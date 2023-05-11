@@ -1,0 +1,237 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Dosis', sans-serif !important;
+	scroll-behavior: smooth;
+}
+
+#root {
+}
+
+:root {
+	--animate-duration: 0.5s !important;
+}
+
+/* Common */
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+/* Disable space in MUI Input */
+fieldset > legend {
+	width: 0;
+}
+
+/* width */
+::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: #1877f22f;
+	border-radius: 8px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #1877f28f;
+	border-radius: 8px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #1877f2;
+}
+
+/* Ripple animation */
+@keyframes ripple {
+	from {
+		transform: scale(0.8);
+		opacity: 1;
+	}
+	to {
+		transform: scale(2.4);
+		opacity: 0;
+	}
+}
+
+@keyframes rippleIn {
+	from {
+		transform: scale(0);
+		opacity: 1;
+	}
+	to {
+		transform: scale(1.4);
+		opacity: 0.2;
+	}
+}
+
+/* Sweet alert */
+.swal2-popup,
+.swal2-popup .swal2-actions > button {
+	border-radius: 16px !important;
+}
+
+.text-overflow-ellipsis {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.fade-enter {
+	opacity: 0;
+	transform: translate(-50%);
+}
+
+.fade-enter-active {
+	opacity: 1;
+	transform: translate(0%);
+}
+
+.fade-exit {
+	opacity: 1;
+	transform: translate(0%);
+}
+
+.fade-exit-active {
+	opacity: 0;
+	transform: translate(50%);
+}
+
+.fade-enter-active,
+.fade-exit-active {
+	transition: all 400ms ease-in-out;
+}
+
+.swal2-container {
+	z-index: 2000 !important;
+}
+
+.MuiInputBase-root:hover fieldset {
+	border: #1877f2 2px solid !important;
+}
+
+/* Expand keyframes */
+@keyframes expand {
+	0% {
+		transform: scale(0);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Key frames shack the icon in the popup */
+@keyframes shack {
+	0% {
+		transform: rotate(0deg) scale(1) translate(0, 0);
+	}
+	25% {
+		transform: rotate(20deg) scale(1.2) translate(-8px, -8px);
+	}
+	50% {
+		transform: rotate(0deg) scale(1) translate(0, 0);
+	}
+	75% {
+		transform: rotate(-20deg) scale(1.2) translate(8px, -8px);
+	}
+	100% {
+		transform: rotate(0deg) scale(1) translate(0, 0);
+	}
+}
+
+/* Sending message animation */
+@keyframes sending-message {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+#modal-view-media .media-view {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+#modal-view-media .list-media-item {
+	width: 100%;
+	aspect-ratio: 16/9;
+	object-fit: cover;
+	border-radius: 8px;
+	transition: all 0.3s ease-in-out;
+}
+
+#modal-view-media .list-media-item-container:not(.active) {
+	opacity: 0.8;
+	filter: brightness(0.4);
+}
+
+#modal-view-media .list-media-item-container {
+	transition: all 0.3s ease-in-out;
+}
+
+#modal-view-media .list-media-item-container.active .list-media-item {
+	border: 4px solid #1877f2;
+}
+
+#modal-view-media .list-media-item-container:not(.active)::before {
+	content: 'Click để xem';
+	opacity: 0;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 100;
+	transition: all 0.3s ease-in-out;
+	color: white;
+}
+
+#modal-view-media .list-media-item-container:not(.active):hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
+#modal-view-media .list-media-item-container:not(.active):hover::before {
+	opacity: 1;
+}
+
+#modal-view-media .list-media-item-container:not(.active):hover .list-media-item {
+	filter: blur(2px) brightness(0.4);
+}
+
+@keyframes typing {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}
+
+.typing-text {
+	overflow: hidden;
+	white-space: nowrap;
+	width: 0;
+	animation: typing;
+	animation-duration: 1.5s;
+	animation-delay: 0.5s;
+	animation-timing-function: steps(30, end);
+	animation-fill-mode: forwards;
+}

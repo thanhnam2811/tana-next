@@ -1,0 +1,96 @@
+/* Table files error */
+.table-files-error {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.table-files-error td,
+.table-files-error th {
+	border: 1px solid #ddd;
+	padding: 8px;
+	text-align: left;
+}
+
+.table-files-error tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.table-files-error tr:hover {
+	background-color: #ddd;
+}
+
+.table-files-error th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: center;
+	background-color: #f27474;
+	color: white;
+}
+
+.table-files-error tr td:nth-child(1) {
+	font-weight: bold;
+	width: 40%;
+}
+
+.message-item .message-media {
+	position: relative;
+	transition: all 0.3s ease-in-out;
+}
+
+.message-item .message-media img,
+.message-item .message-media video {
+	width: 100%;
+	height: auto;
+	max-height: 240px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease-in-out;
+}
+
+.message-item .message-media:has(video)::after {
+	content: '';
+	opacity: 1;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 100;
+	transition: all 0.3s ease-in-out;
+
+	/* Play icon using border */
+	border: 16px solid transparent;
+	border-left: 32px solid white;
+	border-right: 0 solid white;
+}
+
+.message-item .message-media::before {
+	content: 'Click để xem';
+	opacity: 0;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 100;
+	transition: all 0.3s ease-in-out;
+	color: white;
+}
+
+.message-item .message-media:hover {
+	cursor: pointer;
+	opacity: 1;
+}
+
+.message-item .message-media:hover::before {
+	opacity: 1;
+}
+
+.message-item .message-media:has(video):hover::after {
+	opacity: 0;
+}
+
+.message-item .message-media:hover img,
+.message-item .message-media:hover video {
+	filter: blur(2px) brightness(0.4);
+}

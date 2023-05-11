@@ -1,0 +1,20 @@
+{
+	"name": "tana-next",
+	"version": "1.0.0",
+	"repository": "https://github.com/thanhnam2811/tana-next.git",
+	"author": "Thái Thành Nam <thanhnam.thai01@gmail.com>",
+	"license": "MIT",
+	"scripts": {
+		"client:build": "cd client && yarn build",
+		"client:start": "cd client && yarn start",
+		"client:dev": "cd client && yarn dev",
+		"prepare": "husky install"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"husky": "^8.0.0",
+		"lint-staged": "^13.2.0",
+		"prettier": "^2.8.6",
+		"pretty-quick": "^3.1.3"
+	}
+}
