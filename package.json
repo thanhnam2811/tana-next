@@ -5,9 +5,12 @@
 	"author": "Thái Thành Nam <thanhnam.thai01@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"client:build": "cd client && yarn build",
-		"client:start": "cd client && yarn start",
-		"client:dev": "cd client && yarn dev",
+		"client:build": "npm run build --prefix client",
+		"client:start": "npm run start --prefix client",
+		"client:dev": "npm run dev --prefix client",
+		"admin:build": "npm run build --prefix admin",
+		"admin:start": "npm run start --prefix admin",
+		"admin:dev": "npm run dev --prefix admin",
 		"prepare": "husky install"
 	},
 	"dependencies": {},
