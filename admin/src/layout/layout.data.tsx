@@ -1,13 +1,7 @@
 import Dashboard from '@/pages/dashboard/Dashboard';
 import Icon from '@ant-design/icons';
 import { BreadcrumbProps, MenuProps } from 'antd';
-import {
-	IoHomeOutline,
-	IoPeopleOutline,
-	IoPersonCircleOutline,
-	IoPersonOutline,
-	IoShieldOutline,
-} from 'react-icons/io5';
+import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { Link } from 'react-router-dom';
 
