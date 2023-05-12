@@ -16,7 +16,7 @@ export function BaseTable<T extends object>({ fetchData, ...props }: Props<T> & 
 	});
 
 	const fetchTableData = useCallback(
-		async (pagination: any) => {
+		async (pagination: { current: number; pageSize: number }) => {
 			setLoading(true);
 			try {
 				const { current, pageSize } = pagination;

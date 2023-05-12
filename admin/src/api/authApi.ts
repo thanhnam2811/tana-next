@@ -5,13 +5,6 @@ export interface LoginParams {
 	password: string;
 }
 
-interface RegisterParams {
-	fullname: string;
-	phonenumber: string;
-	email: string;
-	password: string;
-}
-
 interface ResetPasswordParams {
 	id: string;
 	token: string;

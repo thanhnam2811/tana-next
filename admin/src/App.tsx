@@ -1,12 +1,12 @@
-import { App as AntdApp, ConfigProvider, Select, Spin, theme } from 'antd';
+import { App as AntdApp, ConfigProvider, Spin, theme } from 'antd';
+import viVn from 'antd/locale/vi_VN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { authApi } from './api';
 import { router } from './routes';
 import { useAuthStore, useThemeStore } from './store';
-import viVn from 'antd/locale/vi_VN';
-import dayjs from 'dayjs';
-import 'dayjs/locale/vi';
 dayjs.locale('vi');
 
 function App() {
