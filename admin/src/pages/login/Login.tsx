@@ -1,10 +1,10 @@
 import { LoginParams, authApi } from '@/api';
 import { LoginSVG } from '@/assets';
 import { useAuthStore } from '@/store';
-import { LockOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { App, Button, Card, Form, Input, Layout, Typography } from 'antd';
 import { Navigate, useLocation } from 'react-router-dom';
 import styles from './Login.module.scss';
+import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 
 function Login() {
 	const { state } = useLocation();

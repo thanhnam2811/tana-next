@@ -7,9 +7,6 @@ const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.respon
 
 // Handle error
 const handleError = (error: any) => {
-	// eslint-disable-next-line no-console
-	console.error('Call API error: ', error);
-
 	let message = 'Lỗi kết nối đến máy chủ!';
 
 	if (axios.isAxiosError(error)) {
