@@ -1,0 +1,49 @@
+.layout {
+	height: 100vh;
+
+	.sider {
+		height: 100vh;
+		overflow: hidden;
+
+		.logo {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 64px;
+
+			img {
+				width: 36px;
+				height: 36px;
+			}
+
+			span {
+				font-size: 20px;
+				font-weight: 800;
+			}
+		}
+
+		.menu {
+			height: calc(100vh - 64px);
+			overflow: auto;
+		}
+	}
+
+	.header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px;
+
+		.theme_switch {
+			.theme_icon {
+				font-size: 20px;
+				cursor: pointer;
+			}
+		}
+	}
+
+	.content {
+		padding: 12px;
+		overflow: auto;
+	}
+}
