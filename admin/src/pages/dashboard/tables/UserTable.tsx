@@ -46,10 +46,10 @@ export function UserTable() {
 				fetchData={fetchData}
 				columns={columns}
 				pagination={{ position: [] }} // hide pagination
-				onRow={(user) => ({
-					style: { cursor: 'pointer' },
-					onClick: () => navigate(`/account/user/${user._id}`),
-				})}
+				// onRow={(user) => ({
+				// 	style: { cursor: 'pointer' },
+				// 	onClick: () => navigate(`/account/user/${user._id}`),
+				// })}
 			/>
 		</Card>
 	);
