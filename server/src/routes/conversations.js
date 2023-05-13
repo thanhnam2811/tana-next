@@ -7,6 +7,7 @@ const isAuth = AuthoMiddleware.isAuth;
 //new conv
 router.post("/", isAuth, ConversationController.add);
 router.get("/random", ConversationController.createRandomConversation);
+router.get("/video-call",isAuth, ConversationController.createRoomIDVideoCall);
 
 // router.put("/updateDB", ConversationController.updateMembersInDatabase);
 
