@@ -5,9 +5,9 @@ const server = http.createServer(app);
 
 //socket
 const io = require('socket.io')(server, {
-	cors: {
-		origin: '*',
-	},
+    cors: {
+        origin: '*',
+    },
 });
 // const io = socketio(server);
 const Socket = require('./socket/index');
@@ -21,5 +21,5 @@ db.connect();
 // 127.0.0.1 - localhost
 const PORT = process.env.PORT || 8800;
 server.listen(PORT, () => {
-	console.log(`Backend server is listening on port ${PORT}`);
+    console.log(`Backend server is listening on port ${PORT}`);
 });
