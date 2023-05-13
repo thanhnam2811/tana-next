@@ -16,7 +16,6 @@ app.use(
         origin: [
             'http://localhost:5173',
             'http://localhost:5174',
-            'https://tana-web.vercel.app',
             'http://172.168.81.36:5173',
             'https://tana.social',
             'https://tana-admin.vercel.app',

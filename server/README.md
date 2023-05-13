@@ -25,4 +25,4 @@
 ### Deploy
 
   - Server: đã deploy lên **Heroku** sử dụng qua [TANA on Heroku](https://tana-social-network.herokuapp.com/) và **Replit** [TANA on Replit](https://TaNa-social-network.hoai-tantan.repl.co)
-  - FrontEnd: đã deploy lên **Vercel** và đã kết hợp với cái API tử server, người dùng sẽ sử dụng qua [TANA on Vercel](https://tana-web.vercel.app/)
+  - FrontEnd: đã deploy lên **Vercel** và đã kết hợp với cái API tử server, người dùng sẽ sử dụng qua [TANA on Vercel](https://tana.social/)
