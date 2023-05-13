@@ -11,9 +11,11 @@ const { populateConversation } = require('../../utils/Populate/Conversation');
 const console = require('console');
 const File = require('../models/File');
 const { getListData } = require('../../utils/Response/listData');
-const getLocationByIPAddress  = require('../../configs/location');
+const getLocationByIPAddress = require('../../configs/location');
 const IP = require('ip');
-const geoip = require('geoip-lite');
+const axios = require('axios');
+
+const apiKey = process.env.API_KEY_VIDEOCALL;
 class ConversationController {
 
     // TODO: Leave conversation
@@ -718,9 +720,9 @@ class ConversationController {
             //             isSystem: true,
             //             });
             //         messageSystem.save();
-                    
+
             //     });
-                
+
 
 
             // });
@@ -730,7 +732,27 @@ class ConversationController {
         } catch (error) {
             console.log(error);
             return next(createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`));
-        } 
+        }
+    }
+
+    //Video call
+    async createRoomIDVideoCall(req, res, next) {
+        try {
+            const options = {
+                method: "POST",
+                headers: {
+                    "Authorization": apiKey,
+                    "Content-Type": "application/json",
+                },
+                // body: JSON.stringify({ "region": "sg001", "customRoomId": "aaa-bbb-ccc", "webhook": "see example", "autoCloseConfig": "see example" }),
+            };
+            const url = `https://api.videosdk.live/v2/rooms`;
+            const response = await axios(url, options);
+            return res.json(response.data);
+        } catch (err) {
+            console.log(err);
+            return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+        }
     }
 
 }
