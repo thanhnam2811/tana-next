@@ -14,198 +14,208 @@ const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 class AdminController {
-	//login for admin
-	async login(req, res, next) {
-		try {
-			//validate
-			const schema = Joi.object({
-				email: Joi.string().min(6).max(255).required().email(),
-				password: Joi.string().min(6).max(1024).required(),
-			});
-			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+    //login for admin
+    async login(req, res, next) {
+        try {
+            //validate
+            const schema = Joi.object({
+                email: Joi.string().min(6).max(255).required().email(),
+                password: Joi.string().min(6).max(1024).required(),
+            });
+            const { error } = schema.validate(req.body);
+            if (error) return res.status(400).send(error.details[0].message);
 
-			const user = await populateUserByEmail(req.body.email);
-			if (!user) {
-				return res.status(401).json('Email không tồn tại.');
-			}
+            const user = await populateUserByEmail(req.body.email);
+            if (!user) {
+                return res.status(401).json('Email không tồn tại.');
+            }
 
-			if (user.role.name != 'ADMIN') {
-				return res.status(401).json('Bạn không có quyền truy cập tính năng này.');
-			}
+            if (user.role.name != 'ADMIN') {
+                return res.status(401).json('Bạn không có quyền truy cập tính năng này.');
+            }
 
-			if (user.password == null) {
-				return res
-					.status(401)
-					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
-			}
-			//check account is being blocked (LockTime - current time > 0)
-			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).fromNow()}`);
-			}
+            if (user.password == null) {
+                return res.status(401).json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+            }
+            //check account is being blocked (LockTime - current time > 0)
+            if (user.lockTime - Date.now() > 0) {
+                return res.status(401).json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).fromNow()}`);
+            }
 
-			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
-			if (!isPasswordValid) {
-				//increase login attempt
-				user.loginAttempts++;
-				if (user.loginAttempts == 3) {
-					//lock account after 5 minutes
-					user.lockTime = Date.now() + 5 * 60 * 1000;
-					await user.save();
-					return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
-				} else if (user.loginAttempts > 3) {
-					//lock account forever
-					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
-					await user.save();
-					return res
-						.status(401)
-						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
-				} else {
-					await user.save();
-					return res.status(401).json('Mật khẩu không chính xác.');
-				}
-			}
-			//reset login attempt
-			user.loginAttempts = 0;
-			await user.save();
+            const isPasswordValid = bcrypt.compareSync(
+                req.body.password,
+                user.password
+            );
+            if (!isPasswordValid) {
+                //increase login attempt
+                user.loginAttempts++;
+                if (user.loginAttempts == 3) {
+                    //lock account after 5 minutes
+                    user.lockTime = Date.now() + 5 * 60 * 1000;
+                    await user.save();
+                    return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
+                } else if (user.loginAttempts > 3) {
+                    //lock account forever
+                    user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+                    await user.save();
+                    return res.status(401).json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
+                } else {
+                    await user.save();
+                    return res.status(401).json('Mật khẩu không chính xác.');
+                }
+            }
+            //reset login attempt
+            user.loginAttempts = 0;
+            await user.save();
 
-			const dataToken = {
-				userId: user._id,
-				role: user.role.name,
-			};
+            const dataToken = {
+                userId: user._id,
+                role: user.role.name,
+            };
 
-			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
+            const accessToken = await authMethod.generateToken(
+                dataToken,
+                accessTokenSecret,
+                accessTokenLife
+            );
 
-			if (!accessToken) {
-				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
-			}
-			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
-			//save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
+            if (!accessToken) {
+                return res
+                    .status(401)
+                    .send('Đăng nhập không thành công, vui lòng thử lại.');
+            }
+            const refreshToken = await authMethod.generateToken(
+                dataToken,
+                refreshTokenSecret,
+                refreshTokenLife
+            );
+            //save refresh token to redis and set expire time
+            // await redisClient.set(user._id, refreshToken);
+            // await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 
-			user.refreshToken = refreshToken;
-			await user.save();
+            user.refreshToken = refreshToken;
+            await user.save();
 
-			return res.status(200).json({
-				msg: 'Đăng nhập thành công.',
-				accessToken,
-				refreshToken,
-				user,
-			});
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+            return res.status(200).json({
+                msg: 'Đăng nhập thành công.',
+                accessToken,
+                refreshToken,
+                user,
+            });
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
 
-	//GET 4 parameters to show in admin page
-	async getDashboard(req, res, next) {
-		try {
-			const totalUser = await UserController.getTotalUser(req, res, next);
-			const numUserOnline = await UserController.getNumUserOnline(req, res, next);
-			const numAccessInDay = await AccessController.getNumAccessInDay(req, res, next);
-			const numUserCreateInDay = await UserController.getUserCreated(req, res, next).then((data) => data.length);
-			return res.status(200).json({
-				totalUser,
-				numUserOnline,
-				numAccessInDay,
-				numUserCreateInDay,
-			});
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+        }
+    }
 
-	async statictisUserPieChart(req, res, next) {
-		try {
-			const statictisBy = req.query.by;
-			if (statictisBy === 'age') {
-				const statictisByAge = await UserController.statisticsUserByAge(req, res, next);
-				return res.status(200).json(statictisByAge);
-			} else if (statictisBy === 'gender') {
-				const statictisByGender = await UserController.statisticsUserByGender(req, res, next);
-				return res.status(200).json(statictisByGender);
-			} else {
-				return next(createError(400, 'Invalid statictisBy'));
-			}
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+    //GET 4 parameters to show in admin page
+    async getDashboard(req, res, next) {
+        try {
+            const totalUser = await UserController.getTotalUser(req, res, next);
+            const numUserOnline = await UserController.getNumUserOnline(req, res, next);
+            const numAccessInDay = await AccessController.getNumAccessInDay(req, res, next);
+            const numUserCreateInDay = await UserController.getUserCreated(req, res, next).then((data) => data.length);
+            return res.status(200).json({
+                totalUser,
+                numUserOnline,
+                numAccessInDay,
+                numUserCreateInDay,
+            });
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 
-	async chartAccessUser(req, res, next) {
-		try {
-			const access = await AccessController.dailyAccessSevenDaysAgo();
-			const user = await UserController.getNumUserCreatedDaily();
-			const data = [];
-			for (let i = 0; i < access.length; i++) {
-				data.push({
-					date: access[i].day,
-					access: access[i].totalAccess,
-					user: user[i].numUserCreated,
-				});
-			}
-			return res.status(200).json(data);
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+    async statictisUserPieChart(req, res, next) {
+        try {
+            const statictisBy = req.query.by;
+            if (statictisBy === 'age') {
+                const statictisByAge = await UserController.statisticsUserByAge(req, res, next);
+                return res.status(200).json(statictisByAge);
+            }
+            else if (statictisBy === 'gender') {
+                const statictisByGender = await UserController.statisticsUserByGender(req, res, next);
+                return res.status(200).json(statictisByGender);
+            } else {
+                return next(createError(400, 'Invalid statictisBy'));
+            }
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 
-	async searchUser(req, res, next) {
-		try {
-			await UserController.searchUser(req, res);
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+    async chartAccessUser(req, res, next) {
+        try {
+            const access = await AccessController.dailyAccessSevenDaysAgo();
+            const user = await UserController.getNumUserCreatedDaily();
+            const data = [];
+            for (let i = 0; i < access.length; i++) {
+                data.push({
+                    date: access[i].day,
+                    access: access[i].totalAccess,
+                    user: user[i].numUserCreated,
+                });
+            }
+            return res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 
-	async searchAdmin(req, res, next) {
-		try {
-			await UserController.searchAdmin(req, res);
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+    async searchUser(req, res, next) {
+        try {
+            await UserController.searchUser(req, res);
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 
-	//change password user
-	async changePassword(req, res, next) {
-		try {
-			const { email, newPassword } = req.body;
-			//generate new password
-			const salt = await bcrypt.genSalt(10);
-			const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    async searchAdmin(req, res, next) {
+        try {
+            await UserController.searchAdmin(req, res);
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 
-			const user = await User.findOne({ email });
-			if (!user) {
-				return next(createError(400, 'Email không tồn tại'));
-			}
-			user.password = hashedPassword;
-			await user.save();
-			return res.status(200).json('Đổi mật khẩu thành công');
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+    //change password user
+    async changePassword(req, res, next) {
+        try {
+            const { email, newPassword } = req.body;
+            //generate new password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-	//get list new user
-	async getListNewUser(req, res, next) {
-		try {
-			const users = await UserController.getUserCreated(req, res, next);
-			return res.status(200).json(users);
-		} catch (error) {
-			console.log(error);
-			return next(createError(400, error));
-		}
-	}
+            const user = await User.findOne({ email });
+            if (!user) {
+                return next(createError(400, 'Email không tồn tại'));
+            }
+            user.password = hashedPassword;
+            await user.save();
+            return res.status(200).json('Đổi mật khẩu thành công');
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+
+    }
+
+    //get list new user
+    async getListNewUser(req, res, next) {
+        try {
+            const users = await UserController.getUserCreated(req, res, next);
+            return res.status(200).json(users);
+        } catch (error) {
+            console.log(error);
+            return next(createError(400, error));
+        }
+    }
 }
 
 module.exports = new AdminController();
