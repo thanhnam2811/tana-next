@@ -12,21 +12,30 @@ const methodOverride = require('method-override');
 
 const app = express();
 app.use(
-	cors({
-		origin: '*',
-	})
+    cors({
+        origin: [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'https://tana-web.vercel.app',
+            'http://172.168.81.36:5173',
+            'https://tana.social',
+            'https://tana-admin.vercel.app',
+        ],
+    })
 );
 app.use(helmet());
 
 // Create folder Logs if not exist
 if (!fs.existsSync(path.join(__dirname, './Logs'))) {
-	fs.mkdirSync(path.join(__dirname, './Logs'));
+    fs.mkdirSync(path.join(__dirname, './Logs'));
 }
-
 app.use(
-	morgan('combined', {
-		stream: fs.createWriteStream(path.join(__dirname, './Logs', 'access.log'), { flags: 'a' }),
-	})
+    morgan('combined', {
+        stream: fs.createWriteStream(
+            path.join(__dirname, './Logs', 'access.log'),
+            { flags: 'a' }
+        ),
+    })
 );
 
 //use morgan to log request in console
@@ -42,22 +51,22 @@ app.use(express.json());
 
 //handle form data of method post html
 app.use(
-	express.urlencoded({
-		extended: true,
-	})
+    express.urlencoded({
+        extended: true,
+    })
 );
 
 app.use(methodOverride('_method'));
 
 app.use(
-	session({
-		secret: 'secrettexthere',
-		saveUninitialized: false,
-		resave: false,
-		cookie: {
-			maxAge: 60000 * 60 * 24,
-		},
-	})
+    session({
+        secret: 'secrettexthere',
+        saveUninitialized: false,
+        resave: false,
+        cookie: {
+            maxAge: 60000 * 60 * 24,
+        },
+    })
 );
 
 //use passport
