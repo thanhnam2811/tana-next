@@ -13,6 +13,7 @@ const moment = require('moment');
 const { populateUserByEmail } = require('../../utils/Populate/User');
 const { default: mongoose } = require('mongoose');
 
+const hostClient = process.env.HOST_CLIENT
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
@@ -58,7 +59,7 @@ class AuthoController {
 
 			}).save();
 
-			const link = `https://tana-web.vercel.app/auth/verify/${user._id}/${token.token}`;
+			const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
 			const status = await sendEmailVerify(user.email, 'Verify account', link, user);
 			//check status
 			if (!status) {
@@ -122,7 +123,7 @@ class AuthoController {
 			userSave.refreshToken = refreshToken;
 			await userSave.save();
 
-			return res.redirect('https://tana-web.vercel.app/auth/login/google?accessToken=' + accessToken + '&refreshToken=' + refreshToken);
+			return res.redirect(`${hostClient}/auth/login/google?accessToken=` + accessToken + '&refreshToken=' + refreshToken);
 		} catch (err) {
 			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
 		}
@@ -158,7 +159,7 @@ class AuthoController {
 			userSave.refreshToken = refreshToken;
 			await userSave.save();
 
-			return res.redirect('https://tana-web.vercel.app/auth/login/github?accessToken=' + accessToken + '&refreshToken=' + refreshToken);
+			return res.redirect(`${hostClient}/auth/login/github?accessToken=` + accessToken + '&refreshToken=' + refreshToken);
 		} catch (err) {
 			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
 		}
