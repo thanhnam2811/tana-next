@@ -7,19 +7,14 @@ const passport = require('passport');
 const session = require('express-session');
 const helmet = require('helmet');
 const fs = require('fs');
+const HOSTS = require('./configs/cors');
 //convert Post to PUT method
 const methodOverride = require('method-override');
 
 const app = express();
 app.use(
     cors({
-        origin: [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'http://172.168.81.36:5173',
-            'https://tana.social',
-            'https://tana-admin.vercel.app',
-        ],
+        origin: HOSTS,
     })
 );
 app.use(helmet());
