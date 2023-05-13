@@ -243,7 +243,7 @@ const emailTemplate = (link, name) => {
                     <tr>
                         <td style="text-align: center">
                             <a
-                                href="https://tana-web.vercel.app"
+                                href="https://tana.social"
                                 style="
                                     font-size: 14px;
                                     color: rgba(69, 80, 86, 0.7411764705882353);
@@ -252,7 +252,7 @@ const emailTemplate = (link, name) => {
                                     text-decoration: none;
                                 "
                             >
-                                &copy; <strong>tana-web.vercel.app</strong>
+                                &copy; <strong>tana.social</strong>
                             </a>
                         </td>
                     </tr>

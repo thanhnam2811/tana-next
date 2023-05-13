@@ -20,7 +20,7 @@ function route(app) {
             'http://localhost:5174',
             'https://tana.social',
             'https://tana-admin.vercel.app',
-            'https://tana-web.vercel.app',
+            'https://tana.social',
         ];
         const origin = req.headers.origin;
         if (allowedOrigins.includes(origin)) {
