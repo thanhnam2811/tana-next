@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 const CommentController = require('../app/controllers/CommentController');
 
+
 router.post('/:id/reply', AuthoMiddleware.isAuth, CommentController.addReply);
 router.post('/', AuthoMiddleware.isAuth, CommentController.add);
 
@@ -15,5 +16,6 @@ router.delete('/:id', AuthoMiddleware.isAuth, CommentController.delete);
 router.get('/:id/replies', CommentController.getAllReplies);
 router.get('/:id', CommentController.get);
 router.get('/', CommentController.getAllOfPost);
+
 
 module.exports = router;
