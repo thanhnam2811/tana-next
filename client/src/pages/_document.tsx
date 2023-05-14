@@ -18,12 +18,12 @@ export default function Document() {
 			<meta name="application-name" content="TaNa" />
 			<meta name="msapplication-TileColor" content="#ffffff" />
 			<meta name="theme-color" content="#ffffff" />
+			<script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" />
 
 			<Head />
 			<body>
 				<Main />
 				<NextScript />
-				<script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" />
 			</body>
 		</Html>
 	);
