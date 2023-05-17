@@ -12,6 +12,11 @@ const {
     notificationRequestFriend,
     notificationAcceptFriend,
 } = require('../../utils/Notification/Friend');
+
+const {
+    createActivityWithFriendRequest,
+    createActivityWithFriendAccept
+} = require('../../utils/Activity/friend');
 const { default: mongoose } = require('mongoose');
 
 
@@ -261,6 +266,10 @@ class UserController {
                         await currentUser.updateOne({ $push: { sentRequests: { user: user._id }, followings: { user: user._id } } });
                         //send notification
                         await notificationRequestFriend(currentUser, user);
+
+                        //create activity
+                        await createActivityWithFriendRequest(currentUser, user);
+
                         res.status(200).json("Gửi yêu cầu kết bạn thành công!!!");
                     } else {
                         //cancel friend request
@@ -292,6 +301,10 @@ class UserController {
                     await currentUser.updateOne({ $push: { friends: { user: user._id }, followers: { user: user._id } } });
                     //send notification
                     await notificationAcceptFriend(currentUser, user);
+
+                    //create activity
+                    await createActivityWithFriendAccept(currentUser, user);
+                    
                     res.status(200).json("Kết bạn thành công!!!");
                 } else {
                     res.status(403).json("Bạn không thể chấp nhận yêu cầu kết bạn này!!!");

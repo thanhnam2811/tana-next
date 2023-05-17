@@ -14,6 +14,12 @@ const { notificationForFriends,
     notificationForSharedPost,
     notificationForReactPost } = require('../../utils/Notification/Post');
 
+const {
+    createActivityWithPost,
+    createActivityWithSharedPost,
+    createActivityWithReactPost,
+    createActivityWithTagPost, } = require('../../utils/Activity/post')
+
 class PostController {
     //[POST] create a post
     async add(req, res, next) {
@@ -53,6 +59,9 @@ class PostController {
             //create a notification for all tags of this post and all friends of the author
             await notificationForTags(savedPost, req.user);
             await notificationForFriends(savedPost, req.user);
+
+            //save activity for user
+            await createActivityWithPost(post, req.user);
 
             res.status(200).json(post);
         } catch (e) {
@@ -323,6 +332,9 @@ class PostController {
                     await notificationForReactPost(post, req.user);
                 }
 
+                //save activity for user
+                await createActivityWithReactPost(post, req.user);
+
                 //populate post and add reactOfUser field to the post
                 const postUpdated = await Post.findById(req.params.id)
                     .populate({
@@ -376,6 +388,10 @@ class PostController {
             if (post.author.toString() !== req.user._id.toString()) {
                 await notificationForSharedPost(savedPost, req.user);
             }
+
+            //save activity for user
+            await createActivityWithSharedPost(savedPost, req.user);
+
             res.status(200).send(savedPost);
         } catch (err) {
             console.error(err);
