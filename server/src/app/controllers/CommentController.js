@@ -9,6 +9,13 @@ const { notificationCreateComment,
     notificationReplyComment,
     notificationReactComment,
     notificationTagComment } = require("../../utils/Notification/Comment");
+
+const { 
+    createActivityWithComment,
+    createActivityWithReplyComment,
+    createActivityWithReactComment,
+    createActivityWithTagComment
+ } = require("../../utils/Activity/comment");
 class CommentController {
     //[POST] create a comment
     async add(req, res, next) {
@@ -43,6 +50,9 @@ class CommentController {
                 //create notification for author of post
                 await notificationCreateComment(post, savedComment, req.user);
                 await notificationTagComment(savedComment, req.user);
+
+                //save activity for user
+                await createActivityWithComment(savedComment, req.user);
 
                 //populate author, media
                 const comment = await Comment.findById(savedComment._id)
@@ -163,6 +173,9 @@ class CommentController {
                     //create notification for author of comment
                     await notificationReactComment(comment, req.user);
 
+                    //save activity for user
+                    await createActivityWithReactComment(comment, req.user);
+
                     const commentUpdated = await Comment.findById(req.params.id)
                         .populate({
                             path: "author",
@@ -246,6 +259,9 @@ class CommentController {
             //create notification for author of comment
             await notificationReplyComment(comment, savedComment, req.user);
             await notificationTagComment(savedComment, req.user);
+
+            //save activity for user
+            await createActivityWithReplyComment(savedComment, req.user);
 
             //increase number comment of post
             await Post.findByIdAndUpdate(req.params.postId, { $inc: { numberComment: 1 } });
