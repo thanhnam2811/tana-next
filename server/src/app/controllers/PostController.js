@@ -7,7 +7,7 @@ const isAuth = require('../middlewares/AuthMiddleware').isAuth;
 const React = require('../models/React');
 const createError = require('http-errors');
 const Joi = require('joi');
-const { getListPost } = require('../../utils/Response/listData');
+const { getListPost, getListData } = require('../../utils/Response/listData');
 const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 const { notificationForFriends,
     notificationForTags,
@@ -622,6 +622,53 @@ class PostController {
         }
     }
 
+    //[GET] get all posts
+    async getAllPosts(req, res, next) {
+        const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+        // get posts of a user by query id and sort by date
+        try {
+            //check role Admin
+            if (req.user.role.name !== 'ADMIN')
+                return next(createError.Forbidden("Bạn không có quyền truy cập"));
+            
+            Post.paginate({ }, {
+                offset, limit, sort: { createdAt: -1 }, populate: [
+                    {
+                        path: "author", select: "_id fullname profilePicture",
+                        populate: {
+                            path: "profilePicture",
+                            select: "_id link",
+                        }
+                    },
+                    {
+                        path: "lastestFiveComments", populate: {
+                            path: "author", select: "_id fullname profilePicture",
+                            populate: {
+                                path: "profilePicture",
+                                select: "_id link",
+                            }
+                        }
+                    },
+                    {
+                        path: "tags", select: "_id fullname profilePicture",
+                        populate: {
+                            path: "profilePicture",
+                            select: "_id link",
+                        }
+                    },
+                ]
+            })
+                .then((data) => {
+                    getListData(res,data);
+                })
+                .catch((err) => {
+                    return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+                }); 
+        }catch(error){
+            console.error(error);
+            return next(createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`));
+        }
+    }
 }
 
 module.exports = new PostController();
