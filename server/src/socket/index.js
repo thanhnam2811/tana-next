@@ -31,6 +31,7 @@ function socket(io) {
                 // Update user isOnline
                 await User.findByIdAndUpdate(userID, {
                     isOnline: false,
+                    lastAccess: Date.now()
                 });
             } catch (err) {
                 console.log(err);

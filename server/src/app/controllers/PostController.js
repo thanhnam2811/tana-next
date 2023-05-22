@@ -40,14 +40,14 @@ class PostController {
             const post = await Post.findById(savedPost._id)
                 .populate({
                     path: "author",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                     }
                 })
                 .populate({
                     path: "tags",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                     }
@@ -108,7 +108,7 @@ class PostController {
                     })
                     .populate({
                         path: "tags",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                         }
@@ -169,7 +169,7 @@ class PostController {
                 sort: { createdAt: -1 }, populate: [
                     {
                         path: "author",
-                        select: "_id fullname profilePicture friends",
+                        select: "_id fullname profilePicture isOnline friends",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -178,7 +178,7 @@ class PostController {
                     {
                         path: "lastestFiveComments", populate: {
                             path: "author",
-                            select: "_id fullname profilePicture",
+                            select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -187,7 +187,7 @@ class PostController {
                     },
                     {
                         path: "tags",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -273,7 +273,7 @@ class PostController {
                 const postUpdated = await Post.findById(req.params.id)
                     .populate({
                         path: "author",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -281,7 +281,7 @@ class PostController {
                     })
                     .populate({
                         path: "tags",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -298,7 +298,7 @@ class PostController {
                 const postUpdated = await Post.findById(req.params.id)
                     .populate({
                         path: "author",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -306,7 +306,7 @@ class PostController {
                     })
                     .populate({
                         path: "tags",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -339,7 +339,7 @@ class PostController {
                 const postUpdated = await Post.findById(req.params.id)
                     .populate({
                         path: "author",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -347,7 +347,7 @@ class PostController {
                     })
                     .populate({
                         path: "tags",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -405,7 +405,7 @@ class PostController {
             const listReact = await React.find({ post: req.params.id })
                 .populate({
                     path: "user",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -438,12 +438,12 @@ class PostController {
     async get(req, res, next) {
         try {
             const post = await Post.findById(req.params.id)
-                .populate("author", "_id fullname profilePicture")
+                .populate("author", "_id fullname profilePicture isOnline")
                 .populate({
                     path: "lastestFiveComments",
                     populate: {
                         path: "author",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -452,7 +452,7 @@ class PostController {
                 })
                 .populate({
                     path: "author",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -460,7 +460,7 @@ class PostController {
                 })
                 .populate({
                     path: "tags",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -492,7 +492,7 @@ class PostController {
             Post.paginate({ author: req.user._id }, {
                 offset, limit, sort: { createdAt: -1 }, populate: [
                     {
-                        path: "author", select: "_id fullname profilePicture",
+                        path: "author", select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -500,7 +500,7 @@ class PostController {
                     },
                     {
                         path: "lastestFiveComments", populate: {
-                            path: "author", select: "_id fullname profilePicture",
+                            path: "author", select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -508,7 +508,7 @@ class PostController {
                         }
                     },
                     {
-                        path: "tags", select: "_id fullname profilePicture",
+                        path: "tags", select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -550,7 +550,7 @@ class PostController {
             const listPost = await Post.find({ author: { $in: listFriendId } })
                 .sort({ createdAt: -1 })
                 .populate({
-                    path: "author", select: "_id fullname profilePicture",
+                    path: "author", select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -558,7 +558,7 @@ class PostController {
                 })
                 .populate({
                     path: "lastestFiveComments", populate: {
-                        path: "author", select: "_id fullname profilePicture",
+                        path: "author", select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -566,7 +566,7 @@ class PostController {
                     }
                 })
                 .populate({
-                    path: "tags", select: "_id fullname profilePicture",
+                    path: "tags", select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -634,7 +634,7 @@ class PostController {
             Post.paginate({ }, {
                 offset, limit, sort: { createdAt: -1 }, populate: [
                     {
-                        path: "author", select: "_id fullname profilePicture",
+                        path: "author", select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -642,7 +642,7 @@ class PostController {
                     },
                     {
                         path: "lastestFiveComments", populate: {
-                            path: "author", select: "_id fullname profilePicture",
+                            path: "author", select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -650,7 +650,7 @@ class PostController {
                         }
                     },
                     {
-                        path: "tags", select: "_id fullname profilePicture",
+                        path: "tags", select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
