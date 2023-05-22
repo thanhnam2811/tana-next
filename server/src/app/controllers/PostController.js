@@ -19,7 +19,7 @@ const {
     createActivityWithSharedPost,
     createActivityWithReactPost,
     createActivityWithTagPost, } = require('../../utils/Activity/post')
-
+const {validatePrivacy} = require('../models/Privacy');
 class PostController {
     //[POST] create a post
     async add(req, res, next) {
@@ -29,6 +29,7 @@ class PostController {
                 content: Joi.string().required(),
                 tags: Joi.array().items(Joi.string()),
                 media: Joi.array().items(Joi.string()),
+                privacy: validatePrivacy
             });
             const { error } = schema.validate(req.body);
             if (error) {

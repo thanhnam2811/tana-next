@@ -296,7 +296,14 @@ class CommentController {
         try {
             Comment.paginate({ replyTo: req.params.id }, {
                 offset, limit, sort: { createdAt: 1 },
-                populate: [{ path: "author", select: "_id fullname profilePicture isOnline" },
+                populate: [{
+                    path: "author",
+                    select: "_id fullname profilePicture isOnline",
+                    populate: {
+                        path: "profilePicture",
+                        select: "_id link",
+                    }
+                },
                 { path: "media", select: "_id name link" }]
             })
                 .then((data) => {
@@ -319,7 +326,14 @@ class CommentController {
         try {
             Comment.paginate({ post: req.params.postId, replyTo: null }, {
                 offset, limit, sort: { createdAt: -1 },
-                populate: [{ path: "author", select: "_id fullname profilePicture isOnline" },
+                populate: [{
+                    path: "author",
+                    select: "_id fullname profilePicture isOnline",
+                    populate: {
+                        path: "profilePicture",
+                        select: "_id link",
+                    }
+                },
                 { path: "media", select: "_id name link" }]
             })
                 .then((data) => {
@@ -340,7 +354,14 @@ class CommentController {
     async get(req, res, next) {
         try {
             const comment = await Comment.findById(req.params.id)
-                .populate("author", "_id fullname profilePicture isOnline");
+                .populate({
+                    path: "author",
+                    select: "_id fullname profilePicture isOnline",
+                    populate: {
+                        path: "profilePicture",
+                        select: "_id link",
+                    }
+                });
             res.status(200).send(comment);
         } catch (err) {
             return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
