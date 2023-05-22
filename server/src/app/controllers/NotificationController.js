@@ -14,15 +14,15 @@ class NotificationController {
                     offset, limit, sort: { createdAt: -1 },
                     populate: [
                         {
-                            path: 'sender', select: '_id fullname profilePicture',
+                            path: 'sender', select: '_id fullname profilePicture isOnline',
                             populate: { path: 'profilePicture', select: '_id link' }
                         },
                         {
-                            path: 'receiver', select: '_id fullname profilePicture',
+                            path: 'receiver', select: '_id fullname profilePicture isOnline',
                             populate: { path: 'profilePicture', select: '_id link' }
                         },
                         {
-                            path: 'read_by', select: '_id fullname profilePicture',
+                            path: 'read_by', select: '_id fullname profilePicture isOnline',
                             populate: { path: 'profilePicture', select: '_id link' }
                         },
                     ]
