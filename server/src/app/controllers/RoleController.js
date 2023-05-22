@@ -1,5 +1,6 @@
 const Role = require('../models/Role');
 const { getPagination } = require('../../utils/Pagination');
+const { getListData } = require('../../utils/Response/listData');
 
 class RoleController {
     async create(req, res) {
@@ -25,13 +26,7 @@ class RoleController {
             const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
             Role.paginate({}, { offset, limit })
                 .then(data => {
-                    res.send({
-                        totalItems: data.totalDocs,
-                        items: data.docs,
-                        totalPages: data.totalPages,
-                        currentPage: data.page - 1,
-                        offset: data.offset,
-                    });
+                   getListData(res,data);
                 })
                 .catch(err => {
                     res.status(500).send({
