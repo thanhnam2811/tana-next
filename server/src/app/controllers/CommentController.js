@@ -16,6 +16,7 @@ const {
     createActivityWithReactComment,
     createActivityWithTagComment
  } = require("../../utils/Activity/comment");
+const { getListData } = require('../../utils/Response/listData');
 class CommentController {
     //[POST] create a comment
     async add(req, res, next) {
@@ -299,13 +300,7 @@ class CommentController {
                 { path: "media", select: "_id name link" }]
             })
                 .then((data) => {
-                    res.send({
-                        totalItems: data.totalDocs,
-                        Comments: data.docs,
-                        totalPages: data.totalPages,
-                        currentPage: data.page - 1,
-                        offset: data.offset,
-                    });
+                    getListData(res,data);
                 })
                 .catch((e) => {
                     res.status(500).send({
