@@ -177,7 +177,7 @@ class ConversationController {
                     }
                 }, {
                     path: 'members.user',
-                    select: '_id fullname profilePicture isOnline',
+                    select: '_id fullname profilePicture isOnline isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -188,7 +188,7 @@ class ConversationController {
                 },
                 {
                     path: 'members.addedBy',
-                    select: '_id fullname profilePicture',
+                    select: '_id fullname profilePicture isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -196,7 +196,7 @@ class ConversationController {
                 },
                 {
                     path: 'members.changedNicknameBy',
-                    select: '_id fullname profilePicture',
+                    select: '_id fullname profilePicture isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -278,7 +278,7 @@ class ConversationController {
                 })
                 .populate({
                     path: 'members.user',
-                    select: '_id fullname profilePicture isOnline',
+                    select: '_id fullname profilePicture isOnline isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -290,7 +290,7 @@ class ConversationController {
                 })
                 .populate({
                     path: 'members.addedBy',
-                    select: '_id fullname profilePicture',
+                    select: '_id fullname profilePicture isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -298,7 +298,7 @@ class ConversationController {
                 })
                 .populate({
                     path: 'members.changedNicknameBy',
-                    select: '_id fullname profilePicture',
+                    select: '_id fullname profilePicture isOnline',
                     populate: {
                         path: 'profilePicture',
                         select: '_id link'
@@ -636,7 +636,7 @@ class ConversationController {
                     limit, offset, sort: { createdAt: -1 },
                     populate: {
                         path: "creator",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",

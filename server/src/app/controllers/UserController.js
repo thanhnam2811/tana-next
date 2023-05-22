@@ -800,9 +800,9 @@ class UserController {
             populate: [
                 { path: 'profilePicture', select: '_id link' },
                 { path: 'coverPicture', select: '_id link' },
-                { path: 'friends.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'friendRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'sentRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friends.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friendRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'sentRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
                 { path: 'role', select: '_id name' },
             ]
         })
@@ -829,9 +829,9 @@ class UserController {
             populate: [
                 { path: 'profilePicture', select: '_id link' },
                 { path: 'coverPicture', select: '_id link' },
-                { path: 'friends.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'friendRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'sentRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friends.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friendRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'sentRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
                 { path: 'role', select: '_id name' },
             ]
         })
@@ -857,9 +857,9 @@ class UserController {
             populate: [
                 { path: 'profilePicture', select: '_id link' },
                 { path: 'coverPicture', select: '_id link' },
-                { path: 'friends.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'friendRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
-                { path: 'sentRequests.user', select: '_id fullname profilePicture', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friends.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'friendRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
+                { path: 'sentRequests.user', select: '_id fullname profilePicture isOnline', populate: { path: 'profilePicture', select: '_id link' } },
                 { path: 'role', select: '_id name' },
             ]
         })
@@ -1057,9 +1057,9 @@ class UserController {
             const UserCreatedInDay = await User.find({ createdAt: { $gte: today }, role: mongoose.Types.ObjectId("6389667eb7991bdd04987103") })
                 .populate({ path: 'profilePicture', select: '_id link' })
                 .populate({ path: 'coverPicture', select: '_id link' })
-                .populate({ path: 'friends.user', select: '_id fullname profilePicture' })
-                .populate({ path: 'friendRequests.user', select: '_id fullname profilePicture' })
-                .populate({ path: 'sentRequests.user', select: '_id fullname profilePicture' })
+                .populate({ path: 'friends.user', select: '_id fullname profilePicture isOnline' })
+                .populate({ path: 'friendRequests.user', select: '_id fullname profilePicture isOnline' })
+                .populate({ path: 'sentRequests.user', select: '_id fullname profilePicture isOnline' })
                 .populate({ path: 'role', select: '_id name' });
             return UserCreatedInDay;
         } catch (err) {
