@@ -153,6 +153,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lastAccess: {
+      type: Date,
+      default: Date.now()
+    },
     profilePicture: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "File",
