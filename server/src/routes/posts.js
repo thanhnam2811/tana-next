@@ -24,7 +24,7 @@ router.get("/:id/reacts", PostController.getAllReactions);
 //get a post
 router.get("/:id", AuthoMiddleware.isAuth, PostController.get);
 //get all posts of current user
-router.get("/", AuthoMiddleware.isAuth, PostController.getAllOfUser);
+router.get("/", AuthoMiddleware.isAuth, PostController.getAllPosts);
 
 
 module.exports = router;
