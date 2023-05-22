@@ -59,7 +59,7 @@ class CommentController {
                 const comment = await Comment.findById(savedComment._id)
                     .populate({
                         path: "author",
-                        select: "_id fullname profilePicture",
+                        select: "_id fullname profilePicture isOnline",
                         populate: {
                             path: "profilePicture",
                             select: "_id link",
@@ -96,7 +96,7 @@ class CommentController {
             const commentUpdated = await Comment.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
                 .populate({
                     path: "author",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -129,7 +129,7 @@ class CommentController {
                     const commentUpdated = await Comment.findById(req.params.id)
                         .populate({
                             path: "author",
-                            select: "_id fullname profilePicture",
+                            select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -150,7 +150,7 @@ class CommentController {
                     const commentUpdated = await Comment.findById(req.params.id)
                         .populate({
                             path: "author",
-                            select: "_id fullname profilePicture",
+                            select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -180,7 +180,7 @@ class CommentController {
                     const commentUpdated = await Comment.findById(req.params.id)
                         .populate({
                             path: "author",
-                            select: "_id fullname profilePicture",
+                            select: "_id fullname profilePicture isOnline",
                             populate: {
                                 path: "profilePicture",
                                 select: "_id link",
@@ -207,7 +207,7 @@ class CommentController {
     //[Delete] delete a comment
     async delete(req, res, next) {
         const comment = await Comment.findById(req.params.id)
-            .populate("author", "_id fullname profilePicture");
+            .populate("author", "_id fullname profilePicture isOnline");
         const post = await Post.findById(req.params.postId);
         if (comment) {
             if (comment.author._id.toString() === req.user._id.toString() || post.author.toString() === req.user._id.toString()) {
@@ -274,7 +274,7 @@ class CommentController {
             const commentPopulated = await Comment.findById(savedComment._id)
                 .populate({
                     path: "author",
-                    select: "_id fullname profilePicture",
+                    select: "_id fullname profilePicture isOnline",
                     populate: {
                         path: "profilePicture",
                         select: "_id link",
@@ -296,7 +296,7 @@ class CommentController {
         try {
             Comment.paginate({ replyTo: req.params.id }, {
                 offset, limit, sort: { createdAt: 1 },
-                populate: [{ path: "author", select: "_id fullname profilePicture" },
+                populate: [{ path: "author", select: "_id fullname profilePicture isOnline" },
                 { path: "media", select: "_id name link" }]
             })
                 .then((data) => {
@@ -319,17 +319,11 @@ class CommentController {
         try {
             Comment.paginate({ post: req.params.postId, replyTo: null }, {
                 offset, limit, sort: { createdAt: -1 },
-                populate: [{ path: "author", select: "_id fullname profilePicture" },
+                populate: [{ path: "author", select: "_id fullname profilePicture isOnline" },
                 { path: "media", select: "_id name link" }]
             })
                 .then((data) => {
-                    res.send({
-                        totalItems: data.totalDocs,
-                        Comments: data.docs,
-                        totalPages: data.totalPages,
-                        currentPage: data.page - 1,
-                        offset: data.offset,
-                    });
+                    getListData(res,data);
                 })
                 .catch((e) => {
                     res.status(500).send({
@@ -346,7 +340,7 @@ class CommentController {
     async get(req, res, next) {
         try {
             const comment = await Comment.findById(req.params.id)
-                .populate("author", "_id fullname profilePicture");
+                .populate("author", "_id fullname profilePicture isOnline");
             res.status(200).send(comment);
         } catch (err) {
             return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));

@@ -6,7 +6,7 @@ exports.populateConversation = async (conversationID) => {
             path: 'lastest_message',
             populate: {
                 path: 'sender',
-                select: '_id fullname profilePicture',
+                select: '_id fullname profilePicture isOnline',
                 populate: {
                     path: 'profilePicture',
                     select: '_id link'
@@ -15,7 +15,7 @@ exports.populateConversation = async (conversationID) => {
         })
         .populate({
             path: 'members.user',
-            select: '_id fullname profilePicture',
+            select: '_id fullname profilePicture isOnline',
             populate: {
                 path: 'profilePicture',
                 select: '_id link'
@@ -23,7 +23,7 @@ exports.populateConversation = async (conversationID) => {
         })
         .populate({
             path: 'members.addedBy',
-            select: '_id fullname profilePicture',
+            select: '_id fullname profilePicture isOnline',
             populate: {
                 path: 'profilePicture',
                 select: '_id link'
@@ -31,7 +31,7 @@ exports.populateConversation = async (conversationID) => {
         })
         .populate({
             path: 'members.changedNicknameBy',
-            select: '_id fullname profilePicture',
+            select: '_id fullname profilePicture isOnline',
             populate: {
                 path: 'profilePicture',
                 select: '_id link'
@@ -43,7 +43,7 @@ exports.populateConversation = async (conversationID) => {
         })
         .populate({
             path: 'creator',
-            select: '_id fullname profilePicture',
+            select: '_id fullname profilePicture isOnline',
             populate: {
                 path: 'profilePicture',
                 select: '_id link'
@@ -51,7 +51,7 @@ exports.populateConversation = async (conversationID) => {
         })
         .populate({
             path: 'creator',
-            select: '_id fullname profilePicture',
+            select: '_id fullname profilePicture isOnline',
             populate: {
                 path: 'profilePicture',
                 select: '_id link'

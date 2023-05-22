@@ -10,11 +10,11 @@ class ActivityController {
                  offset, limit, sort: { createdAt: -1}, 
                     populate: [
                         {
-                            path: 'user', select: '_id fullname profilePicture',
+                            path: 'user', select: '_id fullname profilePicture isOnline',
                             populate: { path: 'profilePicture', select: '_id link' }
                         },
                         {
-                            path: 'friend', select: '_id fullname profilePicture',
+                            path: 'friend', select: '_id fullname profilePicture isOnline',
                             populate: { path: 'profilePicture', select: '_id link' }
                         },
                         {
