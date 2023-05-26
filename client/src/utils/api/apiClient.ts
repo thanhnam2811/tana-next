@@ -1,5 +1,5 @@
 import { SERVER_URL } from '@utils/common';
-import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.response?.status === 401;
