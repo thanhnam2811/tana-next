@@ -1,9 +1,8 @@
-import { Avatar, Button, Grid, Typography, ButtonProps, Skeleton } from '@mui/material';
+import { GroupAvatar, UserAvatar } from '@components/MUI';
+import { Button, ButtonProps, Grid, Skeleton, Typography } from '@mui/material';
+import { useUserStore } from '@store';
 import { getTimeAgo, renderHTML } from '@utils/common';
 import { useRouter } from 'next/router';
-import React from 'react';
-import { useAuth } from '@hooks';
-import { GroupAvatar } from '@components/MUI';
 
 type Props = {
 	conversation: any;
@@ -11,7 +10,7 @@ type Props = {
 };
 
 export function ConversationItem({ conversation, isActived, ...props }: Props & ButtonProps) {
-	const { user } = useAuth();
+	const { user } = useUserStore();
 	const router = useRouter();
 
 	let { avatar, name } = conversation;
@@ -20,6 +19,8 @@ export function ConversationItem({ conversation, isActived, ...props }: Props & 
 	const isDirect = members?.length === 2;
 	const receiver = isDirect && members?.find((member: any) => member.user._id !== user?._id);
 	if (isDirect) {
+		console.log('receiver', receiver);
+
 		avatar = receiver?.user?.profilePicture;
 		name = receiver?.nickname || receiver?.user?.fullname;
 	}
@@ -35,8 +36,8 @@ export function ConversationItem({ conversation, isActived, ...props }: Props & 
 			variant={isActived ? 'contained' : 'text'}
 			fullWidth
 			startIcon={
-				avatar?.link ? (
-					<Avatar src={avatar?.link} sx={{ bgcolor: 'white' }} />
+				isDirect ? (
+					<UserAvatar user={receiver?.user} size={40} src={avatar?.link} sx={{ bgcolor: 'white' }} />
 				) : (
 					<GroupAvatar listMember={members} size={40} />
 				)

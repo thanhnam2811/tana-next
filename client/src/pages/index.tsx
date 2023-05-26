@@ -1,9 +1,9 @@
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 export default function Index() {
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const router = useRouter();
 	useEffect(() => {

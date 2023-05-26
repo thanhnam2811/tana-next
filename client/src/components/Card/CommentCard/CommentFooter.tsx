@@ -1,5 +1,5 @@
 import { reactionData, ReactionType, ReactPopup } from '@components/Popup';
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { Stack, Typography } from '@mui/material';
 import { getTimeAgo } from '@utils/common';
 import Image from 'next/image';
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export function CommentFooter({ comment, isReply = false, handleDelete, showReply, toggleShowReply, onReact }: Props) {
-	const { user } = useAuth();
+	const { user } = useUserStore();
 	const { author, createdAt, reactOfUser } = comment;
 	const isAuthor = user?._id === author._id;
 
