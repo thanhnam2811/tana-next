@@ -1,7 +1,6 @@
 import { UserAvatar } from '@components/MUI';
-import { Avatar, Box, Divider, Typography } from '@mui/material';
+import { Box, Divider, Typography } from '@mui/material';
 import { useUserStore } from '@store';
-import { getShortName } from '@utils/common';
 import { useRouter } from 'next/router';
 import { FcRefresh, FcSettings, FcSportsMode } from 'react-icons/fc';
 import { IconType } from 'react-icons/lib';

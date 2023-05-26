@@ -1,6 +1,6 @@
 import { contactOptions, privacyOptions } from '@assets/data';
 import { IContact, IEducation, IWork } from '@interfaces';
-import { DATE_FORMAT, formatDate } from '@utils/common';
+import { DATE_FORMAT } from '@utils/common';
 import { Button, DatePicker, Form, Input, Modal, Select, Space } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
