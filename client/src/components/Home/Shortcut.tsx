@@ -1,7 +1,6 @@
-import { useAppDispatch, useAuth } from '@hooks';
+import { UserAvatar } from '@components/MUI';
 import { Avatar, Box, Divider, Typography } from '@mui/material';
-import { setUser } from '@redux/slice/userSlice';
-import { authApi } from '@utils/api';
+import { useUserStore } from '@store';
 import { getShortName } from '@utils/common';
 import { useRouter } from 'next/router';
 import { FcRefresh, FcSettings, FcSportsMode } from 'react-icons/fc';
@@ -23,14 +22,11 @@ const listShortCutAction: Action[] = Array(20)
 	}));
 
 export function ShortCut() {
-	const { user } = useAuth();
+	const { user, logout } = useUserStore();
 	const router = useRouter();
 
-	const dispatch = useAppDispatch();
-
 	const handleLogOut = () => {
-		authApi.logout();
-		dispatch(setUser(null));
+		logout();
 	};
 
 	const listAccountAction: Action[] = [
@@ -52,6 +48,7 @@ export function ShortCut() {
 		<Box display="flex" flexDirection="column" height="100%">
 			<Box
 				display="flex"
+				gap={2}
 				alignItems="center"
 				sx={{
 					p: '8px',
@@ -63,17 +60,7 @@ export function ShortCut() {
 				}}
 				onClick={() => router.push('/profile')}
 			>
-				<Avatar
-					src={user?.profilePicture?.link}
-					alt={user?.fullname}
-					sx={{
-						width: '32px',
-						height: '32px',
-						mr: 2,
-					}}
-				>
-					{getShortName(user?.fullname)}
-				</Avatar>
+				<UserAvatar user={user!} size={40} />
 
 				<Typography variant="h6">{user?.fullname}</Typography>
 			</Box>

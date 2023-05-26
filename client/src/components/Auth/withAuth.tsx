@@ -1,16 +1,16 @@
 import { useRouter } from 'next/router';
-import { useAuth } from '@hooks';
 import { NextComponentType } from 'next';
 import { useEffect } from 'react';
+import { useUserStore } from '@store';
 
 export function withAuth(Component: NextComponentType) {
 	const Auth = (props: any) => {
 		const router = useRouter();
-		const { user } = useAuth();
+		const { user } = useUserStore();
 
 		// If user is not logged in, redirect to login page
 		useEffect(() => {
-			if (!user) router.push('/auth/login');
+			if (!user) router.push({ pathname: '/auth/login', query: { from: router.pathname } }, '/auth/login');
 		}, [router, user]);
 
 		// If user is logged in, return original component

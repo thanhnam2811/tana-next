@@ -1,11 +1,14 @@
 import { WhiteBox } from '@components/Box';
+import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
-import { useAuth } from '@hooks';
-import { Avatar, Box, Collapse, Divider, IconButton, Typography, Skeleton, BoxProps } from '@mui/material';
-import { getShortName, getTimeAgo } from '@utils/common';
+import { Box, BoxProps, Collapse, Divider, IconButton, Skeleton, Typography } from '@mui/material';
+import { useUserStore } from '@store';
+import { getTimeAgo } from '@utils/common';
 import { useEffect, useRef, useState } from 'react';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { PostAction, PostComment, PostContent, PostContentSkeleton, PostFooter, PostFooterSkeleton } from '.';
+import { OpenInNewRounded } from '@mui/icons-material';
+import { useRouter } from 'next/router';
 
 interface Props {
 	post: any;
@@ -16,7 +19,8 @@ interface Props {
 export function PostCard({ post, handleReact, ...rest }: Props & BoxProps) {
 	const moreActionRef = useRef<any>();
 
-	const { user } = useAuth();
+	const router = useRouter();
+	const { user } = useUserStore();
 	const [author, setAuthor] = useState<any>(post.author);
 	useEffect(() => {
 		if (author._id === user?._id) {
@@ -27,23 +31,33 @@ export function PostCard({ post, handleReact, ...rest }: Props & BoxProps) {
 	const [showComment, setShowComment] = useState(false);
 	const handleToggleComment = () => setShowComment(!showComment);
 
+	const handleOpenPost = () => {
+		router.push(`/post/${post._id}`);
+	};
+
 	return (
 		<WhiteBox sx={{ mb: 2, p: 2, pb: 1, height: 'fit-content', boxShadow: 1 }} {...rest}>
 			{/* Post header */}
-			<Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+			<Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
 				{/* Avatar and name */}
 				<Box sx={{ display: 'flex', alignItems: 'center' }}>
-					<Avatar sx={{ width: 50, height: 50 }} alt="Profile Picture" src={author?.profilePicture?.link}>
-						{getShortName(author?.fullname)}
-					</Avatar>
+					<UserAvatar size={48} user={author} />
+
 					<Box sx={{ marginLeft: '8px' }}>
-						<Typography variant="h6">{author?.fullname}</Typography>
+						<Typography variant="h6" fontWeight={700}>
+							{author?.fullname}
+						</Typography>
 						<Typography variant="caption">{getTimeAgo(post.createdAt, 30)}</Typography>
 					</Box>
 				</Box>
 
+				{/* Open */}
+				<IconButton sx={{ marginLeft: 'auto' }} onClick={handleOpenPost}>
+					<OpenInNewRounded sx={{ width: 18, height: 18 }} />
+				</IconButton>
+
 				{/* More */}
-				<IconButton sx={{ marginLeft: 'auto' }} ref={moreActionRef}>
+				<IconButton ref={moreActionRef}>
 					<HiDotsHorizontal size={18} />
 				</IconButton>
 
@@ -69,18 +83,23 @@ export function PostCard({ post, handleReact, ...rest }: Props & BoxProps) {
 export const PostCardSkeleton = () => (
 	<WhiteBox sx={{ mb: 1, p: 2, pb: 1, height: 'fit-content', boxShadow: 1 }}>
 		{/* Post header */}
-		<Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+		<Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
 			{/* Avatar and name */}
 			<Box sx={{ display: 'flex', alignItems: 'center' }}>
-				<Skeleton variant="circular" width={50} height={50} />
+				<Skeleton variant="circular" width={48} height={48} />
 				<Box sx={{ marginLeft: '8px' }}>
 					<Skeleton variant="text" width={100} />
 					<Skeleton variant="text" width={100} />
 				</Box>
 			</Box>
 
-			{/* More */}
+			{/* Open */}
 			<IconButton sx={{ marginLeft: 'auto' }}>
+				<OpenInNewRounded sx={{ width: 18, height: 18 }} />
+			</IconButton>
+
+			{/* More */}
+			<IconButton>
 				<HiDotsHorizontal size={18} />
 			</IconButton>
 		</Box>

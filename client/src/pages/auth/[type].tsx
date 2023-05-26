@@ -1,6 +1,6 @@
 import { LoginForm, RegisterForm } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { Box, Container } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
@@ -18,7 +18,7 @@ export default function AuthPage() {
 	const nodeRef = isLogin ? loginRef : registerRef;
 
 	// Check if user is logged in
-	const { user } = useAuth();
+	const { user } = useUserStore();
 	useEffect(() => {
 		if (user) {
 			toast('Bạn đã đăng nhập rồi!', { icon: '👋' });

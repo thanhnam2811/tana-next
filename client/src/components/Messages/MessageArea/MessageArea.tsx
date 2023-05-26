@@ -1,5 +1,5 @@
 import { WhiteBox } from '@components/Box';
-import { useAuth, useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcher } from '@hooks';
 import { Box, Divider, Grid, Typography, styled } from '@mui/material';
 import { fileApi } from '@utils/api';
 import { messageApi } from '@utils/api/message-api';
@@ -14,6 +14,7 @@ import { MessageHeader } from './MessageHeader';
 import { MessagesHistory } from './MessageHistory';
 import { messageConfig } from './config';
 import { MessageContext } from '@pages/messages/[id]';
+import { useUserStore } from '@store';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -43,7 +44,7 @@ export function MessageArea({ onMediaPreview }: Props) {
 		};
 	}, [id]);
 
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const handleSendMessage = async (text: string) => {
 		const isValidToSend = text?.trim() !== '' || filesSelected.length > 0;

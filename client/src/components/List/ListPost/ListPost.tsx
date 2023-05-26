@@ -22,7 +22,7 @@ export function ListPost({ windowScroll = false, fetcher }: Props) {
 	// React to the post
 	const handleReactPost = async (postId: string, react: ReactionType) => {
 		try {
-			const res = await postApi.reactToPost(postId, react);
+			const res = await postApi.react(postId, react);
 
 			fetcher.updateData(postId, res.data);
 		} catch (error: any) {

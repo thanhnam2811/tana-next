@@ -1,6 +1,6 @@
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
 import { ConversationMembersModal, ConversationModal } from '@components/Modal';
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { Avatar } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { UpdateMembersType, conversationApi } from '@utils/api';
@@ -13,7 +13,7 @@ import { FiUserPlus } from 'react-icons/fi';
 import { Menu, MenuOptionProps } from '../components';
 
 export function MembersMenu() {
-	const { user: currentUser } = useAuth();
+	const { user: currentUser } = useUserStore();
 	const { conversation, isDirect, updateConversation, convFetcher } = useContext(MessageContext)!;
 	const router = useRouter();
 

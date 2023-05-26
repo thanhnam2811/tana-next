@@ -4,9 +4,10 @@ import { ListConversation } from '@components/List';
 import { MyIconButton, SearchInput } from '@components/MUI';
 import { DetailArea, MessageArea } from '@components/Messages';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
-import { InfinitFetcherType, useAppSelector, useInfiniteFetcher } from '@hooks';
+import { InfinitFetcherType, useInfiniteFetcher } from '@hooks';
 import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
 import { Badge, Box, Stack, Typography } from '@mui/material';
+import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -98,7 +99,11 @@ function MessagesPage() {
 		};
 	}, [id]);
 
-	const { showDetail } = useAppSelector((state) => state.messageSetting);
+	const {
+		setting: {
+			message: { showDetail },
+		},
+	} = useSettingStore();
 
 	const [mediaPreview, setMediaPreview] = useState<any>();
 	const openMediaPreview = Boolean(mediaPreview);

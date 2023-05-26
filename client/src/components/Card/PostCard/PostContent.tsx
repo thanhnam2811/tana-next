@@ -88,6 +88,7 @@ export function PostContent({ post }: Props) {
 					<DraftViewer content={post.content} />
 				</Typography>
 			</Box>
+
 			{/* Button read more */}
 			{(isContentHasMore || isShowMore) && (
 				<Button

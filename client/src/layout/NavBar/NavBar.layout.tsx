@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Logo } from '@assets/logo';
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { Avatar, Button, Grid, Stack, Tab, Tabs, Typography, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -71,7 +71,7 @@ export function NavBar() {
 
 	const { pathname } = router;
 
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const handleChange = (event: React.SyntheticEvent, newValue: string) => {
 		router.push(newValue);

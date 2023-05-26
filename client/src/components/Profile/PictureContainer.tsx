@@ -1,8 +1,7 @@
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
-import { useAppDispatch, useAuth } from '@hooks';
 import { Avatar, Badge, Box, Button, IconButton, Stack, SxProps, Tooltip, Typography } from '@mui/material';
-import { setUser } from '@redux/slice/userSlice';
-import { conversationApi, fileApi, userApi } from '@utils';
+import { useUserStore } from '@store';
+import { conversationApi, fileApi, userApi } from '@utils/api';
 import { getShortName } from '@utils/common';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useRef } from 'react';
@@ -31,12 +30,10 @@ interface Props {
 
 export const PictureContainer = ({ user }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useAuth();
+	const { user: currentUser, setUser } = useUserStore();
 
 	const isCurrentUser = currentUser?._id === user._id;
 	if (isCurrentUser) user = currentUser;
-
-	const dispatch = useAppDispatch();
 
 	const inputCoverPicRef = useRef<HTMLInputElement>(null);
 	const handleChangeCoverPic = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +48,7 @@ export const PictureContainer = ({ user }: Props) => {
 				// Update cover picture
 				toast.loading('Đang cập nhật ảnh bìa...', { id: toastId });
 				const { data: user } = await userApi.update({ coverPicture: file?._id });
-				dispatch(setUser(user));
+				setUser(user);
 
 				// Show toast
 				toast.success('Cập nhật ảnh bìa thành công!', { id: toastId });
@@ -74,7 +71,7 @@ export const PictureContainer = ({ user }: Props) => {
 				// Update profile picture
 				toast.loading('Đang cập nhật ảnh đại diện...', { id: toastId });
 				const { data: user } = await userApi.update({ profilePicture: file?._id });
-				dispatch(setUser(user));
+				setUser(user);
 
 				// Show toast
 				toast.success('Cập nhật ảnh đại diện thành công!', { id: toastId });
