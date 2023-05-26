@@ -1,5 +1,5 @@
 import { MyIconButton } from '@components/MUI';
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { Stack, TextField } from '@mui/material';
 import { showIncomingAlert } from '@utils/common';
 import { useRouter } from 'next/router';
@@ -17,7 +17,7 @@ const TYPING_TIMEOUT = 1000;
 export const MessageInput = ({ onSend, onChooseFile }: MessageInputProps) => {
 	const router = useRouter();
 	const { id } = router.query;
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const inputRef = useRef<any>(null);
 	const onSubmit = () => {

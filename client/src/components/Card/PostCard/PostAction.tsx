@@ -81,6 +81,7 @@ export const PostAction = ({ anchorElRef }: Props) => {
 			open={open}
 			placement="bottom-end"
 			onClick={(e) => e.stopPropagation()} // Prevent closing popup when clicking on popup
+			sx={{ zIndex: 100 }}
 		>
 			<WhiteBox
 				sx={{

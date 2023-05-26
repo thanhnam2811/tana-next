@@ -1,8 +1,9 @@
 import { WhiteBox } from '@components/Box';
 import { ModalPost } from '@components/Modal';
-import { InfinitFetcherType, useAuth } from '@hooks';
+import { InfinitFetcherType } from '@hooks';
 import { InsertPhotoTwoTone, LocationCityTwoTone, SlideshowTwoTone } from '@mui/icons-material';
 import { Avatar, Box, Button, TextField, styled } from '@mui/material';
+import { useUserStore } from '@store';
 import { postApi } from '@utils/api';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -27,12 +28,12 @@ interface Props {
 }
 
 export function CreatePost({ fetcher }: Props) {
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const handleAddPost = async (data: any) => {
 		const toastId = toast.loading('Đang tạo bài viết...');
 		try {
-			const res = await postApi.createPost(data);
+			const res = await postApi.create(data);
 			fetcher.addData(res.data);
 			toast.success('Tạo bài viết thành công', { id: toastId });
 		} catch (error: any) {
@@ -52,6 +53,7 @@ export function CreatePost({ fetcher }: Props) {
 				placeholder="Bạn đang nghĩ gì?"
 				InputProps={{
 					startAdornment: <Avatar sx={{ mr: 1 }} src={user?.profilePicture?.link} />,
+					readOnly: true,
 				}}
 				onClick={handleOpenModal}
 			/>

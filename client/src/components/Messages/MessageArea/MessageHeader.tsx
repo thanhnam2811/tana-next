@@ -1,18 +1,23 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
-import { useAppDispatch, useAuth } from '@hooks';
-import { Avatar, Box, Grid, IconButton, Typography, Skeleton } from '@mui/material';
+import { Avatar, Box, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
-import { toggleShowDetail } from '@redux/slice/messageSettingSlice';
+import { useSettingStore, useUserStore } from '@store';
+import { meetingApi } from '@utils/api';
 import { getShortName, showIncomingAlert } from '@utils/common';
+import { useRouter } from 'next/router';
 import { useContext } from 'react';
+import { toast } from 'react-hot-toast';
 import { BsFillCameraVideoFill, BsInfoCircleFill, BsTelephoneFill, BsThreeDotsVertical } from 'react-icons/bs';
 
 export function MessageHeader() {
+	const router = useRouter();
 	const { conversation, fetching } = useContext(MessageContext)!;
-	const dispatch = useAppDispatch();
+	const {
+		message: { toggleShowDetail },
+	} = useSettingStore();
 
-	const { user } = useAuth();
+	const { user } = useUserStore();
 	const isDirect = conversation?.members?.length === 2;
 	const receiver = isDirect && conversation?.members?.find((member: any) => member.user._id !== user?._id);
 
@@ -22,6 +27,38 @@ export function MessageHeader() {
 	}
 
 	if (fetching) return <MessageHeaderSkeleton />;
+
+	const onVoiceCall = async () => {
+		const toastId = toast.loading('Đang tạo cuộc gọi...');
+		try {
+			const res = await meetingApi.create();
+			const roomId = res.data.roomId;
+
+			// Show success toast
+			toast.success('Tạo cuộc gọi thành công', { id: toastId });
+
+			// Navigate to call page
+			router.push(`/call/voice/${roomId}`);
+		} catch (error) {
+			toast.error('Không thể tạo cuộc gọi', { id: toastId });
+		}
+	};
+
+	const onVideoCall = async () => {
+		const toastId = toast.loading('Đang tạo cuộc gọi...');
+		try {
+			const res = await meetingApi.create();
+			const roomId = res.data.roomId;
+
+			// Show success toast
+			toast.success('Tạo cuộc gọi thành công', { id: toastId });
+
+			// open new popup
+			window.open(`/call/video/${roomId}`, 'Video Call', 'width=1000,height=700');
+		} catch (error) {
+			toast.error('Không thể tạo cuộc gọi', { id: toastId });
+		}
+	};
 
 	return (
 		<Grid container justifyContent="space-between" flexWrap="nowrap">
@@ -65,8 +102,9 @@ export function MessageHeader() {
 								sm: 'inline',
 							},
 						}}
-						onClick={showIncomingAlert}
+						onClick={onVoiceCall}
 					/>
+
 					<MyIconButton
 						tooltip="Gọi video"
 						Icon={BsFillCameraVideoFill}
@@ -77,8 +115,9 @@ export function MessageHeader() {
 								sm: 'inline',
 							},
 						}}
-						onClick={showIncomingAlert}
+						onClick={onVideoCall}
 					/>
+
 					<MyIconButton
 						tooltip="Thêm"
 						Icon={BsThreeDotsVertical}
@@ -91,12 +130,13 @@ export function MessageHeader() {
 						}}
 						onClick={console.log}
 					/>
+
 					<MyIconButton
 						key="info-button"
 						tooltip="Thông tin"
 						Icon={BsInfoCircleFill}
 						variant="color"
-						onClick={() => dispatch(toggleShowDetail())}
+						onClick={toggleShowDetail}
 					/>
 				</Box>
 			</Grid>
@@ -112,10 +152,12 @@ export const MessageHeaderSkeleton = () => (
 				<Skeleton variant="circular" width={48} height={48} />
 			</IconButton>
 		</Grid>
+
 		<Grid item xs overflow="hidden" justifyContent="center" display="flex" flexDirection="column" py="8px">
 			<Skeleton variant="text" width={200} height={24} />
 			<Skeleton variant="text" width={100} height={16} />
 		</Grid>
+
 		<Grid item xs="auto" display="flex" alignItems="center">
 			<Box justifyContent="center" display="flex">
 				{/* Conversation action */}
@@ -129,8 +171,9 @@ export const MessageHeaderSkeleton = () => (
 							sm: 'inline',
 						},
 					}}
-					onClick={console.log}
+					onClick={showIncomingAlert}
 				/>
+
 				<MyIconButton
 					tooltip="Gọi video"
 					Icon={BsFillCameraVideoFill}
@@ -143,6 +186,7 @@ export const MessageHeaderSkeleton = () => (
 					}}
 					onClick={showIncomingAlert}
 				/>
+
 				<MyIconButton
 					tooltip="Thêm"
 					Icon={BsThreeDotsVertical}
@@ -155,6 +199,7 @@ export const MessageHeaderSkeleton = () => (
 					}}
 					onClick={console.log}
 				/>
+
 				<MyIconButton
 					key="info-button"
 					tooltip="Thông tin"

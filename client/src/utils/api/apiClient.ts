@@ -1,5 +1,5 @@
 import { SERVER_URL } from '@utils/common';
-import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.response?.status === 401;
@@ -44,9 +44,7 @@ const retryRequest = async (error: AxiosError) => {
 	if (!refreshToken) return handleError(error);
 
 	// Call refresh token API
-	const { data } = await apiClient.post('/auth/refresh', {
-		refreshToken,
-	});
+	const { data } = await apiClient.post('/auth/refresh', { refreshToken });
 
 	// Save new access token to local storage
 	localStorage.setItem('accessToken', data.accessToken);
@@ -67,21 +65,35 @@ const apiClient = axios.create({
 		'Retry-Count': 0,
 	},
 	timeout: 10000,
-	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ! (Có thể do máy chủ chưa khởi động, vui lòng thử lại sau)',
+	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ!',
+});
+
+export const apiCaller = axios.create({
+	baseURL: SERVER_URL,
+	headers: {
+		'Content-Type': 'application/json',
+	},
+	timeout: 10000,
+	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ!',
 });
 
 // Interceptors for request
 apiClient.interceptors.request.use(
 	(config) => {
-		// Get access token from local storage
-		const accessToken = localStorage.getItem('accessToken');
+		try {
+			// Get access token from local storage
+			const accessToken = localStorage.getItem('accessToken');
 
-		// If access token exists, add it to request header
-		if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+			// If access token exists, add it to request header
+			if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+		} catch (error) {
+			// eslint-disable-next-line no-console
+			console.error('Get access token error: ', error);
+		}
 
 		return config;
 	},
-	(error) => handleError(error)
+	(error) => handleError(error).catch(() => Promise.reject(error))
 );
 
 // Interceptors for response
@@ -94,8 +106,5 @@ apiClient.interceptors.response.use(
 		return handleError(error);
 	}
 );
-
-export const swrFetcher = (url: string, config: AxiosRequestConfig) =>
-	apiClient.get(url, config).then((res) => res.data);
 
 export default apiClient;

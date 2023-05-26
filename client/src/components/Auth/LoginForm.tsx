@@ -1,9 +1,7 @@
 import { GithubIcon, GoogleIcon } from '@assets/icons';
-import { useAppDispatch } from '@hooks';
 import { LoadingButton } from '@mui/lab';
 import { Avatar, Box, Divider, Grid, IconButton, Link, TextField, Tooltip, Typography } from '@mui/material';
-import { setUser } from '@redux/slice/userSlice';
-import { authApi } from '@utils/api';
+import { useUserStore } from '@store';
 import { SERVER_URL } from '@utils/common';
 import { validate } from 'email-validator';
 import { useRouter } from 'next/router';
@@ -24,14 +22,12 @@ export function LoginForm() {
 		formState: { errors, isSubmitting },
 	} = useForm<ILoginForm>();
 
-	const dispatch = useAppDispatch();
+	const { login } = useUserStore();
 
 	const onSubmit = async (data: ILoginForm) => {
 		const toastId = toast.loading('Đang đăng nhập...');
 		try {
-			const res = await authApi.login(data);
-			const { user } = res.data;
-			dispatch(setUser(user));
+			await login(data);
 			toast.success('Đăng nhập thành công!', { id: toastId });
 			router.replace('/home');
 		} catch (error: any) {

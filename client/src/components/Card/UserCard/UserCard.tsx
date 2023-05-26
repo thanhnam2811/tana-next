@@ -1,7 +1,7 @@
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Card, CardContent, CardMedia, Chip, SxProps, Typography } from '@mui/material';
-import { userApi } from '@utils';
+import { userApi } from '@utils/api';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -55,7 +55,7 @@ interface Props {
 
 export const UserCard = ({ user, relationship = 'friend', sx = {}, onClick }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useAuth();
+	const { user: currentUser } = useUserStore();
 	const isCurrentUser = user._id === currentUser?._id;
 
 	const [loading, setLoading] = useState(false);

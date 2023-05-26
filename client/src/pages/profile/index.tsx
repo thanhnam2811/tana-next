@@ -1,21 +1,18 @@
 import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
+import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import { useAuth } from '@hooks';
 import { ContainerArea, LeftArea } from '@layout';
-import { Box, CircularProgress } from '@mui/material';
-import { userApi } from '@utils';
+import { CircularProgress } from '@mui/material';
+import { useUserStore } from '@store';
+import { userApi } from '@utils/api';
 import { useRouter } from 'next/router';
-import React, { ComponentType, Suspense, useEffect, useState } from 'react';
+import { ComponentType, Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
 import { IconType } from 'react-icons/lib';
 
 // import { FriendTab, PostTab } from '@components/Profile/tabs';
-const FriendTab = React.lazy(() =>
-	import('@components/Profile/tabs').then((module) => ({ default: module.FriendTab }))
-);
-const PostTab = React.lazy(() => import('@components/Profile/tabs').then((module) => ({ default: module.PostTab })));
 
 type tabType = 'posts' | 'friends' | 'media' | 'about';
 
@@ -37,16 +34,11 @@ export const tabData: {
 		tab: 'friends',
 		TabContent: FriendTab,
 	},
-	// {
-	// 	label: 'Ảnh, video',
-	// 	Icon: HiPhotograph,
-	// 	tab: 'media',
-	// },
 	{
 		label: 'Thông tin',
 		Icon: HiInformationCircle,
 		tab: 'about',
-		TabContent: () => <Box>About</Box>,
+		TabContent: InfoTab,
 	},
 ];
 
@@ -61,7 +53,7 @@ function ProfilePage() {
 		router.push({ pathname: router.pathname, query });
 	};
 
-	const { user: currentUser } = useAuth();
+	const { user: currentUser } = useUserStore();
 
 	const [user, setUser] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
@@ -112,15 +104,7 @@ function ProfilePage() {
 			</LeftArea>
 
 			{/* Summary */}
-			{loading ? (
-				<CircularProgress />
-			) : (
-				TabContent && (
-					<Suspense>
-						<TabContent user={user} />
-					</Suspense>
-				)
-			)}
+			{loading ? <CircularProgress /> : <Suspense>{TabContent && <TabContent user={user} />}</Suspense>}
 		</ContainerArea>
 	);
 }

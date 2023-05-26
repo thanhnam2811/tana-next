@@ -31,6 +31,10 @@ const ToolbarButton = ({ active, ...props }: ButtonProps & { active: boolean }) 
 			p: '0',
 			minWidth: '2rem',
 			minHeight: '2rem',
+			'&:hover': {
+				bgcolor: 'primary.main',
+				color: 'white',
+			},
 		}}
 		color={active ? 'primary' : 'secondary'}
 		{...props}
@@ -78,7 +82,7 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 	const isInlineStyleActive = (inlineStyle: string) => editorState.getCurrentInlineStyle().has(inlineStyle);
 
 	return (
-		<Box p={2}>
+		<Box p={2} borderRadius="0.5rem">
 			<Box
 				display="flex"
 				alignItems="center"
@@ -89,7 +93,10 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 				sx={{
 					borderTopLeftRadius: '0.5rem',
 					borderTopRightRadius: '0.5rem',
+					backgroundColor: '#fff',
 				}}
+				position="sticky"
+				top={0}
 			>
 				{INLINE_STYLES.map((type) => (
 					<ToolbarButton
@@ -113,6 +120,7 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 					</ToolbarButton>
 				))}
 			</Box>
+
 			<Box
 				sx={{
 					border: '1px dashed #ccc',

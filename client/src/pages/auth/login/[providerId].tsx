@@ -1,19 +1,16 @@
 import { WhiteBox } from '@components/Box';
-import { useAppDispatch } from '@hooks';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { authApi } from '@utils/api';
+import { useUserStore } from '@store';
 import { authProviders } from '@utils/data';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { setCookie } from 'react-use-cookie';
 import Swal from 'sweetalert2';
-import { setUser } from '../../../redux/slice/userSlice';
 
 const Provider = () => {
 	const router = useRouter();
-	const dispatch = useAppDispatch();
+	const { getProfile } = useUserStore();
 
 	const { providerId, accessToken, refreshToken } = router.query as { [key: string]: string };
 
@@ -24,14 +21,12 @@ const Provider = () => {
 			const toastId = toast.loading('Đang xử lý...');
 
 			try {
-				// Get user profile
-				const res = await authApi.getProfile();
-				const user = res.data;
+				// Save credentials
+				localStorage.setItem('accessToken', accessToken as string);
+				localStorage.setItem('refreshToken', refreshToken as string);
 
-				// Save credentials to cookies
-				setCookie('accessToken', accessToken);
-				setCookie('refreshToken', refreshToken);
-				dispatch(setUser(user));
+				// Get user profile
+				getProfile();
 
 				// Show success toast and redirect to home page
 				toast.success('Đăng nhập thành công!', { id: toastId });
@@ -58,7 +53,7 @@ const Provider = () => {
 		else {
 			login();
 		}
-	}, [accessToken, dispatch, provider, providerId, refreshToken, router]);
+	}, [accessToken, provider, providerId, refreshToken, router]);
 
 	return (
 		<Box

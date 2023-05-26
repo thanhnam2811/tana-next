@@ -1,8 +1,8 @@
 import { ListComment } from '@components/List/ListComment';
+import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
 import { useInfiniteFetcher } from '@hooks';
-import { Avatar, Box, CircularProgress, Collapse, Stack, Typography, StackProps } from '@mui/material';
-import { getShortName } from '@utils/common';
+import { Box, CircularProgress, Collapse, Stack, StackProps, Typography } from '@mui/material';
 import { useState } from 'react';
 import { CommentFooter } from '.';
 
@@ -54,9 +54,8 @@ export const CommentCard = ({
 				...rest.sx,
 			}}
 		>
-			<Avatar sx={{ width: 32, height: 32 }} src={author?.profilePicture?.link} alt={author?.fullname}>
-				{getShortName(author?.fullname)}
-			</Avatar>
+			<UserAvatar size={32} user={author} />
+
 			<Stack flex={1} overflow="hidden">
 				<Typography fontSize={14} fontWeight={800}>
 					{author?.fullname}

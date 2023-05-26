@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { MyIconButton } from '@components/MUI';
-import { useAppDispatch, useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcher } from '@hooks';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import Logout from '@mui/icons-material/Logout';
 import PersonAdd from '@mui/icons-material/PersonAdd';
@@ -18,13 +18,11 @@ import {
 	Tooltip,
 	Typography,
 } from '@mui/material';
-import { setUser } from '@redux/slice/userSlice';
-import { authApi } from '@utils/api';
+import { useUserStore } from '@store';
 import { getShortName } from '@utils/common';
 import { useRouter } from 'next/router';
 import { FcFaq, FcLike, FcStackOfPhotos } from 'react-icons/fc';
 import { FiBell } from 'react-icons/fi';
-import { useAuth } from 'src/hooks/useAuth';
 
 const listTypeNotify = [
 	{
@@ -42,20 +40,17 @@ const listTypeNotify = [
 ];
 
 export function RightSide() {
+	const { user, logout } = useUserStore();
+
 	const [profileMenuEl, setProfileMenuEl] = useState<any>();
 	const openProfileMenu = Boolean(profileMenuEl);
 
 	const [notifyMenuEl, setNotifyMenuEl] = useState<any>();
 	const openNotifyMenu = Boolean(notifyMenuEl);
 
-	const dispatch = useAppDispatch();
-
 	const handleLogOut = () => {
-		authApi.logout();
-		dispatch(setUser(null));
+		logout();
 	};
-
-	const { user } = useAuth();
 
 	const router = useRouter();
 	const { pathname } = router;

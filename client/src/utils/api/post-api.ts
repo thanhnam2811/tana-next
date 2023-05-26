@@ -1,8 +1,13 @@
 import { ReactionType } from '@components/Popup';
-import apiClient from './apiClient';
+import apiClient, { apiCaller } from './apiClient';
+import { IPost } from '@interfaces';
 
 export const postApi = {
-	reactToPost: (id: string, reaction: ReactionType) => apiClient.put(`/posts/${id}/react`, { type: reaction }),
+	react: (id: string, reaction: ReactionType) => apiClient.put(`/posts/${id}/react`, { type: reaction }),
 
-	createPost: (data: { content: string }) => apiClient.post('/posts', data),
+	create: (data: { content: string }) => apiClient.post('/posts', data),
+
+	get: (id: string) => apiClient.get<IPost>(`/posts/${id}`),
+
+	serverGet: (id: string) => apiCaller.get<IPost>(`/posts/${id}`),
 };
