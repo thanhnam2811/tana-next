@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Avatar, Box, Divider, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
+import { UserAvatar } from '@components/MUI';
+import { Box, Divider, Typography } from '@mui/material';
 import { userApi } from '@utils/api';
-import { getShortName } from '@utils/common';
+import { useRouter } from 'next/router';
 
 interface Action {
 	[key: string]: any;
@@ -27,7 +27,7 @@ export function QuickContact() {
 				setListContact(
 					items.map((user: any) => ({
 						title: user.fullname,
-						avatar: user.profilePicture?.link,
+						user,
 						onClick: () => {
 							router.push(`/profile/${user._id}`);
 						},
@@ -46,7 +46,7 @@ export function QuickContact() {
 				setListSuggestions(
 					items.map((user: any) => ({
 						title: user.fullname,
-						avatar: user.profilePicture?.link,
+						user,
 						onClick: () => {
 							router.push(`/profile/${user._id}`);
 						},
@@ -72,6 +72,7 @@ export function QuickContact() {
 			>
 				Liên hệ
 			</Typography>
+
 			<Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto" flex={1}>
 				{listContact.map((action, index) => (
 					<Box
@@ -88,9 +89,7 @@ export function QuickContact() {
 						}}
 						onClick={action.onClick}
 					>
-						<Avatar sx={{ mr: 1 }} src={action.avatar}>
-							{getShortName(action.title)}
-						</Avatar>
+						<UserAvatar user={action.user} size={32} badgeProps={{ sx: { mr: 1 } }} />
 
 						<Typography variant="subtitle2">{action.title}</Typography>
 					</Box>
@@ -124,9 +123,7 @@ export function QuickContact() {
 						}}
 						onClick={action.onClick}
 					>
-						<Avatar sx={{ mr: 1 }} src={action.avatar}>
-							{getShortName(action.title)}
-						</Avatar>
+						<UserAvatar user={action.user} size={32} badgeProps={{ sx: { mr: 1 } }} />
 
 						<Typography variant="subtitle2">{action.title}</Typography>
 					</Box>

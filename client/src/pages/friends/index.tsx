@@ -42,7 +42,7 @@ function Friends() {
 
 	const relationship = relationshipData[type]?.relationship;
 	const userFetcher = useInfiniteFetcher(`/users/searchUser/${type}`);
-	const [userPreview, setUserPreview] = useState<any>(null);
+	const [, setUserPreview] = useState<any>(null); // TODO: preview user
 
 	const changeType = (type: FriendsType) => {
 		router.push({ pathname: router.pathname, query: { type } });

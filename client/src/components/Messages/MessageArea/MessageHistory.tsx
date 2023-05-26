@@ -1,5 +1,5 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
-import { InfinitFetcherType, useAuth } from '@hooks';
+import { InfinitFetcherType } from '@hooks';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { getShortName } from '@utils/common';
@@ -7,6 +7,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { FaArrowDown } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { MessageItem } from './MessageItem';
+import { useUserStore } from '@store';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -17,7 +18,7 @@ interface Props {
 export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 	const { conversation } = useContext(MessageContext)!;
 
-	const { user } = useAuth();
+	const { user } = useUserStore();
 	const listMember = conversation?.members || [];
 	const listMessage = fetcher.data;
 
@@ -109,7 +110,7 @@ export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 };
 
 const UserPreview = ({ listMember, conversation }: any) => {
-	const { user: currentUser } = useAuth();
+	const { user: currentUser } = useUserStore();
 
 	const isDirect = listMember.length === 2;
 	const user = isDirect && listMember.filter((m: any) => m?.user?._id !== currentUser?._id)[0]?.user;

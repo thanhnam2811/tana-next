@@ -1,27 +1,34 @@
+import { IUser } from '@interfaces';
 import apiClient from './apiClient';
 
-interface LoginParams {
+export interface ILoginParams {
 	email: string;
 	password: string;
 }
 
-interface RegisterParams {
+interface ILoginResponse {
+	accessToken: string;
+	refreshToken: string;
+	user: IUser;
+}
+
+export interface IRegisterParams {
 	fullname: string;
 	phonenumber: string;
 	email: string;
 	password: string;
 }
 
-interface ResetPasswordParams {
+export interface IResetPasswordParams {
 	id: string;
 	token: string;
 	password: string;
 }
 
 export const authApi = {
-	login: async ({ email, password }: LoginParams) => {
+	login: async ({ email, password }: ILoginParams) => {
 		// Call login API
-		const res = await apiClient.post('/auth/login', { email, password });
+		const res = await apiClient.post<ILoginResponse>('/auth/login', { email, password });
 		const { accessToken, refreshToken } = res.data;
 
 		// Save access token and refresh token to local storage
@@ -38,12 +45,12 @@ export const authApi = {
 		localStorage.removeItem('refreshToken');
 	},
 
-	register: (data: RegisterParams) => apiClient.post('/auth/register', data),
+	register: (data: IRegisterParams) => apiClient.post('/auth/register', data),
 
-	getProfile: () => apiClient.get('users/profile'),
+	getProfile: () => apiClient.get<IUser>('users/profile'),
 
 	forgotPassword: (email: string) => apiClient.post('auth/password-reset', { email }),
 
-	resetPassword: ({ id, token, password }: ResetPasswordParams) =>
+	resetPassword: ({ id, token, password }: IResetPasswordParams) =>
 		apiClient.post(`auth/password-reset/${id}/${token}`, { password }),
 };

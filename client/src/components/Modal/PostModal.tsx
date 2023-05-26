@@ -64,7 +64,7 @@ export const ModalPost = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 					<Close />
 				</IconButton>
 			</DialogTitle>
-			<DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+			<DialogContent sx={{ p: 0, overflow: 'auto' }}>
 				<Box component="form" onSubmit={handleSubmit(onSubmit)} height="100%">
 					<Controller
 						name="content"

@@ -1,4 +1,4 @@
-import { useAuth } from '@hooks';
+import { useUserStore } from '@store';
 import { LoadingButton } from '@mui/lab';
 import {
 	Avatar,
@@ -46,7 +46,7 @@ interface Props {
 
 export const ConversationMembersModal = ({ open, onClose, member = {}, handleUpdateMembers }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useAuth();
+	const { user: currentUser } = useUserStore();
 
 	const { user = {}, role, nickname, addedBy = {}, addedAt, changedNicknameBy } = member;
 

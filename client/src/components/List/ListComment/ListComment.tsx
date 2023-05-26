@@ -1,10 +1,11 @@
 import { CommentCard } from '@components/Card/CommentCard';
+import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
-import { InfinitFetcherType, useAuth } from '@hooks';
+import { InfinitFetcherType } from '@hooks';
 import { LoadingButton } from '@mui/lab';
-import { Avatar, Box, Collapse, Stack, TextField } from '@mui/material';
+import { Box, Collapse, Stack, TextField } from '@mui/material';
+import { useUserStore } from '@store';
 import { commentApi } from '@utils/api';
-import { getShortName } from '@utils/common';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -32,7 +33,7 @@ export const ListComment = ({ fetcher, post, comment }: Props) => {
 		}
 	};
 
-	const { user } = useAuth();
+	const { user } = useUserStore();
 
 	const {
 		register,
@@ -125,18 +126,11 @@ export const ListComment = ({ fetcher, post, comment }: Props) => {
 					fullWidth
 					InputProps={{
 						startAdornment: (
-							<Avatar
-								src={user?.profilePicture?.link}
-								alt={user?.fullname}
-								sx={{
-									width: 40,
-									height: 40,
-									mr: 1,
-									alignSelf: 'flex-start',
-								}}
-							>
-								{getShortName(user?.fullname)}
-							</Avatar>
+							<UserAvatar
+								user={user!}
+								size={40}
+								badgeProps={{ sx: { mr: 2, alignSelf: 'flex-start' } }}
+							/>
 						),
 						readOnly: isSubmitting,
 						sx: {
