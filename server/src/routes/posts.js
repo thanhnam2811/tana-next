@@ -18,11 +18,11 @@ router.delete("/:id", AuthoMiddleware.isAuth, PostController.delete);
 
 router.get("/home", AuthoMiddleware.isAuth, PostController.getPostInHome);
 //get user's all posts
-router.get("/user/:id", PostController.getAll);
+router.get("/user/:id",AuthoMiddleware.getUserFromToken, PostController.getAll);
 //get reactions of a post
 router.get("/:id/reacts", PostController.getAllReactions);
 //get a post
-router.get("/:id", AuthoMiddleware.isAuth, PostController.get);
+router.get("/:id", AuthoMiddleware.getUserFromToken, PostController.get);
 //get all posts of current user
 router.get("/", AuthoMiddleware.isAuth, PostController.getAllPosts);
 
