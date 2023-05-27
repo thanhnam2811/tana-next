@@ -80,7 +80,7 @@ function RoomChat(socket, io) {
         
         conversation.members.forEach(
             member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
+                if(member.user.toString() !== data.sender._id.toString()){
                     const sk = SocketManager.getUser(member.user);
                     if(sk)
                         sk.emit("typingMessage", data);
@@ -97,7 +97,7 @@ function RoomChat(socket, io) {
         
         conversation.members.forEach(
             member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
+                if(member.user.toString() !== data.sender._id.toString()){
                     const sk = SocketManager.getUser(member.user);
                     if(sk)
                         sk.emit("stopTypingMessage", data);
