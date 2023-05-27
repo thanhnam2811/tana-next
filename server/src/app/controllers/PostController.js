@@ -194,6 +194,10 @@ class PostController {
                             select: "_id link",
                         }
                     },
+                    {
+                        path: "media",
+                        select: "_id link",
+                    }
                 ]
             })
                 .then(async (data) => {
@@ -466,7 +470,12 @@ class PostController {
                         path: "profilePicture",
                         select: "_id link",
                     }
+                })
+                .populate({
+                    path: "media",
+                    select: "_id link",
                 });
+
             //get type of reaction of the user to the post
             const react = await React.findOne({ post: req.params.id, user: req.user._id });
             let reactOfUser = "none";
@@ -515,6 +524,9 @@ class PostController {
                             select: "_id link",
                         }
                     },
+                    {
+                        path: "media", select: "_id link"
+                    }
                 ]
             })
                 .then((data) => {
@@ -548,7 +560,8 @@ class PostController {
         // get posts of a user by query id and sort by date
         try {
             const listFriendId = req.user.friends.map((friend) => friend.user._id);
-            const listPost = await Post.find({ author: { $in: listFriendId } })
+            listFriendId.push(req.user._id);
+            let listPost = await Post.find({ author: { $in: listFriendId } })
                 .sort({ createdAt: -1 })
                 .populate({
                     path: "author", select: "_id fullname profilePicture isOnline",
@@ -572,7 +585,12 @@ class PostController {
                         path: "profilePicture",
                         select: "_id link",
                     }
+                })
+                .populate({
+                    path: "media", select: "_id link"
                 });
+                
+            //:TODO: if listPost is empty, get random posts
 
             //get type of reaction of the user to the post
             const listPosts = [];
@@ -615,7 +633,7 @@ class PostController {
             if (!post) {
                 return next(createError.NotFound("Bài viết không tồn tại"));
             }
-            const files = post.files;
+            const files = post.media;
             res.status(200).json(files);
         } catch (err) {
             console.error(err);
@@ -657,6 +675,9 @@ class PostController {
                             select: "_id link",
                         }
                     },
+                    {
+                        path: "media", select: "_id link"
+                    }
                 ]
             })
                 .then((data) => {
