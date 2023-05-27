@@ -14,7 +14,13 @@ const { getListData } = require('../../utils/Response/listData');
 const getLocationByIPAddress = require('../../configs/location');
 const IP = require('ip');
 const axios = require('axios');
+const crypto = require('crypto');
+const { openai } = require('../../configs/chatgpt');
+// set encryption algorithm
+const algorithm = 'aes-256-cbc';
 
+// private key
+const key = process.env.DECODE_KEY; // must be of 32 characters
 const apiKey = process.env.API_KEY_VIDEOCALL;
 class ConversationController {
 	// TODO: Leave conversation
@@ -231,14 +237,14 @@ class ConversationController {
 				}
 			)
 				.then((data) => {
-					data.docs.forEach((lastest_message) => {
-						if (lastest_message.iv) {
-							console.log(lastest_message.iv);
-							const iv = Buffer.from(lastest_message.iv, 'base64');
+					data.docs.forEach((item) => {
+						if (item.lastest_message.iv) {
+							console.log(item.lastest_message.iv);
+							const iv = Buffer.from(item.lastest_message.iv, 'base64');
 							const decipher = crypto.createDecipheriv(algorithm, key, iv);
-							let decryptedData = decipher.update(lastest_message.text, 'hex', 'utf-8');
+							let decryptedData = decipher.update(item.lastest_message.text, 'hex', 'utf-8');
 							decryptedData += decipher.final('utf-8');
-							lastest_message.text = decryptedData;
+							item.lastest_message.text = decryptedData;
 						}
 					});
 					getListData(res, data);
