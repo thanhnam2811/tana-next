@@ -109,9 +109,10 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 				}
 				bordered
 				dataSource={contacts}
-				renderItem={(contact, index) => (
-					<List.Item
-						actions={[
+				renderItem={(contact, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
 							<PrivacyDropdown
 								key="privacy"
 								value={contact.privacy.value}
@@ -123,16 +124,18 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: contact, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={<b>{contactOptions.find((option) => option.value === contact.type)?.label}</b>}
-							description={contact.value}
-							style={{ width: '100%' }}
-						/>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					const title = contactOptions.find((option) => option.value === contact.type)?.label;
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta title={title} description={contact.value} style={{ width: '100%' }} />
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

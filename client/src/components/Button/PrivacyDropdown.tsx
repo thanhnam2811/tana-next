@@ -18,9 +18,11 @@ export function PrivacyDropdown({ value: propsVal = 'public', onChange }: Props)
 		setValue(propsVal);
 	}, [propsVal]);
 
-	const handleChange = (value: PrivacyType) => {
-		onChange?.(value);
-		setValue(value);
+	const handleChange = (val: PrivacyType) => {
+		if (val === value) return; // No change
+
+		onChange?.(val);
+		setValue(val);
 	};
 
 	return (
