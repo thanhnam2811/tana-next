@@ -74,7 +74,7 @@ function RoomChat(socket, io) {
     //typing message
     socket.on("typingMessage", async (data) => {
         console.log("typingMessage-----------", data);
-        const conversation = await Conversation.findById(msg.conversation);
+        const conversation = await Conversation.findById(data.conversation);
         if(!conversation)
             return;
         
@@ -91,7 +91,7 @@ function RoomChat(socket, io) {
 
     socket.on("stopTypingMessage", async (data) => {
         console.log("stopTypingMessage-----------");
-        const conversation = await Conversation.findById(msg.conversation);
+        const conversation = await Conversation.findById(data.conversation);
         if(!conversation)
             return;
         
