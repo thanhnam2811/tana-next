@@ -29,11 +29,10 @@ export const InfoTab = ({ user }: Props) => {
 			triggerType: ['icon', 'text'],
 		};
 
-	const handleChangeField = (field: keyof IUser) => (value: any) => {
+	const handleChangeField = (field: keyof IUser) => (value: any) =>
 		updateProfile({ [field]: value })
 			.then(() => toast.success('Cập nhật thành công!'))
 			.catch(() => toast.error('Cập nhật thất bại!'));
-	};
 
 	return (
 		<CenterArea>
@@ -41,7 +40,7 @@ export const InfoTab = ({ user }: Props) => {
 				<List header={<Typography.Title level={2}>Thông tin cá nhân</Typography.Title>}>
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Họ và tên</Typography.Title>}
+							title="Họ và tên"
 							description={
 								<Typography.Text editable={getEditable('fullname')}>{user.fullname}</Typography.Text>
 							}
@@ -49,29 +48,26 @@ export const InfoTab = ({ user }: Props) => {
 					</List.Item>
 
 					<List.Item>
-						<List.Item.Meta
-							title={<Typography.Title level={4}>Email</Typography.Title>}
-							description={<Typography.Text>{user.email}</Typography.Text>}
-						/>
+						<List.Item.Meta title="Email" description={<Typography.Text>{user.email}</Typography.Text>} />
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Liên hệ</Typography.Title>}
+							title="Liên hệ"
 							description={<ContactList contacts={user.contact} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Công việc</Typography.Title>}
+							title="Công việc"
 							description={<WorkList works={user.work} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Học vấn</Typography.Title>}
+							title="Học vấn"
 							description={<EducationList educations={user.education} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
