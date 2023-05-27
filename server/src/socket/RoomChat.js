@@ -1,24 +1,38 @@
 const axios = require('axios');
 const { populateUser } = require('../utils/Populate/User');
 const apiKey = process.env.API_KEY_VIDEOCALL;
+const Conversation = require('../app/models/Conversation');
+const SocketManager = require('./SocketManager');
 
 function RoomChat(socket, io) {
-    socket.on("joinRoom", (conversationId) => {
-        console.log("joinRoom", conversationId);
-        socket.join(conversationId);
-    });
+    // socket.on("joinRoom", (conversationId) => {
+    //     console.log("joinRoom", conversationId);
+    //     socket.join(conversationId);
+    // });
 
     // Listen for chatMessage
-    socket.on("sendMessage", (msg) => {
+    socket.on("sendMessage", async (msg) => {
         console.log("sendMessage", msg.conversation);
-        socket.broadcast.to(msg.conversation).emit("receiveMessage", msg);
+        const conversation = await Conversation.findById(msg.conversation);
+        if(!conversation)
+            return;
+        
+        conversation.members.forEach(
+            member => {
+                if(member.user.toString() !== msg.sender._id.toString()){
+                    const sk = SocketManager.getUser(member.user);
+                    if(sk)
+                        sk.emit("receiveMessage", msg);
+                }
+            }
+        )
 
     });
 
-    socket.on("leaveRoom", (conversationId) => {
-        console.log("leaveRoom", conversationId);
-        socket.leave(conversationId);
-    });
+    // socket.on("leaveRoom", (conversationId) => {
+    //     console.log("leaveRoom", conversationId);
+    //     socket.leave(conversationId);
+    // });
 
     // Video call
     socket.on("createVideoCall", async (data)=>{
@@ -37,22 +51,59 @@ function RoomChat(socket, io) {
         const url = `https://api.videosdk.live/v2/rooms`;
         const response = await axios(url, options);
         const caller = await populateUser(data.caller);
-        socket.broadcast.to(data.conversation).emit("createVideoCall", {
-            roomId: response.data.roomId,
-            caller
-        });
+
+        const conversation = await Conversation.findById(msg.conversation);
+        if(!conversation)
+            return;
+        
+        conversation.members.forEach(
+            member => {
+                if(member.user.toString() !== msg.sender._id.toString()){
+                    const sk = SocketManager.getUser(member.user);
+                    if(sk)
+                        sk.emit("createVideoCall", {
+                            roomId: response.data.roomId,
+                            caller
+                        });
+                }
+            }
+        )
 
     })
 
     //typing message
-    socket.on("typingMessage", (data) => {
+    socket.on("typingMessage", async (data) => {
         console.log("typingMessage-----------", data);
-        socket.broadcast.to(data.conversation).emit("typingMessage", data);
+        const conversation = await Conversation.findById(msg.conversation);
+        if(!conversation)
+            return;
+        
+        conversation.members.forEach(
+            member => {
+                if(member.user.toString() !== msg.sender._id.toString()){
+                    const sk = SocketManager.getUser(member.user);
+                    if(sk)
+                        sk.emit("typingMessage", data);
+                }
+            }
+        )
     });
 
-    socket.on("stopTypingMessage", (data) => {
+    socket.on("stopTypingMessage", async (data) => {
         console.log("stopTypingMessage-----------");
-        socket.broadcast.to(data.conversation).emit("stopTypingMessage", data);
+        const conversation = await Conversation.findById(msg.conversation);
+        if(!conversation)
+            return;
+        
+        conversation.members.forEach(
+            member => {
+                if(member.user.toString() !== msg.sender._id.toString()){
+                    const sk = SocketManager.getUser(member.user);
+                    if(sk)
+                        sk.emit("stopTypingMessage", data);
+                }
+            }
+        )
     });
 
 }
