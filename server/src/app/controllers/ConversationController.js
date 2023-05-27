@@ -141,8 +141,6 @@ class ConversationController {
 						editor: req.user._id,
 						content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 					});
-					// save the conversation
-					const savedConversation = await newConversation.save();
 
 					//create message system
 					const messageSystem = new Message({
@@ -151,6 +149,10 @@ class ConversationController {
 						isSystem: true,
 					});
 					await messageSystem.save();
+
+					newConversation.lastest_message = messageSystem;
+					// save the conversation
+					const savedConversation = await newConversation.save();
 
 					res.status(200).json(await populateConversation(savedConversation._id));
 				} else {
@@ -162,8 +164,6 @@ class ConversationController {
 					editor: req.user._id,
 					content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 				});
-				// save the conversation
-				const savedConversation = await newConversation.save();
 
 				//create message system
 				const messageSystem = new Message({
@@ -172,6 +172,10 @@ class ConversationController {
 					isSystem: true,
 				});
 				await messageSystem.save();
+
+				newConversation.lastest_message = messageSystem;
+				// save the conversation
+				const savedConversation = await newConversation.save();
 
 				res.status(200).json(await populateConversation(savedConversation._id));
 			}
@@ -238,7 +242,7 @@ class ConversationController {
 			)
 				.then((data) => {
 					data.docs.forEach((item) => {
-						if (item.lastest_message.iv) {
+						if (item.lastest_message && item.lastest_message.iv) {
 							console.log(item.lastest_message.iv);
 							const iv = Buffer.from(item.lastest_message.iv, 'base64');
 							const decipher = crypto.createDecipheriv(algorithm, key, iv);
