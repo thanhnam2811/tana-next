@@ -59,8 +59,8 @@ function RoomChat(socket, io) {
 		if (!conversation) return;
 
 		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
-			'createVideoCall',
+			conversation.members.filter((member) => member.user.toString() !== data.sender._id.toString()),
+			'receiveMescreateVideoCallsage',
 			{
 				roomId: response.data.roomId,
 				caller,
@@ -69,7 +69,7 @@ function RoomChat(socket, io) {
 	});
 
 	//typing message
-	socket.on('typingMessage', async (data) => {
+	socket.on('typingMessage', async (msg) => {
 		console.log('typingMessage-----------', data);
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
@@ -77,11 +77,11 @@ function RoomChat(socket, io) {
 		SocketManager.sendToList(
 			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
 			'typingMessage',
-			data
+			msg
 		);
 	});
 
-	socket.on('stopTypingMessage', async (data) => {
+	socket.on('stopTypingMessage', async (msg) => {
 		console.log('stopTypingMessage-----------');
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
@@ -89,7 +89,7 @@ function RoomChat(socket, io) {
 		SocketManager.sendToList(
 			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
 			'stopTypingMessage',
-			data
+			msg
 		);
 	});
 }
