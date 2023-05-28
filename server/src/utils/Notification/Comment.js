@@ -1,57 +1,89 @@
 const Notification = require('../../app/models/Notification');
+const SocketManager = require('../../socket/SocketManager');
+const { eventName, notificationType } = require('../../socket/constant');
+const { populateNotification } = require('../Populate/Notification');
 
 async function notificationCreateComment(post, comment, user) {
-    const receiver = [post.author];
-    const notification = new Notification({
-        type: 'comment',
-        content: `${user.fullname} đã bình luận một bài viết của bạn`,
-        link: `/post/${post._id}/comments/${comment._id}`,
-        sender: user._id,
-        receiver: receiver
-    });
-    await notification.save();
+	const receiver = [post.author];
+	const notification = await new Notification({
+		type: 'comment',
+		content: `${user.fullname} đã bình luận một bài viết của bạn`,
+		link: `/post/${post._id}/comments/${comment._id}`,
+		sender: user._id,
+		receiver: receiver,
+	}).save();
+
+	//populate notification
+	const popNotification = await populateNotification(notification);
+
+	//send socket
+	SocketManager.send(user._id, eventName.NOTIFICATION, {
+		type: notificationType.COMMENT_POST,
+		data: popNotification,
+	});
 }
 
 async function notificationReplyComment(commentSource, commentReply, user) {
-    const receiver = [commentSource.author];
-    const notification = new Notification({
-        type: 'comment',
-        content: `${user.fullname} đã trả lời một bình luận của bạn`,
-        link: `/post/${commentSource.post}/comments/${commentReply._id}`,
-        sender: user._id,
-        receiver: receiver
-    });
-    await notification.save();
+	const receiver = [commentSource.author];
+	const notification = await new Notification({
+		type: 'comment',
+		content: `${user.fullname} đã trả lời một bình luận của bạn`,
+		link: `/post/${commentSource.post}/comments/${commentReply._id}`,
+		sender: user._id,
+		receiver: receiver,
+	}).save();
+
+	const popNotification = await populateNotification(notification);
+
+	//send socket
+	SocketManager.send(user._id, eventName.NOTIFICATION, {
+		type: notificationType.REPLY_COMMENT,
+		data: popNotification,
+	});
 }
 
 async function notificationReactComment(comment, user) {
-    const receiver = [comment.author];
-    const notification = new Notification({
-        type: 'comment',
-        content: `${user.fullname} đã bày tỏ cảm xúc về một bình luận của bạn`,
-        link: `/post/${comment.post}/comments/${comment._id}`,
-        sender: user._id,
-        receiver: receiver
-    });
-    await notification.save();
+	const receiver = [comment.author];
+	const notification = await new Notification({
+		type: 'comment',
+		content: `${user.fullname} đã bày tỏ cảm xúc về một bình luận của bạn`,
+		link: `/post/${comment.post}/comments/${comment._id}`,
+		sender: user._id,
+		receiver: receiver,
+	}).save();
+
+	const popNotification = await populateNotification(notification);
+
+	//send socket
+	SocketManager.send(user._id, eventName.NOTIFICATION, {
+		type: notificationType.REACT_COMMENT,
+		data: popNotification,
+	});
 }
 
 async function notificationTagComment(comment, user) {
-    const tagsInComment = comment.tags;
-    if (!tagsInComment || tagsInComment.length === 0) return;
-    const notification = new Notification({
-        type: 'comment',
-        content: `${user.fullname} đã gắn thẻ bạn trong một bình luận`,
-        link: `/post/${comment.post}/comments/${comment._id}`,
-        sender: user._id,
-        receiver: tagsInComment
-    });
-    await notification.save();
+	const tagsInComment = comment.tags;
+	if (!tagsInComment || tagsInComment.length === 0) return;
+	const notification = await new Notification({
+		type: 'comment',
+		content: `${user.fullname} đã gắn thẻ bạn trong một bình luận`,
+		link: `/post/${comment.post}/comments/${comment._id}`,
+		sender: user._id,
+		receiver: tagsInComment,
+	}).save();
+
+	const popNotification = await populateNotification(notification);
+
+	//send socket
+	SocketManager.send(tagsInComment, eventName.NOTIFICATION, {
+		type: notificationType.TAG_COMMENT,
+		data: popNotification,
+	});
 }
 
 module.exports = {
-    notificationCreateComment,
-    notificationReplyComment,
-    notificationReactComment,
-    notificationTagComment
-}
+	notificationCreateComment,
+	notificationReplyComment,
+	notificationReactComment,
+	notificationTagComment,
+};

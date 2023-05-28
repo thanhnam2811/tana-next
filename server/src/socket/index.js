@@ -1,7 +1,7 @@
-const RoomChat = require('./RoomChat');
 const AccessController = require('../app/controllers/AccessController');
 const { User } = require('../app/models/User');
 const SocketManager = require('./SocketManager');
+const RoomMagager = require('./RoomManager');
 
 function socket(io) {
 	io.on('connection', (socket) => {
@@ -26,7 +26,7 @@ function socket(io) {
 			}
 		});
 
-		RoomChat(socket, io);
+		RoomMagager(socket, io);
 
 		// Runs when client disconnects
 		socket.on('disconnect', async () => {
