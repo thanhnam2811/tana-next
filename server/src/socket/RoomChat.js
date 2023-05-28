@@ -12,16 +12,19 @@ function RoomChat(socket, io) {
 
 	// Listen for chatMessage
 	socket.on('sendMessage', async (msg) => {
-		console.log('sendMessage', msg.conversation);
-		const conversation = await Conversation.findById(msg.conversation);
-		if (!conversation) return;
+		try {
+			console.log('sendMessage', msg.conversation);
+			const conversation = await Conversation.findById(msg.conversation);
+			if (!conversation) return;
 
-		conversation.members.forEach((member) => {
-			if (member.user.toString() !== msg.sender._id.toString()) {
-				const sk = SocketManager.getUser(member.user);
-				if (sk) sk.emit('receiveMessage', msg);
-			}
-		});
+			SocketManager.sendToList(
+				conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
+				'receiveMessage',
+				msg
+			);
+		} catch (error) {
+			console.log(error);
+		}
 	});
 
 	// socket.on("leaveRoom", (conversationId) => {
@@ -55,16 +58,14 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
-		conversation.members.forEach((member) => {
-			if (member.user.toString() !== msg.sender._id.toString()) {
-				const sk = SocketManager.getUser(member.user);
-				if (sk)
-					sk.emit('createVideoCall', {
-						roomId: response.data.roomId,
-						caller,
-					});
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
+			'createVideoCall',
+			{
+				roomId: response.data.roomId,
+				caller,
 			}
-		});
+		);
 	});
 
 	//typing message
@@ -73,12 +74,11 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
-		conversation.members.forEach((member) => {
-			if (member.user.toString() !== data.senderId.toString()) {
-				const sk = SocketManager.getUser(member.user);
-				if (sk) sk.emit('typingMessage', data);
-			}
-		});
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
+			'typingMessage',
+			data
+		);
 	});
 
 	socket.on('stopTypingMessage', async (data) => {
@@ -86,12 +86,11 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
-		conversation.members.forEach((member) => {
-			if (member.user.toString() !== data.senderId.toString()) {
-				const sk = SocketManager.getUser(member.user);
-				if (sk) sk.emit('stopTypingMessage', data);
-			}
-		});
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
+			'stopTypingMessage',
+			data
+		);
 	});
 }
 
