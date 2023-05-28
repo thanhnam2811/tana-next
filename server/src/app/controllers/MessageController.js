@@ -65,12 +65,12 @@ class MessageController {
 				await conversation.save();
 				message.text = req.body.text;
 
+				const userIds = conversation.members
+					.filter((member) => member.user.toString() !== msg.sender._id.toString())
+					.map((menber) => menber.user.toString());
+
 				//send socket
-				SocketManager.sendToList(
-					conversation.members.filter((member) => member.user.toString() !== message.sender._id.toString()),
-					eventName.SEND_MESSAGE,
-					message
-				);
+				SocketManager.sendToList(userIds, eventName.SEND_MESSAGE, message);
 				res.status(200).json(message);
 			} else {
 				next(createError(403, 'Bạn không có trong cuộc hội thoại này!!!'));

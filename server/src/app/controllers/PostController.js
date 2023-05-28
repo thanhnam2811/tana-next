@@ -496,11 +496,14 @@ class PostController {
 					select: '_id link',
 				});
 
-			//get type of reaction of the user to the post
-			const react = await React.findOne({ post: req.params.id, user: req.user._id });
 			let reactOfUser = 'none';
-			if (react) {
-				reactOfUser = react.type;
+
+			if (req.user) {
+				//get type of reaction of the user to the post
+				const react = await React.findOne({ post: req.params.id, user: req.user._id });
+				if (react) {
+					reactOfUser = react.type;
+				}
 			}
 			const postObject = post.toObject();
 			postObject.reactOfUser = reactOfUser;
