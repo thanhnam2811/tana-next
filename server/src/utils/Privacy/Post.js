@@ -32,7 +32,6 @@ async function getAllPostWithPrivacy(listPosts, req) {
 					posts.push(post);
 					return;
 				} else if (post.privacy.value === 'excludes') {
-					console.log(post.author);
 					if (
 						!post.privacy.excludes.some((user) => user._id == req.user._id) &&
 						post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
@@ -45,7 +44,6 @@ async function getAllPostWithPrivacy(listPosts, req) {
 				}
 			}
 		});
-		console.log(posts);
 		return posts;
 	} catch (error) {
 		console.log(error);
