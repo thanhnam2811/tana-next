@@ -3,109 +3,95 @@ const { populateUser } = require('../utils/Populate/User');
 const apiKey = process.env.API_KEY_VIDEOCALL;
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
-
+const eventName = require('./constant');
 function RoomChat(socket, io) {
-    // socket.on("joinRoom", (conversationId) => {
-    //     console.log("joinRoom", conversationId);
-    //     socket.join(conversationId);
-    // });
+	// socket.on("joinRoom", (conversationId) => {
+	//     console.log("joinRoom", conversationId);
+	//     socket.join(conversationId);
+	// });
 
-    // Listen for chatMessage
-    socket.on("sendMessage", async (msg) => {
-        console.log("sendMessage", msg.conversation);
-        const conversation = await Conversation.findById(msg.conversation);
-        if(!conversation)
-            return;
-        
-        conversation.members.forEach(
-            member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
-                    const sk = SocketManager.getUser(member.user);
-                    if(sk)
-                        sk.emit("receiveMessage", msg);
-                }
-            }
-        )
+	// Listen for chatMessage
+	socket.on(eventName.SEND_MESSAGE, async (msg) => {
+		try {
+			console.log('sendMessage', msg.conversation);
+			const conversation = await Conversation.findById(msg.conversation);
+			if (!conversation) return;
 
-    });
+			SocketManager.sendToList(
+				conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
+				eventName.RECEIVE_MESSAGE,
+				msg
+			);
+		} catch (error) {
+			console.log(error);
+		}
+	});
 
-    // socket.on("leaveRoom", (conversationId) => {
-    //     console.log("leaveRoom", conversationId);
-    //     socket.leave(conversationId);
-    // });
+	// socket.on("leaveRoom", (conversationId) => {
+	//     console.log("leaveRoom", conversationId);
+	//     socket.leave(conversationId);
+	// });
 
-    // Video call
-    socket.on("createVideoCall", async (data)=>{
-        // data = {
-        //     conversation: conversationId,
-        //     caller: userId,
-        // }
-        const options = {
-            method: "POST",
-            headers: {
-                "Authorization": apiKey,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ "region": "sg001", "customRoomId": "aaa-bbb-ccc", "webhook": "see example", "autoCloseConfig": "see example" }),
-        };
-        const url = `https://api.videosdk.live/v2/rooms`;
-        const response = await axios(url, options);
-        const caller = await populateUser(data.caller);
+	// Video call
+	socket.on(eventName.CREATE_VIDEO_CALL, async (data) => {
+		// data = {
+		//     conversation: conversationId,
+		//     caller: userId,
+		// }
+		const options = {
+			method: 'POST',
+			headers: {
+				Authorization: apiKey,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				region: 'sg001',
+				customRoomId: 'aaa-bbb-ccc',
+				webhook: 'see example',
+				autoCloseConfig: 'see example',
+			}),
+		};
+		const url = `https://api.videosdk.live/v2/rooms`;
+		const response = await axios(url, options);
+		const caller = await populateUser(data.caller);
 
-        const conversation = await Conversation.findById(msg.conversation);
-        if(!conversation)
-            return;
-        
-        conversation.members.forEach(
-            member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
-                    const sk = SocketManager.getUser(member.user);
-                    if(sk)
-                        sk.emit("createVideoCall", {
-                            roomId: response.data.roomId,
-                            caller
-                        });
-                }
-            }
-        )
+		const conversation = await Conversation.findById(data.conversation);
+		if (!conversation) return;
 
-    })
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== data.sender._id.toString()),
+			eventName.CREATE_VIDEO_CALL,
+			{
+				roomId: response.data.roomId,
+				caller,
+			}
+		);
+	});
 
-    //typing message
-    socket.on("typingMessage", async (data) => {
-        console.log("typingMessage-----------", data);
-        const conversation = await Conversation.findById(msg.conversation);
-        if(!conversation)
-            return;
-        
-        conversation.members.forEach(
-            member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
-                    const sk = SocketManager.getUser(member.user);
-                    if(sk)
-                        sk.emit("typingMessage", data);
-                }
-            }
-        )
-    });
+	//typing message
+	socket.on(eventName.TYPING_MESSAGE, async (msg) => {
+		console.log('typingMessage-----------', msg);
+		const conversation = await Conversation.findById(msg.conversation);
+		if (!conversation) return;
 
-    socket.on("stopTypingMessage", async (data) => {
-        console.log("stopTypingMessage-----------");
-        const conversation = await Conversation.findById(msg.conversation);
-        if(!conversation)
-            return;
-        
-        conversation.members.forEach(
-            member => {
-                if(member.user.toString() !== msg.sender._id.toString()){
-                    const sk = SocketManager.getUser(member.user);
-                    if(sk)
-                        sk.emit("stopTypingMessage", data);
-                }
-            }
-        )
-    });
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
+			eventName.TYPING_MESSAGE,
+			msg
+		);
+	});
 
+	socket.on(eventName.STOP_TYPING_MESSAGE, async (msg) => {
+		console.log('stopTypingMessage-----------');
+		const conversation = await Conversation.findById(msg.conversation);
+		if (!conversation) return;
+
+		SocketManager.sendToList(
+			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
+			eventName.STOP_TYPING_MESSAGE,
+			msg
+		);
+	});
 }
 
 module.exports = RoomChat;
