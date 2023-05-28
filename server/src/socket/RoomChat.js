@@ -3,7 +3,7 @@ const { populateUser } = require('../utils/Populate/User');
 const apiKey = process.env.API_KEY_VIDEOCALL;
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
-
+const eventName = require('./constant');
 function RoomChat(socket, io) {
 	// socket.on("joinRoom", (conversationId) => {
 	//     console.log("joinRoom", conversationId);
@@ -11,7 +11,7 @@ function RoomChat(socket, io) {
 	// });
 
 	// Listen for chatMessage
-	socket.on('sendMessage', async (msg) => {
+	socket.on(eventName.SEND_MESSAGE, async (msg) => {
 		try {
 			console.log('sendMessage', msg.conversation);
 			const conversation = await Conversation.findById(msg.conversation);
@@ -19,7 +19,7 @@ function RoomChat(socket, io) {
 
 			SocketManager.sendToList(
 				conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
-				'receiveMessage',
+				eventName.RECEIVE_MESSAGE,
 				msg
 			);
 		} catch (error) {
@@ -33,7 +33,7 @@ function RoomChat(socket, io) {
 	// });
 
 	// Video call
-	socket.on('createVideoCall', async (data) => {
+	socket.on(eventName.CREATE_VIDEO_CALL, async (data) => {
 		// data = {
 		//     conversation: conversationId,
 		//     caller: userId,
@@ -60,7 +60,7 @@ function RoomChat(socket, io) {
 
 		SocketManager.sendToList(
 			conversation.members.filter((member) => member.user.toString() !== data.sender._id.toString()),
-			'receiveMescreateVideoCallsage',
+			eventName.CREATE_VIDEO_CALL,
 			{
 				roomId: response.data.roomId,
 				caller,
@@ -69,26 +69,26 @@ function RoomChat(socket, io) {
 	});
 
 	//typing message
-	socket.on('typingMessage', async (msg) => {
+	socket.on(eventName.TYPING_MESSAGE, async (msg) => {
 		console.log('typingMessage-----------', msg);
 		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
 		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
-			'typingMessage',
+			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
+			eventName.TYPING_MESSAGE,
 			msg
 		);
 	});
 
-	socket.on('stopTypingMessage', async (msg) => {
+	socket.on(eventName.STOP_TYPING_MESSAGE, async (msg) => {
 		console.log('stopTypingMessage-----------');
 		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
 		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
-			'stopTypingMessage',
+			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
+			eventName.STOP_TYPING_MESSAGE,
 			msg
 		);
 	});
