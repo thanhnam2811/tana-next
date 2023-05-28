@@ -4,35 +4,37 @@ const apiKey = process.env.API_KEY_VIDEOCALL;
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
 const eventName = require('./constant');
-function RoomChat(socket, io) {
-	// socket.on("joinRoom", (conversationId) => {
-	//     console.log("joinRoom", conversationId);
-	//     socket.join(conversationId);
-	// });
-
-	// Listen for chatMessage
-	socket.on(eventName.SEND_MESSAGE, async (msg) => {
-		try {
-			console.log('sendMessage', msg.conversation);
-			const conversation = await Conversation.findById(msg.conversation);
-			if (!conversation) return;
-
-			SocketManager.sendToList(
-				conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString()),
-				eventName.RECEIVE_MESSAGE,
-				msg
-			);
-		} catch (error) {
-			console.log(error);
-		}
+function RoomMagager(socket, io) {
+	socket.on('joinRoom', (conversationId) => {
+		console.log('joinRoom', conversationId);
+		socket.join(conversationId);
 	});
 
-	// socket.on("leaveRoom", (conversationId) => {
-	//     console.log("leaveRoom", conversationId);
-	//     socket.leave(conversationId);
+	// Listen for chatMessage
+	// socket.on(eventName.SEND_MESSAGE, async (msg) => {
+	// 	try {
+	// 		console.log('sendMessage', msg.conversation);
+	// 		const conversation = await Conversation.findById(msg.conversation);
+	// 		if (!conversation) return;
+	// 		const userIds = conversation.members.filter((member) => member.user.toString() !== msg.sender._id.toString())
+	// 							.map(menber => menber.user.toString());
+
+	// 		SocketManager.sendToList(
+	// 			userIds,
+	// 			eventName.RECEIVE_MESSAGE,
+	// 			msg
+	// 		);
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	}
 	// });
 
-	// Video call
+	socket.on('leaveRoom', (conversationId) => {
+		console.log('leaveRoom', conversationId);
+		socket.leave(conversationId);
+	});
+
+	// Video call TODO: API => send event
 	socket.on(eventName.CREATE_VIDEO_CALL, async (data) => {
 		// data = {
 		//     conversation: conversationId,
@@ -58,14 +60,14 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
-		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== data.sender._id.toString()),
-			eventName.CREATE_VIDEO_CALL,
-			{
-				roomId: response.data.roomId,
-				caller,
-			}
-		);
+		const userIds = conversation.members
+			.filter((member) => member.user.toString() !== data.sender._id.toString())
+			.map((menber) => menber.user.toString());
+
+		SocketManager.sendToList(userIds, eventName.CREATE_VIDEO_CALL, {
+			roomId: response.data.roomId,
+			caller,
+		});
 	});
 
 	//typing message
@@ -74,11 +76,7 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
-		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
-			eventName.TYPING_MESSAGE,
-			msg
-		);
+		socket.to(conversation._id).emit(eventName.TYPING_MESSAGE, msg);
 	});
 
 	socket.on(eventName.STOP_TYPING_MESSAGE, async (msg) => {
@@ -86,12 +84,8 @@ function RoomChat(socket, io) {
 		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
-		SocketManager.sendToList(
-			conversation.members.filter((member) => member.user.toString() !== msg.senderId.toString()),
-			eventName.STOP_TYPING_MESSAGE,
-			msg
-		);
+		socket.to(conversation._id).emit(eventName.STOP_TYPING_MESSAGE, msg);
 	});
 }
 
-module.exports = RoomChat;
+module.exports = RoomMagager;

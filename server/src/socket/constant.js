@@ -6,6 +6,23 @@ const eventName = {
 	TYPING_MESSAGE: 'typingMessage',
 	STOP_TYPING_MESSAGE: 'stopTypingMessage',
 	CREATE_VIDEO_CALL: 'createVideoCall',
+	NOTIFICATION: 'notification',
 };
 
-module.exports = eventName;
+const notificationType = {
+	SEND_REQUEST_FRIEND: 'sendRequestFriend',
+	ACCEPT_REQUEST_FRIEND: 'acceptRequestFriend',
+	NEW_POST: 'newPost',
+	REACT_POST: 'reactPost',
+	COMMENT_POST: 'commentPost',
+	SHARE_POST: 'sharePost',
+	TAG_POST: 'tagPost',
+	REACT_COMMENT: 'reactComment',
+	REPLY_COMMENT: 'replyComment',
+	TAG_COMMENT: 'tagComment',
+};
+
+module.exports = {
+	eventName,
+	notificationType,
+};
