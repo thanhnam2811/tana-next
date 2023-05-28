@@ -657,7 +657,6 @@ class PostController {
 				});
 				// getListPost(res, data, listPosts);
 				const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-				console.log(listPostsFilter);
 				//pagination for listPosts
 				const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 				return res.status(200).send({
