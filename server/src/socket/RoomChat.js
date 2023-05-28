@@ -55,7 +55,7 @@ function RoomChat(socket, io) {
 		const response = await axios(url, options);
 		const caller = await populateUser(data.caller);
 
-		const conversation = await Conversation.findById(msg.conversation);
+		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
 		SocketManager.sendToList(
@@ -70,8 +70,8 @@ function RoomChat(socket, io) {
 
 	//typing message
 	socket.on('typingMessage', async (msg) => {
-		console.log('typingMessage-----------', data);
-		const conversation = await Conversation.findById(data.conversation);
+		console.log('typingMessage-----------', msg);
+		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
 		SocketManager.sendToList(
@@ -83,7 +83,7 @@ function RoomChat(socket, io) {
 
 	socket.on('stopTypingMessage', async (msg) => {
 		console.log('stopTypingMessage-----------');
-		const conversation = await Conversation.findById(data.conversation);
+		const conversation = await Conversation.findById(msg.conversation);
 		if (!conversation) return;
 
 		SocketManager.sendToList(
