@@ -2,7 +2,7 @@ import { AvatarBadge } from '@components/MUI/AvatarBadge';
 import { Avatar, Badge, Box, Button, IconButton, Stack, SxProps, Tooltip, Typography } from '@mui/material';
 import { useUserStore } from '@store';
 import { conversationApi, fileApi, userApi } from '@utils/api';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useRef } from 'react';
 import { toast } from 'react-hot-toast';
@@ -199,7 +199,7 @@ export const PictureContainer = ({ user }: Props) => {
 								alt={user.fullname}
 								src={user.profilePicture?.link}
 							>
-								{getShortName(user.fullname)}
+								{stringUtil.getShortName(user.fullname)}
 							</Avatar>
 						</AvatarBadge>
 					</Badge>

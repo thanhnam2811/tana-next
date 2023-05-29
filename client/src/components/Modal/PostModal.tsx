@@ -1,51 +1,76 @@
+import { PostMedia } from '@components/Card';
 import { DraftEditor } from '@components/Editor';
-import { Close } from '@mui/icons-material';
+import { IPost } from '@interfaces';
+import { IMedia } from '@interfaces/common';
+import { InsertPhotoTwoTone, LocationCityTwoTone, SlideshowTwoTone } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import {
-	Alert,
-	Box,
-	Collapse,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Grow,
-	IconButton,
-} from '@mui/material';
-import React, { useEffect } from 'react';
+import { Box, Collapse, IconButton, Typography } from '@mui/material';
+import { fileApi } from '@utils/api';
+import { randomString } from '@utils/common';
+import { Modal } from 'antd';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 import { HiPlusCircle } from 'react-icons/hi';
 
-const Transition = React.forwardRef(function Transition(props: { children: JSX.Element }, ref) {
-	return (
-		<Grow ref={ref} {...props}>
-			{props.children}
-		</Grow>
-	);
-});
-
 interface Props {
-	data?: any;
+	data?: IPost & { media: IMedia[] };
 	open: boolean;
 	onClose: () => void;
-	// eslint-disable-next-line no-unused-vars
 	onCreate?: (data: any) => Promise<void>;
-	// eslint-disable-next-line no-unused-vars
 	onUpdate?: (id: string, data: any) => Promise<void>;
 }
 
-export const ModalPost = ({ data, open, onClose, onCreate, onUpdate }: Props) => {
+interface IMediaFile extends IMedia {
+	file?: File;
+}
+
+export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) => {
 	const isUpdate = !!data;
+
+	const mediaInputRef = useRef<HTMLInputElement>(null);
+	const [listMedia, setListMedia] = useState<IMediaFile[]>([]);
+
+	const handleAddMedia = (files: FileList | null) => {
+		if (!files) return;
+
+		for (let i = 0; i < files.length; i++) {
+			const file = files[i];
+			const media: IMediaFile = {
+				_id: randomString(10),
+				link: URL.createObjectURL(file),
+				file,
+			};
+			setListMedia((prev) => [...prev, media]);
+		}
+
+		mediaInputRef.current!.value = ''; // reset input
+	};
+
+	const handleDeleteMedia = (id: string) => {
+		setListMedia((prev) => prev.filter((item) => item._id !== id));
+	};
 
 	const {
 		control,
 		handleSubmit,
 		formState: { errors, isSubmitting },
 		reset,
-	} = useForm();
+	} = useForm<IPost & { media: string[] }>();
 
 	useEffect(() => {
-		reset(data);
+		if (!data?._id) {
+			setListMedia([]);
+			reset();
+		} else {
+			setListMedia(data.media || []);
+
+			reset({
+				...data,
+				// Gán lại media thành mảng id để submit
+				media: data.media?.map((item) => item._id) || [],
+			});
+		}
 	}, [data, reset]);
 
 	const handleClose = () => {
@@ -53,36 +78,119 @@ export const ModalPost = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		onClose();
 	};
 
-	const onSubmit = (data: any) =>
-		isUpdate ? onUpdate?.(data._id, data).then(handleClose) : onCreate?.(data).then(handleClose);
+	const onSubmit = async (data: IPost & { media: string[] }) => {
+		// Tách media cũ và file mới
+		const oldMedia: IMediaFile[] = [],
+			newFiles: File[] = [];
+		listMedia.forEach((item) => {
+			if (item.file) newFiles.push(item.file);
+			else oldMedia.push(item);
+		});
+
+		// Gán lại media
+		data.media = oldMedia.map(({ _id }) => _id);
+
+		// Nếu có file mới thì upload
+		if (newFiles.length) {
+			const toastId = toast.loading('Đang tải lên ảnh, video...');
+			try {
+				const {
+					data: { files },
+				} = await fileApi.upload(newFiles);
+
+				data.media = [...data.media, ...files.map(({ _id }) => _id)];
+				toast.success('Tải lên ảnh, video thành công', { id: toastId });
+			} catch (error) {
+				toast.error('Tải lên ảnh, video thất bại', { id: toastId });
+				return;
+			}
+		}
+
+		// Nếu là update thì gọi hàm onUpdate
+		if (isUpdate) {
+			await onUpdate?.(data._id, data);
+			handleClose();
+			return;
+		}
+
+		// Nếu là create thì gọi hàm onCreate
+		await onCreate?.(data);
+		handleClose();
+	};
 
 	return (
-		<Dialog TransitionComponent={Transition} open={open} onClose={onClose} fullWidth maxWidth="sm">
-			<DialogTitle sx={{ m: 2, p: 0, mb: 0 }}>
-				Bài viết mới
-				<IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8, color: 'grey.500' }}>
-					<Close />
-				</IconButton>
-			</DialogTitle>
-			<DialogContent sx={{ p: 0, overflow: 'auto' }}>
-				<Box component="form" onSubmit={handleSubmit(onSubmit)} height="100%">
-					<Controller
-						name="content"
-						control={control}
-						rules={{
-							validate: (value) => {
-								if (!value?.trim()) return 'Nội dung không được để trống';
-							},
-						}}
-						render={({ field: { value, onChange } }) => <DraftEditor value={value} onChange={onChange} />}
-					/>
-				</Box>
-			</DialogContent>
-			<DialogActions sx={{ alignItems: 'flex-end', p: 2, pt: 0 }}>
-				<Collapse in={!!errors.content} sx={{ mr: 'auto', whiteSpace: 'nowrap' }} orientation="horizontal">
-					<Alert severity="error">{errors.content?.message as string}</Alert>
-				</Collapse>
+		// <Dialog TransitionComponent={Transition} open={open} onClose={handleClose} fullWidth maxWidth="sm">
+		// 	<DialogTitle sx={{ p: 2 }}>Bài viết mới</DialogTitle>
+
+		// 	<DialogContent sx={{ overflow: 'auto', p: 2 }}>
+		// 		<Box component="form" onSubmit={handleSubmit(onSubmit)} height="100%">
+		// 			<Controller
+		// 				name="content"
+		// 				control={control}
+		// 				rules={{
+		// 					validate: (value) => {
+		// 						if (!value?.trim()) return 'Nội dung không được để trống';
+		// 					},
+		// 				}}
+		// 				render={({ field: { value, onChange } }) => <DraftEditor value={value} onChange={onChange} />}
+		// 			/>
+		// 		</Box>
+		// 		<Box sx={{ border: '1px dashed #ccc' }} p={1} mt={2} borderRadius={1} gap={1}>
+		// 			<Box display="flex" alignItems="center" gap={1}>
+		// 				<input
+		// 					ref={mediaInputRef}
+		// 					type="file"
+		// 					hidden
+		// 					onChange={(e) => handleAddMedia(e.target.files)}
+		// 					multiple
+		// 					accept="image/*, video/*"
+		// 				/>
+		// 				<Typography variant="body2">Thêm ảnh, video, vị trí,...</Typography>
+
+		// 				<IconButton color="success" sx={{ ml: 'auto' }} onClick={() => mediaInputRef.current?.click()}>
+		// 					<InsertPhotoTwoTone />
+		// 				</IconButton>
+
+		// 				<IconButton color="info" onClick={() => mediaInputRef.current?.click()}>
+		// 					<SlideshowTwoTone />
+		// 				</IconButton>
+
+		// 				<IconButton color="warning" onClick={() => alert('Chức năng đang phát triển')}>
+		// 					<LocationCityTwoTone />
+		// 				</IconButton>
+		// 			</Box>
+
+		// 			<Collapse in={!!listMedia.length}>
+		// 				<PostMedia media={listMedia} onDelete={handleDeleteMedia} showAll />
+		// 			</Collapse>
+		// 		</Box>
+		// 	</DialogContent>
+
+		// 	<DialogActions sx={{ alignItems: 'flex-end', p: 2, pt: 0 }}>
+		// 		<Collapse in={!!errors.content} sx={{ mr: 'auto', whiteSpace: 'nowrap' }} orientation="horizontal">
+		// 			<Alert severity="error" sx={{ height: 56 }}>
+		// 				{errors.content?.message as string}
+		// 			</Alert>
+		// 		</Collapse>
+
+		// 		<LoadingButton
+		// 			variant="contained"
+		// 			onClick={handleSubmit(onSubmit)}
+		// 			loading={isSubmitting}
+		// 			loadingPosition="start"
+		// 			startIcon={<HiPlusCircle />}
+		// 		>
+		// 			Đăng
+		// 		</LoadingButton>
+		// 	</DialogActions>
+		// </Dialog>
+		<Modal
+			open={open}
+			onCancel={handleClose}
+			title="Bài viết mới"
+			footer={[
 				<LoadingButton
+					key="submit"
 					variant="contained"
 					onClick={handleSubmit(onSubmit)}
 					loading={isSubmitting}
@@ -90,8 +198,50 @@ export const ModalPost = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 					startIcon={<HiPlusCircle />}
 				>
 					Đăng
-				</LoadingButton>
-			</DialogActions>
-		</Dialog>
+				</LoadingButton>,
+			]}
+		>
+			<Box component="form" onSubmit={handleSubmit(onSubmit)} height="100%">
+				<Controller
+					name="content"
+					control={control}
+					rules={{
+						validate: (value) => {
+							if (!value?.trim()) return 'Nội dung không được để trống';
+						},
+					}}
+					render={({ field: { value, onChange } }) => <DraftEditor value={value} onChange={onChange} />}
+				/>
+			</Box>
+			<Box sx={{ border: '1px dashed #ccc' }} p={1} mt={2} borderRadius={1} gap={1}>
+				<Box display="flex" alignItems="center" gap={1}>
+					<input
+						ref={mediaInputRef}
+						type="file"
+						hidden
+						onChange={(e) => handleAddMedia(e.target.files)}
+						multiple
+						accept="image/*, video/*"
+					/>
+					<Typography variant="body2">Thêm ảnh, video, vị trí,...</Typography>
+
+					<IconButton color="success" sx={{ ml: 'auto' }} onClick={() => mediaInputRef.current?.click()}>
+						<InsertPhotoTwoTone />
+					</IconButton>
+
+					<IconButton color="info" onClick={() => mediaInputRef.current?.click()}>
+						<SlideshowTwoTone />
+					</IconButton>
+
+					<IconButton color="warning" onClick={() => alert('Chức năng đang phát triển')}>
+						<LocationCityTwoTone />
+					</IconButton>
+				</Box>
+
+				<Collapse in={!!listMedia.length}>
+					<PostMedia media={listMedia} onDelete={handleDeleteMedia} showAll />
+				</Collapse>
+			</Box>
+		</Modal>
 	);
 };

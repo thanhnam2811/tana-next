@@ -1,5 +1,5 @@
 import { Alert, Avatar, Box, Chip, Divider, Grid, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
-import { getShortName, randomBoolean, randomNumber, renderHTML } from '@utils/common';
+import { stringUtil, randomBoolean, randomNumber, renderHTML } from '@utils/common';
 import { getFilePreview, isImage, isVideo } from '@utils/data';
 import styles from './MessageArea.module.css';
 import Image from 'next/image';
@@ -57,9 +57,9 @@ export function MessageItem({
 					variant="outlined"
 					color="primary"
 					label={
-						<Tooltip title={renderHTML(text)} placement="top">
+						<Tooltip title={stringUtil.renderHTML(text)} placement="top">
 							<Typography textOverflow="ellipsis" overflow="hidden">
-								{renderHTML(text)}
+								{stringUtil.renderHTML(text)}
 							</Typography>
 						</Tooltip>
 					}
@@ -190,7 +190,7 @@ export function MessageItem({
 						alt={nickname || user?.fullname}
 						src={user?.profilePicture?.link}
 					>
-						{getShortName(user?.fullname)}
+						{stringUtil.getShortName(user?.fullname)}
 					</Avatar>
 				</Grid>
 			)}

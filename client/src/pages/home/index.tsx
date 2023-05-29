@@ -1,11 +1,12 @@
 import { withAuth } from '@components/Auth';
 import { QuickContact, ShortCut } from '@components/Home';
-import { CreatePost, ListPost } from '@components/List/ListPost';
+import { CreatePost, ListPost } from '@components/v2/List';
 import { useInfiniteFetcher } from '@hooks';
+import { IPost } from '@interfaces';
 import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
 
 function Home() {
-	const postFetch = useInfiniteFetcher('posts/home');
+	const postFetch = useInfiniteFetcher<IPost>('posts/home');
 
 	return (
 		<ContainerArea>
@@ -14,7 +15,7 @@ function Home() {
 			</LeftArea>
 
 			<CenterArea>
-				<CreatePost fetcher={postFetch} />
+				<CreatePost fetcher={postFetch} style={{ marginBottom: 16 }} />
 
 				<ListPost fetcher={postFetch} />
 			</CenterArea>

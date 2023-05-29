@@ -1,5 +1,7 @@
-import { ContactType, EducationType, PrivacyType, WorkType } from '@interfaces';
-import { HiGlobeAsiaAustralia, HiLockClosed, HiUsers } from 'react-icons/hi2';
+import Reaction from '@assets/icons/reactions';
+import { ContactType, EducationType, PrivacyType, ReactionType, WorkType } from '@interfaces';
+import { COLORS } from '@utils/theme';
+import { HiGlobeAsiaAustralia, HiLockClosed, HiUserPlus, HiUsers, HiUserMinus } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
 
 export interface IOption<T> {
@@ -8,7 +10,8 @@ export interface IOption<T> {
 	RIcon?: IconType;
 }
 
-export const privacyOptions: Required<IOption<PrivacyType>>[] = [
+export type PrivacyOptionType = Required<IOption<PrivacyType>>;
+export const privacyOptions: PrivacyOptionType[] = [
 	{
 		value: 'public',
 		label: 'Công khai',
@@ -24,9 +27,19 @@ export const privacyOptions: Required<IOption<PrivacyType>>[] = [
 		label: 'Bạn bè',
 		RIcon: HiUsers,
 	},
+	{
+		value: 'includes',
+		label: 'Bạn bè bao gồm',
+		RIcon: HiUserPlus,
+	},
+	{
+		value: 'excludes',
+		label: 'Bạn bè ngoại trừ',
+		RIcon: HiUserMinus,
+	},
 ];
 export const getPrivacyOption = (value: PrivacyType = 'public') =>
-	privacyOptions.find((option) => option.value === value)!;
+	privacyOptions.find((option) => option.value === value);
 
 export const contactOptions: IOption<ContactType>[] = [
 	{
@@ -106,5 +119,47 @@ export const workOptions: IOption<WorkType>[] = [
 	{
 		value: 'fulltime',
 		label: 'Toàn thời gian',
+	},
+];
+
+export const reactOptions: (IOption<ReactionType> & {
+	color: string;
+	img: string;
+})[] = [
+	{
+		color: COLORS.info,
+		img: Reaction.Like.src,
+		label: 'Thích',
+		value: 'like',
+	},
+	{
+		color: COLORS.love,
+		img: Reaction.Love.src,
+		label: 'Yêu thích',
+		value: 'love',
+	},
+	{
+		color: COLORS.warning,
+		img: Reaction.Haha.src,
+		label: 'Haha',
+		value: 'haha',
+	},
+	{
+		color: COLORS.warning,
+		img: Reaction.Wow.src,
+		label: 'Wow',
+		value: 'wow',
+	},
+	{
+		color: COLORS.gray,
+		img: Reaction.Sad.src,
+		label: 'Buồn',
+		value: 'sad',
+	},
+	{
+		color: COLORS.error,
+		img: Reaction.Angry.src,
+		label: 'Phẫn nộ',
+		value: 'angry',
 	},
 ];
