@@ -4,7 +4,7 @@ import { Avatar, Box, Grid, IconButton, Skeleton, Typography } from '@mui/materi
 import { MessageContext } from '@pages/messages/[id]';
 import { useSettingStore, useUserStore } from '@store';
 import { meetingApi } from '@utils/api';
-import { getShortName, showIncomingAlert } from '@utils/common';
+import { stringUtil, showIncomingAlert } from '@utils/common';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -75,7 +75,7 @@ export function MessageHeader() {
 									height: 48,
 								}}
 							>
-								{getShortName(conversation.name)}
+								{stringUtil.getShortName(conversation.name)}
 							</Avatar>
 						) : (
 							<GroupAvatar listMember={conversation.members} size={48} />

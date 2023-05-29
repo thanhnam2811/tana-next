@@ -126,6 +126,8 @@ export function MessageFooter({ filesSelected, onRemoveFile, onSend, open }: Pro
 	useEffect(() => {
 		if (id) {
 			window.socket.on('typingMessage', ({ senderId }: any) => {
+				console.log('typingMessage', senderId);
+
 				const typer = listMember.find((m: any) => m?.user?._id === senderId);
 				setTypingList((prev) => [...prev, typer]);
 			});

@@ -1,7 +1,7 @@
 import { contactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IContact, PrivacyType } from '@interfaces';
+import { IContact, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -84,9 +84,9 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 		optimisticUpdate(newContact, 'Xóa liên hệ');
 	};
 
-	const handlePrivacyChange = async (value: PrivacyType, index: number) => {
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
 		const newContact = [...contacts];
-		newContact[index].privacy.value = value;
+		newContact[index].privacy = value;
 		optimisticUpdate(newContact, 'Thay đổi quyền riêng tư');
 	};
 
@@ -115,7 +115,7 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 						actions.push(
 							<PrivacyDropdown
 								key="privacy"
-								value={contact.privacy.value}
+								value={contact.privacy}
 								onChange={(value) => handlePrivacyChange(value, index)}
 							/>,
 							<Button

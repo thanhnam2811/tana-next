@@ -11,7 +11,9 @@ export function withAuth(Component: NextComponentType) {
 		// If user is not logged in, redirect to login page
 		useEffect(() => {
 			if (!user) router.push({ pathname: '/auth/login', query: { from: router.pathname } }, '/auth/login');
-		}, [router, user]);
+		}, []);
+
+		if (!user) return null;
 
 		// If user is logged in, return original component
 		return <Component {...props} />;

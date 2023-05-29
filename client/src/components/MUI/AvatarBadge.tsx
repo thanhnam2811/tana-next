@@ -1,6 +1,6 @@
 import { IUser } from '@interfaces';
 import { Avatar, AvatarProps, Badge, BadgeProps, useTheme } from '@mui/material';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 
 interface Props {
@@ -72,7 +72,7 @@ export const UserAvatar = ({ user, size, badgeProps, ...props }: UserAvatarProps
 				onClick={goToProfile}
 				{...props}
 			>
-				{getShortName(user.fullname)}
+				{stringUtil.getShortName(user.fullname)}
 			</Avatar>
 		</AvatarBadge>
 	);

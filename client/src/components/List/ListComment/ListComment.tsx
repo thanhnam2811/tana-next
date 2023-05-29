@@ -54,6 +54,7 @@ export const ListComment = ({ fetcher, post, comment }: Props) => {
 			toast.error(error.toString());
 		}
 	};
+
 	// React to the post
 	const handleReactComment = async (commentId: string, react: ReactionType) => {
 		try {

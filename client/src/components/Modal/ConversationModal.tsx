@@ -17,7 +17,7 @@ import {
 	Tooltip,
 	Typography,
 } from '@mui/material';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
@@ -104,7 +104,7 @@ export function ConversationModal({
 						onClick={() => setListMember((prev) => [...prev, member])}
 					>
 						<Avatar src={member.profilePicture?.link} alt={member.fullname} sx={{ marginRight: '16px' }}>
-							{getShortName(member.fullname)}
+							{stringUtil.getShortName(member.fullname)}
 						</Avatar>
 
 						<Typography fontSize={16} fontWeight={600}>
@@ -147,7 +147,7 @@ export function ConversationModal({
 						>
 							<Tooltip title={member.fullname}>
 								<Avatar src={member.profilePicture?.link} alt={member.fullname}>
-									{getShortName(member.fullname)}
+									{stringUtil.getShortName(member.fullname)}
 								</Avatar>
 							</Tooltip>
 						</Badge>

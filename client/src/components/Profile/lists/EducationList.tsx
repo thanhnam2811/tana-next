@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IEducation, PrivacyType } from '@interfaces';
+import { IEducation, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
@@ -86,9 +86,9 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 		optimisticUpdate(newEducation, 'Xóa liên hệ');
 	};
 
-	const handlePrivacyChange = async (value: PrivacyType, index: number) => {
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
 		const newEdu = [...educations];
-		newEdu[index].privacy.value = value;
+		newEdu[index].privacy = value;
 		optimisticUpdate(newEdu, 'Thay đổi quyền riêng tư');
 	};
 
@@ -117,7 +117,7 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 						actions.push(
 							<PrivacyDropdown
 								key="privacy"
-								value={edu.privacy.value}
+								value={edu.privacy}
 								onChange={(value) => handlePrivacyChange(value, index)}
 							/>,
 							<Button
