@@ -66,11 +66,12 @@ class MessageController {
 				message.text = req.body.text;
 
 				const userIds = conversation.members
-					.filter((member) => member.user.toString() !== msg.sender._id.toString())
+					.filter((member) => member.user.toString() !== message.sender._id.toString())
 					.map((menber) => menber.user.toString());
 
 				//send socket
 				SocketManager.sendToList(userIds, eventName.SEND_MESSAGE, message);
+
 				res.status(200).json(message);
 			} else {
 				next(createError(403, 'Bạn không có trong cuộc hội thoại này!!!'));
@@ -170,7 +171,6 @@ class MessageController {
 				.then((data) => {
 					data.docs.forEach((message) => {
 						if (message.iv) {
-							console.log(message.iv);
 							const iv = Buffer.from(message.iv, 'base64');
 							const decipher = crypto.createDecipheriv(algorithm, key, iv);
 							let decryptedData = decipher.update(message.text, 'hex', 'utf-8');
