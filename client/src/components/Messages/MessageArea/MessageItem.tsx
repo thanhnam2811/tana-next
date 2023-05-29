@@ -1,8 +1,8 @@
 import { Alert, Avatar, Box, Chip, Divider, Grid, Skeleton, Stack, Tooltip, Typography } from '@mui/material';
-import { stringUtil, randomBoolean, randomNumber, renderHTML } from '@utils/common';
+import { randomBoolean, randomNumber, stringUtil } from '@utils/common';
 import { getFilePreview, isImage, isVideo } from '@utils/data';
-import styles from './MessageArea.module.css';
 import Image from 'next/image';
+import styles from './MessageArea.module.css';
 
 interface Props {
 	text: string;

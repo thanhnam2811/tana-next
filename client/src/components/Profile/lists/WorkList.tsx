@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IPrivacy, IWork, PrivacyType } from '@interfaces';
+import { IPrivacy, IWork } from '@interfaces';
 import { useUserStore } from '@store';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
@@ -112,7 +112,7 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 						actions.push(
 							<PrivacyDropdown
 								key="privacy"
-								value={work.privacy.value}
+								value={work.privacy}
 								onChange={(value) => handlePrivacyChange(value, index)}
 							/>,
 							<Button
