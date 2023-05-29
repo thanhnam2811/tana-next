@@ -22,11 +22,13 @@ export function PostCard({ post, handleReact, ...rest }: Props & BoxProps) {
 	const router = useRouter();
 	const { user } = useUserStore();
 	const [author, setAuthor] = useState<any>(post.author);
+	const isMyPost = author._id === user?._id;
+
 	useEffect(() => {
-		if (author._id === user?._id) {
+		if (isMyPost) {
 			setAuthor(user);
 		}
-	}, [author._id, user]);
+	}, [isMyPost, user]);
 
 	const [showComment, setShowComment] = useState(false);
 	const handleToggleComment = () => setShowComment(!showComment);

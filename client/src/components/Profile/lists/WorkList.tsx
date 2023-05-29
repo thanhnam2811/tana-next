@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IWork } from '@interfaces';
+import { IPrivacy, IWork } from '@interfaces';
 import { useUserStore } from '@store';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
@@ -86,6 +86,12 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 		optimisticUpdate(newWork, 'Xóa liên hệ');
 	};
 
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
+		const newWorks = [...works];
+		newWorks[index].privacy = value;
+		optimisticUpdate(newWorks, 'Thay đổi quyền riêng tư');
+	};
+
 	return (
 		<>
 			<InfoModal.Work open={modalOpen} onClose={closeModal} data={modalData?.data} onSubmit={handleModalSubmit} />
@@ -100,39 +106,48 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 				}
 				bordered
 				dataSource={works}
-				renderItem={(work, index) => (
-					<List.Item
-						actions={[
-							<PrivacyDropdown key="privacy" value={work.privacy.value} />,
+				renderItem={(work, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
+							<PrivacyDropdown
+								key="privacy"
+								value={work.privacy}
+								onChange={(value) => handlePrivacyChange(value, index)}
+							/>,
 							<Button
 								key="edit"
 								type="text"
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: work, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={
-								<>
-									Công ty: <b>{work.company}</b>
-								</>
-							}
-							description={
-								<>
-									Chức vụ: <b>{work.position}</b>
-								</>
-							}
-							style={{ width: '100%' }}
-						/>
-						<i>
-							{[work.from && `Từ ${formatDate(work.from)}`, work.to && `Đến ${formatDate(work.to)}`]
-								.filter(Boolean)
-								.join(' - ')}
-						</i>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta
+								title={
+									<>
+										Công ty: <b>{work.company}</b>
+									</>
+								}
+								description={
+									<>
+										Chức vụ: <b>{work.position}</b>
+									</>
+								}
+								style={{ width: '100%' }}
+							/>
+							<i>
+								{[work.from && `Từ ${formatDate(work.from)}`, work.to && `Đến ${formatDate(work.to)}`]
+									.filter(Boolean)
+									.join(' - ')}
+							</i>
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

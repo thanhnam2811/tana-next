@@ -6,9 +6,6 @@
 	scroll-behavior: smooth;
 }
 
-#root {
-}
-
 :root {
 	--animate-duration: 0.5s !important;
 }
@@ -131,25 +128,6 @@ fieldset > legend {
 	}
 }
 
-/* Key frames shack the icon in the popup */
-@keyframes shack {
-	0% {
-		transform: rotate(0deg) scale(1) translate(0, 0);
-	}
-	25% {
-		transform: rotate(20deg) scale(1.2) translate(-8px, -8px);
-	}
-	50% {
-		transform: rotate(0deg) scale(1) translate(0, 0);
-	}
-	75% {
-		transform: rotate(-20deg) scale(1.2) translate(8px, -8px);
-	}
-	100% {
-		transform: rotate(0deg) scale(1) translate(0, 0);
-	}
-}
-
 /* Sending message animation */
 @keyframes sending-message {
 	0% {
@@ -234,4 +212,54 @@ fieldset > legend {
 	animation-delay: 0.5s;
 	animation-timing-function: steps(30, end);
 	animation-fill-mode: forwards;
+}
+
+.time-ago {
+	font-size: 12px;
+	font-weight: 400;
+	color: #8e8e8e;
+}
+
+.empty-text {
+	font-size: 14px;
+	font-weight: 600;
+	color: #8e8e8e;
+
+	padding: 8px;
+	text-align: center;
+}
+
+// ANTD OVERRIDE
+
+button.ant-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+
+	.ant-btn-icon {
+		margin: 0 !important;
+
+		span {
+			width: 100%;
+			height: 100%;
+
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			img {
+				width: 14px;
+				height: 14px;
+				margin: auto;
+			}
+		}
+	}
+}
+
+.ant-modal-footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
 }

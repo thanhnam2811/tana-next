@@ -1,6 +1,8 @@
 import { WhiteBox } from '@components/Box';
-import { ModalPost } from '@components/Modal';
+import { PostModal } from '@components/Modal';
 import { InfinitFetcherType } from '@hooks';
+import { IPost } from '@interfaces';
+import { IMedia } from '@interfaces/common';
 import { InsertPhotoTwoTone, LocationCityTwoTone, SlideshowTwoTone } from '@mui/icons-material';
 import { Avatar, Box, Button, TextField, styled } from '@mui/material';
 import { useUserStore } from '@store';
@@ -30,12 +32,12 @@ interface Props {
 export function CreatePost({ fetcher }: Props) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: any) => {
-		const toastId = toast.loading('Đang tạo bài viết...');
+	const handleAddPost = async (data: IPost & { media: IMedia[] }) => {
+		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);
 			fetcher.addData(res.data);
-			toast.success('Tạo bài viết thành công', { id: toastId });
+			toast.success('Thêm bài viết thành công', { id: toastId });
 		} catch (error: any) {
 			toast.error(error.toString(), { id: toastId });
 		}
@@ -46,7 +48,7 @@ export function CreatePost({ fetcher }: Props) {
 	const handleCloseModal = () => setOpenModal(false);
 	return (
 		<WhiteBox sx={{ height: 'auto', mb: 2 }}>
-			<ModalPost open={openModal} onClose={handleCloseModal} onCreate={handleAddPost} />
+			<PostModal open={openModal} onClose={handleCloseModal} onCreate={handleAddPost} />
 
 			<StatusInput
 				fullWidth

@@ -57,6 +57,25 @@ class PostController {
 					},
 				})
 				.populate({
+					path: 'privacy',
+					populate: {
+						path: 'includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					populate: {
+						path: 'excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+				})
+				.populate({
 					path: 'media',
 					select: '_id link',
 				});
@@ -115,6 +134,25 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
+						},
+					})
+					.populate({
+						path: 'privacy',
+						populate: {
+							path: 'includes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						populate: {
+							path: 'excludes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
 						},
 					})
 					.populate({
@@ -203,6 +241,25 @@ class PostController {
 							populate: {
 								path: 'profilePicture',
 								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy',
+							populate: {
+								path: 'includes',
+								select: '_id fullname profilePicture isOnline',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
+							},
+							populate: {
+								path: 'excludes',
+								select: '_id fullname profilePicture isOnline',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
 							},
 						},
 						{
@@ -492,6 +549,25 @@ class PostController {
 					},
 				})
 				.populate({
+					path: 'privacy',
+					populate: {
+						path: 'includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					populate: {
+						path: 'excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+				})
+				.populate({
 					path: 'media',
 					select: '_id link',
 				});
@@ -559,6 +635,25 @@ class PostController {
 						{
 							path: 'media',
 							select: '_id link',
+						},
+						{
+							path: 'privacy',
+							populate: {
+								path: 'includes',
+								select: '_id fullname profilePicture isOnline',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
+							},
+							populate: {
+								path: 'excludes',
+								select: '_id fullname profilePicture isOnline',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
+							},
 						},
 					],
 				}
@@ -628,6 +723,25 @@ class PostController {
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy',
+					populate: {
+						path: 'includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					populate: {
+						path: 'excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
 					},
 				})
 				.populate({

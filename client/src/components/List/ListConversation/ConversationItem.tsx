@@ -1,7 +1,7 @@
 import { GroupAvatar, UserAvatar } from '@components/MUI';
 import { Button, ButtonProps, Grid, Skeleton, Typography } from '@mui/material';
 import { useUserStore } from '@store';
-import { getTimeAgo, renderHTML } from '@utils/common';
+import { getTimeAgo, stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 
 type Props = {
@@ -93,7 +93,7 @@ export function ConversationItem({ conversation, isActived, ...props }: Props & 
 					variant="body2"
 				>
 					<strong>{lastest_message?.sender?.fullname?.concat(': ')}</strong>
-					{renderHTML(lastest_message?.text || '<i>Chưa có tin nhắn</i>')}
+					{stringUtil.renderHTML(lastest_message?.text || '<i>Chưa có tin nhắn</i>')}
 				</Typography>
 			</Grid>
 		</Button>

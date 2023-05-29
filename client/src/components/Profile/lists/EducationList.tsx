@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IEducation } from '@interfaces';
+import { IEducation, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
@@ -86,6 +86,12 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 		optimisticUpdate(newEducation, 'Xóa liên hệ');
 	};
 
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
+		const newEdu = [...educations];
+		newEdu[index].privacy = value;
+		optimisticUpdate(newEdu, 'Thay đổi quyền riêng tư');
+	};
+
 	return (
 		<>
 			<InfoModal.Education
@@ -105,42 +111,51 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 				}
 				bordered
 				dataSource={educations}
-				renderItem={(edu, index) => (
-					<List.Item
-						actions={[
-							<PrivacyDropdown key="privacy" value={edu.privacy.value} />,
+				renderItem={(edu, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
+							<PrivacyDropdown
+								key="privacy"
+								value={edu.privacy}
+								onChange={(value) => handlePrivacyChange(value, index)}
+							/>,
 							<Button
 								key="edit"
 								type="text"
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: edu, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={
-								<>
-									Trường: <b>{edu.school}</b>
-								</>
-							}
-							description={
-								<>
-									Chuyên ngành:{' '}
-									<b>
-										{edu.major} ({edu.degree})
-									</b>
-								</>
-							}
-							style={{ width: '100%' }}
-						/>
-						<i>
-							{[edu.from && `Từ ${formatDate(edu.from)}`, edu.to && `Đến ${formatDate(edu.to)}`]
-								.filter(Boolean)
-								.join(' - ')}
-						</i>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta
+								title={
+									<>
+										Trường: <b>{edu.school}</b>
+									</>
+								}
+								description={
+									<>
+										Chuyên ngành:{' '}
+										<b>
+											{edu.major} ({edu.degree})
+										</b>
+									</>
+								}
+								style={{ width: '100%' }}
+							/>
+							<i>
+								{[edu.from && `Từ ${formatDate(edu.from)}`, edu.to && `Đến ${formatDate(edu.to)}`]
+									.filter(Boolean)
+									.join(' - ')}
+							</i>
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

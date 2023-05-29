@@ -32,7 +32,7 @@ import {
 } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { MyIconButton } from '@components/MUI';
 import dayjs from 'dayjs';
 
@@ -193,7 +193,7 @@ export const ConversationMembersModal = ({ open, onClose, member = {}, handleUpd
 							height: 80,
 						}}
 					>
-						{getShortName(user.fullname)}
+						{stringUtil.getShortName(user.fullname)}
 					</Avatar>
 
 					<Stack direction="column" flex={1} overflow="hidden">

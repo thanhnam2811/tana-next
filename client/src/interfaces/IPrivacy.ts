@@ -4,7 +4,7 @@ export interface IPrivacy {
 	excludes?: string[];
 }
 
-export type PrivacyType = 'public' | 'private' | 'friends';
+export type PrivacyType = 'public' | 'private' | 'friends' | 'includes' | 'excludes';
 
 export type ContactType =
 	| 'phone'

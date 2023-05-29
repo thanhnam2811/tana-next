@@ -8,10 +8,10 @@ interface IUserStore {
 	login: (data: ILoginParams) => Promise<void>;
 	logout: () => void;
 	getProfile: () => Promise<void>;
-	updateProfile: (data: Partial<IUser>) => Promise<IUser>;
+	updateProfile: (data: Partial<IUser>) => Promise<void>;
 }
 
-export const useUserStore = create<IUserStore>()((set) => ({
+export const useUserStore = create<IUserStore>()((set, get) => ({
 	user: null,
 	setUser: (user) => set({ user }),
 	login: async (data) => {
@@ -31,9 +31,20 @@ export const useUserStore = create<IUserStore>()((set) => ({
 		set({ user });
 	},
 	updateProfile: async (data: Partial<IUser>) => {
-		const { data: user } = await userApi.update(data);
-		set({ user });
+		// Save rollback data
+		const prev = get().user!;
 
-		return user;
+		// Optimistic update
+		set({ user: { ...prev, ...data } });
+
+		try {
+			// Update to server
+			const { data: user } = await userApi.update(data);
+			set({ user });
+		} catch (error) {
+			// Rollback if error
+			set({ user: prev });
+			throw error;
+		}
 	},
 }));
