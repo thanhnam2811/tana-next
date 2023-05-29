@@ -38,14 +38,17 @@
 
 	.post_media_item {
 		position: relative;
+		margin: auto;
 
 		display: flex;
 		align-items: center;
 		justify-content: center;
 
-		width: 100%;
 		height: fit-content;
+		max-height: 48vh;
+		aspect-ratio: 1/1;
 		border-radius: 12px;
+
 		border: 1px solid #e8e8e8;
 		overflow: hidden;
 
