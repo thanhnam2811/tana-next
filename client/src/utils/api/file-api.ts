@@ -1,5 +1,25 @@
 import apiClient from './apiClient';
 
+export interface IFileUploadResponse {
+	message: string;
+	files: IFile[];
+}
+
+export interface IFile {
+	name: string;
+	originalname: string;
+	type: string;
+	link: string;
+	public_id: string;
+	is_System: boolean;
+	creator: string;
+	_id: string;
+	deleted: boolean;
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
+}
+
 export const fileApi = {
 	upload: (files: FileList | File[], data: any = {}) => {
 		const formData = new FormData();
@@ -16,7 +36,7 @@ export const fileApi = {
 			}
 		}
 
-		return apiClient.post('files/upload', formData, {
+		return apiClient.post<IFileUploadResponse>('files/upload', formData, {
 			headers: {
 				'Content-Type': 'multipart/form-data',
 			},

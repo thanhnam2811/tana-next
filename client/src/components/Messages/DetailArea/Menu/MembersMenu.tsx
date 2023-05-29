@@ -4,7 +4,7 @@ import { useUserStore } from '@store';
 import { Avatar } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { UpdateMembersType, conversationApi } from '@utils/api';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
@@ -102,7 +102,7 @@ export function MembersMenu() {
 								height: 40,
 							}}
 						>
-							{getShortName(user.fullname)}
+							{stringUtil.getShortName(user.fullname)}
 						</Avatar>
 					</AvatarBadge>
 				),

@@ -2,7 +2,7 @@ import { GroupAvatar, MyIconButton } from '@components/MUI';
 import { InfinitFetcherType } from '@hooks';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FaArrowDown } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -120,7 +120,7 @@ const UserPreview = ({ listMember, conversation }: any) => {
 			{/* Avatar */}
 			{isDirect ? (
 				<Avatar src={user?.profilePicture?.link} alt={user?.fullname} style={{ width: 80, height: 80 }}>
-					{getShortName(user?.fullname)}
+					{stringUtil.getShortName(user?.fullname)}
 				</Avatar>
 			) : conversation?.avatar?.link ? (
 				<Avatar src={conversation?.avatar?.link} alt={conversation?.name} style={{ width: 80, height: 80 }} />

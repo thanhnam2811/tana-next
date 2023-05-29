@@ -1,9 +1,5 @@
 import { ContactType, EducationType, IPrivacy } from './IPrivacy';
-
-export interface IPicture {
-	_id: string;
-	link: string;
-}
+import { IMedia } from './common';
 
 export interface IContact {
 	type: ContactType;
@@ -34,8 +30,8 @@ export interface IUser {
 	_id: string;
 	fullname: string;
 	email: string;
-	profilePicture: IPicture;
-	coverPicture: IPicture;
+	profilePicture: IMedia;
+	coverPicture: IMedia;
 	isOnline: boolean;
 
 	contact: IContact[];

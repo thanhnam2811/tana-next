@@ -3,7 +3,6 @@ import { IUser } from '@interfaces';
 import { CenterArea } from '@layout';
 import { useUserStore } from '@store';
 import { List, Typography } from 'antd';
-import { BlockProps } from 'antd/es/typography/Base';
 import { toast } from 'react-hot-toast';
 import { HiPencil } from 'react-icons/hi2';
 import { ContactList } from '../lists';
@@ -21,18 +20,13 @@ export const InfoTab = ({ user }: Props) => {
 
 	if (isCurrentUser) user = currentUser; // Use current user data (for optimistic update)
 
-	const getEditable = (field: keyof IUser): BlockProps['editable'] =>
-		isCurrentUser && {
-			icon: <HiPencil />,
-			tooltip: 'Chỉnh sửa',
-			onChange: handleChangeField(field),
-			triggerType: ['icon', 'text'],
-		};
+	const handleChangeField = (field: keyof IUser) => (value: any) => {
+		if (value === user[field]) return; // No change
 
-	const handleChangeField = (field: keyof IUser) => (value: any) =>
 		updateProfile({ [field]: value })
 			.then(() => toast.success('Cập nhật thành công!'))
 			.catch(() => toast.error('Cập nhật thất bại!'));
+	};
 
 	return (
 		<CenterArea>
@@ -42,7 +36,18 @@ export const InfoTab = ({ user }: Props) => {
 						<List.Item.Meta
 							title="Họ và tên"
 							description={
-								<Typography.Text editable={getEditable('fullname')}>{user.fullname}</Typography.Text>
+								<Typography.Text
+									editable={
+										isCurrentUser && {
+											icon: <HiPencil />,
+											tooltip: 'Chỉnh sửa',
+											onChange: handleChangeField('fullname'),
+											triggerType: ['icon', 'text'],
+										}
+									}
+								>
+									{user.fullname}
+								</Typography.Text>
 							}
 						/>
 					</List.Item>
