@@ -22,7 +22,7 @@ export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: P
 		>
 			<Avatar
 				shape="circle"
-				src={user.profilePicture.link}
+				src={user.profilePicture.link as string}
 				icon={<HiUser />}
 				{...avatarProps}
 				style={{ width: avtSize, height: avtSize, ...avatarProps?.style }}
