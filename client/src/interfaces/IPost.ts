@@ -1,10 +1,11 @@
 import { IPrivacy } from './IPrivacy';
 import { IUser } from './IUser';
+import { IMedia } from './common';
 
 export interface IPost {
 	_id: string;
 	content: string;
-	media: any[];
+	media: IMedia[] | string[]; // string[] for create, update post
 	numberReact: number;
 	numberShare: number;
 	numberComment: number;

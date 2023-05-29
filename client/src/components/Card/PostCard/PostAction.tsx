@@ -6,6 +6,7 @@ import { IconType } from 'react-icons/lib';
 
 interface Props {
 	anchorElRef: any;
+	isMyPost?: boolean;
 }
 
 const listActions: {
@@ -40,7 +41,7 @@ const listActions: {
 	},
 ];
 
-export const PostAction = ({ anchorElRef }: Props) => {
+export const PostAction = ({ anchorElRef, isMyPost = false }: Props) => {
 	const [open, setOpen] = useState(false);
 
 	const handleOpen = (e: any) => {
@@ -62,6 +63,15 @@ export const PostAction = ({ anchorElRef }: Props) => {
 			handleOpen(e);
 		}
 	};
+
+	if (isMyPost) {
+		listActions.push({
+			key: 'delete',
+			Icon: HiArchive,
+			label: 'Xóa bài viết',
+			onClick: () => console.log('Xóa bài viết'),
+		});
+	}
 
 	useEffect(() => {
 		anchorElRef?.current?.addEventListener('click', handleAnchorElRefClick);
