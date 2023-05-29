@@ -54,7 +54,7 @@ export function CreatePost({ fetcher }: Props) {
 				fullWidth
 				placeholder="Bạn đang nghĩ gì?"
 				InputProps={{
-					startAdornment: <Avatar sx={{ mr: 1 }} src={user?.profilePicture?.link} />,
+					startAdornment: <Avatar sx={{ mr: 1 }} src={user?.profilePicture!.link as string} />,
 					readOnly: true,
 				}}
 				onClick={handleOpenModal}

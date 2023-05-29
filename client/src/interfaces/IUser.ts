@@ -30,8 +30,8 @@ export interface IUser {
 	_id: string;
 	fullname: string;
 	email: string;
-	profilePicture: IMedia;
-	coverPicture: IMedia;
+	profilePicture: IMedia | string;
+	coverPicture: IMedia | string;
 	isOnline: boolean;
 
 	contact: IContact[];
