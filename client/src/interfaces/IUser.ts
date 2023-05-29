@@ -38,3 +38,15 @@ export interface IUser {
 	work: IWork[];
 	education: IEducation[];
 }
+
+export type UserType = IUser & {
+	profilePicture: IMedia;
+	coverPicture: IMedia;
+};
+
+export type UserFormType = Partial<
+	IUser & {
+		profilePicture: string;
+		coverPicture: string;
+	}
+>;
