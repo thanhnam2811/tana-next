@@ -243,7 +243,6 @@ class ConversationController {
 				.then((data) => {
 					data.docs.forEach((item) => {
 						if (item.lastest_message && item.lastest_message.iv) {
-							console.log(item.lastest_message.iv);
 							const iv = Buffer.from(item.lastest_message.iv, 'base64');
 							const decipher = crypto.createDecipheriv(algorithm, key, iv);
 							let decryptedData = decipher.update(item.lastest_message.text, 'hex', 'utf-8');
