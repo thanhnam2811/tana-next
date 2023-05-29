@@ -19,7 +19,7 @@ import {
 	Typography,
 } from '@mui/material';
 import { useUserStore } from '@store';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 import { FcFaq, FcLike, FcStackOfPhotos } from 'react-icons/fc';
 import { FiBell } from 'react-icons/fi';
@@ -135,7 +135,7 @@ export function RightSide() {
 								}
 							>
 								<Avatar alt={sender?.fullname} src={sender?.profilePicture?.link}>
-									{getShortName(sender?.fullname)}
+									{stringUtil.getShortName(sender?.fullname)}
 								</Avatar>
 							</Badge>
 							<Typography variant="body2" sx={{ whiteSpace: 'normal' }}>
@@ -149,7 +149,7 @@ export function RightSide() {
 			<Tooltip title={user?.fullname || ''}>
 				<IconButton onClick={(e) => setProfileMenuEl(e.target)}>
 					<Avatar alt="Ảnh đại diện" src={user?.profilePicture?.link}>
-						{getShortName(user?.fullname)}
+						{stringUtil.getShortName(user?.fullname)}
 					</Avatar>
 				</IconButton>
 			</Tooltip>

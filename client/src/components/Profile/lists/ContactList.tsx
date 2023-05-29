@@ -1,7 +1,7 @@
 import { contactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IContact, PrivacyType } from '@interfaces';
+import { IContact, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -84,9 +84,9 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 		optimisticUpdate(newContact, 'Xóa liên hệ');
 	};
 
-	const handlePrivacyChange = async (value: PrivacyType, index: number) => {
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
 		const newContact = [...contacts];
-		newContact[index].privacy.value = value;
+		newContact[index].privacy = value;
 		optimisticUpdate(newContact, 'Thay đổi quyền riêng tư');
 	};
 
@@ -109,12 +109,13 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 				}
 				bordered
 				dataSource={contacts}
-				renderItem={(contact, index) => (
-					<List.Item
-						actions={[
+				renderItem={(contact, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
 							<PrivacyDropdown
 								key="privacy"
-								value={contact.privacy.value}
+								value={contact.privacy}
 								onChange={(value) => handlePrivacyChange(value, index)}
 							/>,
 							<Button
@@ -123,16 +124,18 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: contact, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={<b>{contactOptions.find((option) => option.value === contact.type)?.label}</b>}
-							description={contact.value}
-							style={{ width: '100%' }}
-						/>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					const title = contactOptions.find((option) => option.value === contact.type)?.label;
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta title={title} description={contact.value} style={{ width: '100%' }} />
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

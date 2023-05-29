@@ -2,7 +2,7 @@ import { ScrollToTopButton } from '@components/Button';
 import { NavBar } from '@layout';
 import { Backdrop, Box, CircularProgress, CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { useSettingStore, useUserStore } from '@store';
-import '@styles/global.css';
+import '@styles/global.scss';
 import { SERVER_URL, VERSION } from '@utils/common';
 import { getTheme } from '@utils/theme';
 import { ConfigProvider } from 'antd';

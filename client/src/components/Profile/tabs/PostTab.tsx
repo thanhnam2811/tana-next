@@ -20,7 +20,7 @@ export function PostTab({ user }: Props) {
 		<CenterArea alignItems="flex-start">
 			<Stack height="100%" width="100%" spacing={2}>
 				{/* Header */}
-				<Box flex="auto">
+				<Box flex={0}>
 					<PictureContainer user={user} />
 				</Box>
 

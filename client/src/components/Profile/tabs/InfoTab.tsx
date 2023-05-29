@@ -3,7 +3,6 @@ import { IUser } from '@interfaces';
 import { CenterArea } from '@layout';
 import { useUserStore } from '@store';
 import { List, Typography } from 'antd';
-import { BlockProps } from 'antd/es/typography/Base';
 import { toast } from 'react-hot-toast';
 import { HiPencil } from 'react-icons/hi2';
 import { ContactList } from '../lists';
@@ -21,15 +20,9 @@ export const InfoTab = ({ user }: Props) => {
 
 	if (isCurrentUser) user = currentUser; // Use current user data (for optimistic update)
 
-	const getEditable = (field: keyof IUser): BlockProps['editable'] =>
-		isCurrentUser && {
-			icon: <HiPencil />,
-			tooltip: 'Chỉnh sửa',
-			onChange: handleChangeField(field),
-			triggerType: ['icon', 'text'],
-		};
-
 	const handleChangeField = (field: keyof IUser) => (value: any) => {
+		if (value === user[field]) return; // No change
+
 		updateProfile({ [field]: value })
 			.then(() => toast.success('Cập nhật thành công!'))
 			.catch(() => toast.error('Cập nhật thất bại!'));
@@ -41,37 +34,45 @@ export const InfoTab = ({ user }: Props) => {
 				<List header={<Typography.Title level={2}>Thông tin cá nhân</Typography.Title>}>
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Họ và tên</Typography.Title>}
+							title="Họ và tên"
 							description={
-								<Typography.Text editable={getEditable('fullname')}>{user.fullname}</Typography.Text>
+								<Typography.Text
+									editable={
+										isCurrentUser && {
+											icon: <HiPencil />,
+											tooltip: 'Chỉnh sửa',
+											onChange: handleChangeField('fullname'),
+											triggerType: ['icon', 'text'],
+										}
+									}
+								>
+									{user.fullname}
+								</Typography.Text>
 							}
 						/>
 					</List.Item>
 
 					<List.Item>
-						<List.Item.Meta
-							title={<Typography.Title level={4}>Email</Typography.Title>}
-							description={<Typography.Text>{user.email}</Typography.Text>}
-						/>
+						<List.Item.Meta title="Email" description={<Typography.Text>{user.email}</Typography.Text>} />
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Liên hệ</Typography.Title>}
+							title="Liên hệ"
 							description={<ContactList contacts={user.contact} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Công việc</Typography.Title>}
+							title="Công việc"
 							description={<WorkList works={user.work} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
 
 					<List.Item>
 						<List.Item.Meta
-							title={<Typography.Title level={4}>Học vấn</Typography.Title>}
+							title="Học vấn"
 							description={<EducationList educations={user.education} isCurrentUser={isCurrentUser} />}
 						/>
 					</List.Item>
