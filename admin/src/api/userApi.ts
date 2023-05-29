@@ -4,5 +4,10 @@ import { IUser } from '@/interface';
 import { IPaginationResponse } from '@/interface/api-interface';
 
 export const userApi = {
-	get: (config: AxiosRequestConfig) => apiClient.get<IPaginationResponse<IUser>>('/admin/searchUser', config),
+	endpoint: {
+		searchUser: `/admin/searchUser`,
+	},
+
+	searchUser: (config: AxiosRequestConfig) =>
+		apiClient.get<IPaginationResponse<IUser>>(userApi.endpoint.searchUser, config),
 };
