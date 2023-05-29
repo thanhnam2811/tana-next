@@ -1,4 +1,4 @@
-import { IUser } from '@interfaces';
+import { IUser, UserType } from '@interfaces';
 import apiClient from './apiClient';
 
 export const userApi = {
@@ -7,9 +7,9 @@ export const userApi = {
 			params,
 		}),
 
-	get: (id: string) => apiClient.get<IUser>(`users/${id}`),
+	get: (id: string) => apiClient.get<UserType>(`users/${id}`),
 
-	update: (data: Partial<IUser>) => apiClient.put<IUser>(`users/update-profile`, data),
+	update: (data: Partial<IUser>) => apiClient.put<UserType>(`users/update-profile`, data),
 
 	requestFriend: (userId: string) => apiClient.put(`users/${userId}/friend-request`),
 

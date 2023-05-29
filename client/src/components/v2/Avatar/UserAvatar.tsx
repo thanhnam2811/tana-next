@@ -1,9 +1,9 @@
-import { IUser } from '@interfaces';
+import { UserType } from '@interfaces';
 import { Avatar, AvatarProps, Badge, BadgeProps } from 'antd';
 import { HiUser } from 'react-icons/hi2';
 
 interface Props {
-	user: IUser;
+	user: UserType;
 	badgeProps?: BadgeProps;
 	avtSize?: number; // Size of avatar
 }
@@ -22,10 +22,10 @@ export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: P
 		>
 			<Avatar
 				shape="circle"
-				src={user.profilePicture.link as string}
+				src={user.profilePicture.link}
 				icon={<HiUser />}
 				{...avatarProps}
-				style={{ width: avtSize, height: avtSize, ...avatarProps?.style }}
+				style={{ width: avtSize, height: avtSize, border: 'none', ...avatarProps?.style }}
 			/>
 		</Badge>
 	);

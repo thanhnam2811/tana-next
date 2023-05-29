@@ -6,6 +6,7 @@ import { DetailArea, MessageArea } from '@components/Messages';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
 import { InfinitFetcherType, useInfiniteFetcher } from '@hooks';
 import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
+import { withLayout } from '@layout/v2';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
@@ -194,4 +195,4 @@ function MessagesPage() {
 	);
 }
 
-export default withAuth(MessagesPage);
+export default withAuth(withLayout(MessagesPage));

@@ -4,6 +4,7 @@ import { CreatePost, ListPost } from '@components/v2/List';
 import { useInfiniteFetcher } from '@hooks';
 import { IPost } from '@interfaces';
 import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
+import { withLayout } from '@layout/v2';
 
 function Home() {
 	const postFetch = useInfiniteFetcher<IPost>('posts/home');
@@ -27,4 +28,4 @@ function Home() {
 	);
 }
 
-export default withAuth(Home);
+export default withAuth(withLayout(Home));
