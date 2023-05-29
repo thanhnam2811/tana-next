@@ -6,7 +6,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import styles from './Login.module.scss';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 
-function Login() {
+export function Login() {
 	const { state } = useLocation();
 	const { isAuth, login } = useAuthStore();
 	const { message } = App.useApp();
@@ -99,5 +99,3 @@ function Login() {
 		</Layout>
 	);
 }
-
-export default Login;

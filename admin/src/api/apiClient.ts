@@ -1,4 +1,4 @@
-import { SERVER_URL } from '@/config';
+import { API_URL } from '@/config';
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import { authApi } from '.';
 
@@ -58,7 +58,7 @@ const retryRequest = async (error: AxiosError) => {
 
 // Create an axios instance
 const apiClient = axios.create({
-	baseURL: SERVER_URL,
+	baseURL: API_URL,
 	headers: {
 		'Content-Type': 'application/json',
 		'Max-Retry': MAX_RETRY,
@@ -93,7 +93,8 @@ apiClient.interceptors.response.use(
 	}
 );
 
-export const swrFetcher = (url: string, config: AxiosRequestConfig) =>
-	apiClient.get(url, config).then((res) => res.data);
+export function swrFetcher(url: string, config: AxiosRequestConfig) {
+	return apiClient.get(url, config).then((res) => res.data);
+}
 
 export default apiClient;
