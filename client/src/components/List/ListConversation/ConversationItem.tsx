@@ -1,7 +1,7 @@
 import { GroupAvatar, UserAvatar } from '@components/MUI';
 import { Button, ButtonProps, Grid, Skeleton, Typography } from '@mui/material';
 import { useUserStore } from '@store';
-import { getTimeAgo, renderHTML } from '@utils/common';
+import { getTimeAgo, stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 
 type Props = {

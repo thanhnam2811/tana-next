@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IEducation, IPrivacy, PrivacyType } from '@interfaces';
+import { IEducation, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
@@ -117,7 +117,7 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 						actions.push(
 							<PrivacyDropdown
 								key="privacy"
-								value={edu.privacy.value}
+								value={edu.privacy}
 								onChange={(value) => handlePrivacyChange(value, index)}
 							/>,
 							<Button

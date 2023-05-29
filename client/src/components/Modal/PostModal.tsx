@@ -54,7 +54,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 	const {
 		control,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { isSubmitting },
 		reset,
 	} = useForm<IPost & { media: string[] }>();
 

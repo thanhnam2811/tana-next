@@ -19,7 +19,7 @@ interface Props {
 	isReply?: boolean;
 }
 
-export function CommentItem({ post, comment, onEdit, onDelete, onReact, isReply = false }: Props) {
+export function CommentItem({ post, comment, onDelete, onReact, isReply = false }: Props) {
 	const { user } = useUserStore();
 	const isPostAuthor = user!._id === post!.author._id;
 	const isAuthor = user!._id === comment!.author._id;
@@ -54,7 +54,13 @@ export function CommentItem({ post, comment, onEdit, onDelete, onReact, isReply 
 	if (isAuthor || isPostAuthor) {
 		actions = [
 			...actions,
-			<Button key="delete" type="text" danger icon={<HiOutlineTrash />} onClick={() => onDelete(comment._id)} />,
+			<Button
+				key="delete"
+				type="text"
+				danger
+				icon={<HiOutlineTrash />}
+				onClick={() => onDelete?.(comment._id)}
+			/>,
 		];
 	}
 

@@ -1,7 +1,7 @@
 import { contactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IContact, IPrivacy, PrivacyType } from '@interfaces';
+import { IContact, IPrivacy } from '@interfaces';
 import { useUserStore } from '@store';
 import { Button, List } from 'antd';
 import { useState } from 'react';
