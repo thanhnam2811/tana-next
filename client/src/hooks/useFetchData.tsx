@@ -1,5 +1,7 @@
-import apiClient from '@utils/api/apiClient';
-import { useCallback, useMemo, useState } from 'react';
+import { IPaginationResponse } from '@interfaces';
+import apiClient, { swrFetcher } from '@utils/api/apiClient';
+import queryString from 'query-string';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 interface PaginationResponse<T extends { _id: string } = any> {
@@ -77,6 +79,7 @@ export function useInfiniteFetcher<T extends { _id: string } = any>(api: string)
 			loadMore,
 			filter,
 			reload,
+			validating: false,
 		}),
 		[api, data, updateData, addData, removeData, fetching, hasMore, params, fetch, loadMore, filter, reload]
 	);
@@ -195,20 +198,105 @@ export function useInfiniteFetcher<T extends { _id: string } = any>(api: string)
 
 export type InfinitFetcherType<T extends { _id: string } = any> = {
 	data: T[];
-	// eslint-disable-next-line no-unused-vars
 	updateData: (id: string, newData: T) => void;
-	// eslint-disable-next-line no-unused-vars
 	addData: (newData: T) => void;
-	// eslint-disable-next-line no-unused-vars
 	removeData: (id: string) => void;
 	fetching: boolean;
+	validating: boolean;
 	hasMore: boolean;
 	params: any;
-	// eslint-disable-next-line no-unused-vars
 	fetch: (params: any) => void;
 	loadMore: () => void;
-	// eslint-disable-next-line no-unused-vars
 	filter: (filter: any) => void;
 	reload: () => void;
 	api: string;
+};
+
+import useSWR from 'swr';
+
+interface useInfiniteFetcherSWROptions {
+	params?: object;
+}
+
+export const useInfiniteFetcherSWR = <T extends { _id: string } = any>(
+	api: string,
+	{ params: initParams }: useInfiniteFetcherSWROptions = {}
+): InfinitFetcherType<T> => {
+	const [data, setData] = useState<T[]>([]);
+	console.log('data', data);
+
+	const [params, setParams] = useState({ offset: 0, size: 20, ...initParams });
+
+	const {
+		data: res,
+		isLoading: fetching,
+		isValidating: validating,
+		mutate: reloadSWR,
+	} = useSWR<IPaginationResponse<T>>(`${api}?${queryString.stringify(params)}`, swrFetcher);
+
+	useEffect(() => {
+		console.log('useInfiniteFetcherSWR', res);
+
+		if (!res) return;
+
+		if (res.offset == 0) {
+			setData(res.items || []);
+		} else {
+			const items = res.items || [];
+			const offset = res.offset || 0;
+			setData((prev) => prev.splice(offset, items.length, ...items));
+		}
+	}, [res]);
+
+	const hasMore = res ? res.totalItems > params.offset + params.size : true; // If res is null, hasMore is true (prevent stop fetching when error)
+
+	const addData = (newData: T) => {
+		setData((prev) => [newData, ...prev]);
+	};
+
+	const updateData = (id: string, newData: T) => {
+		setData((prev) => prev.map((item) => (item._id === id ? newData : item)));
+	};
+
+	const removeData = (id: string) => {
+		setData((prev) => prev.filter((item) => item._id !== id));
+	};
+
+	const fetch = (params: object) => {
+		setParams((prev) => ({ ...prev, ...params, offset: 0 }));
+	};
+
+	const loadMore = () => {
+		setParams((prev) => ({ ...prev, offset: data.length }));
+	};
+
+	const reload = () => {
+		setParams({ ...params, offset: 0 });
+		reloadSWR();
+	};
+
+	const filter = (filter: object) => {
+		setParams((prev) => ({ ...prev, ...filter, offset: 0 }));
+	};
+
+	const fetcher = useMemo(
+		() => ({
+			data,
+			params,
+			fetching,
+			validating,
+			hasMore,
+			fetch,
+			loadMore,
+			filter,
+			reload,
+			addData,
+			updateData,
+			removeData,
+			api,
+		}),
+		[data, params, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
+	);
+
+	return fetcher;
 };

@@ -1,11 +1,13 @@
 import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
-import { ListConversation } from '@components/List';
+import { ListConversation } from '@components/List/ListConversation';
 import { MyIconButton, SearchInput } from '@components/MUI';
-import { DetailArea, MessageArea } from '@components/Messages';
+import { DetailArea } from '@components/Messages/DetailArea';
+import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
 import { InfinitFetcherType, useInfiniteFetcher } from '@hooks';
-import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
+import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout/Area';
+import { withLayout } from '@layout/v2';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
@@ -194,4 +196,4 @@ function MessagesPage() {
 	);
 }
 
-export default withAuth(MessagesPage);
+export default withAuth(withLayout(MessagesPage));

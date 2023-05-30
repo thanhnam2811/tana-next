@@ -1,11 +1,10 @@
 import { ScrollToTopButton } from '@components/Button';
-import { NavBar } from '@layout';
 import { Backdrop, Box, CircularProgress, CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { useSettingStore, useUserStore } from '@store';
 import '@styles/global.scss';
 import { SERVER_URL, VERSION } from '@utils/common';
 import { getTheme } from '@utils/theme';
-import { ConfigProvider } from 'antd';
+import { App as AntApp, ConfigProvider } from 'antd';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'draft-js/dist/Draft.css';
@@ -17,9 +16,9 @@ import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import 'swiper/css';
 
+import locale from 'antd/lib/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import locale from 'antd/lib/locale/vi_VN';
 
 // Set default locale to Vietnamese
 dayjs.locale('vi');
@@ -76,7 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
 		);
 
 	return (
-		<>
+		<ConfigProvider locale={locale}>
 			<Head>
 				<title>TaNa - Kết nối và sáng tạo</title>
 				<meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -89,13 +88,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
 			<ThemeProvider theme={getTheme('light')}>
 				<CssBaseline />
-				<NavBar />
 
-				<Box sx={{ minHeight: 'calc(100vh - 64px)', mt: '64px', display: 'flex' }}>
-					<ConfigProvider locale={locale}>
-						<Component {...pageProps} />
-					</ConfigProvider>
-				</Box>
+				<AntApp>
+					<Component {...pageProps} />
+				</AntApp>
 
 				{/* Scroll to top */}
 				<ScrollToTopButton />
@@ -107,6 +103,6 @@ export default function App({ Component, pageProps }: AppProps) {
 					</Typography>
 				</Box>
 			</ThemeProvider>
-		</>
+		</ConfigProvider>
 	);
 }

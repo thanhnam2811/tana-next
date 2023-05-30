@@ -1,14 +1,14 @@
-import { IUser } from '@interfaces';
+import { UserType } from '@interfaces';
 import { ILoginParams, authApi, userApi } from '@utils/api';
 import { create } from 'zustand';
 
 interface IUserStore {
-	user: IUser | null;
-	setUser: (user: IUser) => void;
+	user: UserType | null;
+	setUser: (user: UserType) => void;
 	login: (data: ILoginParams) => Promise<void>;
 	logout: () => void;
 	getProfile: () => Promise<void>;
-	updateProfile: (data: Partial<IUser>) => Promise<void>;
+	updateProfile: (data: Partial<UserType>) => Promise<void>;
 }
 
 export const useUserStore = create<IUserStore>()((set, get) => ({
@@ -30,7 +30,7 @@ export const useUserStore = create<IUserStore>()((set, get) => ({
 		user.isOnline = true; // Set user online
 		set({ user });
 	},
-	updateProfile: async (data: Partial<IUser>) => {
+	updateProfile: async (data: Partial<UserType>) => {
 		// Save rollback data
 		const prev = get().user!;
 

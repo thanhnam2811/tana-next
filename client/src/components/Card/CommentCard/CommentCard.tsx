@@ -5,9 +5,10 @@ import { useInfiniteFetcher } from '@hooks';
 import { Box, CircularProgress, Collapse, Stack, StackProps, Typography } from '@mui/material';
 import { useState } from 'react';
 import { CommentFooter } from '.';
+import { IPost } from '@interfaces';
 
 interface Props {
-	post: any;
+	post: IPost;
 	comment: any;
 	isReply?: boolean;
 	// eslint-disable-next-line no-unused-vars

@@ -1,4 +1,4 @@
-import { ListComment } from '@components/v2/List';
+import { ListComment } from '@components/v2/List/ListComment';
 import { useInfiniteFetcher } from '@hooks';
 import { IComment, IPost } from '@interfaces';
 import React from 'react';

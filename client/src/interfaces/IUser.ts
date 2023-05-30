@@ -30,11 +30,23 @@ export interface IUser {
 	_id: string;
 	fullname: string;
 	email: string;
-	profilePicture: IMedia;
-	coverPicture: IMedia;
+	profilePicture: IMedia | string;
+	coverPicture: IMedia | string;
 	isOnline: boolean;
 
 	contact: IContact[];
 	work: IWork[];
 	education: IEducation[];
 }
+
+export type UserType = IUser & {
+	profilePicture: IMedia;
+	coverPicture: IMedia;
+};
+
+export type UserFormType = Partial<
+	IUser & {
+		profilePicture: string;
+		coverPicture: string;
+	}
+>;
