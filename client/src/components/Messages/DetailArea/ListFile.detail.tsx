@@ -1,23 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { Box, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
-import { HiDownload } from 'react-icons/hi';
-import { useInfiniteFetcher } from '@hooks';
-import { getFileIcon } from '@utils/data';
 import { getTimeAgo } from '@utils/common';
+import { getFileIcon } from '@utils/data';
 import Image from 'next/image';
+import { HiDownload } from 'react-icons/hi';
 
 interface Props {
 	conversation: any;
 }
 
 const ListFiles = ({ conversation }: Props) => {
-	const fileFetcher = useInfiniteFetcher(`conversations/${conversation?._id}/files/other`);
-
-	const idRef = useRef<any>(null);
-	useEffect(() => {
-		idRef.current = conversation?._id;
-		if (conversation?._id) fileFetcher.reload();
-	}, [conversation?._id]);
+	const fileFetcher = useInfiniteFetcherSWR({ api: `conversations/${conversation?._id}/files/other` });
 
 	if (fileFetcher.fetching) {
 		return (

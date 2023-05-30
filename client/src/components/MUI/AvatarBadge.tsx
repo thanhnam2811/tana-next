@@ -68,7 +68,7 @@ export const UserAvatar = ({ user, size, badgeProps, ...props }: UserAvatarProps
 					...props?.sx,
 				}}
 				alt={user.fullname}
-				src={user.profilePicture.link}
+				src={user.profilePicture.link as string}
 				onClick={goToProfile}
 				{...props}
 			>

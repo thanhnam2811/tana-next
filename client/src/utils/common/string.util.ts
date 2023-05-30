@@ -1,5 +1,6 @@
 import sanitizeHtml from 'sanitize-html';
 import parse from 'html-react-parser';
+import queryString from 'query-string';
 
 interface searchOptions {
 	normalize?: boolean;
@@ -41,4 +42,7 @@ export const stringUtil = {
 
 		return str.includes(search);
 	},
+
+	/** URL generator */
+	generateUrl: (url: string, params: object) => `${url}?${queryString.stringify(params)}`,
 };

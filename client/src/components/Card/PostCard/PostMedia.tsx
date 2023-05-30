@@ -1,8 +1,7 @@
 import { IMedia } from '@interfaces/common';
-import { CloseRounded } from '@mui/icons-material';
+import CloseRounded from '@mui/icons-material/CloseRounded';
 import { Box, Grid, IconButton, Typography } from '@mui/material';
 import { Image } from 'antd';
-import React from 'react';
 
 // Layout for image
 const getColumnSize = (index: number, size: number) => {

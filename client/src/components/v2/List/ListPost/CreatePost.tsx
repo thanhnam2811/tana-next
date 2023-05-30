@@ -1,8 +1,7 @@
 import { UserAvatar } from '@components/v2/Avatar';
 import { PostModal } from '@components/v2/Modal';
 import { InfinitFetcherType } from '@hooks';
-import { IPost } from '@interfaces';
-import { IMedia } from '@interfaces/common';
+import { PostType } from '@interfaces';
 import { useUserStore } from '@store';
 import { postApi } from '@utils/api';
 import { COLORS } from '@utils/theme';
@@ -12,13 +11,13 @@ import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 
 interface Props {
-	fetcher: InfinitFetcherType<IPost>;
+	fetcher: InfinitFetcherType<PostType>;
 }
 
 export function CreatePost({ fetcher, ...cardProps }: Props & CardProps) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: IPost & { media: IMedia[] }) => {
+	const handleAddPost = async (data: PostType) => {
 		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);

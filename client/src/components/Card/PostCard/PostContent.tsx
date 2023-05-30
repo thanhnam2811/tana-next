@@ -19,7 +19,7 @@ const getColumnSize = (index: number, size: number) => {
 };
 
 interface Props {
-	post: IPost & { media: IMedia[] };
+	post: PostType;
 }
 
 export function PostContent({ post }: Props) {

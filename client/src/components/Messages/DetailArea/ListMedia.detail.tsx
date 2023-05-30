@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { Box, CircularProgress, ImageList, ImageListItem, Typography } from '@mui/material';
-import { useInfiniteFetcher } from '@hooks';
 import { isVideo } from '@utils/data';
 import Image from 'next/image';
 interface Props {
@@ -9,14 +8,8 @@ interface Props {
 }
 
 const ListMedia = ({ conversation, handlePreviewMedia }: Props) => {
-	const mediaFetcher = useInfiniteFetcher(`conversations/${conversation?._id}/files/media`);
-	const { data: listMedia, hasMore, fetching, loadMore, reload } = mediaFetcher;
-
-	const idRef = useRef<any>(null);
-	useEffect(() => {
-		idRef.current = conversation?._id;
-		if (conversation?._id) reload();
-	}, [conversation?._id]);
+	const mediaFetcher = useInfiniteFetcherSWR({ api: `conversations/${conversation?._id}/files/media` });
+	const { data: listMedia, hasMore, fetching, loadMore } = mediaFetcher;
 
 	if (mediaFetcher.fetching) {
 		return (

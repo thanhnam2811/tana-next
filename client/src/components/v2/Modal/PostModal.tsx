@@ -1,5 +1,5 @@
 import { PrivacyDropdown } from '@components/Button';
-import { IPost } from '@interfaces';
+import { IPost, PostType } from '@interfaces';
 import { IMedia } from '@interfaces/common';
 import { Collapse } from '@mui/material';
 import { fileApi } from '@utils/api';
@@ -9,11 +9,11 @@ import { Button, Card, Form, Modal, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
+import { PostMedia } from '../Card/PostCard';
 import { RichTextInput } from '../Input';
-import { PostMedia } from '../Card';
 
 interface Props {
-	data?: IPost & { media: IMedia[] };
+	data?: PostType;
 	open: boolean;
 	onClose: () => void;
 	onCreate?: (data: any) => Promise<void>;
@@ -132,6 +132,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 			<Form form={form} layout="vertical" onFinish={onSubmit}>
 				<Form.Item name="content" rules={[{ required: true, message: 'Nội dung không được để trống' }]}>
 					<RichTextInput
+						placeholder="Bạn đang nghĩ gì?"
 						extra={
 							<Form.Item name="privacy" noStyle>
 								<PrivacyDropdown

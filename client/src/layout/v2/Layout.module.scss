@@ -1,0 +1,93 @@
+.header {
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+
+	display: flex;
+	align-items: center;
+
+	.nav {
+		height: 100%;
+		background-color: inherit;
+
+		&_left,
+		&_right {
+			background-color: transparent;
+
+			> div {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+		}
+
+		&_left > div {
+			justify-content: flex-start;
+		}
+
+		&_right > div {
+			justify-content: flex-end;
+		}
+
+		&_content {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		&_button {
+			height: 100%;
+			aspect-ratio: 1;
+			width: auto !important;
+			border-width: 0;
+			border-style: none;
+			transition: all 0.2s ease-in-out;
+
+			svg {
+				width: 20px;
+				height: 20px;
+			}
+
+			&_active,
+			&:hover {
+				border-bottom: 2px solid;
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+				background-color: transparent;
+			}
+		}
+	}
+}
+
+aside.sider {
+	flex: 0 0 360px !important;
+	max-width: 360px !important;
+	min-width: 360px !important;
+	width: 360px !important;
+	background: transparent !important;
+	padding: 1rem;
+
+	&.fixed {
+		position: sticky;
+		top: 64px;
+		height: calc(100vh - 64px);
+		overflow: auto;
+		z-index: 2;
+
+		&.left {
+			left: 0;
+		}
+
+		&.right {
+			right: 0;
+		}
+	}
+}
+
+.content {
+	max-width: 800px;
+	margin: 1rem auto;
+	padding: 0 1rem;
+}

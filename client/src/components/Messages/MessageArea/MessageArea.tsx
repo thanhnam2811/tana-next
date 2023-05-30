@@ -1,6 +1,8 @@
 import { WhiteBox } from '@components/Box';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { Box, Divider, Grid, Typography, styled } from '@mui/material';
+import { MessageContext } from '@pages/messages/[id]';
+import { useUserStore } from '@store';
 import { fileApi } from '@utils/api';
 import { messageApi } from '@utils/api/message-api';
 import { randomString } from '@utils/common';
@@ -13,8 +15,6 @@ import { MessageFooter } from './MessageFooter';
 import { MessageHeader } from './MessageHeader';
 import { MessagesHistory } from './MessageHistory';
 import { messageConfig } from './config';
-import { MessageContext } from '@pages/messages/[id]';
-import { useUserStore } from '@store';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -25,13 +25,12 @@ export function MessageArea({ onMediaPreview }: Props) {
 	const { conversation } = useContext(MessageContext)!;
 	const router = useRouter();
 	const id = router.query.id as string;
-	const messageFetcher = useInfiniteFetcher(`/conversations/${id}/messages`);
+	const messageFetcher = useInfiniteFetcherSWR({ api: `/conversations/${id}/messages` });
 
 	const idRef = useRef(id);
 	// reload data when conversation change
 	useEffect(() => {
 		idRef.current = id;
-		messageFetcher.reload();
 
 		if (conversation) {
 			window.socket.on('receiveMessage', (msg: any) => {

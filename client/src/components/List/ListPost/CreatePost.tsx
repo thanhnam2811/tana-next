@@ -1,9 +1,10 @@
 import { WhiteBox } from '@components/Box';
 import { PostModal } from '@components/Modal';
 import { InfinitFetcherType } from '@hooks';
-import { IPost } from '@interfaces';
-import { IMedia } from '@interfaces/common';
-import { InsertPhotoTwoTone, LocationCityTwoTone, SlideshowTwoTone } from '@mui/icons-material';
+import { PostType } from '@interfaces';
+import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
+import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
+import SlideshowTwoTone from '@mui/icons-material/SlideshowTwoTone';
 import { Avatar, Box, Button, TextField, styled } from '@mui/material';
 import { useUserStore } from '@store';
 import { postApi } from '@utils/api';
@@ -32,7 +33,7 @@ interface Props {
 export function CreatePost({ fetcher }: Props) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: IPost & { media: IMedia[] }) => {
+	const handleAddPost = async (data: PostType) => {
 		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);
@@ -54,7 +55,7 @@ export function CreatePost({ fetcher }: Props) {
 				fullWidth
 				placeholder="Bạn đang nghĩ gì?"
 				InputProps={{
-					startAdornment: <Avatar sx={{ mr: 1 }} src={user?.profilePicture?.link} />,
+					startAdornment: <Avatar sx={{ mr: 1 }} src={user?.profilePicture!.link as string} />,
 					readOnly: true,
 				}}
 				onClick={handleOpenModal}
