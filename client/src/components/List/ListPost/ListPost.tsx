@@ -2,7 +2,6 @@ import { PostCard, PostCardSkeleton } from '@components/Card/PostCard';
 import { InfinitFetcherType } from '@hooks';
 import { Collapse, Typography } from '@mui/material';
 import { postApi } from '@utils/api';
-import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
@@ -14,11 +13,6 @@ interface Props {
 }
 
 export function ListPost({ windowScroll = false, fetcher }: Props) {
-	// Reload when api change
-	useEffect(() => {
-		fetcher.reload();
-	}, [fetcher.api]); // reload when api change
-
 	// React to the post
 	const handleReactPost = async (postId: string, react: ReactionType) => {
 		try {

@@ -1,7 +1,7 @@
 import { IPaginationResponse } from '@interfaces';
 import apiClient, { swrFetcher } from '@utils/api/apiClient';
-import queryString from 'query-string';
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { stringUtil } from '@utils/common';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 interface PaginationResponse<T extends { _id: string } = any> {
@@ -87,115 +87,6 @@ export function useInfiniteFetcher<T extends { _id: string } = any>(api: string)
 	return fetcher;
 }
 
-// // SWR Version
-// import { swrFetcher } from '@utils/api/apiClient';
-// import useSWRInfinite from 'swr/infinite';
-// import queryString from 'query-string';
-
-// export function useInfiniteFetcher<T extends { _id: string } = any>(api: string): InfinitFetcherType<T> {
-// 	const initParams = { size: 20 };
-// 	const [params, setParams] = useState<any>(initParams);
-// 	const getKey = useCallback(
-// 		(pageIndex: number, prevData: PaginationResponse<T>) => {
-// 			if (prevData && !prevData.hasNextPage) return null;
-
-// 			params.offset = pageIndex * params.size;
-// 			return `${api}?${queryString.stringify(params)}`;
-// 		},
-// 		[params]
-// 	);
-
-// 	const { data, error, size, setsize, mutate } = useSWRInfinite<PaginationResponse<any>>(getKey, swrFetcher);
-
-// 	const items: T[] = data?.reduce((acc: T[], cur) => [...acc, ...cur.items], []) || [];
-
-// 	const fetching = !data && !error;
-// 	const hasMore = !!data?.[data.length - 1]?.hasNextPage;
-
-// 	const fetch = (params: any) => {
-// 		setParams(params);
-// 		setsize(1);
-// 	};
-
-// 	const loadMore = () => setsize(size + 1);
-
-// 	const reload = () => {
-// 		setParams(initParams); // Reset params
-// 		setsize(1);
-// 	};
-
-// 	const filter = (filter: any) => {
-// 		setParams({ ...params, ...filter });
-// 		setsize(1);
-// 	};
-
-// 	const addData = (item: T) => {
-// 		// Make a shallow copy of the existing data array and add the new data to the beginning
-// 		const newItems = [item, ...items];
-// 		// Update the cache with the new data
-// 		setsize(size + 1);
-// 		mutate((prevData) => {
-// 			const newPages = prevData?.map((page, index) => {
-// 				const startIndex = index * params.size,
-// 					endIndex = (index + 1) * params.size;
-// 				return {
-// 					...page,
-// 					items: newItems.slice(startIndex, endIndex),
-// 				};
-// 			});
-// 			return newPages;
-// 		});
-// 	};
-
-// 	const updateData = (_id: string, newData: T) => {
-// 		// Make a shallow copy of the existing data array and add the new data to the beginning
-// 		const newItems = items.map((item) => (item._id === _id ? { ...item, ...newData } : item));
-// 		// Update the cache with the new data
-// 		mutate((prevData) => {
-// 			const newPages = prevData?.map((page, index) => {
-// 				const startIndex = index * params.size,
-// 					endIndex = (index + 1) * params.size;
-// 				return {
-// 					...page,
-// 					items: newItems.slice(startIndex, endIndex),
-// 				};
-// 			});
-// 			return newPages;
-// 		});
-// 	};
-
-// 	const removeData = (_id: string) => {
-// 		// Make a shallow copy of the existing data array and add the new data to the beginning
-// 		const newItems = items.filter((item) => item._id !== _id);
-// 		// Update the cache with the new data
-// 		mutate((prevData) => {
-// 			const newPages = prevData?.map((page, index) => {
-// 				const startIndex = index * params.size,
-// 					endIndex = (index + 1) * params.size;
-// 				return {
-// 					...page,
-// 					items: newItems.slice(startIndex, endIndex),
-// 				};
-// 			});
-// 			return newPages;
-// 		});
-// 	};
-
-// 	return {
-// 		data: items,
-// 		params,
-// 		fetching,
-// 		hasMore,
-// 		fetch,
-// 		loadMore,
-// 		filter,
-// 		reload,
-// 		addData,
-// 		updateData,
-// 		removeData,
-// 	};
-// }
-
 export type InfinitFetcherType<T extends { _id: string } = any> = {
 	data: T[];
 	updateData: (id: string, newData: T) => void;
@@ -204,7 +95,7 @@ export type InfinitFetcherType<T extends { _id: string } = any> = {
 	fetching: boolean;
 	validating: boolean;
 	hasMore: boolean;
-	params: any;
+	params: object;
 	fetch: (params: any) => void;
 	loadMore: () => void;
 	filter: (filter: any) => void;
@@ -212,71 +103,122 @@ export type InfinitFetcherType<T extends { _id: string } = any> = {
 	api: string;
 };
 
-import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 
 interface useInfiniteFetcherSWROptions {
+	api: string;
+	size?: number;
 	params?: object;
 }
 
-export const useInfiniteFetcherSWR = <T extends { _id: string } = any>(
-	api: string,
-	{ params: initParams }: useInfiniteFetcherSWROptions = {}
-): InfinitFetcherType<T> => {
-	const [data, setData] = useState<T[]>([]);
-	console.log('data', data);
+export const useInfiniteFetcherSWR = <T extends { _id: string } = any>({
+	api,
+	size = 20,
+	params = {},
+}: useInfiniteFetcherSWROptions): InfinitFetcherType<T> => {
+	const getKey = useCallback(
+		(pageIndex: number, prevData: IPaginationResponse<T>) => {
+			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size });
 
-	const [params, setParams] = useState({ offset: 0, size: 20, ...initParams });
+			const prevOffset = Number(prevData?.offset) || 0;
+			const prevItems = prevData?.items || [];
+			if (prevOffset + prevItems.length >= prevData.totalItems) return null; // No more data
+
+			const offset = prevOffset + prevItems.length;
+			return stringUtil.generateUrl(api, { ...params, offset, size });
+		},
+		[size, api, params]
+	);
 
 	const {
-		data: res,
+		data: listRes,
 		isLoading: fetching,
 		isValidating: validating,
-		mutate: reloadSWR,
-	} = useSWR<IPaginationResponse<T>>(`${api}?${queryString.stringify(params)}`, swrFetcher);
+		mutate,
+		size: page,
+		setSize: setPage,
+	} = useSWRInfinite<IPaginationResponse<T>>(getKey, swrFetcher);
 
-	useEffect(() => {
-		console.log('useInfiniteFetcherSWR', res);
+	const { data, hasMore } = useMemo(() => {
+		const memo = { data: [], hasMore: true };
 
-		if (!res) return;
+		if (!listRes?.length) return memo;
 
-		if (res.offset == 0) {
-			setData(res.items || []);
-		} else {
-			const items = res.items || [];
-			const offset = res.offset || 0;
-			setData((prev) => prev.splice(offset, items.length, ...items));
-		}
-	}, [res]);
+		const lastPage = listRes[listRes.length - 1];
+		const data = listRes.reduce<T[]>((acc, res) => [...acc, ...res.items], []);
+		const hasMore = lastPage.totalItems > data.length;
 
-	const hasMore = res ? res.totalItems > params.offset + params.size : true; // If res is null, hasMore is true (prevent stop fetching when error)
+		return { data, hasMore };
+	}, [listRes]);
 
 	const addData = (newData: T) => {
-		setData((prev) => [newData, ...prev]);
+		// Make a shallow copy of the existing data array and add the new data to the beginning
+		const newItems = [newData, ...data];
+
+		// Update the cache with the new data
+		mutate((prevData) => {
+			const newPages = prevData?.map((page, index) => {
+				const startIndex = index * size,
+					endIndex = (index + 1) * size;
+				return {
+					...page,
+					items: newItems.slice(startIndex, endIndex),
+				};
+			});
+			return newPages;
+		});
 	};
 
 	const updateData = (id: string, newData: T) => {
-		setData((prev) => prev.map((item) => (item._id === id ? newData : item)));
+		// Make a shallow copy of the existing data array and add the new data to the beginning
+		const newItems = data.map((item) => (item._id === id ? { ...item, ...newData } : item));
+
+		// Update the cache with the new data
+		mutate((prevData) => {
+			const newPages = prevData?.map((page, index) => {
+				const startIndex = index * size,
+					endIndex = (index + 1) * size;
+				return {
+					...page,
+					items: newItems.slice(startIndex, endIndex),
+				};
+			});
+			return newPages;
+		});
 	};
 
 	const removeData = (id: string) => {
-		setData((prev) => prev.filter((item) => item._id !== id));
+		// Make a shallow copy of the existing data array and add the new data to the beginning
+		const newItems = data.filter((item) => item._id !== id);
+
+		// Update the cache with the new data
+		mutate((prevData) => {
+			const newPages = prevData?.map((page, index) => {
+				const startIndex = index * size,
+					endIndex = (index + 1) * size;
+				return {
+					...page,
+					items: newItems.slice(startIndex, endIndex),
+				};
+			});
+			return newPages;
+		});
 	};
 
 	const fetch = (params: object) => {
-		setParams((prev) => ({ ...prev, ...params, offset: 0 }));
+		console.log({ params });
 	};
 
 	const loadMore = () => {
-		setParams((prev) => ({ ...prev, offset: data.length }));
+		setPage(page + 1);
 	};
 
 	const reload = () => {
-		setParams({ ...params, offset: 0 });
-		reloadSWR();
+		mutate();
 	};
 
 	const filter = (filter: object) => {
-		setParams((prev) => ({ ...prev, ...filter, offset: 0 }));
+		console.log({ filter });
 	};
 
 	const fetcher = useMemo(
@@ -295,7 +237,7 @@ export const useInfiniteFetcherSWR = <T extends { _id: string } = any>(
 			removeData,
 			api,
 		}),
-		[data, params, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
+		[data, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
 	);
 
 	return fetcher;

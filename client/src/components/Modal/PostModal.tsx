@@ -1,6 +1,6 @@
 import { PostMedia } from '@components/Card/PostCard';
 import { DraftEditor } from '@components/Editor';
-import { IPost } from '@interfaces';
+import { IPost, PostType } from '@interfaces';
 import { IMedia } from '@interfaces/common';
 import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
 import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
@@ -16,7 +16,7 @@ import { toast } from 'react-hot-toast';
 import { HiPlusCircle } from 'react-icons/hi';
 
 interface Props {
-	data?: IPost & { media: IMedia[] };
+	data?: PostType;
 	open: boolean;
 	onClose: () => void;
 	onCreate?: (data: any) => Promise<void>;

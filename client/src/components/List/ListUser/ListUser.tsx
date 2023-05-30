@@ -1,6 +1,5 @@
 import { InfinitFetcherType } from '@hooks';
 import { Box, CircularProgress, Collapse, Typography } from '@mui/material';
-import { useEffect, useRef } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
 import { Relationship, UserCard } from '../../Card/UserCard/UserCard';
@@ -12,15 +11,8 @@ interface Props {
 	onUserClick: (user: any) => void;
 }
 
-export const ListUser = ({ type = 'friends', relationship = 'friend', fetcher, onUserClick }: Props) => {
-	const { data, params, hasMore, loadMore, reload } = fetcher;
-
-	const typeRef = useRef(type);
-	// Fetch data when change type
-	useEffect(() => {
-		typeRef.current = type;
-		reload();
-	}, [type]);
+export const ListUser = ({ relationship = 'friend', fetcher, onUserClick }: Props) => {
+	const { data, params, hasMore, loadMore } = fetcher;
 
 	return (
 		<InfiniteScroll
