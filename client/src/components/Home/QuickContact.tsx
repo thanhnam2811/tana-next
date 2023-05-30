@@ -1,134 +1,64 @@
-import { useEffect, useState } from 'react';
-
-import { UserAvatar } from '@components/MUI';
-import { Box, Divider, Typography } from '@mui/material';
-import { userApi } from '@utils/api';
+import { UserAvatar } from '@components/v2/Avatar';
+import { IPaginationResponse, UserType } from '@interfaces';
+import { swrFetcher, userApi } from '@utils/api';
+import { Button, Card, List, Space, Typography } from 'antd';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import useSWR from 'swr';
 
-interface Action {
-	[key: string]: any;
-
-	title: string;
-	onClick: () => void;
-	avatar?: string;
+interface ContactItemProps {
+	user: UserType;
 }
 
+const ContactItem = ({ user }: ContactItemProps) => (
+	<Button type="text" style={{ width: '100%', height: 'auto' }}>
+		<Space align="center" style={{ width: '100%' }}>
+			<UserAvatar user={user!} />
+
+			<Typography.Title level={5} style={{ margin: 0 }}>
+				{user!.fullname}
+			</Typography.Title>
+		</Space>
+	</Button>
+);
+
 export function QuickContact() {
-	const router = useRouter();
-	const [listContact, setListContact] = useState<Action[]>([]);
-	const [listSuggestions, setListSuggestions] = useState<Action[]>([]);
-
-	useEffect(() => {
-		const fetchContact = async () => {
-			try {
-				const res = await userApi.searchUser('friends', { size: 10 });
-				const items = res.data.items as any[];
-
-				setListContact(
-					items.map((user: any) => ({
-						title: user.fullname,
-						user,
-						onClick: () => {
-							router.push(`/profile/${user._id}`);
-						},
-					}))
-				);
-			} catch (error) {
-				console.log(error);
-			}
-		};
-
-		const fetchSuggestions = async () => {
-			try {
-				const res = await userApi.searchUser('suggests', { size: 10 });
-				const items = res.data.items as any[];
-
-				setListSuggestions(
-					items.map((user: any) => ({
-						title: user.fullname,
-						user,
-						onClick: () => {
-							router.push(`/profile/${user._id}`);
-						},
-					}))
-				);
-			} catch (error) {
-				console.log(error);
-			}
-		};
-
-		fetchContact();
-		fetchSuggestions();
-	}, []);
+	const { data: friends, isLoading: friendsLoading } = useSWR<IPaginationResponse<UserType>>(
+		`${userApi.endpoint.searchUser}/friends`,
+		swrFetcher
+	);
+	const { data: suggests, isLoading: suggestsLoading } = useSWR<IPaginationResponse<UserType>>(
+		`${userApi.endpoint.searchUser}/suggests`,
+		swrFetcher
+	);
 
 	return (
-		<Box display="flex" flexDirection="column" height="100%">
-			<Typography
-				fontSize={18}
-				fontWeight={600}
-				sx={{
-					mx: 1,
-				}}
-			>
-				Liên hệ
-			</Typography>
+		<>
+			<List
+				header={<Typography.Title level={4}>Liên hệ</Typography.Title>}
+				dataSource={friends?.items}
+				renderItem={(item) => (
+					<List.Item>
+						<Link href={`/profile?id=${item._id}`} style={{ width: '100%' }}>
+							<ContactItem user={item} />
+						</Link>
+					</List.Item>
+				)}
+				loading={friendsLoading}
+			/>
 
-			<Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto" flex={1}>
-				{listContact.map((action, index) => (
-					<Box
-						key={index}
-						display="flex"
-						alignItems="center"
-						sx={{
-							p: '8px',
-							cursor: 'pointer',
-							'&:hover': {
-								backgroundColor: '#1877f22f',
-							},
-							borderRadius: '8px',
-						}}
-						onClick={action.onClick}
-					>
-						<UserAvatar user={action.user} size={32} badgeProps={{ sx: { mr: 1 } }} />
-
-						<Typography variant="subtitle2">{action.title}</Typography>
-					</Box>
-				))}
-			</Box>
-
-			<Divider sx={{ my: 1 }} />
-
-			<Typography
-				fontSize={18}
-				fontWeight={600}
-				sx={{
-					mx: 1,
-				}}
-			>
-				Gợi ý
-			</Typography>
-			<Box display="flex" flexDirection="column" maxHeight="100%" overflow="auto" flex={1}>
-				{listSuggestions.map((action, index) => (
-					<Box
-						key={index}
-						display="flex"
-						alignItems="center"
-						sx={{
-							p: '8px',
-							cursor: 'pointer',
-							'&:hover': {
-								backgroundColor: '#1877f22f',
-							},
-							borderRadius: '8px',
-						}}
-						onClick={action.onClick}
-					>
-						<UserAvatar user={action.user} size={32} badgeProps={{ sx: { mr: 1 } }} />
-
-						<Typography variant="subtitle2">{action.title}</Typography>
-					</Box>
-				))}
-			</Box>
-		</Box>
+			<List
+				header={<Typography.Title level={4}>Đề xuất</Typography.Title>}
+				dataSource={suggests?.items}
+				renderItem={(item) => (
+					<List.Item>
+						<Link href={`/profile?id=${item._id}`}>
+							<ContactItem user={item} />
+						</Link>
+					</List.Item>
+				)}
+				loading={suggestsLoading}
+			/>
+		</>
 	);
 }

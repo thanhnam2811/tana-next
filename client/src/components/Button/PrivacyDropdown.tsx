@@ -1,6 +1,6 @@
 import { PrivacyOptionType, getPrivacyOption, privacyOptions } from '@assets/data';
 import { SelectApi } from '@components/v2/Input';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { IPrivacy, IUser, PrivacyType } from '@interfaces';
 import { useUserStore } from '@store';
 import { Button, DropDownProps, Dropdown, Form, Input, Modal, Tooltip } from 'antd';
@@ -46,13 +46,7 @@ export function PrivacyDropdown({
 	const hideModal = () => setOpenModal(false);
 
 	const { user } = useUserStore();
-	const friendFetcher = useInfiniteFetcher<IUser>(`/users/${user!._id}/friends`);
-
-	useEffect(() => {
-		if (openModal && !friendFetcher.data.length) {
-			friendFetcher.loadMore(); // load friend list when open modal and not loaded
-		}
-	}, [openModal]);
+	const friendFetcher = useInfiniteFetcherSWR<IUser>({ api: `/users/${user!._id}/friends` });
 
 	return (
 		<>

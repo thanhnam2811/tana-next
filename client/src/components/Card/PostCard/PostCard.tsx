@@ -1,14 +1,14 @@
 import { WhiteBox } from '@components/Box';
 import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
+import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
 import { Box, BoxProps, Collapse, Divider, IconButton, Skeleton, Typography } from '@mui/material';
 import { useUserStore } from '@store';
 import { getTimeAgo } from '@utils/common';
+import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { PostAction, PostComment, PostContent, PostContentSkeleton, PostFooter, PostFooterSkeleton } from '.';
-import { OpenInNewRounded } from '@mui/icons-material';
-import { useRouter } from 'next/router';
 
 interface Props {
 	post: any;
