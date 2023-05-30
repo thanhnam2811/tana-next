@@ -2,9 +2,9 @@ import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
 import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
-import { useInfiniteFetcher } from '@hooks';
-import { CenterArea, ContainerArea, LeftArea } from '@layout/Area';
-import { withLayout } from '@layout/v2';
+import { useInfiniteFetcherSWR } from '@hooks';
+import { Content, Sider, withLayout } from '@layout/v2';
+import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { HiSparkles, HiUserGroup, HiUserPlus, HiUsers } from 'react-icons/hi2';
@@ -42,7 +42,7 @@ function Friends() {
 	const type = (router.query.type as FriendsType) || 'friends';
 
 	const relationship = relationshipData[type]?.relationship;
-	const userFetcher = useInfiniteFetcher(`/users/searchUser/${type}`);
+	const userFetcher = useInfiniteFetcherSWR({ api: `/users/searchUser/${type}` });
 	const [, setUserPreview] = useState<any>(null); // TODO: preview user
 
 	const changeType = (type: FriendsType) => {
@@ -51,8 +51,8 @@ function Friends() {
 	const previewUser = (user: any) => setUserPreview(user);
 
 	return (
-		<ContainerArea>
-			<LeftArea fixed>
+		<Layout hasSider>
+			<Sider fixed align="left">
 				<WhiteBox>
 					<Navigate.Tabs
 						value={type ?? false}
@@ -72,17 +72,16 @@ function Friends() {
 						))}
 					</Navigate.Tabs>
 				</WhiteBox>
-			</LeftArea>
+			</Sider>
 
-			{/* Summary */}
-			<CenterArea>
+			<Content>
 				<WhiteBox p={2}>
 					<FilterUser fetcher={userFetcher} />
 
 					<ListUser type={type} onUserClick={previewUser} fetcher={userFetcher} relationship={relationship} />
 				</WhiteBox>
-			</CenterArea>
-		</ContainerArea>
+			</Content>
+		</Layout>
 	);
 }
 

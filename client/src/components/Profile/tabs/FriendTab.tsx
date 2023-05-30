@@ -12,7 +12,7 @@ interface Props {
 export function FriendTab({ user }: Props) {
 	const router = useRouter();
 	console.log('FriendTab');
-	const userFetcher = useInfiniteFetcherSWR(`/users/${user._id}/friends`);
+	const userFetcher = useInfiniteFetcherSWR({ api: `/users/${user._id}/friends` });
 
 	const onUserClick = (user: any) => {
 		router.push({ pathname: '/profile', query: { id: user._id } });

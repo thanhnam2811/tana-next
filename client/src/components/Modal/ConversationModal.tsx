@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useInfiniteFetcher } from '@hooks';
+import { SearchInput } from '@components/MUI';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { LoadingButton } from '@mui/lab';
 import {
 	Avatar,
@@ -18,11 +18,11 @@ import {
 	Typography,
 } from '@mui/material';
 import { stringUtil } from '@utils/common';
+import React, { useState } from 'react';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
 import Swal from 'sweetalert2';
-import { SearchInput } from '@components/MUI';
 
 const Transition = React.forwardRef(function Transition(props: { children: JSX.Element }, ref) {
 	return (
@@ -50,12 +50,8 @@ export function ConversationModal({
 }: Props) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const searchFetcher = useInfiniteFetcher('users/searchUser/friends');
+	const searchFetcher = useInfiniteFetcherSWR({ api: 'users/searchUser/friends' });
 	const searchResults = searchFetcher.data;
-
-	useEffect(() => {
-		searchFetcher.reload();
-	}, []);
 
 	const handleSearch = (value: string) => searchFetcher.filter({ key: value });
 
@@ -71,7 +67,6 @@ export function ConversationModal({
 			await onSubmit(listMember);
 
 			setListMember([]);
-			searchFetcher.reload();
 			handleClose();
 			setIsSubmitting(false);
 		}

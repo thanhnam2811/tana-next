@@ -1,5 +1,5 @@
 import { PrivacyDropdown } from '@components/Button';
-import { IPost } from '@interfaces';
+import { IPost, PostType } from '@interfaces';
 import { IMedia } from '@interfaces/common';
 import { Collapse } from '@mui/material';
 import { fileApi } from '@utils/api';
@@ -9,11 +9,11 @@ import { Button, Card, Form, Modal, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
-import { RichTextInput } from '../Input';
 import { PostMedia } from '../Card/PostCard';
+import { RichTextInput } from '../Input';
 
 interface Props {
-	data?: IPost & { media: IMedia[] };
+	data?: PostType;
 	open: boolean;
 	onClose: () => void;
 	onCreate?: (data: any) => Promise<void>;

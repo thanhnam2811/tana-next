@@ -17,3 +17,5 @@ export interface IPost {
 	updatedAt: string;
 	reactOfUser: string;
 }
+
+export type PostType = IPost & { media: IMedia[] }; // for use in component

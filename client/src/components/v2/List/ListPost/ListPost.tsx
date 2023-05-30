@@ -1,25 +1,19 @@
+import { ReactionType } from '@components/Popup';
 import { PostCard } from '@components/v2/Card/PostCard';
 import { InfinitFetcherType } from '@hooks';
-import { Collapse, Typography } from '@mui/material';
+import { IPost, PostType } from '@interfaces';
+import { Typography } from '@mui/material';
 import { postApi } from '@utils/api';
-import { useEffect } from 'react';
+import { List } from 'antd';
 import { toast } from 'react-hot-toast';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { TransitionGroup } from 'react-transition-group';
-import { IPost } from '@interfaces';
-import { ReactionType } from '@components/Popup';
 
 interface Props {
 	windowScroll?: boolean;
-	fetcher: InfinitFetcherType<IPost>;
+	fetcher: InfinitFetcherType<PostType>;
 }
 
 export function ListPost({ windowScroll = false, fetcher }: Props) {
-	// Reload when api change
-	useEffect(() => {
-		fetcher.reload();
-	}, [fetcher.api]); // reload when api change
-
 	// React to the post
 	const handleReact = async (postId: string, react: ReactionType) => {
 		try {
@@ -79,13 +73,13 @@ export function ListPost({ windowScroll = false, fetcher }: Props) {
 				)
 			}
 		>
-			<TransitionGroup component={null}>
-				{fetcher.data.map((post: any) => (
-					<Collapse key={post._id} mountOnEnter>
-						<PostCard post={post} onDelete={handleDelete} onReact={handleReact} onEdit={handleEdit} />
-					</Collapse>
-				))}
-			</TransitionGroup>
+			<List
+				loading={fetcher.fetching}
+				dataSource={fetcher.data}
+				renderItem={(post) => (
+					<PostCard post={post} onDelete={handleDelete} onReact={handleReact} onEdit={handleEdit} />
+				)}
+			/>
 		</InfiniteScroll>
 	);
 }

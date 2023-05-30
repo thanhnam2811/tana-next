@@ -2,12 +2,12 @@ import { withAuth } from '@components/Auth';
 import { QuickContact, ShortCut } from '@components/Home';
 import { CreatePost, ListPost } from '@components/v2/List/ListPost';
 import { useInfiniteFetcherSWR } from '@hooks';
-import { IPost } from '@interfaces';
+import { PostType } from '@interfaces';
 import { Content, Sider, withLayout } from '@layout/v2';
 import { Layout } from 'antd';
 
 function Home() {
-	const postFetch = useInfiniteFetcherSWR<IPost>('posts/home');
+	const postFetch = useInfiniteFetcherSWR<PostType>({ api: 'posts/home' });
 
 	return (
 		<Layout hasSider>
