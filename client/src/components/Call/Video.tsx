@@ -1,4 +1,6 @@
-import { CallEndRounded, MicRounded, VideoCallRounded } from '@mui/icons-material';
+import CallEndRounded from '@mui/icons-material/CallEndRounded';
+import MicRounded from '@mui/icons-material/MicRounded';
+import VideoCallRounded from '@mui/icons-material/VideoCallRounded';
 import { Box, BoxProps, IconButton, Stack } from '@mui/material';
 import { useUserStore } from '@store';
 import { authToken } from '@utils/api';

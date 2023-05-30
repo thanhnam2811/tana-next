@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 
 import { Goal, Mission, Value } from '@assets/images';
-import { ArrowForward } from '@mui/icons-material';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import { Box, Button, Card, Container, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';

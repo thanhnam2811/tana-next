@@ -2,7 +2,7 @@ import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
 import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import { ContainerArea, LeftArea } from '@layout';
+import { ContainerArea, LeftArea } from '@layout/Area';
 import { CircularProgress } from '@mui/material';
 import { useUserStore } from '@store';
 import { userApi } from '@utils/api';

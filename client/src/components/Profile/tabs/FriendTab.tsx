@@ -1,9 +1,9 @@
 import { WhiteBox } from '@components/Box';
-import { FilterUser, ListUser } from '@components/List';
-import { useInfiniteFetcher } from '@hooks';
-import { CenterArea } from '@layout';
+import { FilterUser } from '@components/List/ListUser';
+import { useInfiniteFetcherSWR } from '@hooks';
+import { CenterArea } from '@layout/Area';
 import { useRouter } from 'next/router';
-import React from 'react';
+import { ListFriend } from '@components/v2/List/ListFriend';
 
 interface Props {
 	user: any;
@@ -11,7 +11,8 @@ interface Props {
 
 export function FriendTab({ user }: Props) {
 	const router = useRouter();
-	const userFetcher = useInfiniteFetcher(`/users/${user._id}/friends`);
+	console.log('FriendTab');
+	const userFetcher = useInfiniteFetcherSWR(`/users/${user._id}/friends`);
 
 	const onUserClick = (user: any) => {
 		router.push({ pathname: '/profile', query: { id: user._id } });
@@ -22,7 +23,7 @@ export function FriendTab({ user }: Props) {
 			<WhiteBox p={2}>
 				<FilterUser fetcher={userFetcher} />
 
-				<ListUser onUserClick={onUserClick} fetcher={userFetcher} />
+				<ListFriend fetcher={userFetcher} />
 			</WhiteBox>
 		</CenterArea>
 	);

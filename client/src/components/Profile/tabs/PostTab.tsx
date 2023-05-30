@@ -1,20 +1,20 @@
-import React from 'react';
+import { CreatePost, ListPost } from '@components/v2/List/ListPost';
+import { useInfiniteFetcherSWR } from '@hooks';
+import { CenterArea } from '@layout/Area';
 import { Box, Stack } from '@mui/material';
-import { useInfiniteFetcher } from '@hooks';
-import { PictureContainer } from '../PictureContainer';
-import { CenterArea } from '@layout';
 import { useUserStore } from '@store';
-import { CreatePost, ListPost } from '@components/v2/List';
+import { PictureContainer } from '../PictureContainer';
+import { IPost, UserType } from '@interfaces';
 
 interface Props {
-	user: any;
+	user: UserType;
 }
 
 export function PostTab({ user }: Props) {
 	const { user: currentUser } = useUserStore();
 	const isCurrentUser = user._id === currentUser?._id;
 
-	const postsFetcher = useInfiniteFetcher(`/users/${user._id}/posts`);
+	const postsFetcher = useInfiniteFetcherSWR<IPost>(`/users/${user._id}/posts`);
 
 	return (
 		<CenterArea alignItems="flex-start">

@@ -1,9 +1,9 @@
-import { DraftViewer } from '@components/Editor';
+import { RichTextInput } from '@components/v2/Input';
 import { IPost } from '@interfaces';
-import { useEffect, useRef, useState } from 'react';
 import { IMedia } from '@interfaces/common';
-import styles from './PostCard.module.scss';
 import { Typography } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import styles from './PostCard.module.scss';
 
 const LINE_HEIGHT = 24; // Height of each line of post content
 const MAX_HEIGHT = 5 * LINE_HEIGHT; // Max height of post content
@@ -39,7 +39,7 @@ export function PostContent({ post }: Props) {
 
 	return (
 		<div style={{ maxHeight: MAX_HEIGHT }} ref={postContentRef} className={styles.post_content}>
-			<DraftViewer content={post.content} />
+			<RichTextInput.Viewer content={post.content} />
 
 			{/* Button read more */}
 			{hasMore && (
