@@ -2,6 +2,10 @@ import { IUser, UserType } from '@interfaces';
 import apiClient from './apiClient';
 
 export const userApi = {
+	endpoint: {
+		searchUser: 'users/searchUser',
+	},
+
 	searchUser: (type: string, params: any) =>
 		apiClient.get(`users/searchUser/${type}`, {
 			params,

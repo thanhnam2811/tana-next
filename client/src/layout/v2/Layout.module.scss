@@ -60,3 +60,32 @@
 		}
 	}
 }
+
+aside.sider {
+	min-width: 280px !important;
+	width: 360px !important;
+	background: transparent !important;
+	padding: 1rem;
+
+	&.fixed {
+		position: sticky;
+		top: 64px;
+		height: calc(100vh - 64px);
+		overflow: auto;
+		z-index: 2;
+
+		&.left {
+			left: 0;
+		}
+
+		&.right {
+			right: 0;
+		}
+	}
+}
+
+.content {
+	max-width: 800px;
+	margin: 1rem auto;
+	padding: 0 1rem;
+}
