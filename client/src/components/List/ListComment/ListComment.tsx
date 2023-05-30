@@ -6,7 +6,6 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Collapse, Stack, TextField } from '@mui/material';
 import { useUserStore } from '@store';
 import { commentApi } from '@utils/api';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { TransitionGroup } from 'react-transition-group';
@@ -19,10 +18,6 @@ interface Props {
 
 export const ListComment = ({ fetcher, post, comment }: Props) => {
 	const isReply = !!comment;
-
-	useEffect(() => {
-		fetcher.reload();
-	}, [fetcher.api]); // reload when api change
 
 	const handleDeleteComment = async (commentId: string) => {
 		try {

@@ -112,7 +112,7 @@ const filterOptions = {
 	],
 };
 
-export const getFilterTitle = (query: any) => {
+export const getFilterTitle = (query: any = {}) => {
 	const { gender, sort } = query;
 	const genderLabel = filterOptions.gender.find((g) => g.value === gender)?.label || 'Tất cả';
 	const sortLabel = filterOptions.sort.find((s) => s.value === sort)?.label || 'Mới nhất';

@@ -1,11 +1,11 @@
 import { ListComment } from '@components/List/ListComment';
 import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
+import { IPost } from '@interfaces';
 import { Box, CircularProgress, Collapse, Stack, StackProps, Typography } from '@mui/material';
 import { useState } from 'react';
 import { CommentFooter } from '.';
-import { IPost } from '@interfaces';
 
 interface Props {
 	post: IPost;
@@ -37,7 +37,7 @@ export const CommentCard = ({
 		setDeleting(false);
 	};
 
-	const replyFetcher = useInfiniteFetcher(`posts/${post._id}/comments/${comment._id}/replies`);
+	const replyFetcher = useInfiniteFetcherSWR({ api: `posts/${post._id}/comments/${comment._id}/replies` });
 
 	const onReact = (react: ReactionType) => handleReact(comment._id, react);
 

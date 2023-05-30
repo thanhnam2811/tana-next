@@ -1,6 +1,5 @@
 import { RichTextInput } from '@components/v2/Input';
-import { IPost } from '@interfaces';
-import { IMedia } from '@interfaces/common';
+import { PostType } from '@interfaces';
 import { Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './PostCard.module.scss';
@@ -9,7 +8,7 @@ const LINE_HEIGHT = 24; // Height of each line of post content
 const MAX_HEIGHT = 5 * LINE_HEIGHT; // Max height of post content
 
 interface Props {
-	post: IPost & { media: IMedia[] };
+	post: PostType;
 }
 
 export function PostContent({ post }: Props) {

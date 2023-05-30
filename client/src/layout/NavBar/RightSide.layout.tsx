@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { MyIconButton } from '@components/MUI';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
 import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import Logout from '@mui/icons-material/Logout';
 import PersonAdd from '@mui/icons-material/PersonAdd';
@@ -59,11 +59,8 @@ export function RightSide() {
 		if (!pathname.includes(`/profile/${user?._id}`)) router.push(`/profile/${user?._id}`);
 	};
 
-	const notiFetcher = useInfiniteFetcher('users/notifications');
+	const notiFetcher = useInfiniteFetcherSWR({ api: 'users/notifications' });
 	const notifications = notiFetcher.data;
-	useEffect(() => {
-		notiFetcher.reload();
-	}, [user?._id]);
 
 	return (
 		<Grid
