@@ -2,7 +2,7 @@ import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
 import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import { ContainerArea, LeftArea } from '@layout';
+import { ContainerArea, LeftArea } from '@layout/Area';
 import { CircularProgress } from '@mui/material';
 import { useUserStore } from '@store';
 import { userApi } from '@utils/api';
@@ -11,8 +11,7 @@ import { ComponentType, Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
 import { IconType } from 'react-icons/lib';
-
-// import { FriendTab, PostTab } from '@components/Profile/tabs';
+import { withLayout } from '@layout/v2';
 
 type tabType = 'posts' | 'friends' | 'media' | 'about';
 
@@ -109,4 +108,4 @@ function ProfilePage() {
 	);
 }
 
-export default withAuth(ProfilePage);
+export default withAuth(withLayout(ProfilePage));

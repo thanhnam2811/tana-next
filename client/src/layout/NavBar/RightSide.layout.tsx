@@ -148,7 +148,7 @@ export function RightSide() {
 
 			<Tooltip title={user?.fullname || ''}>
 				<IconButton onClick={(e) => setProfileMenuEl(e.target)}>
-					<Avatar alt="Ảnh đại diện" src={user?.profilePicture?.link}>
+					<Avatar alt="Ảnh đại diện" src={user?.profilePicture?.link as string}>
 						{stringUtil.getShortName(user?.fullname)}
 					</Avatar>
 				</IconButton>

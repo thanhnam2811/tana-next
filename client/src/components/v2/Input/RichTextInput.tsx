@@ -39,12 +39,7 @@ interface EditorProps {
 	placeholder?: string;
 }
 
-export const RichTextInput = ({
-	value = '',
-	onChange,
-	placeholder = 'Nhập nội dung...',
-	...props
-}: EditorProps & CardProps) => {
+export const RichTextInput = ({ value = '', onChange, placeholder, ...props }: EditorProps & CardProps) => {
 	const [editorState, setEditorState] = useState(EditorState.createWithContent(stateFromHTML(value)));
 
 	const handleEditorChange = (newEditorState: EditorState) => {
@@ -112,10 +107,17 @@ interface ViewerProps {
 	content: string;
 }
 
-export const DraftViewer: React.FC<ViewerProps> = ({ content }) => {
+RichTextInput.Viewer = function Viewer({ content }: ViewerProps) {
 	const contentState = stateFromHTML(content);
 	const editorState = EditorState.createWithContent(contentState);
 
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	return <Editor editorState={editorState} readOnly={true} onChange={() => {}} />;
+	return (
+		<Editor
+			editorState={editorState}
+			readOnly={true}
+			onChange={() => {
+				// Do nothing
+			}}
+		/>
+	);
 };

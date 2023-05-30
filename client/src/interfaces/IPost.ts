@@ -1,5 +1,5 @@
 import { IPrivacy } from './IPrivacy';
-import { IUser } from './IUser';
+import { UserType } from './IUser';
 import { IMedia } from './common';
 
 export interface IPost {
@@ -12,7 +12,7 @@ export interface IPost {
 	tags: any[];
 	privacy: IPrivacy;
 	deleted: boolean;
-	author: IUser;
+	author: UserType;
 	createdAt: string;
 	updatedAt: string;
 	reactOfUser: string;

@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { RichTextInput } from '../Input';
-import { PostMedia } from '../Card';
+import { PostMedia } from '../Card/PostCard';
 
 interface Props {
 	data?: IPost & { media: IMedia[] };
@@ -132,6 +132,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 			<Form form={form} layout="vertical" onFinish={onSubmit}>
 				<Form.Item name="content" rules={[{ required: true, message: 'Nội dung không được để trống' }]}>
 					<RichTextInput
+						placeholder="Bạn đang nghĩ gì?"
 						extra={
 							<Form.Item name="privacy" noStyle>
 								<PrivacyDropdown

@@ -106,4 +106,8 @@ apiClient.interceptors.response.use(
 	}
 );
 
+export function swrFetcher<T>(url: string) {
+	return apiClient.get<T>(url).then((res) => res.data);
+}
+
 export default apiClient;

@@ -1,4 +1,4 @@
-import { IUser } from './IUser';
+import { UserType } from './IUser';
 import { IMedia } from './common';
 
 export interface IComment {
@@ -10,7 +10,7 @@ export interface IComment {
 	reactOfUser?: string;
 	tags: any[];
 	deleted: boolean;
-	author: IUser;
+	author: UserType;
 	post: string;
 	createdAt: string;
 	updatedAt: string;

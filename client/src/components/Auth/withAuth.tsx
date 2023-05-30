@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useUserStore } from '@store';
 
 export function withAuth(Component: NextComponentType) {
-	const Auth = (props: any) => {
+	const Auth: NextComponentType = (props: any) => {
 		const router = useRouter();
 		const { user } = useUserStore();
 

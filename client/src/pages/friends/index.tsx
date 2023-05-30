@@ -1,9 +1,10 @@
 import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
-import { FilterUser, ListUser } from '@components/List';
+import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
 import { useInfiniteFetcher } from '@hooks';
-import { CenterArea, ContainerArea, LeftArea } from '@layout';
+import { CenterArea, ContainerArea, LeftArea } from '@layout/Area';
+import { withLayout } from '@layout/v2';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { HiSparkles, HiUserGroup, HiUserPlus, HiUsers } from 'react-icons/hi2';
@@ -72,6 +73,7 @@ function Friends() {
 					</Navigate.Tabs>
 				</WhiteBox>
 			</LeftArea>
+
 			{/* Summary */}
 			<CenterArea>
 				<WhiteBox p={2}>
@@ -84,4 +86,4 @@ function Friends() {
 	);
 }
 
-export default withAuth(Friends);
+export default withAuth(withLayout(Friends));
