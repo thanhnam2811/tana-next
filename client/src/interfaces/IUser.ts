@@ -30,9 +30,12 @@ export interface IUser {
 	_id: string;
 	fullname: string;
 	email: string;
+
 	profilePicture: IMedia | string;
 	coverPicture: IMedia | string;
+
 	isOnline: boolean;
+	lastAccess: string;
 
 	contact: IContact[];
 	work: IWork[];

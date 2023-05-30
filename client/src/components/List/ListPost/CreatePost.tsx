@@ -1,8 +1,7 @@
 import { WhiteBox } from '@components/Box';
 import { PostModal } from '@components/Modal';
 import { InfinitFetcherType } from '@hooks';
-import { IPost } from '@interfaces';
-import { IMedia } from '@interfaces/common';
+import { PostType } from '@interfaces';
 import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
 import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
 import SlideshowTwoTone from '@mui/icons-material/SlideshowTwoTone';
@@ -34,7 +33,7 @@ interface Props {
 export function CreatePost({ fetcher }: Props) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: IPost & { media: IMedia[] }) => {
+	const handleAddPost = async (data: PostType) => {
 		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);

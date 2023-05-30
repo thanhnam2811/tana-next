@@ -2,16 +2,16 @@ import { withAuth } from '@components/Auth';
 import { WhiteBox } from '@components/Box';
 import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import { ContainerArea, LeftArea } from '@layout/Area';
+import { Content, Sider, withLayout } from '@layout/v2';
 import { CircularProgress } from '@mui/material';
 import { useUserStore } from '@store';
 import { userApi } from '@utils/api';
+import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import { ComponentType, Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
 import { IconType } from 'react-icons/lib';
-import { withLayout } from '@layout/v2';
 
 type tabType = 'posts' | 'friends' | 'media' | 'about';
 
@@ -79,8 +79,8 @@ function ProfilePage() {
 	}, [id]);
 
 	return (
-		<ContainerArea>
-			<LeftArea fixed>
+		<Layout hasSider>
+			<Sider fixed align="left">
 				<WhiteBox>
 					<Navigate.Tabs
 						value={tab}
@@ -100,11 +100,13 @@ function ProfilePage() {
 						))}
 					</Navigate.Tabs>
 				</WhiteBox>
-			</LeftArea>
+			</Sider>
 
 			{/* Summary */}
-			{loading ? <CircularProgress /> : <Suspense>{TabContent && <TabContent user={user} />}</Suspense>}
-		</ContainerArea>
+			<Content>
+				{loading ? <CircularProgress /> : <Suspense>{TabContent && <TabContent user={user} />}</Suspense>}
+			</Content>
+		</Layout>
 	);
 }
 

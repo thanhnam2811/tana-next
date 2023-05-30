@@ -5,12 +5,12 @@ import { MyIconButton, SearchInput } from '@components/MUI';
 import { DetailArea } from '@components/Messages/DetailArea';
 import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
-import { InfinitFetcherType, useInfiniteFetcher } from '@hooks';
-import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout/Area';
-import { withLayout } from '@layout/v2';
+import { InfinitFetcherType, useInfiniteFetcherSWR } from '@hooks';
+import { Content, Sider, withLayout } from '@layout/v2';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
+import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -30,7 +30,7 @@ function MessagesPage() {
 	const { id } = router.query;
 	const all = !id || id === 'all';
 
-	const convFetcher = useInfiniteFetcher('conversations');
+	const convFetcher = useInfiniteFetcherSWR({ api: 'conversations' });
 	const handleSearch = (value: string) => convFetcher.filter({ key: value }); // TODO: change to search
 
 	const [conversation, setConversation] = useState<any>(null);
@@ -64,11 +64,6 @@ function MessagesPage() {
 		convFetcher.updateData(newConv._id, newConv); // update data in list
 		setConversation(newConv); // update data in detail
 	};
-
-	// fetch data when page load
-	useEffect(() => {
-		convFetcher.reload();
-	}, []);
 
 	// set conversation when change ID
 	const idRef = useRef(id);
@@ -117,12 +112,12 @@ function MessagesPage() {
 	const handleCloseModalCreate = () => setOpenModalCreate(false);
 
 	return (
-		<ContainerArea>
+		<Layout hasSider>
 			{id && id !== 'all' && (
 				<MediaViewModal open={openMediaPreview} onClose={handleCloseMediaPreview} mediaData={mediaPreview} />
 			)}
 
-			<LeftArea fixed>
+			<Sider fixed align="left">
 				<WhiteBox
 					sx={{
 						py: '8px',
@@ -165,7 +160,7 @@ function MessagesPage() {
 						<ListConversation fetcher={convFetcher} scrollableTarget="list-conversation" />
 					</Box>
 				</WhiteBox>
-			</LeftArea>
+			</Sider>
 
 			{!all && conversation ? (
 				<MessageContext.Provider
@@ -177,14 +172,14 @@ function MessagesPage() {
 						updateConversation,
 					}}
 				>
-					<CenterArea width="100%">
+					<Content style={{ width: '100%', maxWidth: '100%' }}>
 						<MessageArea onMediaPreview={handleMediaPreview} />
-					</CenterArea>
+					</Content>
 
 					{showDetail && (
-						<RightArea fixed>
+						<Sider fixed align="right">
 							<DetailArea />
-						</RightArea>
+						</Sider>
 					)}
 				</MessageContext.Provider>
 			) : (
@@ -192,7 +187,7 @@ function MessagesPage() {
 					Chọn cuộc trò chuyện để xem tin nhắn
 				</Box>
 			)}
-		</ContainerArea>
+		</Layout>
 	);
 }
 

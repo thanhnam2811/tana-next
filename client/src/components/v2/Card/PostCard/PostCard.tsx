@@ -1,8 +1,9 @@
 import { reactOptions } from '@assets/data';
+import { PrivacyDropdown } from '@components/Button';
 import { UserAvatar } from '@components/v2/Avatar';
 import { ReactPopover } from '@components/v2/Popover';
-import { IPost } from '@interfaces';
-import { IMedia, ReactionType } from '@interfaces/common';
+import { IPost, PostType } from '@interfaces';
+import { ReactionType } from '@interfaces/common';
 import { Collapse } from '@mui/material';
 import { useUserStore } from '@store';
 import { getTimeAgo, randomNumber } from '@utils/common';
@@ -14,12 +15,11 @@ import styles from './PostCard.module.scss';
 import { PostComment } from './PostComment';
 import { PostContent } from './PostContent';
 import { PostMedia } from './PostMedia';
-import { PrivacyDropdown } from '@components/Button';
 
 const { Meta } = Card;
 
 interface Props {
-	post?: IPost & { media: IMedia[] };
+	post?: PostType;
 	onEdit?: (postId: string, data: Partial<IPost>) => void;
 	onDelete?: (postId: string) => void;
 	onReact?: (postId: string, reaction: ReactionType) => void;
@@ -90,10 +90,10 @@ export function PostCard({ post, onEdit, onDelete, onReact }: Props) {
 		);
 
 	return (
-		<Card bodyStyle={{ padding: 0 }}>
+		<Card bodyStyle={{ padding: 0 }} style={{ marginBottom: 16 }}>
 			<Card
 				style={{ width: '100%' }}
-				headStyle={{ padding: '0 16px' }}
+				headStyle={{ padding: '0 16px 16px' }}
 				bodyStyle={{ padding: 16 }}
 				bordered={false}
 				extra={

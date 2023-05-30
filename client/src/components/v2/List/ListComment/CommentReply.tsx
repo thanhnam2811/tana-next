@@ -1,7 +1,6 @@
 import { ListComment } from '@components/v2/List/ListComment';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { IComment, IPost } from '@interfaces';
-import React from 'react';
 
 interface Props {
 	post: IPost;
@@ -9,9 +8,9 @@ interface Props {
 }
 
 export function CommentReply({ post, comment }: Props) {
-	const replyFetcher = useInfiniteFetcher(`posts/${post._id}/comments/${comment._id}/replies`);
+	const replyFetcher = useInfiniteFetcherSWR({ api: `posts/${post._id}/comments/${comment._id}/replies` });
 	return (
-		<div style={{ padding: '16px 16px 0' }}>
+		<div style={{ padding: '0 16px 16px' }}>
 			<ListComment fetcher={replyFetcher} post={post} comment={comment} />
 		</div>
 	);

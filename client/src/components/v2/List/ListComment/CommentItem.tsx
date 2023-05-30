@@ -79,7 +79,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			</List.Item>
 
 			{!isReply && (
-				<Collapse in={showReply}>
+				<Collapse in={showReply} mountOnEnter>
 					<CommentReply post={post} comment={comment} />
 				</Collapse>
 			)}
