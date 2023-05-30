@@ -1,30 +1,30 @@
 import { withAuth } from '@components/Auth';
 import { QuickContact, ShortCut } from '@components/Home';
 import { CreatePost, ListPost } from '@components/v2/List/ListPost';
-import { useInfiniteFetcher } from '@hooks';
+import { useInfiniteFetcherSWR } from '@hooks';
 import { IPost } from '@interfaces';
-import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout/Area';
-import { withLayout } from '@layout/v2';
+import { Content, Sider, withLayout } from '@layout/v2';
+import { Layout } from 'antd';
 
 function Home() {
-	const postFetch = useInfiniteFetcher<IPost>('posts/home');
+	const postFetch = useInfiniteFetcherSWR<IPost>('posts/home');
 
 	return (
-		<ContainerArea>
-			<LeftArea fixed>
+		<Layout hasSider>
+			<Sider fixed align="left">
 				<ShortCut />
-			</LeftArea>
+			</Sider>
 
-			<CenterArea>
+			<Content>
 				<CreatePost fetcher={postFetch} style={{ marginBottom: 16 }} />
 
 				<ListPost fetcher={postFetch} />
-			</CenterArea>
+			</Content>
 
-			<RightArea fixed>
+			<Sider fixed align="right">
 				<QuickContact />
-			</RightArea>
-		</ContainerArea>
+			</Sider>
+		</Layout>
 	);
 }
 
