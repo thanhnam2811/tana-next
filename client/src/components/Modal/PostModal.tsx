@@ -1,8 +1,10 @@
-import { PostMedia } from '@components/Card';
+import { PostMedia } from '@components/Card/PostCard';
 import { DraftEditor } from '@components/Editor';
 import { IPost } from '@interfaces';
 import { IMedia } from '@interfaces/common';
-import { InsertPhotoTwoTone, LocationCityTwoTone, SlideshowTwoTone } from '@mui/icons-material';
+import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
+import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
+import SlideshowTwoTone from '@mui/icons-material/SlideshowTwoTone';
 import { LoadingButton } from '@mui/lab';
 import { Box, Collapse, IconButton, Typography } from '@mui/material';
 import { fileApi } from '@utils/api';
@@ -119,71 +121,6 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 	};
 
 	return (
-		// <Dialog TransitionComponent={Transition} open={open} onClose={handleClose} fullWidth maxWidth="sm">
-		// 	<DialogTitle sx={{ p: 2 }}>Bài viết mới</DialogTitle>
-
-		// 	<DialogContent sx={{ overflow: 'auto', p: 2 }}>
-		// 		<Box component="form" onSubmit={handleSubmit(onSubmit)} height="100%">
-		// 			<Controller
-		// 				name="content"
-		// 				control={control}
-		// 				rules={{
-		// 					validate: (value) => {
-		// 						if (!value?.trim()) return 'Nội dung không được để trống';
-		// 					},
-		// 				}}
-		// 				render={({ field: { value, onChange } }) => <DraftEditor value={value} onChange={onChange} />}
-		// 			/>
-		// 		</Box>
-		// 		<Box sx={{ border: '1px dashed #ccc' }} p={1} mt={2} borderRadius={1} gap={1}>
-		// 			<Box display="flex" alignItems="center" gap={1}>
-		// 				<input
-		// 					ref={mediaInputRef}
-		// 					type="file"
-		// 					hidden
-		// 					onChange={(e) => handleAddMedia(e.target.files)}
-		// 					multiple
-		// 					accept="image/*, video/*"
-		// 				/>
-		// 				<Typography variant="body2">Thêm ảnh, video, vị trí,...</Typography>
-
-		// 				<IconButton color="success" sx={{ ml: 'auto' }} onClick={() => mediaInputRef.current?.click()}>
-		// 					<InsertPhotoTwoTone />
-		// 				</IconButton>
-
-		// 				<IconButton color="info" onClick={() => mediaInputRef.current?.click()}>
-		// 					<SlideshowTwoTone />
-		// 				</IconButton>
-
-		// 				<IconButton color="warning" onClick={() => alert('Chức năng đang phát triển')}>
-		// 					<LocationCityTwoTone />
-		// 				</IconButton>
-		// 			</Box>
-
-		// 			<Collapse in={!!listMedia.length}>
-		// 				<PostMedia media={listMedia} onDelete={handleDeleteMedia} showAll />
-		// 			</Collapse>
-		// 		</Box>
-		// 	</DialogContent>
-
-		// 	<DialogActions sx={{ alignItems: 'flex-end', p: 2, pt: 0 }}>
-		// 		<Collapse in={!!errors.content} sx={{ mr: 'auto', whiteSpace: 'nowrap' }} orientation="horizontal">
-		// 			<Alert severity="error" sx={{ height: 56 }}>
-		// 				{errors.content?.message as string}
-		// 			</Alert>
-		// 		</Collapse>
-
-		// 		<LoadingButton
-		// 			variant="contained"
-		// 			onClick={handleSubmit(onSubmit)}
-		// 			loading={isSubmitting}
-		// 			loadingPosition="start"
-		// 			startIcon={<HiPlusCircle />}
-		// 		>
-		// 			Đăng
-		// 		</LoadingButton>
-		// 	</DialogActions>
-		// </Dialog>
 		<Modal
 			open={open}
 			onCancel={handleClose}

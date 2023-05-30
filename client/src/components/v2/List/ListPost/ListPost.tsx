@@ -1,4 +1,4 @@
-import { PostCard } from '@components/v2/Card';
+import { PostCard } from '@components/v2/Card/PostCard';
 import { InfinitFetcherType } from '@hooks';
 import { Collapse, Typography } from '@mui/material';
 import { postApi } from '@utils/api';

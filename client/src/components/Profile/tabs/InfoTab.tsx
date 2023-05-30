@@ -1,6 +1,6 @@
 import { WhiteBox } from '@components/Box';
 import { IUser } from '@interfaces';
-import { CenterArea } from '@layout';
+import { CenterArea } from '@layout/Area';
 import { useUserStore } from '@store';
 import { List, Typography } from 'antd';
 import { toast } from 'react-hot-toast';
