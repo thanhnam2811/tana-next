@@ -1,10 +1,9 @@
 import { DraftViewer } from '@components/Editor';
-import { IPost } from '@interfaces';
+import { PostType } from '@interfaces';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import { randomNumber } from '@utils/common';
 import { useEffect, useRef, useState } from 'react';
 import { PostMedia } from './PostMedia';
-import { IMedia } from '@interfaces/common';
 
 const LINE_HEIGHT = 24; // Height of each line of post content
 const MAX_HEIGHT = 5 * LINE_HEIGHT; // Max height of post content

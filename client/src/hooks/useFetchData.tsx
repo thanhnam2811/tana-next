@@ -1,16 +1,10 @@
-import { IPaginationResponse } from '@interfaces';
+import { IData, IPaginationParams, IPaginationResponse } from '@interfaces';
 import apiClient, { swrFetcher } from '@utils/api/apiClient';
 import { stringUtil } from '@utils/common';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-interface PaginationResponse<T extends { _id: string } = any> {
-	items: T[];
-	totalItems: number;
-	hasNextPage: boolean;
-}
-
-export function useInfiniteFetcher<T extends { _id: string } = any>(api: string): InfinitFetcherType<T> {
+export function useInfiniteFetcher<T extends IData>(api: string): InfinitFetcherType<T> {
 	const [fetching, setFetching] = useState(false);
 	const [data, setData] = useState<T[]>([]);
 
@@ -25,7 +19,7 @@ export function useInfiniteFetcher<T extends { _id: string } = any>(api: string)
 			setFetching(true);
 
 			try {
-				const res: { data: PaginationResponse } = await apiClient.get(api, { params });
+				const res: { data: IPaginationResponse<T> } = await apiClient.get(api, { params });
 				const { totalItems, items } = res.data;
 				setData((prev) => [...prev, ...items]);
 				setHasMore(totalItems > params.offset + params.size);
@@ -87,15 +81,16 @@ export function useInfiniteFetcher<T extends { _id: string } = any>(api: string)
 	return fetcher;
 }
 
-export type InfinitFetcherType<T extends { _id: string } = any> = {
+// T: Data type,
+export type InfinitFetcherType<T extends IData> = {
 	data: T[];
-	updateData: (id: string, newData: T) => void;
+	updateData: (id: string, newData: Partial<T>) => void;
 	addData: (newData: T) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
 	validating: boolean;
 	hasMore: boolean;
-	params: object;
+	params: IPaginationParams;
 	fetch: (params: any) => void;
 	loadMore: () => void;
 	filter: (filter: any) => void;
@@ -108,10 +103,10 @@ import useSWRInfinite from 'swr/infinite';
 interface useInfiniteFetcherSWROptions {
 	api: string;
 	size?: number;
-	params?: object;
+	params?: IPaginationParams;
 }
 
-export const useInfiniteFetcherSWR = <T extends { _id: string } = any>({
+export const useInfiniteFetcherSWR = <T extends IData = any>({
 	api,
 	size = 20,
 	params = {},
@@ -169,7 +164,7 @@ export const useInfiniteFetcherSWR = <T extends { _id: string } = any>({
 		});
 	};
 
-	const updateData = (id: string, newData: T) => {
+	const updateData = (id: string, newData: Partial<T>) => {
 		// Make a shallow copy of the existing data array and add the new data to the beginning
 		const newItems = data.map((item) => (item._id === id ? { ...item, ...newData } : item));
 

@@ -1,5 +1,5 @@
 import { WhiteBox } from '@components/Box';
-import { IUser } from '@interfaces';
+import { UserType } from '@interfaces';
 import { CenterArea } from '@layout/Area';
 import { useUserStore } from '@store';
 import { List, Typography } from 'antd';
@@ -10,7 +10,7 @@ import { EducationList } from '../lists/EducationList';
 import { WorkList } from '../lists/WorkList';
 
 interface Props {
-	user: IUser;
+	user: UserType;
 }
 
 export const InfoTab = ({ user }: Props) => {
@@ -20,7 +20,7 @@ export const InfoTab = ({ user }: Props) => {
 
 	if (isCurrentUser) user = currentUser; // Use current user data (for optimistic update)
 
-	const handleChangeField = (field: keyof IUser) => (value: any) => {
+	const handleChangeField = (field: keyof UserType) => (value: any) => {
 		if (value === user[field]) return; // No change
 
 		updateProfile({ [field]: value })

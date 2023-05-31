@@ -1,22 +1,7 @@
 export interface IPrivacy {
-	value: PrivacyType;
+	value: PrivacyValueType;
 	includes?: string[];
 	excludes?: string[];
 }
 
-export type PrivacyType = 'public' | 'private' | 'friends' | 'includes' | 'excludes';
-
-export type ContactType =
-	| 'phone'
-	| 'email'
-	| 'facebook'
-	| 'twitter'
-	| 'instagram'
-	| 'github'
-	| 'linkedin'
-	| 'youtube'
-	| 'website';
-
-export type EducationType = 'primary' | 'secondary' | 'high' | 'university' | 'master' | 'doctor';
-
-export type WorkType = 'intern' | 'parttime' | 'fulltime';
+export type PrivacyValueType = 'public' | 'private' | 'friends' | 'includes' | 'excludes';

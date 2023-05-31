@@ -69,8 +69,6 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 	};
 
 	const handleModalSubmit = (data: IWork) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {

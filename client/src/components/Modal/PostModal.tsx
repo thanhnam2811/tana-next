@@ -1,6 +1,6 @@
 import { PostMedia } from '@components/Card/PostCard';
 import { DraftEditor } from '@components/Editor';
-import { IPost, PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import { IMedia } from '@interfaces/common';
 import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
 import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
@@ -28,7 +28,7 @@ interface IMediaFile extends IMedia {
 }
 
 export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) => {
-	const isUpdate = !!data;
+	const isUpdate = !!data?._id;
 
 	const mediaInputRef = useRef<HTMLInputElement>(null);
 	const [listMedia, setListMedia] = useState<IMediaFile[]>([]);
@@ -58,7 +58,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		handleSubmit,
 		formState: { isSubmitting },
 		reset,
-	} = useForm<IPost & { media: string[] }>();
+	} = useForm<PostFormType>();
 
 	useEffect(() => {
 		if (!data?._id) {
@@ -80,7 +80,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		onClose();
 	};
 
-	const onSubmit = async (data: IPost & { media: string[] }) => {
+	const onSubmit = async (data: PostFormType) => {
 		// Tách media cũ và file mới
 		const oldMedia: IMediaFile[] = [],
 			newFiles: File[] = [];
@@ -110,7 +110,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 
 		// Nếu là update thì gọi hàm onUpdate
 		if (isUpdate) {
-			await onUpdate?.(data._id, data);
+			await onUpdate?.(data._id!, data);
 			handleClose();
 			return;
 		}

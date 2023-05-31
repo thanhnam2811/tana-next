@@ -1,10 +1,10 @@
-import { IPost } from '@interfaces';
+import { PostType } from '@interfaces';
 import { postApi } from '@utils/api';
 import { GetServerSideProps } from 'next';
 import React from 'react';
 
 interface Props {
-	post: IPost;
+	post: PostType;
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {

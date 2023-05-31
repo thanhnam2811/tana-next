@@ -4,11 +4,12 @@ import { useRouter } from 'next/router';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
 import { ConversationItem, ConversationItemSkeleton } from './ConversationItem';
+import { ConversationType } from '@interfaces';
 
 const loader = [...Array(10)].map((_v, index) => <ConversationItemSkeleton key={index} />);
 
 interface Props {
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<ConversationType>;
 	scrollableTarget: string;
 }
 

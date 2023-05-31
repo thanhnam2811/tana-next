@@ -1,7 +1,7 @@
 import { reactOptions } from '@assets/data';
 import { UserAvatar } from '@components/v2/Avatar';
 import { ReactPopover } from '@components/v2/Popover';
-import { IComment, IPost, ReactionType } from '@interfaces';
+import { CommentType, PostType, ReactionType } from '@interfaces';
 import { Collapse } from '@mui/material';
 import { useUserStore } from '@store';
 import { getTimeAgo } from '@utils/common';
@@ -11,8 +11,8 @@ import { HiOutlineChatBubbleLeft, HiOutlineHandThumbUp, HiOutlineTrash } from 'r
 import { CommentReply } from './CommentReply';
 
 interface Props {
-	post: IPost;
-	comment: IComment;
+	post: PostType;
+	comment: CommentType;
 	onEdit?: (id: string) => void;
 	onDelete?: (id: string) => void;
 	onReact?: (id: string, reaction: ReactionType) => void;

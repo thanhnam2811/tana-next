@@ -6,6 +6,7 @@ import { DetailArea } from '@components/Messages/DetailArea';
 import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
 import { InfinitFetcherType, useInfiniteFetcherSWR } from '@hooks';
+import { ConversationType } from '@interfaces';
 import { Content, Sider, withLayout } from '@layout/v2';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
@@ -20,7 +21,7 @@ export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
 	updateConversation: (conv: any) => void;
 	conversation: any;
-	convFetcher: InfinitFetcherType;
+	convFetcher: InfinitFetcherType<ConversationType>;
 	fetching: boolean;
 	isDirect: boolean;
 } | null>(null);
@@ -30,7 +31,7 @@ function MessagesPage() {
 	const { id } = router.query;
 	const all = !id || id === 'all';
 
-	const convFetcher = useInfiniteFetcherSWR({ api: 'conversations' });
+	const convFetcher = useInfiniteFetcherSWR<ConversationType>({ api: 'conversations' });
 	const handleSearch = (value: string) => convFetcher.filter({ key: value }); // TODO: change to search
 
 	const [conversation, setConversation] = useState<any>(null);

@@ -2,6 +2,7 @@ import { CommentCard } from '@components/Card/CommentCard';
 import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
 import { InfinitFetcherType } from '@hooks';
+import { CommentType } from '@interfaces';
 import { LoadingButton } from '@mui/lab';
 import { Box, Collapse, Stack, TextField } from '@mui/material';
 import { useUserStore } from '@store';
@@ -11,7 +12,7 @@ import { toast } from 'react-hot-toast';
 import { TransitionGroup } from 'react-transition-group';
 
 interface Props {
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<CommentType>;
 	post: any;
 	comment?: any;
 }

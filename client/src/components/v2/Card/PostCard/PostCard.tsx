@@ -2,7 +2,7 @@ import { reactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { UserAvatar } from '@components/v2/Avatar';
 import { ReactPopover } from '@components/v2/Popover';
-import { IPost, PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import { ReactionType } from '@interfaces/common';
 import { Collapse } from '@mui/material';
 import { useUserStore } from '@store';
@@ -20,7 +20,7 @@ const { Meta } = Card;
 
 interface Props {
 	post?: PostType;
-	onEdit?: (postId: string, data: Partial<IPost>) => void;
+	onEdit?: (postId: string, data: PostFormType) => void;
 	onDelete?: (postId: string) => void;
 	onReact?: (postId: string, reaction: ReactionType) => void;
 }

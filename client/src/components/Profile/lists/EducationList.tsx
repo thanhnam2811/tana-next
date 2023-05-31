@@ -69,8 +69,6 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 	};
 
 	const handleModalSubmit = (data: IEducation) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {

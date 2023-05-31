@@ -1,5 +1,5 @@
 import { InfinitFetcherType } from '@hooks';
-import { IComment, IPost, ReactionType } from '@interfaces';
+import { CommentFormType, CommentType, PostType, ReactionType } from '@interfaces';
 import { Collapse } from '@mui/material';
 import { useUserStore } from '@store';
 import { commentApi } from '@utils/api';
@@ -11,9 +11,9 @@ import { TransitionGroup } from 'react-transition-group';
 import { CommentItem } from './CommentItem';
 
 interface Props {
-	fetcher: InfinitFetcherType<IComment>;
-	post: IPost;
-	comment?: IComment;
+	fetcher: InfinitFetcherType<CommentType>;
+	post: PostType;
+	comment?: CommentType;
 }
 
 export function ListComment({ fetcher, post, comment }: Props) {
@@ -30,11 +30,11 @@ export function ListComment({ fetcher, post, comment }: Props) {
 
 	const { user } = useUserStore();
 
-	const [form] = Form.useForm<Partial<IComment>>();
+	const [form] = Form.useForm<CommentFormType>();
 	const [submitting, setSubmitting] = useState(false);
 	const commentInputRef = useRef<TextAreaRef>(null);
 
-	const onSubmit = async (data: Partial<IComment>) => {
+	const onSubmit = async (data: CommentFormType) => {
 		setSubmitting(true);
 		try {
 			const res = isReply

@@ -9,8 +9,6 @@ interface Props {
 }
 
 export function ListFriend({ fetcher, threshHold = 200 }: Props) {
-	console.log('ListFriend');
-
 	useEffect(() => {
 		const handleScroll = (e: Event) => {
 			const el = e.target;

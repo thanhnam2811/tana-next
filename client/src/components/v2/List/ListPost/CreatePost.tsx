@@ -1,7 +1,7 @@
 import { UserAvatar } from '@components/v2/Avatar';
 import { PostModal } from '@components/v2/Modal';
 import { InfinitFetcherType } from '@hooks';
-import { PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import { useUserStore } from '@store';
 import { postApi } from '@utils/api';
 import { COLORS } from '@utils/theme';
@@ -17,7 +17,7 @@ interface Props {
 export function CreatePost({ fetcher, ...cardProps }: Props & CardProps) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: PostType) => {
+	const handleAddPost = async (data: PostFormType) => {
 		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);
