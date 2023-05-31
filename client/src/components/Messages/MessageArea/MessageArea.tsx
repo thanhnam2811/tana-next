@@ -15,6 +15,7 @@ import { MessageFooter } from './MessageFooter';
 import { MessageHeader } from './MessageHeader';
 import { MessagesHistory } from './MessageHistory';
 import { messageConfig } from './config';
+import { IMedia, MessageType } from '@interfaces';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -25,7 +26,12 @@ export function MessageArea({ onMediaPreview }: Props) {
 	const { conversation } = useContext(MessageContext)!;
 	const router = useRouter();
 	const id = router.query.id as string;
-	const messageFetcher = useInfiniteFetcherSWR({ api: `/conversations/${id}/messages` });
+	const messageFetcher = useInfiniteFetcherSWR<
+		MessageType & {
+			sending?: boolean; // for optimistic UI
+			error?: string; // for display error
+		}
+	>({ api: `/conversations/${id}/messages` });
 
 	const idRef = useRef(id);
 	// reload data when conversation change
@@ -54,9 +60,12 @@ export function MessageArea({ onMediaPreview }: Props) {
 		const newMessagePlaceholder = {
 			_id: sending_id,
 			text,
-			sender: user,
+			sender: user!,
 			sending: true,
-			media: filesSelected,
+			media: filesSelected.map<IMedia>((file) => ({ _id: randomString(10), link: URL.createObjectURL(file) })),
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			conversation: id,
 		};
 		messageFetcher.addData(newMessagePlaceholder);
 

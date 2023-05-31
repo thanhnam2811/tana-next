@@ -6,10 +6,11 @@ import { toast } from 'react-hot-toast';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
 import { ReactionType } from '../../Popup/ReactPopup';
+import { PostType } from '@interfaces';
 
 interface Props {
 	windowScroll?: boolean;
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<PostType>;
 }
 
 export function ListPost({ windowScroll = false, fetcher }: Props) {

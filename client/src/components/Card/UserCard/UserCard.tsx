@@ -7,18 +7,18 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiCheckCircle, HiPlusCircle, HiUser, HiUserMinus, HiUserPlus, HiXCircle } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
+import { RelationshipType } from '@interfaces';
 
-export type Relationship = 'friend' | 'sent' | 'received' | 'none' | 'you';
-
-type ChipRelationship = {
-	[key in Relationship]: {
+type ChipRelationshipType = Record<
+	RelationshipType,
+	{
 		label: string;
-		color: 'success' | 'info' | 'secondary' | 'default' | 'error' | 'warning' | 'primary';
+		color: 'success' | 'info' | 'secondary' | 'primary' | 'default' | 'error' | 'warning';
 		Icon: IconType;
-	};
-};
+	}
+>;
 
-const chipMap: ChipRelationship = {
+const chipMap: ChipRelationshipType = {
 	friend: {
 		label: 'Bạn bè',
 		color: 'success',
@@ -48,7 +48,7 @@ const chipMap: ChipRelationship = {
 
 interface Props {
 	user: any;
-	relationship?: Relationship;
+	relationship?: RelationshipType;
 	sx?: SxProps;
 	onClick?: (user: any) => void;
 }

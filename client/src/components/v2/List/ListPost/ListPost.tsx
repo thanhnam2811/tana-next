@@ -1,7 +1,7 @@
 import { ReactionType } from '@components/Popup';
 import { PostCard } from '@components/v2/Card/PostCard';
 import { InfinitFetcherType } from '@hooks';
-import { IPost, PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import { Typography } from '@mui/material';
 import { postApi } from '@utils/api';
 import { List } from 'antd';
@@ -40,7 +40,7 @@ export function ListPost({ windowScroll = false, fetcher }: Props) {
 	};
 
 	// Handle edit post
-	const handleEdit = async (postId: string, data: Partial<IPost>) => {
+	const handleEdit = async (postId: string, data: PostFormType) => {
 		try {
 			const res = await postApi.update(postId, data);
 

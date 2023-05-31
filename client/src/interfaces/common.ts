@@ -12,3 +12,18 @@ export interface IPaginationResponse<T> {
 	totalPages: number;
 	offset: number;
 }
+
+export interface IData {
+	_id: string;
+
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface IPaginationParams {
+	page?: number;
+	size?: number;
+	offset?: number;
+
+	[key: string]: any;
+}

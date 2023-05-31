@@ -1,15 +1,16 @@
 import { InfinitFetcherType } from '@hooks';
+import { IData } from '@interfaces';
 import { stringUtil } from '@utils/common';
 import { Select, SelectProps } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 
-interface Props<T extends { _id: string }> {
+interface Props<T extends IData> {
 	fetcher: InfinitFetcherType<T>;
 	scrollThreshold?: number;
 	toOption: (item: T) => DefaultOptionType;
 }
 
-export function SelectApi<T extends { _id: string }>({
+export function SelectApi<T extends IData = any>({
 	fetcher,
 	scrollThreshold = 100,
 	toOption,

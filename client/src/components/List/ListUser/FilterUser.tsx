@@ -1,5 +1,6 @@
 import { UserFilterModal, getFilterTitle } from '@components/Modal';
 import { InfinitFetcherType } from '@hooks';
+import { UserType } from '@interfaces';
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { HiFilter, HiSearch } from 'react-icons/hi';
 
 interface Props {
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<UserType>;
 }
 export function FilterUser({ fetcher }: Props) {
 	const [showFilter, setShowFilter] = useState(false);

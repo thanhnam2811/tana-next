@@ -1,9 +1,8 @@
 import { UserAvatar } from '@components/v2/Avatar';
 import { IPaginationResponse, UserType } from '@interfaces';
 import { swrFetcher, userApi } from '@utils/api';
-import { Button, Card, List, Space, Typography } from 'antd';
+import { Button, List, Space, Typography } from 'antd';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
 interface ContactItemProps {

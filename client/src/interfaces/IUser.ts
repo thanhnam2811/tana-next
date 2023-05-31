@@ -1,11 +1,23 @@
-import { ContactType, EducationType, IPrivacy } from './IPrivacy';
-import { IMedia } from './common';
+import { IPrivacy } from './IPrivacy';
+import { IData, IMedia } from './common';
 
+export type ContactType =
+	| 'phone'
+	| 'email'
+	| 'facebook'
+	| 'twitter'
+	| 'instagram'
+	| 'github'
+	| 'linkedin'
+	| 'youtube'
+	| 'website';
 export interface IContact {
 	type: ContactType;
 	value: string;
 	privacy: IPrivacy;
 }
+
+export type WorkType = 'intern' | 'parttime' | 'fulltime';
 
 export interface IWork {
 	// type: WorkType;
@@ -15,6 +27,8 @@ export interface IWork {
 	to?: string;
 	privacy: IPrivacy;
 }
+
+export type EducationType = 'primary' | 'secondary' | 'high' | 'university' | 'master' | 'doctor';
 
 export interface IEducation {
 	type: EducationType;
@@ -26,8 +40,9 @@ export interface IEducation {
 	privacy: IPrivacy;
 }
 
-export interface IUser {
-	_id: string;
+export type RelationshipType = 'friend' | 'sent' | 'received' | 'none' | 'you';
+
+interface IUser extends IData {
 	fullname: string;
 	email: string;
 
@@ -37,16 +52,20 @@ export interface IUser {
 	isOnline: boolean;
 	lastAccess: string;
 
+	relationship?: RelationshipType;
+
 	contact: IContact[];
 	work: IWork[];
 	education: IEducation[];
 }
 
+// For use
 export type UserType = IUser & {
 	profilePicture: IMedia;
 	coverPicture: IMedia;
 };
 
+// For form
 export type UserFormType = Partial<
 	IUser & {
 		profilePicture: string;

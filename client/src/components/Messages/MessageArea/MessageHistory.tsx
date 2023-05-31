@@ -1,18 +1,19 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
 import { InfinitFetcherType } from '@hooks';
+import { MessageType } from '@interfaces';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
+import { useUserStore } from '@store';
 import { stringUtil } from '@utils/common';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FaArrowDown } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { MessageItem } from './MessageItem';
-import { useUserStore } from '@store';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
 	onMediaPreview: (media: any) => void;
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<MessageType>;
 }
 
 export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {

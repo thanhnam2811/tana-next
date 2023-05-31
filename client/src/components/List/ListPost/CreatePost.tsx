@@ -1,7 +1,7 @@
 import { WhiteBox } from '@components/Box';
 import { PostModal } from '@components/Modal';
 import { InfinitFetcherType } from '@hooks';
-import { PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import InsertPhotoTwoTone from '@mui/icons-material/InsertPhotoTwoTone';
 import LocationCityTwoTone from '@mui/icons-material/LocationCityTwoTone';
 import SlideshowTwoTone from '@mui/icons-material/SlideshowTwoTone';
@@ -27,13 +27,13 @@ const StatusInput = styled(TextField)({
 });
 
 interface Props {
-	fetcher: InfinitFetcherType;
+	fetcher: InfinitFetcherType<PostType>;
 }
 
 export function CreatePost({ fetcher }: Props) {
 	const { user } = useUserStore();
 
-	const handleAddPost = async (data: PostType) => {
+	const handleAddPost = async (data: PostFormType) => {
 		const toastId = toast.loading('Đang thêm bài viết...');
 		try {
 			const res = await postApi.create(data);

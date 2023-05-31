@@ -1,7 +1,7 @@
 import { UserType } from './IUser';
-import { IMedia } from './common';
+import { IData, IMedia } from './common';
 
-export interface IComment {
+interface IComment extends IData {
 	_id: string;
 	content: string;
 	media: IMedia[];
@@ -12,7 +12,10 @@ export interface IComment {
 	deleted: boolean;
 	author: UserType;
 	post: string;
-	createdAt: string;
-	updatedAt: string;
-	__v: number;
 }
+
+// For use
+export type CommentType = IComment;
+
+// For form
+export type CommentFormType = Partial<IComment>;

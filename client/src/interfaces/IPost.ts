@@ -1,21 +1,25 @@
 import { IPrivacy } from './IPrivacy';
 import { UserType } from './IUser';
-import { IMedia } from './common';
+import { IData, IMedia } from './common';
 
-export interface IPost {
-	_id: string;
+interface IPost extends IData {
+	author: UserType;
+	privacy: IPrivacy;
+
 	content: string;
 	media: IMedia[] | string[]; // string[] for create, update post
+	tags: any[];
+
 	numberReact: number;
 	numberShare: number;
 	numberComment: number;
-	tags: any[];
-	privacy: IPrivacy;
-	deleted: boolean;
-	author: UserType;
-	createdAt: string;
-	updatedAt: string;
+
 	reactOfUser: string;
+	deleted: boolean;
 }
 
-export type PostType = IPost & { media: IMedia[] }; // for use in component
+// For use
+export type PostType = IPost & { media: IMedia[] };
+
+// For form
+export type PostFormType = Partial<IPost & { media: string[] }>;

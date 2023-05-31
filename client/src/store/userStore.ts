@@ -1,4 +1,4 @@
-import { UserType } from '@interfaces';
+import { UserFormType, UserType } from '@interfaces';
 import { ILoginParams, authApi, userApi } from '@utils/api';
 import { create } from 'zustand';
 
@@ -8,7 +8,7 @@ interface IUserStore {
 	login: (data: ILoginParams) => Promise<void>;
 	logout: () => void;
 	getProfile: () => Promise<void>;
-	updateProfile: (data: Partial<UserType>) => Promise<void>;
+	updateProfile: (data: UserFormType, optimisticData?: Partial<UserType>) => Promise<void>;
 }
 
 export const useUserStore = create<IUserStore>()((set, get) => ({
@@ -30,12 +30,19 @@ export const useUserStore = create<IUserStore>()((set, get) => ({
 		user.isOnline = true; // Set user online
 		set({ user });
 	},
-	updateProfile: async (data: Partial<UserType>) => {
+	updateProfile: async (data, optimisticData) => {
 		// Save rollback data
 		const prev = get().user!;
 
+		// Get optimistic data if not provided
+		optimisticData ??= {
+			...data,
+			profilePicture: prev.profilePicture, // Keep old profile picture
+			coverPicture: prev.coverPicture, // Keep old cover picture
+		};
+
 		// Optimistic update
-		set({ user: { ...prev, ...data } });
+		set({ user: { ...prev, ...optimisticData } });
 
 		try {
 			// Update to server

@@ -2,13 +2,13 @@ import { ListComment } from '@components/List/ListComment';
 import { UserAvatar } from '@components/MUI';
 import { ReactionType } from '@components/Popup';
 import { useInfiniteFetcherSWR } from '@hooks';
-import { IPost } from '@interfaces';
+import { CommentType, PostType } from '@interfaces';
 import { Box, CircularProgress, Collapse, Stack, StackProps, Typography } from '@mui/material';
 import { useState } from 'react';
 import { CommentFooter } from '.';
 
 interface Props {
-	post: IPost;
+	post: PostType;
 	comment: any;
 	isReply?: boolean;
 	// eslint-disable-next-line no-unused-vars
@@ -37,7 +37,9 @@ export const CommentCard = ({
 		setDeleting(false);
 	};
 
-	const replyFetcher = useInfiniteFetcherSWR({ api: `posts/${post._id}/comments/${comment._id}/replies` });
+	const replyFetcher = useInfiniteFetcherSWR<CommentType>({
+		api: `posts/${post._id}/comments/${comment._id}/replies`,
+	});
 
 	const onReact = (react: ReactionType) => handleReact(comment._id, react);
 

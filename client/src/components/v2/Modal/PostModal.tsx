@@ -1,5 +1,5 @@
 import { PrivacyDropdown } from '@components/Button';
-import { IPost, PostType } from '@interfaces';
+import { PostFormType, PostType } from '@interfaces';
 import { IMedia } from '@interfaces/common';
 import { Collapse } from '@mui/material';
 import { fileApi } from '@utils/api';
@@ -25,7 +25,7 @@ interface IMediaFile extends IMedia {
 }
 
 export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) => {
-	const isEdit = !!data;
+	const isEdit = !!data?._id; // Nếu có id thì là edit
 
 	const mediaInputRef = useRef<HTMLInputElement>(null);
 	const [listMedia, setListMedia] = useState<IMediaFile[]>([]);
@@ -50,7 +50,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		setListMedia((prev) => prev.filter((item) => item._id !== id));
 	};
 
-	const [form] = Form.useForm<IPost & { media: string[] }>();
+	const [form] = Form.useForm<PostFormType>();
 	const [submitting, setSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -72,7 +72,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		setListMedia([]);
 	};
 
-	const onSubmit = async (data: IPost & { media: string[] }) => {
+	const onSubmit = async (data: PostFormType) => {
 		setSubmitting(true);
 
 		// Tách media cũ và file mới
@@ -104,7 +104,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 
 		// Nếu là update thì gọi hàm onUpdate
 		if (isEdit) {
-			await onUpdate?.(data._id, data);
+			await onUpdate?.(data._id!, data);
 		}
 
 		// Nếu là create thì gọi hàm onCreate
