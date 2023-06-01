@@ -1,62 +1,42 @@
-import { IDashboardData, dashboardApi } from '@/api';
+import { IDashboardData, dashboardApi, swrFetcher } from '@/api';
 import Icon from '@ant-design/icons';
 import { Card, Col, Row, Statistic, StatisticProps } from 'antd';
-import { useEffect, useState } from 'react';
 import { IoPeopleOutline } from 'react-icons/io5';
+import useSWR from 'swr';
 import { LineChart, PieChart } from './charts';
 import { UserTable } from './tables';
 
-function Dashboard() {
-	const [loading, setLoading] = useState(false);
-	const [data, setData] = useState<IDashboardData>({
-		totalUser: 0,
-		numUserOnline: 0,
-		numAccessInDay: 0,
-		numUserCreateInDay: 0,
-	});
+export function Dashboard() {
+	const { data, isLoading } = useSWR<IDashboardData>(dashboardApi.endpoint.getData, swrFetcher);
 
 	const dashboardCard: StatisticProps[] = [
 		{
 			title: 'Tổng số người dùng',
 			prefix: <Icon component={IoPeopleOutline} style={{ marginRight: 16 }} />,
-			value: data.totalUser, // convert number to string
+			value: data?.totalUser || 0,
 		},
 		{
 			title: 'Đang hoạt động',
 			prefix: <Icon component={IoPeopleOutline} style={{ marginRight: 16 }} />,
-			value: data.numUserOnline,
+			value: data?.numUserOnline || 0,
 		},
 		{
 			title: 'Truy cập trong ngày',
 			prefix: <Icon component={IoPeopleOutline} style={{ marginRight: 16 }} />,
-			value: data.numAccessInDay,
+			value: data?.numAccessInDay || 0,
 		},
 		{
 			title: 'Người dùng mới',
 			prefix: <Icon component={IoPeopleOutline} style={{ marginRight: 16 }} />,
-			value: data.numUserCreateInDay,
+			value: data?.numUserCreateInDay || 0,
 		},
 	];
-
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true);
-			try {
-				const { data } = await dashboardApi.getData();
-				setData(data);
-			} catch (error) {
-				console.log(error);
-			}
-			setLoading(false);
-		};
-		fetchData();
-	}, []);
 
 	return (
 		<Row gutter={[16, 16]}>
 			{dashboardCard.map((item, index) => (
 				<Col key={index} xs={12} lg={6}>
-					<Card loading={loading}>
+					<Card loading={isLoading}>
 						<Statistic {...item} valueStyle={{ fontWeight: 800 }} />
 					</Card>
 				</Col>
@@ -76,5 +56,3 @@ function Dashboard() {
 		</Row>
 	);
 }
-
-export default Dashboard;

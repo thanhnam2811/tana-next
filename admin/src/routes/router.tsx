@@ -1,5 +1,5 @@
 import { Layout, layoutData, LayoutData } from '@/layout';
-import Login from '@/pages/login/Login';
+import { Login } from '@/pages/login';
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
 const getRoute = (data: LayoutData[]) => {
