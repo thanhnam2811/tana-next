@@ -1,4 +1,5 @@
-import Dashboard from '@/pages/dashboard/Dashboard';
+import { UserPage } from '@/pages/account';
+import { Dashboard } from '@/pages/dashboard';
 import Icon from '@ant-design/icons';
 import { BreadcrumbProps, MenuProps } from 'antd';
 import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
@@ -29,7 +30,7 @@ export const layoutData: LayoutData[] = [
 				path: 'user',
 				title: 'Người dùng',
 				icon: <Icon component={IoPersonOutline} />,
-				element: <div>User</div>,
+				element: <UserPage />,
 			},
 			{
 				path: 'admin',

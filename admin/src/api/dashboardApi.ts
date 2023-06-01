@@ -8,5 +8,9 @@ export interface IDashboardData {
 }
 
 export const dashboardApi = {
-	getData: () => apiClient.get<IDashboardData>('/admin/dashboard'),
+	endpoint: {
+		getData: '/admin/dashboard',
+	},
+
+	getData: () => apiClient.get<IDashboardData>(dashboardApi.endpoint.getData),
 };
