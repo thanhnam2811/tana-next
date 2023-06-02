@@ -1,0 +1,61 @@
+.header {
+	display: flex;
+	align-items: center;
+
+	.logo {
+		width: 48px;
+		height: 48px;
+	}
+
+	.title {
+		margin: 0;
+		margin-left: 10px;
+
+		font-weight: 800;
+	}
+}
+
+.content {
+	display: flex;
+	justify-content: center;
+
+	height: 100%;
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+
+	.left,
+	.right {
+		flex: 1;
+		width: 100%;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.logo {
+		@keyframes rotate10-15 {
+			0% {
+				transform: rotate(10deg);
+			}
+			50% {
+				transform: rotate(15deg);
+			}
+			100% {
+				transform: rotate(10deg);
+			}
+		}
+
+		animation: rotate10-15 3s ease-in-out infinite;
+	}
+
+	.card {
+		width: 100%;
+		max-width: 480px;
+
+		.title {
+			font-weight: 700;
+		}
+	}
+}
