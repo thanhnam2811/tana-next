@@ -1,4 +1,4 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { ListConversation } from '@components/List/ListConversation';
 import { MyIconButton, SearchInput } from '@components/MUI';

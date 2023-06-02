@@ -1,4 +1,4 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
