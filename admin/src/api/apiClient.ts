@@ -1,5 +1,5 @@
 import { API_URL, MAX_RETRY } from '@/config';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import handleApiError from './handleApiError';
 import retryRequest from './retryRequest';
 
