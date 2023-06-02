@@ -1,7 +1,7 @@
 import { Layout, theme } from 'antd';
 import { NextComponentType } from 'next';
-import { NavBar } from './NavBar';
 import styles from './Layout.module.scss';
+import { NavBar } from './NavBar';
 
 export function withLayout(Component: NextComponentType) {
 	const Container: NextComponentType = (props: any) => {
@@ -10,7 +10,7 @@ export function withLayout(Component: NextComponentType) {
 		} = theme.useToken();
 
 		return (
-			<Layout>
+			<Layout style={{ height: '100vh', overflowX: 'hidden' }}>
 				<Layout.Header style={{ backgroundColor: colorBgContainer }} className={styles.header}>
 					<NavBar />
 				</Layout.Header>

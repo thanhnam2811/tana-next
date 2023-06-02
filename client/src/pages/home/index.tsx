@@ -1,4 +1,4 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { QuickContact, ShortCut } from '@components/Home';
 import { CreatePost, ListPost } from '@components/v2/List/ListPost';
 import { useInfiniteFetcherSWR } from '@hooks';
