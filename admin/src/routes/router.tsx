@@ -1,8 +1,10 @@
-import { Layout, layoutData, LayoutData } from '@/layout';
-import Login from '@/pages/login/Login';
+import LoginPage from '@/modules/auth/pages/LoginPage';
+import Layout from '@/modules/layout/components/Layout';
+import layoutData from '@/modules/layout/data/layoutData';
+import ILayoutData from '@/modules/layout/types/ILayoutData';
 import { createBrowserRouter, Navigate, RouteObject } from 'react-router-dom';
 
-const getRoute = (data: LayoutData[]) => {
+const getRoute = (data: ILayoutData[] = layoutData) => {
 	const routes: RouteObject[] = [];
 
 	data.forEach((item) => {
@@ -44,7 +46,7 @@ export const router = createBrowserRouter([
 	},
 	{
 		path: '/login',
-		element: <Login />,
+		element: <LoginPage />,
 	},
 	{
 		path: '/404',
