@@ -1,4 +1,4 @@
-const { User } = require('../models/User');
+const { User, labelOfGender } = require('../models/User');
 const Token = require('../models/Token');
 const { sendEmail, sendEmailVerify, isEmailValid } = require('../../utils/Mail/sendMail');
 const crypto = require('crypto');
@@ -13,7 +13,7 @@ const moment = require('moment');
 const { populateUserByEmail } = require('../../utils/Populate/User');
 const { default: mongoose } = require('mongoose');
 
-const hostClient = process.env.HOST_CLIENT
+const hostClient = process.env.HOST_CLIENT;
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
@@ -27,6 +27,9 @@ class AuthoController {
 				confirmPassword: Joi.string().required().valid(Joi.ref('password')),
 				email: Joi.string().email().required(),
 				fullname: Joi.string().required(),
+				gender: Joi.object({
+					value: Joi.string().valid('male', 'female', 'other').required(),
+				}),
 			});
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
@@ -47,6 +50,10 @@ class AuthoController {
 				fullname: req.body.fullname,
 				email: req.body.email,
 				password: hashedPassword,
+				gender: {
+					value: req.body.gender.value,
+					label: labelOfGender[req.body.gender.value],
+				},
 			});
 
 			// save user and respond
@@ -56,7 +63,6 @@ class AuthoController {
 			const token = await new Token({
 				userId: user._id,
 				token: crypto.randomBytes(16).toString('hex'),
-
 			}).save();
 
 			const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
@@ -70,9 +76,11 @@ class AuthoController {
 			}
 			res.status(200).json(user);
 		} catch (err) {
-			if (err.code === 11000)
-				return res.status(500).send('Email đã tồn tại!');
-			else return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			if (err.code === 11000) return res.status(500).send('Email đã tồn tại!');
+			else
+				return next(
+					createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				);
 		}
 	}
 
@@ -83,13 +91,15 @@ class AuthoController {
 			const user = await User.findById(userId);
 			if (!user) return res.status(400).send('User không tồn tại!!!');
 			const tokenVerify = await Token.findOne({ userId: user._id, token: token });
-			if (!tokenVerify) return res.status(400).send("Link xác nhận không hợp lệ!!!");
+			if (!tokenVerify) return res.status(400).send('Link xác nhận không hợp lệ!!!');
 			user.isVerified = true;
 			await user.save();
 			await tokenVerify.deleteOne();
 			res.status(200).send('Xác nhận thành công!!!');
 		} catch (err) {
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -100,32 +110,30 @@ class AuthoController {
 			const dataToken = {
 				userId: user._id,
 			};
-			const accessToken = await authMethod.generateToken(
-				dataToken,
-				accessTokenSecret,
-				accessTokenLife
-			);
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			// let refreshToken = randToken.generate(256);
-			const refreshToken = await authMethod.generateToken(
-				dataToken,
-				refreshTokenSecret,
-				refreshTokenLife
-			);
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 
 			//save refresh token to redis and set expire time
 			// await redisClient.set(user._id, refreshToken);
 			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 			const userSave = await User.findById(user._id);
 			if (user.lockTime - Date.now() > 0) {
-				return res.status(401).json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return res
+					.status(401)
+					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 			userSave.refreshToken = refreshToken;
 			await userSave.save();
 
-			return res.redirect(`${hostClient}/auth/login/google?accessToken=` + accessToken + '&refreshToken=' + refreshToken);
+			return res.redirect(
+				`${hostClient}/auth/login/google?accessToken=` + accessToken + '&refreshToken=' + refreshToken
+			);
 		} catch (err) {
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -136,17 +144,9 @@ class AuthoController {
 			const dataToken = {
 				userId: user._id,
 			};
-			const accessToken = await authMethod.generateToken(
-				dataToken,
-				accessTokenSecret,
-				accessTokenLife
-			);
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
-			const refreshToken = await authMethod.generateToken(
-				dataToken,
-				refreshTokenSecret,
-				refreshTokenLife
-			);
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 
 			//save refresh token to redis and set expire time
 			// await redisClient.set(user._id, refreshToken);
@@ -154,14 +154,20 @@ class AuthoController {
 			const userSave = await User.findById(user._id);
 
 			if (user.lockTime - Date.now() > 0) {
-				return res.status(401).json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return res
+					.status(401)
+					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 			userSave.refreshToken = refreshToken;
 			await userSave.save();
 
-			return res.redirect(`${hostClient}/auth/login/github?accessToken=` + accessToken + '&refreshToken=' + refreshToken);
+			return res.redirect(
+				`${hostClient}/auth/login/github?accessToken=` + accessToken + '&refreshToken=' + refreshToken
+			);
 		} catch (err) {
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -182,17 +188,18 @@ class AuthoController {
 			}
 
 			if (user.password == null) {
-				return res.status(401).json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+				return res
+					.status(401)
+					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
 			}
 			//check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
-				return res.status(401).json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return res
+					.status(401)
+					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 
-			const isPasswordValid = bcrypt.compareSync(
-				req.body.password,
-				user.password
-			);
+			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
 			if (!isPasswordValid) {
 				//increase login attempt
 				user.loginAttempts++;
@@ -205,7 +212,9 @@ class AuthoController {
 					//lock account forever
 					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 					await user.save();
-					return res.status(401).json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
+					return res
+						.status(401)
+						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
 				} else {
 					await user.save();
 					return res.status(401).json('Mật khẩu không chính xác.');
@@ -214,28 +223,17 @@ class AuthoController {
 			//reset login attempt
 			user.loginAttempts = 0;
 
-
 			const dataToken = {
 				userId: user._id,
 				role: user.role.name,
 			};
 
-			const accessToken = await authMethod.generateToken(
-				dataToken,
-				accessTokenSecret,
-				accessTokenLife
-			);
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			if (!accessToken) {
-				return res
-					.status(401)
-					.send('Đăng nhập không thành công, vui lòng thử lại.');
+				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
 			}
-			const refreshToken = await authMethod.generateToken(
-				dataToken,
-				refreshTokenSecret,
-				refreshTokenLife
-			);
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 			user.refreshToken = refreshToken;
 			await user.save();
 
@@ -251,7 +249,9 @@ class AuthoController {
 			});
 		} catch (err) {
 			console.log(err);
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -279,10 +279,7 @@ class AuthoController {
 
 			// const accessToken_ = accessTokenFromHeader?.replace('Bearer ', '');
 			// Decode access token đó
-			const decoded = await authMethod.decodeToken(
-				refreshTokenFromBody,
-				refreshTokenSecret
-			);
+			const decoded = await authMethod.decodeToken(refreshTokenFromBody, refreshTokenSecret);
 			if (!decoded) {
 				return res.status(400).send('Refresh token không hợp lệ.');
 			}
@@ -302,7 +299,9 @@ class AuthoController {
 			}
 
 			if (user.lockTime - Date.now() > 0) {
-				return res.status(401).json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return res
+					.status(401)
+					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 
 			if (user.refreshToken !== refreshTokenFromBody) {
@@ -314,15 +313,9 @@ class AuthoController {
 				userId,
 				role: user.role.name,
 			};
-			const accessToken = await authMethod.generateToken(
-				dataToken,
-				accessTokenSecret,
-				accessTokenLife
-			);
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 			if (!accessToken) {
-				return res
-					.status(400)
-					.send('Tạo access token không thành công, vui lòng thử lại.');
+				return res.status(400).send('Tạo access token không thành công, vui lòng thử lại.');
 			}
 
 			return res.json({
@@ -330,9 +323,10 @@ class AuthoController {
 			});
 		} catch (err) {
 			console.log(err.message);
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
-
 	}
 
 	// get link forgot password
@@ -362,7 +356,9 @@ class AuthoController {
 			res.send('Link reset mật khẩu đã được gửi qua email của bạn');
 		} catch (error) {
 			console.log(error);
-			return next(createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -373,15 +369,13 @@ class AuthoController {
 			if (error) return res.status(400).send(error.details[0].message);
 
 			const user = await User.findById(req.params.userId);
-			if (!user)
-				return res.status(400).send('Không tìm thấy người dùng!!!');
+			if (!user) return res.status(400).send('Không tìm thấy người dùng!!!');
 
 			const token = await Token.findOne({
 				userId: user._id,
 				token: req.params.token,
 			});
-			if (!token)
-				return res.status(400).send('Link không đúng hoặc đã hết hạn');
+			if (!token) return res.status(400).send('Link không đúng hoặc đã hết hạn');
 
 			//hash password
 			const salt = await bcrypt.genSalt(10);
@@ -392,7 +386,9 @@ class AuthoController {
 			res.send('Reset mật khẩu thành công!!.');
 		} catch (err) {
 			console.log(err);
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -403,7 +399,9 @@ class AuthoController {
 			res.send('Đăng xuất thành công!!!');
 		} catch (err) {
 			console.log(err);
-			return next(createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`));
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 }
