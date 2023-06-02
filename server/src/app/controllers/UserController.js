@@ -1306,26 +1306,54 @@ class UserController {
 		}
 	}
 
-	//get number user is created daily in 7 days
-	async getNumUserCreatedDaily(req, res, next) {
+	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
-			const numUserCreatedDaily = [];
-			for (let i = 0; i < 7; i++) {
-				const day = moment()
-					.subtract(7 - i, 'days')
-					.toDate(); // get day i days ago
-				const numUserCreated = (await User.countDocuments({ createdAt: { $lte: day } })) || 0;
-				numUserCreatedDaily.push({
-					day: day,
-					numUserCreated: numUserCreated,
-				});
+			const totalUserCreationsByDay = await User.aggregate([
+				{
+					$match: {
+						createdAt: {
+							$gte: new Date(startDay),
+							$lte: new Date(endDay),
+						},
+					},
+				},
+				{
+					$group: {
+						_id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+						totalUserCreations: { $sum: 1 },
+					},
+				},
+				{ $sort: { _id: 1 } },
+			]);
+
+			// Create an object to store the total user creations by day
+			const totalUserCreationsMap = {};
+
+			// Initialize the map with 0 for each day in the range
+			let currentDate = new Date(startDay);
+			const endDate = new Date(endDay);
+			while (currentDate <= endDate) {
+				const dateString = currentDate.toISOString().split('T')[0];
+				totalUserCreationsMap[dateString] = 0;
+
+				const nextDate = currentDate.setDate(currentDate.getDate() + 1);
+				currentDate = new Date(nextDate);
 			}
-			return numUserCreatedDaily;
+
+			// Update the map with the actual total user creations
+			totalUserCreationsByDay.forEach((result) => {
+				totalUserCreationsMap[result._id] = result.totalUserCreations;
+			});
+
+			// Convert the map into an array of objects
+			const totalUserCreationsByDayArray = Object.keys(totalUserCreationsMap).map((dateString) => ({
+				day: dateString,
+				totalUserCreations: totalUserCreationsMap[dateString],
+			}));
+
+			return totalUserCreationsByDayArray;
 		} catch (err) {
 			console.log(err);
-			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-			);
 		}
 	}
 }
