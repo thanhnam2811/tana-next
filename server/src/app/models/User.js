@@ -98,6 +98,12 @@ const contact = mongoose.Schema(
 	{ _id: false }
 );
 
+const labelOfGender = {
+	male: 'nam',
+	female: 'nữ',
+	other: 'khác',
+};
+
 const gender = mongoose.Schema(
 	{
 		value: {
@@ -292,4 +298,4 @@ const User = mongoose.model(
 	})
 );
 
-module.exports = { User, validate };
+module.exports = { User, validate, labelOfGender };
