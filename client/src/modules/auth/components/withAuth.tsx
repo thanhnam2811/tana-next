@@ -12,7 +12,7 @@ export function withAuth(Component: NextComponentType) {
 		useEffect(() => {
 			if (!authUser)
 				router.push({ pathname: '/auth/login', query: { redirect: router.pathname } }, '/auth/login');
-		}, []);
+		}, [authUser]);
 
 		if (!authUser) return null;
 

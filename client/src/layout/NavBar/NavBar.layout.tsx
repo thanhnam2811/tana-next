@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Logo } from '@assets/logo';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, Grid, Stack, Tab, Tabs, Typography, useTheme } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -71,7 +71,7 @@ export function NavBar() {
 
 	const { pathname } = router;
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	const handleChange = (event: React.SyntheticEvent, newValue: string) => {
 		router.push(newValue);
@@ -85,7 +85,7 @@ export function NavBar() {
 	return (
 		<AppBar position="fixed" sx={{ boxShadow: 1, backgroundColor: 'white' }}>
 			<Toolbar disableGutters>
-				{user ? (
+				{authUser ? (
 					<Grid component="div" container sx={{ minHeight: 'inherit' }}>
 						{/* Left Area */}
 						<LeftSide />

@@ -158,6 +158,7 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 				return {
 					...page,
 					items: newItems.slice(startIndex, endIndex),
+					totalItems: page.totalItems + 1,
 				};
 			});
 			return newPages;
@@ -194,6 +195,7 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 				return {
 					...page,
 					items: newItems.slice(startIndex, endIndex),
+					totalItems: page.totalItems - 1,
 				};
 			});
 			return newPages;
@@ -205,6 +207,8 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 	};
 
 	const loadMore = () => {
+		console.log('loadMore');
+
 		setPage(page + 1);
 	};
 

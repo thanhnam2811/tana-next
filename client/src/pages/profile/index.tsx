@@ -4,7 +4,7 @@ import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
 import { Content, Sider, withLayout } from '@layout/v2';
 import { CircularProgress } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { userApi } from '@utils/api';
 import { Layout } from 'antd';
 import { useRouter } from 'next/router';
@@ -52,7 +52,7 @@ function ProfilePage() {
 		router.push({ pathname: router.pathname, query });
 	};
 
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 
 	const [user, setUser] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
@@ -68,7 +68,7 @@ function ProfilePage() {
 				}
 				// else get current user
 				else {
-					setUser(currentUser);
+					setUser(authUser);
 				}
 			} catch (error: any) {
 				toast.error(error?.toString());

@@ -1,7 +1,7 @@
 import { WhiteBox } from '@components/Box';
 import { UserType } from '@interfaces';
 import { CenterArea } from '@layout/Area';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { List, Typography } from 'antd';
 import { toast } from 'react-hot-toast';
 import { HiPencil } from 'react-icons/hi2';
@@ -14,16 +14,16 @@ interface Props {
 }
 
 export const InfoTab = ({ user }: Props) => {
-	const { user: currentUser, updateProfile } = useUserStore();
+	const { authUser, updateAuthUser } = useAuth();
 
-	const isCurrentUser = currentUser?._id === user._id;
+	const isCurrentUser = authUser?._id === user._id;
 
-	if (isCurrentUser) user = currentUser; // Use current user data (for optimistic update)
+	if (isCurrentUser) user = authUser; // Use current user data (for optimistic update)
 
 	const handleChangeField = (field: keyof UserType) => (value: any) => {
 		if (value === user[field]) return; // No change
 
-		updateProfile({ [field]: value })
+		updateAuthUser({ [field]: value })
 			.then(() => toast.success('Cập nhật thành công!'))
 			.catch(() => toast.error('Cập nhật thất bại!'));
 	};

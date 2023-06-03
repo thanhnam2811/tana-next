@@ -1,6 +1,6 @@
 import { UserAvatar } from '@components/MUI';
 import { Box, Divider, Typography } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { useRouter } from 'next/router';
 import { FcRefresh, FcSettings, FcSportsMode } from 'react-icons/fc';
 import { IconType } from 'react-icons/lib';
@@ -21,7 +21,7 @@ const listShortCutAction: Action[] = Array(20)
 	}));
 
 export function ShortCut() {
-	const { user, logout } = useUserStore();
+	const { authUser, logout } = useAuth();
 	const router = useRouter();
 
 	const handleLogOut = () => {
@@ -59,9 +59,9 @@ export function ShortCut() {
 				}}
 				onClick={() => router.push('/profile')}
 			>
-				<UserAvatar user={user!} size={40} />
+				<UserAvatar user={authUser!} size={40} />
 
-				<Typography variant="h6">{user?.fullname}</Typography>
+				<Typography variant="h6">{authUser?.fullname}</Typography>
 			</Box>
 
 			<Divider sx={{ my: 1 }} />

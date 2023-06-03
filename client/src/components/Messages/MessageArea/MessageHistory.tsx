@@ -3,7 +3,7 @@ import { InfinitFetcherType } from '@hooks';
 import { MessageType } from '@interfaces';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { stringUtil } from '@utils/common';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FaArrowDown } from 'react-icons/fa';
@@ -19,7 +19,7 @@ interface Props {
 export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 	const { conversation } = useContext(MessageContext)!;
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 	const listMember = conversation?.members || [];
 	const listMessage = fetcher.data;
 
@@ -92,7 +92,7 @@ export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 					<MessageItem
 						key={_id}
 						isSystem={isSystem}
-						other={sender?._id !== user?._id}
+						other={sender?._id !== authUser?._id}
 						text={text}
 						combine={{
 							prev: listMessage[index - 1]?.sender?._id === sender?._id,
@@ -111,10 +111,10 @@ export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 };
 
 const UserPreview = ({ listMember, conversation }: any) => {
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 
 	const isDirect = listMember.length === 2;
-	const user = isDirect && listMember.filter((m: any) => m?.user?._id !== currentUser?._id)[0]?.user;
+	const user = isDirect && listMember.filter((m: any) => m?.user?._id !== authUser?._id)[0]?.user;
 
 	return (
 		<Stack direction="column" alignItems="center" spacing={1}>

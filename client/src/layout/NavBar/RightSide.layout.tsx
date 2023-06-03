@@ -18,7 +18,7 @@ import {
 	Tooltip,
 	Typography,
 } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 import { FcFaq, FcLike, FcStackOfPhotos } from 'react-icons/fc';
@@ -40,7 +40,7 @@ const listTypeNotify = [
 ];
 
 export function RightSide() {
-	const { user, logout } = useUserStore();
+	const { authUser, logout } = useAuth();
 
 	const [profileMenuEl, setProfileMenuEl] = useState<any>();
 	const openProfileMenu = Boolean(profileMenuEl);
@@ -56,7 +56,7 @@ export function RightSide() {
 	const { pathname } = router;
 
 	const navigateToProfile = () => {
-		if (!pathname.includes(`/profile/${user?._id}`)) router.push(`/profile/${user?._id}`);
+		if (!pathname.includes(`/profile/${authUser?._id}`)) router.push(`/profile/${authUser?._id}`);
 	};
 
 	const notiFetcher = useInfiniteFetcherSWR({ api: 'users/notifications' });
@@ -143,10 +143,10 @@ export function RightSide() {
 				})}
 			</Menu>
 
-			<Tooltip title={user?.fullname || ''}>
+			<Tooltip title={authUser?.fullname || ''}>
 				<IconButton onClick={(e) => setProfileMenuEl(e.target)}>
-					<Avatar alt="Ảnh đại diện" src={user?.profilePicture?.link as string}>
-						{stringUtil.getShortName(user?.fullname)}
+					<Avatar alt="Ảnh đại diện" src={authUser?.profilePicture?.link as string}>
+						{stringUtil.getShortName(authUser?.fullname)}
 					</Avatar>
 				</IconButton>
 			</Tooltip>
