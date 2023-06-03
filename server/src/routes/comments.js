@@ -12,7 +12,7 @@ router.put('/:id', AuthoMiddleware.isAuth, CommentController.update);
 
 router.delete('/:id', AuthoMiddleware.isAuth, CommentController.delete);
 
-router.get('/:id/replies', CommentController.getAllReplies);
+router.get('/:id/replies', AuthoMiddleware.getUserFromToken, CommentController.getAllReplies);
 router.get('/:id', CommentController.get);
 router.get('/', AuthoMiddleware.getUserFromToken, CommentController.getAllOfPost);
 
