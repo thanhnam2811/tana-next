@@ -10,6 +10,10 @@
 	--animate-duration: 0.5s !important;
 }
 
+body {
+	overflow: hidden auto;
+}
+
 /* Common */
 /* Hide scrollbar for Chrome, Safari and Opera */
 .hide-scrollbar::-webkit-scrollbar {

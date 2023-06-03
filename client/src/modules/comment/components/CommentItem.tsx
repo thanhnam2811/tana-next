@@ -35,6 +35,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 		<ReactPopover key="reaction" reaction={reaction?.value} onReact={handleReact}>
 			<Button
 				icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
+				size="small"
 				type="text"
 				style={{ color: reaction?.color }}
 			>
@@ -46,7 +47,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 	if (!isReply) {
 		actions = [
 			...actions,
-			<Button key="reply" type="text" icon={<HiOutlineChatBubbleLeft />} onClick={toggleReply}>
+			<Button key="reply" size="small" type="text" icon={<HiOutlineChatBubbleLeft />} onClick={toggleReply}>
 				{comment.numberReply}
 			</Button>,
 		];
@@ -57,6 +58,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			...actions,
 			<Button
 				key="delete"
+				size="small"
 				type="text"
 				danger
 				icon={<HiOutlineTrash />}

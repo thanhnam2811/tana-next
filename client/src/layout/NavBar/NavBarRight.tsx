@@ -1,16 +1,15 @@
-import { Avatar, Badge, Button, Layout } from 'antd';
-import React from 'react';
-import { HiBell } from 'react-icons/hi2';
-import styles from '../Layout.module.scss';
-import Link from 'next/link';
+import { HeaderRight } from '@layout/Header';
 import { useAuth } from '@modules/auth/hooks';
+import { Avatar, Badge, Button } from 'antd';
+import Link from 'next/link';
+import { HiBell } from 'react-icons/hi2';
 
 export function NavBarRight() {
 	const { authUser } = useAuth();
 
 	if (!authUser)
 		return (
-			<Layout.Sider className={styles.nav_right}>
+			<HeaderRight>
 				<Link href="/auth/login" draggable>
 					<Button type="primary">Đăng nhập</Button>
 				</Link>
@@ -18,11 +17,11 @@ export function NavBarRight() {
 				<Link href="/auth/register" draggable>
 					<Button>Đăng ký</Button>
 				</Link>
-			</Layout.Sider>
+			</HeaderRight>
 		);
 
 	return (
-		<Layout.Sider className={styles.nav_right}>
+		<HeaderRight>
 			<Badge count={5} offset={[-4, 4]}>
 				<Button shape="circle" size="large">
 					<HiBell />
@@ -32,6 +31,6 @@ export function NavBarRight() {
 			<Button shape="circle" size="large">
 				<Avatar src={authUser?.profilePicture.link} />
 			</Button>
-		</Layout.Sider>
+		</HeaderRight>
 	);
 }

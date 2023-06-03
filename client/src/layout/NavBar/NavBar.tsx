@@ -1,11 +1,13 @@
 import { Logo } from '@assets/logo';
+import Layout from '@layout';
+import { HeaderCenter, HeaderLeft } from '@layout/Header';
 import { useAuth } from '@modules/auth/hooks';
-import { Avatar, Button, Layout, Tooltip, Typography, theme } from 'antd';
+import { Avatar, Button, Tooltip, Typography, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
 import styles from '../Layout.module.scss';
-import { NavBarRight } from './NavBar.right';
+import { NavBarRight } from './NavBarRight';
 
 const items = [
 	{
@@ -30,22 +32,22 @@ const items = [
 	},
 ];
 
-export function NavBar() {
+export default function NavBar() {
 	const { authUser } = useAuth();
 	const router = useRouter();
 	const { token } = theme.useToken();
 
 	return (
-		<Layout hasSider className={styles.nav}>
-			<Layout.Sider className={styles.nav_left}>
+		<Layout.Header>
+			<HeaderLeft>
 				<Link href="/" style={{ display: 'flex' }}>
 					<Button shape="circle" size="large">
 						<Avatar src={Logo.src} />
 					</Button>
 				</Link>
-			</Layout.Sider>
+			</HeaderLeft>
 
-			<Layout.Content className={styles.nav_content}>
+			<HeaderCenter>
 				{authUser ? (
 					items.map((page) => {
 						const isCurrentPage = router.pathname.startsWith(page.path);
@@ -59,8 +61,8 @@ export function NavBar() {
 									size="large"
 									onClick={() => router.push(page.path)}
 									icon={<page.RIcon />}
-									type="text"
 									className={classes.join(' ')}
+									type="text"
 									style={{
 										color: isCurrentPage ? token.colorPrimary : token.colorBorder,
 									}}
@@ -73,9 +75,9 @@ export function NavBar() {
 						TaNa - Kết nối và sáng tạo
 					</Typography.Title>
 				)}
-			</Layout.Content>
+			</HeaderCenter>
 
 			<NavBarRight />
-		</Layout>
+		</Layout.Header>
 	);
 }

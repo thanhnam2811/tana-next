@@ -3,8 +3,7 @@ import { WhiteBox } from '@components/Box';
 import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
 import { useInfiniteFetcherSWR } from '@hooks';
-import { Content, Sider, withLayout } from '@layout/v2';
-import { Layout } from 'antd';
+import Layout, { withLayout } from '@layout';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { HiSparkles, HiUserGroup, HiUserPlus, HiUsers } from 'react-icons/hi2';
@@ -51,8 +50,8 @@ function Friends() {
 	const previewUser = (user: any) => setUserPreview(user);
 
 	return (
-		<Layout hasSider>
-			<Sider fixed align="left">
+		<>
+			<Layout.Sider align="left">
 				<WhiteBox>
 					<Navigate.Tabs
 						value={type ?? false}
@@ -72,16 +71,16 @@ function Friends() {
 						))}
 					</Navigate.Tabs>
 				</WhiteBox>
-			</Sider>
+			</Layout.Sider>
 
-			<Content>
+			<Layout.Content>
 				<WhiteBox p={2}>
 					<FilterUser fetcher={userFetcher} />
 
 					<ListUser type={type} onUserClick={previewUser} fetcher={userFetcher} relationship={relationship} />
 				</WhiteBox>
-			</Content>
-		</Layout>
+			</Layout.Content>
+		</>
 	);
 }
 

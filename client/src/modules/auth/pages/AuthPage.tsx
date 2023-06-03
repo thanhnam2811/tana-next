@@ -1,4 +1,4 @@
-import { withLayout } from '@layout/v2';
+import { withLayout } from '@layout';
 import { Col, Row } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
