@@ -95,6 +95,7 @@ class CommentController {
 			return next(createError(400, error.details[0].message));
 		}
 		const comment = await Comment.findById(req.params.id);
+		if (!comment) return next(createError(404, 'Bình luận không tồn tại'));
 		if (comment.author.toString() === req.user._id.toString()) {
 			const commentUpdated = await Comment.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
 				.populate({
@@ -339,6 +340,10 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
+						//sort post by date desc
+						listComments.sort((a, b) => {
+							return new Date(b.createdAt) - new Date(a.createdAt);
+						});
 						getListPost(res, data, listComments);
 					});
 				})
@@ -395,6 +400,10 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
+						//sort post by date desc
+						listComments.sort((a, b) => {
+							return new Date(b.createdAt) - new Date(a.createdAt);
+						});
 						getListPost(res, data, listComments);
 					});
 				})

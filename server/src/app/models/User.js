@@ -98,6 +98,12 @@ const contact = mongoose.Schema(
 	{ _id: false }
 );
 
+const labelOfGender = {
+	male: 'nam',
+	female: 'nữ',
+	other: 'khác',
+};
+
 const gender = mongoose.Schema(
 	{
 		value: {
@@ -271,6 +277,7 @@ const validate = (user) => {
 		gender: Joi.object({
 			value: Joi.string().valid('male', 'female', 'other').required(),
 			label: Joi.string().valid('nam', 'nữ', 'khác').required(),
+			privacy: validatePrivacy(),
 		}),
 		birthdate: Joi.date(),
 	});
@@ -292,4 +299,4 @@ const User = mongoose.model(
 	})
 );
 
-module.exports = { User, validate };
+module.exports = { User, validate, labelOfGender };
