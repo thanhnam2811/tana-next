@@ -339,6 +339,10 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
+						//sort post by date desc
+						listComments.sort((a, b) => {
+							return new Date(b.createdAt) - new Date(a.createdAt);
+						});
 						getListPost(res, data, listComments);
 					});
 				})
@@ -395,6 +399,10 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
+						//sort post by date desc
+						listComments.sort((a, b) => {
+							return new Date(b.createdAt) - new Date(a.createdAt);
+						});
 						getListPost(res, data, listComments);
 					});
 				})
