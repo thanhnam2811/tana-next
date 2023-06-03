@@ -1,6 +1,6 @@
 const isProd = require('./environment');
 
-const PRO_HOST = [process.env.HOST_ADMIN, process.env.HOST_CLIENT, 'https://www.tana.social', 'https://*.tana.social'];
+const PRO_HOST = [process.env.HOST_ADMIN, process.env.HOST_CLIENT, 'https://www.*.tana.social'];
 
 const HOSTS = isProd ? PRO_HOST : '*';
 
