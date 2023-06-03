@@ -1,4 +1,4 @@
-import { withLayout } from '@layout/v2';
+import { withLayout } from '@layout';
 import { Button, Card, Col, Divider, Form, Input, Row, Typography, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';

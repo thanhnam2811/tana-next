@@ -1,10 +1,9 @@
 import { useInfiniteFetcherSWR } from '@hooks';
 import { PostType, UserType } from '@interfaces';
-import { CenterArea } from '@layout/Area';
-import { Box, Stack } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
-import { PictureContainer } from '../PictureContainer';
 import { CreatePost, ListPost } from '@modules/post/components';
+import { Box, Stack } from '@mui/material';
+import { PictureContainer } from '../PictureContainer';
 
 interface Props {
 	user: UserType;
@@ -17,19 +16,17 @@ export function PostTab({ user }: Props) {
 	const postsFetcher = useInfiniteFetcherSWR<PostType>({ api: `/users/${user._id}/posts` });
 
 	return (
-		<CenterArea alignItems="flex-start">
-			<Stack height="100%" width="100%" spacing={2}>
-				{/* Header */}
-				<Box flex={0}>
-					<PictureContainer user={user} />
-				</Box>
+		<Stack height="100%" width="100%" spacing={2}>
+			{/* Header */}
+			<Box flex={0}>
+				<PictureContainer user={user} />
+			</Box>
 
-				{/* Body */}
-				{isCurrentUser && <CreatePost fetcher={postsFetcher} />}
+			{/* Body */}
+			{isCurrentUser && <CreatePost fetcher={postsFetcher} />}
 
-				{/* Content */}
-				<ListPost fetcher={postsFetcher} />
-			</Stack>
-		</CenterArea>
+			{/* Content */}
+			<ListPost fetcher={postsFetcher} />
+		</Stack>
 	);
 }

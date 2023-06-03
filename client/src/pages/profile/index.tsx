@@ -2,11 +2,10 @@ import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import { Content, Sider, withLayout } from '@layout/v2';
+import Layout, { withLayout } from '@layout';
 import { CircularProgress } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
 import { userApi } from '@utils/api';
-import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import { ComponentType, Suspense, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -79,8 +78,8 @@ function ProfilePage() {
 	}, [id]);
 
 	return (
-		<Layout hasSider>
-			<Sider fixed align="left">
+		<>
+			<Layout.Sider align="left">
 				<WhiteBox>
 					<Navigate.Tabs
 						value={tab}
@@ -100,13 +99,13 @@ function ProfilePage() {
 						))}
 					</Navigate.Tabs>
 				</WhiteBox>
-			</Sider>
+			</Layout.Sider>
 
 			{/* Summary */}
-			<Content>
+			<Layout.Content>
 				{loading ? <CircularProgress /> : <Suspense>{TabContent && <TabContent user={user} />}</Suspense>}
-			</Content>
-		</Layout>
+			</Layout.Content>
+		</>
 	);
 }
 

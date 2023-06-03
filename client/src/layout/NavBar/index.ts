@@ -1,3 +1,3 @@
-export * from './LeftSide.layout';
-export * from './NavBar.layout';
-export * from './RightSide.layout';
+import NavBar from './NavBar';
+
+export default NavBar;

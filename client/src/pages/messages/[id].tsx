@@ -7,11 +7,10 @@ import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
 import { InfinitFetcherType, useInfiniteFetcherSWR } from '@hooks';
 import { ConversationType } from '@interfaces';
-import { Content, Sider, withLayout } from '@layout/v2';
+import Layout, { withLayout } from '@layout';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
-import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -113,12 +112,12 @@ function MessagesPage() {
 	const handleCloseModalCreate = () => setOpenModalCreate(false);
 
 	return (
-		<Layout hasSider>
+		<>
 			{id && id !== 'all' && (
 				<MediaViewModal open={openMediaPreview} onClose={handleCloseMediaPreview} mediaData={mediaPreview} />
 			)}
 
-			<Sider fixed align="left">
+			<Layout.Sider align="left">
 				<WhiteBox
 					sx={{
 						py: '8px',
@@ -161,7 +160,7 @@ function MessagesPage() {
 						<ListConversation fetcher={convFetcher} scrollableTarget="list-conversation" />
 					</Box>
 				</WhiteBox>
-			</Sider>
+			</Layout.Sider>
 
 			{!all && conversation ? (
 				<MessageContext.Provider
@@ -173,14 +172,14 @@ function MessagesPage() {
 						updateConversation,
 					}}
 				>
-					<Content style={{ width: '100%', maxWidth: '100%' }}>
+					<Layout.Content style={{ width: '100%', maxWidth: '100%' }}>
 						<MessageArea onMediaPreview={handleMediaPreview} />
-					</Content>
+					</Layout.Content>
 
 					{showDetail && (
-						<Sider fixed align="right">
+						<Layout.Sider align="right">
 							<DetailArea />
-						</Sider>
+						</Layout.Sider>
 					)}
 				</MessageContext.Provider>
 			) : (
@@ -188,7 +187,7 @@ function MessagesPage() {
 					Chọn cuộc trò chuyện để xem tin nhắn
 				</Box>
 			)}
-		</Layout>
+		</>
 	);
 }
 
