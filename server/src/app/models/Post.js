@@ -3,31 +3,6 @@ const mongooseDelete = require('mongoose-delete');
 const mongoosePaginate = require('mongoose-paginate-v2');
 const { PrivacyModel, validatePrivacy } = require('./Privacy');
 
-const Privacy = mongoose.Schema(
-	{
-		value: {
-			type: String,
-			enum: ['public', 'private', 'friends', 'includes', 'excludes'],
-			default: 'public',
-		},
-		includes: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'User',
-				default: [],
-			},
-		],
-		excludes: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'User',
-				default: [],
-			},
-		],
-	},
-	{ _id: false }
-);
-
 const PostSchema = new mongoose.Schema(
 	{
 		author: {
@@ -82,7 +57,7 @@ const PostSchema = new mongoose.Schema(
 		},
 		//privacy
 		privacy: {
-			type: Privacy,
+			type: PrivacyModel.schema,
 			default: {
 				value: 'public',
 				includes: [],
