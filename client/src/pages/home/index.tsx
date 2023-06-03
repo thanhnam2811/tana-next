@@ -1,10 +1,10 @@
 import { withAuth } from '@modules/auth/components';
 import { QuickContact, ShortCut } from '@components/Home';
-import { CreatePost, ListPost } from '@components/v2/List/ListPost';
 import { useInfiniteFetcherSWR } from '@hooks';
-import { PostType } from '@interfaces';
 import { Content, Sider, withLayout } from '@layout/v2';
 import { Layout } from 'antd';
+import { PostType } from '@modules/post/types';
+import { CreatePost, ListPost } from '@modules/post/components';
 
 function Home() {
 	const postFetch = useInfiniteFetcherSWR<PostType>({ api: 'posts/home' });

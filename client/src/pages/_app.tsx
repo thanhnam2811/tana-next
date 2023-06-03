@@ -1,6 +1,6 @@
 import { ScrollToTopButton } from '@components/Button';
 import { Backdrop, Box, CircularProgress, CssBaseline, ThemeProvider, Typography } from '@mui/material';
-import { useSettingStore, useUserStore } from '@store';
+import { useSettingStore } from '@store';
 import '@styles/global.scss';
 import { SERVER_URL, VERSION } from '@utils/common';
 import { getTheme } from '@utils/theme';
@@ -19,12 +19,14 @@ import 'swiper/css';
 import locale from 'antd/lib/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
+import { useAuth } from '@modules/auth/hooks';
+import { useSWRConfig } from 'swr';
 
 // Set default locale to Vietnamese
 dayjs.locale('vi');
 
 export default function App({ Component, pageProps }: AppProps) {
-	const { user, getProfile } = useUserStore();
+	const { authUser, login } = useAuth();
 	const { getSetting } = useSettingStore();
 
 	// Fetch user data
@@ -40,26 +42,31 @@ export default function App({ Component, pageProps }: AppProps) {
 
 		// fetch user data if accessToken is exist
 		const accessToken = localStorage.getItem('accessToken');
-		if (accessToken) getProfile().finally(() => setIsFetching(false));
+		if (accessToken) login().finally(() => setIsFetching(false));
 		else setIsFetching(false);
 	}, []);
 
 	// Socket
 	useEffect(() => {
 		window.socket = io(SERVER_URL, { autoConnect: false });
-		if (user) {
+		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {
-				window.socket.emit('login', user?._id); // login to socket
+				window.socket.emit('login', authUser?._id); // login to socket
 			});
 		}
 		return () => {
-			if (user) {
+			if (authUser) {
 				window.socket.off('connect');
 				window.socket.disconnect(); // disconnect to socket
 			}
 		};
-	}, [user?._id]);
+	}, [authUser?._id]);
+
+	const { mutate } = useSWRConfig();
+	useEffect(() => {
+		mutate('*', undefined, true);
+	}, [authUser?._id]);
 
 	if (isFetching)
 		return (

@@ -2,7 +2,7 @@ import { WhiteBox } from '@components/Box';
 import { useInfiniteFetcherSWR } from '@hooks';
 import { Box, Divider, Grid, Typography, styled } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { fileApi } from '@utils/api';
 import { messageApi } from '@utils/api/message-api';
 import { randomString } from '@utils/common';
@@ -49,7 +49,7 @@ export function MessageArea({ onMediaPreview }: Props) {
 		};
 	}, [id]);
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	const handleSendMessage = async (text: string) => {
 		const isValidToSend = text?.trim() !== '' || filesSelected.length > 0;
@@ -60,7 +60,7 @@ export function MessageArea({ onMediaPreview }: Props) {
 		const newMessagePlaceholder = {
 			_id: sending_id,
 			text,
-			sender: user!,
+			sender: authUser!,
 			sending: true,
 			media: filesSelected.map<IMedia>((file) => ({ _id: randomString(10), link: URL.createObjectURL(file) })),
 			createdAt: new Date().toISOString(),

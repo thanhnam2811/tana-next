@@ -1,11 +1,11 @@
 import { Logo } from '@assets/logo';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, Layout, Tooltip, Typography, theme } from 'antd';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
 import styles from '../Layout.module.scss';
 import { NavBarRight } from './NavBar.right';
-import Link from 'next/link';
 
 const items = [
 	{
@@ -31,7 +31,7 @@ const items = [
 ];
 
 export function NavBar() {
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 	const router = useRouter();
 	const { token } = theme.useToken();
 
@@ -46,7 +46,7 @@ export function NavBar() {
 			</Layout.Sider>
 
 			<Layout.Content className={styles.nav_content}>
-				{user ? (
+				{authUser ? (
 					items.map((page) => {
 						const isCurrentPage = router.pathname.startsWith(page.path);
 

@@ -1,6 +1,6 @@
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
 import { Avatar, Badge, Box, Button, IconButton, Stack, SxProps, Tooltip, Typography } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { conversationApi, fileApi, userApi } from '@utils/api';
 import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
@@ -30,10 +30,10 @@ interface Props {
 
 export const PictureContainer = ({ user }: Props) => {
 	const router = useRouter();
-	const { user: currentUser, setUser } = useUserStore();
+	const { authUser, updateAuthUser } = useAuth();
 
-	const isCurrentUser = currentUser?._id === user._id;
-	if (isCurrentUser) user = currentUser;
+	const isCurrentUser = authUser?._id === user._id;
+	if (isCurrentUser) user = authUser;
 
 	const inputCoverPicRef = useRef<HTMLInputElement>(null);
 	const handleChangeCoverPic = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -45,10 +45,12 @@ export const PictureContainer = ({ user }: Props) => {
 				const { data } = await fileApi.upload(files);
 				const file = data.files[0];
 
+				// Optimistic update
+				updateAuthUser({ coverPicture: file._id }, { coverPicture: file });
+
 				// Update cover picture
 				toast.loading('Đang cập nhật ảnh bìa...', { id: toastId });
-				const { data: user } = await userApi.update({ coverPicture: file?._id });
-				setUser(user);
+				await userApi.update({ coverPicture: file._id });
 
 				// Show toast
 				toast.success('Cập nhật ảnh bìa thành công!', { id: toastId });
@@ -68,10 +70,12 @@ export const PictureContainer = ({ user }: Props) => {
 				const { data } = await fileApi.upload(files);
 				const file = data.files[0];
 
+				// Optimistic update
+				updateAuthUser({ coverPicture: file._id }, { coverPicture: file });
+
 				// Update profile picture
 				toast.loading('Đang cập nhật ảnh đại diện...', { id: toastId });
-				const { data: user } = await userApi.update({ profilePicture: file?._id });
-				setUser(user);
+				await userApi.update({ profilePicture: file._id });
 
 				// Show toast
 				toast.success('Cập nhật ảnh đại diện thành công!', { id: toastId });

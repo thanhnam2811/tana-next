@@ -1,10 +1,11 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
+import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Box, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
-import { useSettingStore, useUserStore } from '@store';
+import { useSettingStore } from '@store';
 import { meetingApi } from '@utils/api';
-import { stringUtil, showIncomingAlert } from '@utils/common';
+import { showIncomingAlert, stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -17,9 +18,9 @@ export function MessageHeader() {
 		message: { toggleShowDetail },
 	} = useSettingStore();
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 	const isDirect = conversation?.members?.length === 2;
-	const receiver = isDirect && conversation?.members?.find((member: any) => member.user._id !== user?._id);
+	const receiver = isDirect && conversation?.members?.find((member: any) => member.user._id !== authUser?._id);
 
 	if (receiver) {
 		conversation.avatar = receiver.user.profilePicture;

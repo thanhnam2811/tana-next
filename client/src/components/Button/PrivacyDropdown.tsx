@@ -2,7 +2,7 @@ import { PrivacyOptionType, getPrivacyOption, privacyOptions } from '@assets/dat
 import { SelectApi } from '@components/v2/Input';
 import { useInfiniteFetcherSWR } from '@hooks';
 import { IPrivacy, UserType, PrivacyValueType } from '@interfaces';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Button, DropDownProps, Dropdown, Form, Input, Modal, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 interface Props {
@@ -45,8 +45,8 @@ export function PrivacyDropdown({
 	const showModal = () => setOpenModal(true);
 	const hideModal = () => setOpenModal(false);
 
-	const { user } = useUserStore();
-	const friendFetcher = useInfiniteFetcherSWR<UserType>({ api: `/users/${user!._id}/friends` });
+	const { authUser } = useAuth();
+	const friendFetcher = useInfiniteFetcherSWR<UserType>({ api: `/users/${authUser!._id}/friends` });
 
 	return (
 		<>

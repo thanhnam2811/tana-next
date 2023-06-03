@@ -1,13 +1,13 @@
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 export default function Index() {
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	const router = useRouter();
 	useEffect(() => {
-		if (user) router.replace('/home');
+		if (authUser) router.replace('/home');
 		else router.replace('/landing');
 	}, []);
 

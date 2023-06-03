@@ -1,4 +1,4 @@
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Card, CardContent, CardMedia, Chip, SxProps, Typography } from '@mui/material';
 import { userApi } from '@utils/api';
@@ -55,8 +55,8 @@ interface Props {
 
 export const UserCard = ({ user, relationship = 'friend', sx = {}, onClick }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useUserStore();
-	const isCurrentUser = user._id === currentUser?._id;
+	const { authUser } = useAuth();
+	const isCurrentUser = user._id === authUser?._id;
 
 	const [loading, setLoading] = useState(false);
 	const [relationshipState, setRelationshipState] = useState(relationship);

@@ -1,18 +1,18 @@
-import { CreatePost, ListPost } from '@components/v2/List/ListPost';
 import { useInfiniteFetcherSWR } from '@hooks';
 import { PostType, UserType } from '@interfaces';
 import { CenterArea } from '@layout/Area';
 import { Box, Stack } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { PictureContainer } from '../PictureContainer';
+import { CreatePost, ListPost } from '@modules/post/components';
 
 interface Props {
 	user: UserType;
 }
 
 export function PostTab({ user }: Props) {
-	const { user: currentUser } = useUserStore();
-	const isCurrentUser = user._id === currentUser?._id;
+	const { authUser } = useAuth();
+	const isCurrentUser = user._id === authUser?._id;
 
 	const postsFetcher = useInfiniteFetcherSWR<PostType>({ api: `/users/${user._id}/posts` });
 
@@ -28,7 +28,7 @@ export function PostTab({ user }: Props) {
 				{isCurrentUser && <CreatePost fetcher={postsFetcher} />}
 
 				{/* Content */}
-				<ListPost windowScroll fetcher={postsFetcher} />
+				<ListPost fetcher={postsFetcher} />
 			</Stack>
 		</CenterArea>
 	);
