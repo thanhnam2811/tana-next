@@ -277,6 +277,7 @@ const validate = (user) => {
 		gender: Joi.object({
 			value: Joi.string().valid('male', 'female', 'other').required(),
 			label: Joi.string().valid('nam', 'nữ', 'khác').required(),
+			privacy: validatePrivacy(),
 		}),
 		birthdate: Joi.date(),
 	});
