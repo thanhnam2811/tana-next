@@ -69,7 +69,7 @@ export function LoginForm() {
 							message: 'Vui lòng nhập mật khẩu!',
 						},
 						{
-							len: 6,
+							min: 6,
 							message: 'Mật khẩu phải có ít nhất 6 ký tự!',
 						},
 					]}
