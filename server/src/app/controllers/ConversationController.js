@@ -23,6 +23,105 @@ const algorithm = 'aes-256-cbc';
 const key = process.env.DECODE_KEY; // must be of 32 characters
 const apiKey = process.env.API_KEY_VIDEOCALL;
 class ConversationController {
+	//search conversation
+	async search(req, res, next) {
+		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const { q } = req.query;
+		try {
+			Conversation.paginate(
+				{
+					members: {
+						$elemMatch: {
+							user: req.user._id,
+						},
+					},
+					$or: [
+						{
+							$and: [
+								{ name: { $exists: true } }, // Name field exists
+								{ name: { $regex: q, $options: 'i' } }, // Name matches the search query
+							],
+						},
+						{
+							$and: [
+								{ name: { $exists: false } }, // Name field does not exist
+								{
+									members: {
+										$elemMatch: {
+											nickname: { $regex: q, $options: 'i' }, // Nickname matches the search query
+										},
+									},
+								},
+							],
+						},
+					],
+				},
+				{
+					offset,
+					limit,
+					sort: { updatedAt: -1 },
+					populate: [
+						{
+							path: 'lastest_message',
+							populate: {
+								path: 'sender',
+							},
+						},
+						{
+							path: 'members.user',
+							select: '_id fullname profilePicture isOnline isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'avatar',
+						},
+						{
+							path: 'members.addedBy',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'members.changedNicknameBy',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+					],
+				}
+			)
+				.then((data) => {
+					data.docs.forEach((item) => {
+						if (item.lastest_message && item.lastest_message.iv) {
+							const iv = Buffer.from(item.lastest_message.iv, 'base64');
+							const decipher = crypto.createDecipheriv(algorithm, key, iv);
+							let decryptedData = decipher.update(item.lastest_message.text, 'hex', 'utf-8');
+							decryptedData += decipher.final('utf-8');
+							item.lastest_message.text = decryptedData;
+						}
+					});
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
+				});
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
+		}
+	}
+
 	// TODO: Leave conversation
 	async leaveConversation(req, res, next) {
 		try {
@@ -93,7 +192,11 @@ class ConversationController {
 					})
 				)
 				.required(),
-			name: Joi.string(),
+			name: Joi.string().when('members', {
+				is: Joi.array().length(1),
+				then: Joi.string().allow(null).default(null),
+				otherwise: Joi.string().allow(null, '').default(''),
+			}),
 			avatar: Joi.string(),
 		});
 
@@ -103,13 +206,26 @@ class ConversationController {
 		}
 
 		//set addedBy to current user
-		req.body.members.forEach((member) => {
-			member.addedBy = req.user._id;
-		});
+		await Promise.all(
+			req.body.members.map(async (member) => {
+				const user = await User.findById(member.user);
+				if (!user) return next(createError.NotFound('Không tìm thấy người dùng để thêm vào cuộc hội thoại'));
+
+				member.nickname = user.fullname;
+				member.addedBy = req.user._id;
+				return member;
+			})
+		);
+
+		//remove name if req.body.member.lenght = 1
+		if (req.body.members.length === 1) {
+			req.body.name = undefined;
+		}
 
 		const newConversation = new Conversation(req.body);
 		newConversation.members.push({
 			user: req.user._id,
+			nickname: req.user.fullname,
 			role: 'admin',
 			addedBy: req.user._id,
 		});
@@ -119,7 +235,16 @@ class ConversationController {
 			if (newConversation.members.length < 2) {
 				return res.status(400).send('Cuộc hội thoại phải có ít nhất 2 thành viên');
 			} else if (newConversation.members.length === 2) {
-				const allConversations = await Conversation.find();
+				const allConversations = await Conversation.find({
+					$or: [
+						{
+							'members.user': req.user._id,
+						},
+						{
+							'members.user': newConversation.members[0].user,
+						},
+					],
+				});
 				// Check conversation with 2 members. It's only 1
 				var checked = false;
 				//Get ID of conversation with 2 members is req.user._id and newConversation.members[0] if it's exist
@@ -135,12 +260,14 @@ class ConversationController {
 						return conversation._id;
 					}
 				});
-				console.log(convID);
 				if (!checked) {
 					newConversation.history.push({
 						editor: req.user._id,
 						content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 					});
+
+					// save the conversation
+					const savedConversation = await newConversation.save();
 
 					//create message system
 					const messageSystem = new Message({
@@ -151,8 +278,6 @@ class ConversationController {
 					await messageSystem.save();
 
 					newConversation.lastest_message = messageSystem;
-					// save the conversation
-					const savedConversation = await newConversation.save();
 
 					res.status(200).json(await populateConversation(savedConversation._id));
 				} else {
