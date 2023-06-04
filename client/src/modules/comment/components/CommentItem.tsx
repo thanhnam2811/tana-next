@@ -22,8 +22,8 @@ interface Props {
 
 export function CommentItem({ post, comment, onDelete, onReact, isReply = false }: Props) {
 	const { authUser } = useAuth();
-	const isPostAuthor = authUser!._id === post!.author._id;
-	const isAuthor = authUser!._id === comment!.author._id;
+	const isPostAuthor = authUser?._id === post!.author._id;
+	const isAuthor = authUser?._id === comment!.author._id;
 
 	const [showReply, setShowReply] = useState(false);
 	const toggleReply = () => setShowReply(!showReply);
