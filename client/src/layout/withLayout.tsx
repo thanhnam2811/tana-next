@@ -3,7 +3,7 @@ import { NextComponentType } from 'next';
 import NavBar from './NavBar';
 
 export function withLayout(Component: NextComponentType) {
-	const Container: NextComponentType = (props: any) => (
+	const Container: NextComponentType = (props: React.ComponentProps<typeof Component>) => (
 		<>
 			<NavBar />
 

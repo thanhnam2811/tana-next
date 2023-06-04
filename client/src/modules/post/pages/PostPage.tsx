@@ -1,3 +1,4 @@
+import { useAuth } from '@modules/auth/hooks';
 import { ListComment } from '@modules/comment/components';
 import { Card, Col, Row } from 'antd';
 import { useRouter } from 'next/router';
@@ -5,9 +6,7 @@ import React, { useEffect } from 'react';
 import { getPostApi } from '../api';
 import { PostCard } from '../components';
 import { PostType } from '../types';
-import Head from 'next/head';
-import { useAuth } from '@modules/auth/hooks';
-import { urlUtil } from '@common/utils';
+import Layout from '@layout';
 
 interface Props {
 	post?: PostType;
@@ -18,7 +17,6 @@ export default function PostPage({ post: serverPost }: Props) {
 	const { authUser } = useAuth();
 
 	const [post, setPost] = React.useState<PostType | undefined>(serverPost);
-	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
 	useEffect(() => {
 		const fetchPost = async () => {
@@ -43,21 +41,7 @@ export default function PostPage({ post: serverPost }: Props) {
 	};
 
 	return (
-		<>
-			<Head>
-				<meta name="description" content={post?.content} />
-				<link rel="canonical" href={`/post/${post?._id}`} />
-
-				{/* Social media meta tags */}
-				<meta property="og:type" content="website" />
-				<meta property="og:title" content={post?.content} />
-				<meta property="og:description" content={post?.content} />
-				<meta property="og:url" content={link} />
-				{post?.media.map((media, index) => (
-					<meta key={index} property="og:image" content={media.link} />
-				))}
-			</Head>
-
+		<Layout.Container>
 			<Row gutter={[16, 16]} style={{ padding: 16, width: '100%' }}>
 				{/* Post */}
 				<Col span={16}>
@@ -71,6 +55,6 @@ export default function PostPage({ post: serverPost }: Props) {
 					</Card>
 				</Col>
 			</Row>
-		</>
+		</Layout.Container>
 	);
 }

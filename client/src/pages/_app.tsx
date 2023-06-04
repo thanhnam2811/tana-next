@@ -1,27 +1,21 @@
-import { ScrollToTopButton } from '@components/Button';
-import { Backdrop, Box, CircularProgress, CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import '@styles/global.scss';
-import { SERVER_URL, VERSION } from '@utils/common';
-import { getTheme } from '@utils/theme';
-import { App as AntApp, ConfigProvider } from 'antd';
+import { SERVER_URL } from '@utils/common';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'draft-js/dist/Draft.css';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
-import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import 'swiper/css';
 
-import locale from 'antd/lib/locale/vi_VN';
+import { useAuth } from '@modules/auth/hooks';
+import { Analytics } from '@vercel/analytics/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { useAuth } from '@modules/auth/hooks';
 import { useSWRConfig } from 'swr';
-import { Analytics } from '@vercel/analytics/react';
 
 // Set default locale to Vietnamese
 dayjs.locale('vi');
@@ -69,50 +63,13 @@ export default function App({ Component, pageProps }: AppProps) {
 		mutate('*', undefined, true);
 	}, [authUser?._id]);
 
-	if (isFetching)
-		return (
-			<Backdrop
-				sx={{
-					bgcolor: '#fff',
-					zIndex: (theme) => theme.zIndex.drawer + 1,
-				}}
-				open
-			>
-				<CircularProgress color="primary" />
-			</Backdrop>
-		);
-
 	return (
 		<>
-			<ConfigProvider locale={locale}>
-				<Head>
-					<title>TaNa - Kết nối và sáng tạo</title>
-					<meta name="viewport" content="initial-scale=1.0, width=device-width" />
-					<link rel="icon" href="/TaNa-logo.svg" />
-				</Head>
+			<Component {...pageProps} />
 
-				<NextProgress color="#29D" delay={300} height={2} />
+			<Toaster position="bottom-right" />
 
-				<Toaster position="bottom-right" />
-
-				<ThemeProvider theme={getTheme('light')}>
-					<CssBaseline />
-
-					<AntApp>
-						<Component {...pageProps} />
-					</AntApp>
-
-					{/* Scroll to top */}
-					<ScrollToTopButton />
-
-					{/* Version */}
-					<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 999, pointerEvents: 'none' }}>
-						<Typography variant="caption" color="textSecondary">
-							{VERSION}
-						</Typography>
-					</Box>
-				</ThemeProvider>
-			</ConfigProvider>
+			<NextProgress color="#29D" delay={300} height={2} />
 
 			<Analytics />
 		</>
