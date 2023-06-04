@@ -1,6 +1,6 @@
 import { withLayout } from '@layout';
 import { authProviders } from '@utils/data';
-import { Avatar, Card, Space, Spin } from 'antd';
+import { Avatar, Card, Spin } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
@@ -51,7 +51,7 @@ const ProviderAuthPage = () => {
 	}, [router.isReady]);
 
 	return (
-		<Space style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+		<div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 			<Card>
 				<Card.Meta
 					description={<Spin />}
@@ -59,7 +59,7 @@ const ProviderAuthPage = () => {
 					avatar={<Avatar src={provider?.icon} />}
 				/>
 			</Card>
-		</Space>
+		</div>
 	);
 };
 
