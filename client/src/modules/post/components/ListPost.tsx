@@ -1,10 +1,10 @@
-import { ReactionType } from '@components/Popup';
 import { InfinitFetcherType } from '@hooks';
-import { List } from 'antd';
-import { toast } from 'react-hot-toast';
+import { ListComment } from '@modules/comment/components';
+import { Collapse } from '@mui/material';
+import { Card, List } from 'antd';
+import { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { PostFormType, PostType } from '../types';
-import { deletePostApi, reactToPostApi, updatePostApi } from '../api';
+import { PostType } from '../types';
 import { PostCard } from './PostCard';
 
 interface Props {
@@ -13,43 +13,10 @@ interface Props {
 }
 
 export function ListPost({ containerId, fetcher }: Props) {
-	// React to the post
-	const handleReact = async (postId: string, react: ReactionType) => {
-		try {
-			const reacted = await reactToPostApi(postId, react);
-
-			fetcher.updateData(postId, reacted);
-		} catch (error: any) {
-			toast.error(error.toString());
-		}
-	};
-
 	const loader = [...Array(10)].map((_, i) => <PostCard key={i} />);
 
-	const handleDelete = async (postId: string) => {
-		const toastId = toast.loading('Đang xóa bài viết...');
-		try {
-			await deletePostApi(postId);
-			fetcher.removeData(postId);
-
-			toast.success('Xóa bài viết thành công', { id: toastId });
-		} catch (error: any) {
-			toast.error(error.toString());
-		}
-	};
-
-	// Handle edit post
-	const handleEdit = async (postId: string, data: PostFormType) => {
-		try {
-			const updated = await updatePostApi(postId, data);
-
-			fetcher.updateData(postId, updated);
-
-			toast.success('Cập nhật bài viết thành công');
-		} catch (error: any) {
-			toast.error(error.toString());
-		}
-	};
+	const handleUpdate = async (postId: string, data: PostType) => fetcher.updateData(postId, data);
+	const handleDelete = async (postId: string) => fetcher.removeData(postId);
 
 	return (
 		<InfiniteScroll
@@ -77,11 +44,28 @@ export function ListPost({ containerId, fetcher }: Props) {
 				dataSource={fetcher.data}
 				split={false}
 				renderItem={(post) => (
-					<List.Item>
-						<PostCard post={post} onDelete={handleDelete} onReact={handleReact} onEdit={handleEdit} />
-					</List.Item>
+					<PostItem post={post} onDelete={handleDelete} onUpdate={handleUpdate} openNewTab />
 				)}
 			/>
 		</InfiniteScroll>
 	);
 }
+
+const PostItem = (props: React.ComponentProps<typeof PostCard>) => {
+	const [showComment, setShowComment] = useState(false);
+	const toggleComment = () => setShowComment(!showComment);
+
+	return (
+		<List.Item>
+			<Card bodyStyle={{ padding: 0 }} style={{ width: '100%' }}>
+				<PostCard {...props} onCommentClick={toggleComment} />
+
+				<Collapse in={showComment} mountOnEnter>
+					<div style={{ padding: '0 16px 16px' }}>
+						<ListComment post={props.post!} />
+					</div>
+				</Collapse>
+			</Card>
+		</List.Item>
+	);
+};

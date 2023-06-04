@@ -1,25 +1,37 @@
 import { PostType } from '@interfaces';
-import { postApi } from '@utils/api';
+import { withLayout } from '@layout';
+import { getPostApi } from '@modules/post/api';
+import PostPage from '@modules/post/pages/PostPage';
+import axios from 'axios';
 import { GetServerSideProps } from 'next';
-import React from 'react';
 
 interface Props {
-	post: PostType;
+	post?: PostType;
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
 	try {
-		const { data: post } = await postApi.serverGet(params?.id as string);
+		const id = params?.id as string;
+		console.log({ id });
 
-		console.log({ post });
+		const post = await getPostApi(id, true);
 
 		return { props: { post } };
 	} catch (error) {
 		console.log(error);
-		return { notFound: true };
+
+		if (axios.isAxiosError(error)) {
+			if (error.response?.status === 404) {
+				return { notFound: true };
+			}
+		}
+
+		return { props: {} };
 	}
 };
 
-export default function Post({ post }: Props) {
-	return <div>{JSON.stringify(post, null, 2)}</div>;
+function Post({ post }: Props) {
+	return <PostPage post={post} />;
 }
+
+export default withLayout(Post);
