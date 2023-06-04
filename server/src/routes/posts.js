@@ -21,6 +21,8 @@ router.get('/home', AuthoMiddleware.isAuth, PostController.getPostInHome);
 router.get('/user/:id', AuthoMiddleware.getUserFromToken, PostController.getAll);
 //get reactions of a post
 router.get('/:id/reacts', PostController.getAllReactions);
+//search
+router.get('/search', AuthoMiddleware.isAuth, PostController.search);
 //get a post
 router.get('/:id', AuthoMiddleware.getUserFromToken, PostController.get);
 //get all posts of current user
