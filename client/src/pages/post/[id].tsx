@@ -39,7 +39,7 @@ export default function Post({ post }: Props) {
 
 				{/* Social media meta tags */}
 				<meta property="og:type" content="website" />
-				<meta property="og:title" content={post?.content} />
+				<meta property="og:title" content="TaNa - Kết nối và sáng tạo" />
 				<meta property="og:description" content={post?.content} />
 				<meta property="og:url" content={link} />
 				<meta property="og:image" content={post?.media[0]?.link} />
