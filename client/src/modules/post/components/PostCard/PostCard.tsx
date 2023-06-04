@@ -168,16 +168,28 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 				</Space>
 			}
 			actions={[
-				<ReactPopover key="reaction" reaction={reaction?.value} onReact={handleReact}>
+				<ReactPopover
+					key="reaction"
+					reaction={reaction?.value}
+					onReact={handleReact}
+					trigger={authUser ? 'click' : []} // Disable trigger if user is not logged in
+				>
 					<Button
 						icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
 						type="text"
 						style={{ color: reaction?.color }}
+						disabled={!authUser} // Disable if user is not logged in
 					>
 						{reaction?.label || 'Thích'}
 					</Button>
 				</ReactPopover>,
-				<Button key="comment" icon={<HiOutlineChatBubbleLeft />} type="text" onClick={onCommentClick}>
+				<Button
+					key="comment"
+					icon={<HiOutlineChatBubbleLeft />}
+					type="text"
+					onClick={onCommentClick}
+					disabled={!authUser} // Disable if user is not logged in
+				>
 					Bình luận
 				</Button>,
 				<SharePopover link={link} key="share">

@@ -1,8 +1,13 @@
-import { RichTextInput } from '@components/v2/Input';
+// import { RichTextInput } from '@components/v2/Input';
 import { PostType } from '@interfaces';
 import { Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './PostCard.module.scss';
+import dynamic from 'next/dynamic';
+
+const RichTextViewer = dynamic(() => import('@components/v2/Input').then((mod) => mod.RichTextViewer), {
+	ssr: false,
+});
 
 const LINE_HEIGHT = 24; // Height of each line of post content
 const MAX_HEIGHT = 5 * LINE_HEIGHT; // Max height of post content
@@ -38,7 +43,7 @@ export function PostContent({ post }: Props) {
 
 	return (
 		<div style={{ maxHeight: MAX_HEIGHT }} ref={postContentRef} className={styles.post_content}>
-			<RichTextInput.Viewer content={post.content} />
+			<RichTextViewer content={post.content} />
 
 			{/* Button read more */}
 			{hasMore && (

@@ -107,7 +107,7 @@ interface ViewerProps {
 	content: string;
 }
 
-RichTextInput.Viewer = function Viewer({ content }: ViewerProps) {
+export const RichTextViewer = function Viewer({ content }: ViewerProps) {
 	const contentState = stateFromHTML(content);
 	const editorState = EditorState.createWithContent(contentState);
 
