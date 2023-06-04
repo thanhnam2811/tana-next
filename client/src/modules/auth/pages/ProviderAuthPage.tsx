@@ -27,7 +27,7 @@ const ProviderAuthPage = () => {
 				await login();
 
 				// Show success toast and redirect to home page
-				toast.success('Đăng nhập thành công!', { id: toastId });
+				toast.success(`Đăng nhập với ${provider?.name} thành công!`, { id: toastId });
 				router.replace('/');
 			} catch (error: any) {
 				// Show error toast and redirect to login page
@@ -36,27 +36,22 @@ const ProviderAuthPage = () => {
 			}
 		};
 
-		// Redirect to login page if provider is not found
-		if (!provider) {
-			router.replace('/auth/login');
-		}
+		if (router.isReady) {
+			// Redirect to login page if provider is not found
+			if (!provider) router.replace('/auth/login');
+			// Redirect to login page if access token and refresh token are not available
+			else if (!accessToken || !refreshToken) {
+				toast.error(`Đăng nhập với ${provider?.name} thất bại!`);
+				router.replace('/auth/login');
+			}
 
-		// Login if access token and refresh token are available
-		else if (!accessToken || !refreshToken) {
-			toast.error(`Đăng nhập với ${provider?.name} thất bại!`);
-			router.replace('/auth/login');
+			// Login if access token and refresh token are available
+			else loginWithProvider();
 		}
-
-		// Redirect to login page if access token and refresh token are not available
-		else {
-			loginWithProvider();
-		}
-	}, []);
+	}, [router.isReady]);
 
 	return (
-		<Space
-			style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-		>
+		<Space style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 			<Card>
 				<Card.Meta
 					description={<Spin />}
