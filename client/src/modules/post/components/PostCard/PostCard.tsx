@@ -23,6 +23,7 @@ import { PostMedia } from './PostMedia';
 import { deletePostApi, reactToPostApi, updatePostApi } from '@modules/post/api';
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
+import { urlUtil } from '@common/utils';
 
 const { Meta } = Card;
 
@@ -36,6 +37,7 @@ interface Props {
 
 export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, openNewTab }: Props) {
 	const [post, setPost] = useState<PostType | undefined>(initPost);
+	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
 	useEffect(() => {
 		setPost(initPost);
@@ -176,7 +178,7 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 				<Button key="comment" icon={<HiOutlineChatBubbleLeft />} type="text" onClick={onCommentClick}>
 					Bình luận
 				</Button>,
-				<SharePopover link={`/post/${post!._id}`} key="share">
+				<SharePopover link={link} key="share">
 					<Button icon={<HiOutlineShare />} type="text">
 						Chia sẻ
 					</Button>

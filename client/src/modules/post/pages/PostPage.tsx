@@ -6,6 +6,8 @@ import { getPostApi } from '../api';
 import { PostCard } from '../components';
 import { PostType } from '../types';
 import Head from 'next/head';
+import { useAuth } from '@modules/auth/hooks';
+import { urlUtil } from '@common/utils';
 
 interface Props {
 	post?: PostType;
@@ -13,8 +15,10 @@ interface Props {
 
 export default function PostPage({ post: serverPost }: Props) {
 	const router = useRouter();
+	const { authUser } = useAuth();
 
 	const [post, setPost] = React.useState<PostType | undefined>(serverPost);
+	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
 	useEffect(() => {
 		const fetchPost = async () => {
@@ -27,10 +31,12 @@ export default function PostPage({ post: serverPost }: Props) {
 			}
 		};
 
-		if (!post) {
-			fetchPost();
+		if (router.isReady) {
+			if (!post || authUser) {
+				fetchPost();
+			}
 		}
-	}, [post, router.query.id]);
+	}, [router.isReady]);
 
 	const handleDelete = () => {
 		router.push('/'); // Go to home page after deleting
@@ -39,12 +45,14 @@ export default function PostPage({ post: serverPost }: Props) {
 	return (
 		<>
 			<Head>
-				{post?.media.map((media, index) => (
-					<meta key={index} property="og:image" content={media.link} />
-				))}
+				<meta name="description" content={post?.content} />
+				<link rel="canonical" href={link} />
 
+				{/* Social media meta tags */}
+				<meta property="og:type" content="website" />
 				<meta property="og:title" content={post?.content} />
 				<meta property="og:description" content={post?.content} />
+				<meta property="og:url" content={link} />
 				{post?.media.map((media, index) => (
 					<meta key={index} property="og:image" content={media.link} />
 				))}

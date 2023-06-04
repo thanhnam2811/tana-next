@@ -1,3 +1,4 @@
+import { urlUtil } from '@common/utils';
 import { Button, Popover, PopoverProps, Space } from 'antd';
 import {
 	FacebookIcon,
@@ -7,7 +8,6 @@ import {
 	TelegramIcon,
 	TelegramShareButton,
 } from 'next-share';
-import { useEffect, useState } from 'react';
 
 interface Props {
 	link: string;
@@ -15,20 +15,7 @@ interface Props {
 }
 
 export function SharePopover({ link, onShare, ...props }: Props & PopoverProps) {
-	const [url, setUrl] = useState<string>('');
-	useEffect(() => {
-		if (!link.startsWith('http')) {
-			const hostname = window.location.hostname;
-			const protocol = window.location.protocol;
-			const port = window.location.port;
-
-			const url = `${protocol}//${hostname}${port ? `:${port}` : ''}${link}`;
-			setUrl(url);
-		} else {
-			setUrl(link);
-		}
-	}, []);
-
+	const url = urlUtil.getFullUrl(link);
 	return (
 		<Popover
 			content={

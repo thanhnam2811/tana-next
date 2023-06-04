@@ -9,5 +9,6 @@ module.exports = (phase, { defaultConfig }) =>
 		},
 		env: {
 			SERVER_URL: process.env.SERVER_URL,
+			BASE_URL: process.env.BASE_URL,
 		},
 	});
