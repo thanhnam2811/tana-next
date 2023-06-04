@@ -1,10 +1,10 @@
 import { apiClient, apiServer } from '@common/api';
-import { CommentType } from '@interfaces';
+import { PostType } from '../types';
 
 export const getPostApi = (id: string, serverSide = false) => {
 	if (serverSide) {
-		return apiServer.get<CommentType>(`/posts/${id}`).then((res) => res.data);
+		return apiServer.get<PostType>(`/posts/${id}`).then((res) => res.data);
 	}
 
-	return apiClient.get<CommentType>(`/posts/${id}`).then((res) => res.data);
+	return apiClient.get<PostType>(`/posts/${id}`).then((res) => res.data);
 };

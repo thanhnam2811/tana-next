@@ -1,35 +1,48 @@
 import { reactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { UserAvatar } from '@components/v2/Avatar';
-import { ReactPopover } from '@components/v2/Popover';
-import { PostFormType, PostType } from '@interfaces';
+import { ReactPopover, SharePopover } from '@components/v2/Popover';
+import { IPrivacy, PostType } from '@interfaces';
 import { ReactionType } from '@interfaces/common';
-import { ListComment } from '@modules/comment/components';
-import { Collapse } from '@mui/material';
+import { useAuth } from '@modules/auth/hooks';
 import { getTimeAgo, randomNumber } from '@utils/common';
 import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space } from 'antd';
-import { useState } from 'react';
+import Link from 'next/link';
 import { HiArchive, HiBell, HiDotsHorizontal, HiEyeOff, HiLink } from 'react-icons/hi';
-import { HiOutlineChatBubbleLeft, HiOutlineHandThumbUp, HiOutlineShare, HiPencil, HiTrash } from 'react-icons/hi2';
+import {
+	HiOutlineArrowTopRightOnSquare,
+	HiOutlineChatBubbleLeft,
+	HiOutlineHandThumbUp,
+	HiOutlineShare,
+	HiPencil,
+	HiTrash,
+} from 'react-icons/hi2';
 import styles from './PostCard.module.scss';
 import { PostContent } from './PostContent';
 import { PostMedia } from './PostMedia';
-import { useAuth } from '@modules/auth/hooks';
+import { deletePostApi, reactToPostApi, updatePostApi } from '@modules/post/api';
+import { toast } from 'react-hot-toast';
+import { useEffect, useState } from 'react';
 
 const { Meta } = Card;
 
 interface Props {
 	post?: PostType;
-	onEdit?: (postId: string, data: PostFormType) => void;
+	onUpdate?: (postId: string, data: PostType) => void;
 	onDelete?: (postId: string) => void;
-	onReact?: (postId: string, reaction: ReactionType) => void;
+	onCommentClick?: () => void;
+	openNewTab?: boolean;
 }
 
-export function PostCard({ post, onEdit, onDelete, onReact }: Props) {
+export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, openNewTab }: Props) {
+	const [post, setPost] = useState<PostType | undefined>(initPost);
+
+	useEffect(() => {
+		setPost(initPost);
+	}, [initPost]);
+
 	const loading = !post;
 	const { authUser } = useAuth();
-	const [showComment, setShowComment] = useState(false);
-	const toggleComment = () => setShowComment(!showComment);
 
 	const menuProps: MenuProps = {
 		items: [
@@ -71,7 +84,47 @@ export function PostCard({ post, onEdit, onDelete, onReact }: Props) {
 	const author = isAuthor ? authUser! : post!.author;
 
 	const reaction = reactOptions.find((react) => react.value === post!.reactOfUser);
-	const handleReact = (react: ReactionType) => onReact?.(post!._id, react);
+
+	// React to the post
+	const handleReact = async (react: ReactionType) => {
+		try {
+			const reacted = await reactToPostApi(post!._id, react);
+
+			onUpdate?.(post!._id, reacted);
+
+			setPost(reacted);
+		} catch (error: any) {
+			toast.error(error.toString());
+		}
+	};
+
+	// Change privacy of the post
+	const handlePrivacyChange = async (privacy: IPrivacy) => {
+		try {
+			const updated = await updatePostApi(post!._id, { privacy });
+
+			onUpdate?.(post!._id, updated);
+
+			setPost(updated);
+
+			toast.success('Đã thay đổi quyền riêng tư của bài viết');
+		} catch (error: any) {
+			toast.error(error.toString());
+		}
+	};
+
+	// Delete the post
+	const handleDelete = async () => {
+		try {
+			await deletePostApi(post!._id);
+
+			onDelete?.(post!._id);
+
+			toast.success('Đã xóa bài viết');
+		} catch (error: any) {
+			toast.error(error.toString());
+		}
+	};
 
 	if (isAuthor)
 		menuProps.items!.push(
@@ -85,66 +138,62 @@ export function PostCard({ post, onEdit, onDelete, onReact }: Props) {
 				key: 'delete',
 				icon: <HiTrash />,
 				label: 'Xóa bài viết',
-				onClick: () => onDelete?.(post!._id),
+				onClick: handleDelete,
 			}
 		);
 
 	return (
-		<Card bodyStyle={{ padding: 0 }} style={{ width: '100%' }}>
-			<Card
-				style={{ width: '100%' }}
-				headStyle={{ padding: '0 16px' }}
-				bodyStyle={{ padding: 16 }}
-				bordered={false}
-				extra={
-					<Space>
-						<PrivacyDropdown
-							value={post!.privacy}
-							disabled={!isAuthor}
-							onChange={(privacy) => onEdit?.(post!._id, { privacy })}
-						/>
+		<Card
+			style={{ width: '100%' }}
+			headStyle={{ padding: '0 16px' }}
+			bodyStyle={{ padding: 16 }}
+			bordered={false}
+			extra={
+				<Space>
+					{openNewTab && (
+						<Link href={`/post/${post!._id}`} target="_blank" rel="noopener noreferrer" passHref>
+							<Button type="text" icon={<HiOutlineArrowTopRightOnSquare />} />
+						</Link>
+					)}
 
-						<Dropdown menu={menuProps} arrow trigger={['click']}>
-							<Button type="text" icon={<HiDotsHorizontal />} />
-						</Dropdown>
-					</Space>
-				}
-				actions={[
-					<ReactPopover key="reaction" reaction={reaction?.value} onReact={handleReact}>
-						<Button
-							icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
-							type="text"
-							style={{ color: reaction?.color }}
-						>
-							{reaction?.label || 'Thích'}
-						</Button>
-					</ReactPopover>,
-					<Button key="comment" icon={<HiOutlineChatBubbleLeft />} type="text" onClick={toggleComment}>
-						Bình luận
-					</Button>,
-					<Button key="share" icon={<HiOutlineShare />} type="text">
+					<PrivacyDropdown value={post!.privacy} disabled={!isAuthor} onChange={handlePrivacyChange} />
+
+					<Dropdown menu={menuProps} arrow trigger={['click']}>
+						<Button type="text" icon={<HiDotsHorizontal />} />
+					</Dropdown>
+				</Space>
+			}
+			actions={[
+				<ReactPopover key="reaction" reaction={reaction?.value} onReact={handleReact}>
+					<Button
+						icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
+						type="text"
+						style={{ color: reaction?.color }}
+					>
+						{reaction?.label || 'Thích'}
+					</Button>
+				</ReactPopover>,
+				<Button key="comment" icon={<HiOutlineChatBubbleLeft />} type="text" onClick={onCommentClick}>
+					Bình luận
+				</Button>,
+				<SharePopover link={`/post/${post!._id}`} key="share">
+					<Button icon={<HiOutlineShare />} type="text">
 						Chia sẻ
-					</Button>,
-				]}
-				title={
-					<Meta
-						avatar={<UserAvatar user={author} avtSize={48} />}
-						title={author.fullname}
-						description={<span className="time-ago">{getTimeAgo(post!.createdAt)}</span>}
-						className={styles.meta}
-					/>
-				}
-			>
-				<PostContent post={post!} />
+					</Button>
+				</SharePopover>,
+			]}
+			title={
+				<Meta
+					avatar={<UserAvatar user={author} avtSize={48} />}
+					title={author.fullname}
+					description={<span className="time-ago">{getTimeAgo(post!.createdAt)}</span>}
+					className={styles.meta}
+				/>
+			}
+		>
+			<PostContent post={post!} />
 
-				<PostMedia media={post!.media} />
-			</Card>
-
-			<Collapse in={showComment} mountOnEnter>
-				<div style={{ padding: '0 16px 16px' }}>
-					<ListComment post={post} />
-				</div>
-			</Collapse>
+			<PostMedia media={post!.media} />
 		</Card>
 	);
 }
