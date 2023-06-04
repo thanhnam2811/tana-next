@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useAuth } from '@modules/auth/hooks';
 import { useSWRConfig } from 'swr';
+import { Analytics } from '@vercel/analytics/react';
 
 // Set default locale to Vietnamese
 dayjs.locale('vi');
@@ -82,34 +83,38 @@ export default function App({ Component, pageProps }: AppProps) {
 		);
 
 	return (
-		<ConfigProvider locale={locale}>
-			<Head>
-				<title>TaNa - Kết nối và sáng tạo</title>
-				<meta name="viewport" content="initial-scale=1.0, width=device-width" />
-				<link rel="icon" href="/TaNa-logo.svg" />
-			</Head>
+		<>
+			<ConfigProvider locale={locale}>
+				<Head>
+					<title>TaNa - Kết nối và sáng tạo</title>
+					<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+					<link rel="icon" href="/TaNa-logo.svg" />
+				</Head>
 
-			<NextProgress color="#29D" delay={300} height={2} />
+				<NextProgress color="#29D" delay={300} height={2} />
 
-			<Toaster position="bottom-right" />
+				<Toaster position="bottom-right" />
 
-			<ThemeProvider theme={getTheme('light')}>
-				<CssBaseline />
+				<ThemeProvider theme={getTheme('light')}>
+					<CssBaseline />
 
-				<AntApp>
-					<Component {...pageProps} />
-				</AntApp>
+					<AntApp>
+						<Component {...pageProps} />
+					</AntApp>
 
-				{/* Scroll to top */}
-				<ScrollToTopButton />
+					{/* Scroll to top */}
+					<ScrollToTopButton />
 
-				{/* Version */}
-				<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 999, pointerEvents: 'none' }}>
-					<Typography variant="caption" color="textSecondary">
-						{VERSION}
-					</Typography>
-				</Box>
-			</ThemeProvider>
-		</ConfigProvider>
+					{/* Version */}
+					<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 999, pointerEvents: 'none' }}>
+						<Typography variant="caption" color="textSecondary">
+							{VERSION}
+						</Typography>
+					</Box>
+				</ThemeProvider>
+			</ConfigProvider>
+
+			<Analytics />
+		</>
 	);
 }
