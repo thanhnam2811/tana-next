@@ -2,7 +2,6 @@ import { WhiteBox } from '@components/Box';
 import { FilterUser } from '@components/List/ListUser';
 import { ListFriend } from '@components/v2/List/ListFriend';
 import { useInfiniteFetcherSWR } from '@hooks';
-import Layout from '@layout';
 
 interface Props {
 	user: any;
