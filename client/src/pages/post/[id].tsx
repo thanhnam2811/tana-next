@@ -42,7 +42,7 @@ export default function Post({ post }: Props) {
 				<meta property="og:title" content={post?.content} />
 				<meta property="og:description" content={post?.content} />
 				<meta property="og:url" content={link} />
-				<meta property="og:image" content={post?.media[0].link} />
+				<meta property="og:image" content={post?.media[0]?.link} />
 			</Head>
 
 			<PostPage post={post} />
