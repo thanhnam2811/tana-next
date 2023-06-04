@@ -82,7 +82,7 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 			</Card>
 		);
 
-	const isAuthor = authUser!._id === post!.author._id;
+	const isAuthor = authUser?._id === post!.author._id;
 	const author = isAuthor ? authUser! : post!.author;
 
 	const reaction = reactOptions.find((react) => react.value === post!.reactOfUser);
@@ -158,7 +158,9 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 						</Link>
 					)}
 
-					<PrivacyDropdown value={post!.privacy} disabled={!isAuthor} onChange={handlePrivacyChange} />
+					{authUser && (
+						<PrivacyDropdown value={post!.privacy} disabled={!isAuthor} onChange={handlePrivacyChange} />
+					)}
 
 					<Dropdown menu={menuProps} arrow trigger={['click']}>
 						<Button type="text" icon={<HiDotsHorizontal />} />
