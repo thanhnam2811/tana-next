@@ -26,9 +26,6 @@ function AuthPage() {
 		}
 	}, []);
 
-	// don't render anything if user is logged in
-	if (authUser) return null;
-
 	return (
 		<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
 			<Col span={12} style={{ height: 'fit-content' }}>

@@ -1,5 +1,5 @@
 import { reactOptions } from '@assets/data';
-import { UserAvatar } from '@components/v2/Avatar';
+import { UserAvatar } from '@modules/user/components';
 import { ReactPopover } from '@components/v2/Popover';
 import { PostType, ReactionType } from '@interfaces';
 import { Collapse } from '@mui/material';

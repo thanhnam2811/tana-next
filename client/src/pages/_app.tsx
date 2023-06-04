@@ -1,12 +1,11 @@
 import { useSettingStore } from '@store';
 import '@styles/global.scss';
 import { SERVER_URL } from '@utils/common';
-import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'draft-js/dist/Draft.css';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import 'swiper/css';
@@ -15,30 +14,26 @@ import { useAuth } from '@modules/auth/hooks';
 import { Analytics } from '@vercel/analytics/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { useSWRConfig } from 'swr';
+import { App, ConfigProvider, theme } from 'antd';
 
 // Set default locale to Vietnamese
 dayjs.locale('vi');
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
 	const { getSetting } = useSettingStore();
+	const { token } = theme.useToken();
 
 	// Fetch user data
-	const [isFetching, setIsFetching] = useState(true);
 	useEffect(() => {
-		// init AOS
-		AOS.init({
-			throttleDelay: 99, // the delay on throttle used while scrolling the page (advanced)
-		});
-
 		// fetch setting
 		getSetting();
 
-		// fetch user data if accessToken is exist
-		const accessToken = localStorage.getItem('accessToken');
-		if (accessToken) login().finally(() => setIsFetching(false));
-		else setIsFetching(false);
+		if (!authUser) {
+			// fetch user data if accessToken is exist
+			const accessToken = localStorage.getItem('accessToken');
+			if (accessToken) login();
+		}
 	}, []);
 
 	// Socket
@@ -58,20 +53,17 @@ export default function App({ Component, pageProps }: AppProps) {
 		};
 	}, [authUser?._id]);
 
-	const { mutate } = useSWRConfig();
-	useEffect(() => {
-		mutate('*', undefined, true);
-	}, [authUser?._id]);
-
 	return (
-		<>
-			<Component {...pageProps} />
-
+		<ConfigProvider>
 			<Toaster position="bottom-right" />
 
-			<NextProgress color="#29D" delay={300} height={2} />
+			<NextProgress color={token.colorPrimary} delay={300} height={2} />
+
+			<App style={{ backgroundColor: token.colorBgLayout }}>
+				<Component {...pageProps} />
+			</App>
 
 			<Analytics />
-		</>
+		</ConfigProvider>
 	);
 }

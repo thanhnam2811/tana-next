@@ -1,9 +1,9 @@
 import { UserType } from '@interfaces';
-import { Avatar, AvatarProps, Badge, BadgeProps, theme } from 'antd';
+import { Avatar, AvatarProps, Badge, BadgeProps, Skeleton, theme } from 'antd';
 import { HiUser } from 'react-icons/hi2';
 
 interface Props {
-	user: UserType;
+	user?: UserType;
 	badgeProps?: BadgeProps;
 	avtSize?: number; // Size of avatar
 }
@@ -11,8 +11,10 @@ interface Props {
 export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: Props & AvatarProps) {
 	const { token } = theme.useToken();
 
-	const content = user.isOnline ? ' ' : undefined;
+	const content = user?.isOnline ? ' ' : undefined;
 	const badgeSize = avtSize / 4;
+
+	if (!user) return <Skeleton.Avatar size={avtSize} shape="circle" active />;
 
 	return (
 		<Badge
@@ -29,7 +31,7 @@ export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: P
 		>
 			<Avatar
 				shape="circle"
-				src={user.profilePicture.link}
+				src={user?.profilePicture.link}
 				icon={<HiUser />}
 				{...avatarProps}
 				style={{ width: avtSize, height: avtSize, border: 'none', ...avatarProps?.style }}

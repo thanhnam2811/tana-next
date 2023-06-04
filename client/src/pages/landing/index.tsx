@@ -6,6 +6,8 @@ import { Box, Button, Card, Container, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { useEffect } from 'react';
+import Aos from 'aos';
 
 const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing), {
 	ssr: false,
@@ -20,6 +22,13 @@ const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing
 
 export default function Landing() {
 	const router = useRouter();
+
+	useEffect(() => {
+		// init AOS
+		Aos.init({
+			throttleDelay: 99, // the delay on throttle used while scrolling the page (advanced)
+		});
+	}, []);
 
 	return (
 		<Box width="100%" overflow="hidden auto">
