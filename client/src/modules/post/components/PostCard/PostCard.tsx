@@ -1,6 +1,6 @@
 import { reactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
-import { UserAvatar } from '@components/v2/Avatar';
+import { UserAvatar } from '@modules/user/components';
 import { ReactPopover, SharePopover } from '@components/v2/Popover';
 import { IPrivacy, PostType } from '@interfaces';
 import { ReactionType } from '@interfaces/common';

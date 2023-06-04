@@ -1,4 +1,4 @@
-import { UserAvatar } from '@components/v2/Avatar';
+import { UserAvatar } from '@modules/user/components';
 import { InfinitFetcherType } from '@hooks';
 import { PostFormType, PostType } from '@interfaces';
 import { useAuth } from '@modules/auth/hooks';
