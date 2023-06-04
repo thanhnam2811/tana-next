@@ -46,7 +46,7 @@ export default function PostPage({ post: serverPost }: Props) {
 		<>
 			<Head>
 				<meta name="description" content={post?.content} />
-				<link rel="canonical" href={link} />
+				<link rel="canonical" href={`/post/${post?._id}`} />
 
 				{/* Social media meta tags */}
 				<meta property="og:type" content="website" />
