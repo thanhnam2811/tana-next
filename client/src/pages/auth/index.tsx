@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 export default function Auth() {
 	const router = useRouter();
@@ -9,5 +9,5 @@ export default function Auth() {
 		router.push('/auth/login');
 	}, [router]);
 
-	return <div />;
+	return null;
 }

@@ -1,7 +1,7 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IEducation, IPrivacy } from '@interfaces';
-import { useUserStore } from '@store';
+import { IEducation, IPrivacy } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ interface EducationModalData {
 }
 
 export const EducationList = ({ educations: init, isCurrentUser }: EducationListProps) => {
-	const { updateProfile } = useUserStore();
+	const { updateAuthUser } = useAuth();
 	const [educations, setEducations] = useState(init);
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +47,7 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 
 		try {
 			// Update profile
-			await updateProfile({ education: newEducations });
+			await updateAuthUser({ education: newEducations });
 
 			// Notify
 			toast.success(`${updateNotify} thành công!`);
@@ -69,8 +69,6 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 	};
 
 	const handleModalSubmit = (data: IEducation) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {

@@ -1,8 +1,8 @@
 import { PrivacyOptionType, getPrivacyOption, privacyOptions } from '@assets/data';
 import { SelectApi } from '@components/v2/Input';
-import { useInfiniteFetcherSWR } from '@hooks';
-import { IPrivacy, IUser, PrivacyType } from '@interfaces';
-import { useUserStore } from '@store';
+import { useFetcher } from '@common/hooks';
+import { IPrivacy, UserType, PrivacyValueType } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { Button, DropDownProps, Dropdown, Form, Input, Modal, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 interface Props {
@@ -31,7 +31,7 @@ export function PrivacyDropdown({
 		hideModal();
 	};
 
-	const handleChange = (val: PrivacyType) => {
+	const handleChange = (val: PrivacyValueType) => {
 		form.setFieldValue('value', val);
 
 		if (val !== 'includes' && val !== 'excludes') {
@@ -45,8 +45,8 @@ export function PrivacyDropdown({
 	const showModal = () => setOpenModal(true);
 	const hideModal = () => setOpenModal(false);
 
-	const { user } = useUserStore();
-	const friendFetcher = useInfiniteFetcherSWR<IUser>({ api: `/users/${user!._id}/friends` });
+	const { authUser } = useAuth();
+	const friendFetcher = useFetcher<UserType>({ api: `/users/${authUser!._id}/friends` });
 
 	return (
 		<>
@@ -111,7 +111,7 @@ export function PrivacyDropdown({
 
 				<Dropdown
 					menu={{
-						onClick: ({ key }) => handleChange(key as PrivacyType),
+						onClick: ({ key }) => handleChange(key as PrivacyValueType),
 						items: privacyOptions.map(({ value, label, RIcon }) => ({
 							key: value,
 							label: label,

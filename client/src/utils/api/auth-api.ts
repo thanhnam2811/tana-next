@@ -1,4 +1,4 @@
-import { UserType } from '@interfaces';
+import { UserType } from '@common/types';
 import apiClient from './apiClient';
 
 export interface ILoginParams {

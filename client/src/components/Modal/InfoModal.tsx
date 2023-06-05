@@ -1,5 +1,5 @@
 import { contactOptions, privacyOptions } from '@assets/data';
-import { IContact, IEducation, IWork } from '@interfaces';
+import { IContact, IEducation, IWork } from '@common/types';
 import { DATE_FORMAT } from '@utils/common';
 import { Button, DatePicker, Form, Input, Modal, Select, Space } from 'antd';
 import dayjs from 'dayjs';
