@@ -16,8 +16,8 @@ interface Props {
 	data?: PostType;
 	open: boolean;
 	onClose: () => void;
-	onCreate?: (data: any) => Promise<void>;
-	onUpdate?: (id: string, data: any) => Promise<void>;
+	onCreate?: (data: PostFormType) => Promise<void>;
+	onUpdate?: (id: string, data: PostFormType) => Promise<void>;
 }
 
 interface IMediaFile extends IMedia {

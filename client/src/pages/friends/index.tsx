@@ -3,7 +3,7 @@ import { WhiteBox } from '@components/Box';
 import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
 import { useInfiniteFetcherSWR } from '@hooks';
-import Layout, { withLayout } from '@layout';
+import Layout, { withLayout } from '@layout/components';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { HiSparkles, HiUserGroup, HiUserPlus, HiUsers } from 'react-icons/hi2';

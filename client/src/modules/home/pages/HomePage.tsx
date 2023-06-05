@@ -1,5 +1,5 @@
 import { useInfiniteFetcherSWR } from '@hooks';
-import Layout, { withLayout } from '@layout';
+import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
 import { CreatePost, ListPost } from '@modules/post/components';
 import { PostType } from '@modules/post/types';

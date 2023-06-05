@@ -1,4 +1,4 @@
-import Layout from '@layout';
+import Layout from '@layout/components';
 import { NextComponentType } from 'next';
 import NavBar from './NavBar';
 

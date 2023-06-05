@@ -1,12 +1,12 @@
 import { Logo } from '@assets/logo';
-import Layout from '@layout';
-import { HeaderCenter, HeaderLeft } from '@layout/Header';
+import Layout from '@layout/components';
+import { HeaderCenter, HeaderLeft } from '../Header';
 import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, Tooltip, Typography, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
-import styles from '../Layout.module.scss';
+import styles from '../styles/Layout.module.scss';
 import { NavBarRight } from './NavBarRight';
 
 const items = [

@@ -100,29 +100,29 @@ export type InfinitFetcherType<T extends IData> = {
 
 import useSWRInfinite from 'swr/infinite';
 
-interface useInfiniteFetcherSWROptions {
+export interface useInfiniteFetcherSWROptions {
 	api: string;
-	size?: number;
+	limit?: number;
 	params?: IPaginationParams;
 }
 
 export const useInfiniteFetcherSWR = <T extends IData = any>({
 	api,
-	size = 20,
+	limit = 20,
 	params = {},
 }: useInfiniteFetcherSWROptions): InfinitFetcherType<T> => {
 	const getKey = useCallback(
 		(pageIndex: number, prevData: IPaginationResponse<T>) => {
-			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size });
+			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size: limit });
 
 			const prevOffset = Number(prevData?.offset) || 0;
 			const prevItems = prevData?.items || [];
 			if (prevOffset + prevItems.length >= prevData.totalItems) return null; // No more data
 
 			const offset = prevOffset + prevItems.length;
-			return stringUtil.generateUrl(api, { ...params, offset, size });
+			return stringUtil.generateUrl(api, { ...params, offset, size: limit });
 		},
-		[size, api, params]
+		[limit, api, params]
 	);
 
 	const {
@@ -153,8 +153,8 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 		// Update the cache with the new data
 		mutate((prevData) => {
 			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * size,
-					endIndex = (index + 1) * size;
+				const startIndex = index * limit,
+					endIndex = (index + 1) * limit;
 				return {
 					...page,
 					items: newItems.slice(startIndex, endIndex),
@@ -172,8 +172,8 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 		// Update the cache with the new data
 		mutate((prevData) => {
 			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * size,
-					endIndex = (index + 1) * size;
+				const startIndex = index * limit,
+					endIndex = (index + 1) * limit;
 				return {
 					...page,
 					items: newItems.slice(startIndex, endIndex),
@@ -190,8 +190,8 @@ export const useInfiniteFetcherSWR = <T extends IData = any>({
 		// Update the cache with the new data
 		mutate((prevData) => {
 			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * size,
-					endIndex = (index + 1) * size;
+				const startIndex = index * limit,
+					endIndex = (index + 1) * limit;
 				return {
 					...page,
 					items: newItems.slice(startIndex, endIndex),

@@ -7,7 +7,7 @@ import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
 import { InfinitFetcherType, useInfiniteFetcherSWR } from '@hooks';
 import { ConversationType } from '@interfaces';
-import Layout, { withLayout } from '@layout';
+import Layout, { withLayout } from '@layout/components';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';

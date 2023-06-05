@@ -1,4 +1,4 @@
-import { withLayout } from '@layout';
+import { withLayout } from '@layout/components';
 import { authProviders } from '@utils/data';
 import { Avatar, Card, Spin } from 'antd';
 import { useRouter } from 'next/router';
