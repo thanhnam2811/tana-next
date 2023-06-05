@@ -18,6 +18,7 @@ export interface IData {
 
 	createdAt: string;
 	updatedAt: string;
+	deleted?: boolean;
 }
 
 export interface IPaginationParams {
