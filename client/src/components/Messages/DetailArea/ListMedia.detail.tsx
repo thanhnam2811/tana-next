@@ -1,4 +1,4 @@
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import { Box, CircularProgress, ImageList, ImageListItem, Typography } from '@mui/material';
 import { isVideo } from '@utils/data';
 import Image from 'next/image';
@@ -8,7 +8,7 @@ interface Props {
 }
 
 const ListMedia = ({ conversation, handlePreviewMedia }: Props) => {
-	const mediaFetcher = useInfiniteFetcherSWR({ api: `conversations/${conversation?._id}/files/media` });
+	const mediaFetcher = useFetcher({ api: `conversations/${conversation?._id}/files/media` });
 	const { data: listMedia, hasMore, fetching, loadMore } = mediaFetcher;
 
 	if (mediaFetcher.fetching) {

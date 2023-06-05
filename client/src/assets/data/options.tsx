@@ -1,5 +1,5 @@
 import Reaction from '@assets/icons/reactions';
-import { ContactType, EducationType, PrivacyType, ReactionType, WorkType } from '@interfaces';
+import { ContactType, EducationType, PrivacyValueType, ReactionType, WorkType } from '@common/types';
 import { COLORS } from '@utils/theme';
 import { HiGlobeAsiaAustralia, HiLockClosed, HiUserPlus, HiUsers, HiUserMinus } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
@@ -10,7 +10,7 @@ export interface IOption<T> {
 	RIcon?: IconType;
 }
 
-export type PrivacyOptionType = Required<IOption<PrivacyType>>;
+export type PrivacyOptionType = Required<IOption<PrivacyValueType>>;
 export const privacyOptions: PrivacyOptionType[] = [
 	{
 		value: 'public',
@@ -38,7 +38,7 @@ export const privacyOptions: PrivacyOptionType[] = [
 		RIcon: HiUserMinus,
 	},
 ];
-export const getPrivacyOption = (value: PrivacyType = 'public') =>
+export const getPrivacyOption = (value: PrivacyValueType = 'public') =>
 	privacyOptions.find((option) => option.value === value);
 
 export const contactOptions: IOption<ContactType>[] = [

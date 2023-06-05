@@ -1,24 +1,25 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
-import { InfinitFetcherType } from '@hooks';
+import { FetcherType } from '@common/hooks';
+import { MessageType } from '@common/types';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
+import { useAuth } from '@modules/auth/hooks';
 import { stringUtil } from '@utils/common';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { FaArrowDown } from 'react-icons/fa';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { MessageItem } from './MessageItem';
-import { useUserStore } from '@store';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
 	onMediaPreview: (media: any) => void;
-	fetcher: InfinitFetcherType;
+	fetcher: FetcherType<MessageType>;
 }
 
 export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 	const { conversation } = useContext(MessageContext)!;
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 	const listMember = conversation?.members || [];
 	const listMessage = fetcher.data;
 
@@ -91,7 +92,7 @@ export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 					<MessageItem
 						key={_id}
 						isSystem={isSystem}
-						other={sender?._id !== user?._id}
+						other={sender?._id !== authUser?._id}
 						text={text}
 						combine={{
 							prev: listMessage[index - 1]?.sender?._id === sender?._id,
@@ -110,10 +111,10 @@ export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {
 };
 
 const UserPreview = ({ listMember, conversation }: any) => {
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 
 	const isDirect = listMember.length === 2;
-	const user = isDirect && listMember.filter((m: any) => m?.user?._id !== currentUser?._id)[0]?.user;
+	const user = isDirect && listMember.filter((m: any) => m?.user?._id !== authUser?._id)[0]?.user;
 
 	return (
 		<Stack direction="column" alignItems="center" spacing={1}>

@@ -1,4 +1,4 @@
-import { IUser } from '@interfaces';
+import { UserType } from '@common/types';
 import { Avatar, AvatarProps, Badge, BadgeProps, useTheme } from '@mui/material';
 import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
@@ -45,7 +45,7 @@ export const AvatarBadge = ({ active, size = 64, ...props }: Props & BadgeProps)
 };
 
 interface UserAvatarProps {
-	user: IUser;
+	user: UserType;
 	size: number;
 	badgeProps?: BadgeProps;
 }

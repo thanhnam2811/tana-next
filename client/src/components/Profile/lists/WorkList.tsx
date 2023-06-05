@@ -1,7 +1,7 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IPrivacy, IWork } from '@interfaces';
-import { useUserStore } from '@store';
+import { IPrivacy, IWork } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ interface WorkModalData {
 }
 
 export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
-	const { updateProfile } = useUserStore();
+	const { updateAuthUser } = useAuth();
 	const [works, setWorks] = useState(init);
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +47,7 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 
 		try {
 			// Update profile
-			await updateProfile({ work: newWorks });
+			await updateAuthUser({ work: newWorks });
 
 			// Notify
 			toast.success(`${updateNotify} thành công!`);
@@ -69,8 +69,6 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 	};
 
 	const handleModalSubmit = (data: IWork) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {

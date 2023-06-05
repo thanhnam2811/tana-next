@@ -1,5 +1,5 @@
-import { UserAvatar } from '@components/v2/Avatar';
-import { UserType } from '@interfaces';
+import { UserAvatar } from '@modules/user/components';
+import { UserType } from '@common/types';
 import { Card, Skeleton, Space, Typography } from 'antd';
 import React from 'react';
 
