@@ -1,5 +1,5 @@
-import { TableBase } from '@/component/Table';
-import { IPicture, UserType } from '@/types/user.type';
+import { IPicture, UserType } from '@common/types/user.type';
+import { TableBase } from '@components/Table';
 import { Avatar, Button, Card } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';

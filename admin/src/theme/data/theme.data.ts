@@ -1,4 +1,4 @@
-import { BackgroundColorsEnum, ColorsEnum, ITheme } from '../types/them.type';
+import { BackgroundColorsEnum, ColorsEnum, ITheme } from '../types/IThemeStore';
 
 export const lightTheme: ITheme = {
 	colors: {

@@ -1,10 +1,10 @@
 import Icon from '@ant-design/icons';
 import { Card, Col, Row, Statistic, StatisticProps } from 'antd';
 import { IoPeopleOutline } from 'react-icons/io5';
+import { useDashboardData } from '../hooks';
 import LineChart from '../components/LineChart';
 import PieChart from '../components/PieChart';
 import UserTable from '../components/UserTable';
-import useDashboardData from '../hooks/useDashboardData';
 
 export default function DashboardPage() {
 	const { data, isLoading } = useDashboardData();

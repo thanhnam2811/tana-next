@@ -1,7 +1,7 @@
+import { layoutData } from '@layout/data';
 import { MenuProps } from 'antd';
-import layoutData from '../data/layoutData';
 
-export default function getLayoutMenuItems(data = layoutData) {
+export function getLayoutMenuItems(data = layoutData) {
 	const items: MenuProps['items'] = [];
 
 	for (const item of data) {

@@ -1,6 +1,4 @@
-import apiClient from '@/api/apiClient';
-import { UserType } from '@/types/user.type';
+import apiClient from '@common/api/apiClient';
+import { UserType } from '@common/types/user.type';
 
-const getProfileApi = () => apiClient.get<UserType>('/users/profile').then((res) => res.data);
-
-export default getProfileApi;
+export const getProfileApi = () => apiClient.get<UserType>('/users/profile').then((res) => res.data);
