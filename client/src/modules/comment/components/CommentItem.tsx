@@ -1,7 +1,7 @@
 import { reactOptions } from '@assets/data';
 import { UserAvatar } from '@modules/user/components';
 import { ReactPopover } from '@components/v2/Popover';
-import { PostType, ReactionType } from '@interfaces';
+import { PostType, ReactionType } from '@common/types';
 import { Collapse } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
 import { getTimeAgo } from '@utils/common';

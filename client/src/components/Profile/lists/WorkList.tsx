@@ -1,6 +1,6 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IPrivacy, IWork } from '@interfaces';
+import { IPrivacy, IWork } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';

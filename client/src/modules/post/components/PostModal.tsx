@@ -1,7 +1,7 @@
 import { PrivacyDropdown } from '@components/Button';
 import { RichTextInput } from '@components/v2/Input';
-import { PostFormType, PostType } from '@interfaces';
-import { IMedia } from '@interfaces/common';
+import { PostFormType, PostType } from '@common/types';
+import { IMedia } from '@common/types/common';
 import { Collapse } from '@mui/material';
 import { fileApi } from '@utils/api';
 import { randomString } from '@utils/common';

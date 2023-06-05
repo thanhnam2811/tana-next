@@ -1,4 +1,4 @@
-import { UserFormType, UserType } from '@interfaces';
+import { UserFormType, UserType } from '@common/types';
 import { ILoginParams } from '@utils/api';
 
 export interface IUseAuth {

@@ -1,4 +1,4 @@
-import { UserType } from '@interfaces';
+import { UserType } from '@common/types';
 import { Avatar, AvatarProps, Badge, BadgeProps, useTheme } from '@mui/material';
 import { stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';

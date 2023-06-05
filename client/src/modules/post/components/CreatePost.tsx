@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
-import { InfinitFetcherType } from '@hooks';
-import { PostFormType, PostType } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { PostFormType, PostType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
 import { postApi } from '@utils/api';
 import { COLORS } from '@utils/theme';
@@ -11,7 +11,7 @@ import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { PostModal } from './PostModal';
 
 interface Props {
-	fetcher: InfinitFetcherType<PostType>;
+	fetcher: FetcherType<PostType>;
 }
 
 export function CreatePost({ fetcher, ...cardProps }: Props & CardProps) {

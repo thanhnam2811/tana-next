@@ -1,5 +1,5 @@
 import { WhiteBox } from '@components/Box';
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import { Box, Divider, Grid, Typography, styled } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { useAuth } from '@modules/auth/hooks';
@@ -15,7 +15,7 @@ import { MessageFooter } from './MessageFooter';
 import { MessageHeader } from './MessageHeader';
 import { MessagesHistory } from './MessageHistory';
 import { messageConfig } from './config';
-import { IMedia, MessageType } from '@interfaces';
+import { IMedia, MessageType } from '@common/types';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -26,7 +26,7 @@ export function MessageArea({ onMediaPreview }: Props) {
 	const { conversation } = useContext(MessageContext)!;
 	const router = useRouter();
 	const id = router.query.id as string;
-	const messageFetcher = useInfiniteFetcherSWR<
+	const messageFetcher = useFetcher<
 		MessageType & {
 			sending?: boolean; // for optimistic UI
 			error?: string; // for display error

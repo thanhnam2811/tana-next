@@ -1,4 +1,4 @@
-import { IData, IMedia, IPrivacy, UserType } from '@interfaces';
+import { IData, IMedia, IPrivacy, UserType } from '@common/types';
 
 interface IPost extends IData {
 	author: UserType;

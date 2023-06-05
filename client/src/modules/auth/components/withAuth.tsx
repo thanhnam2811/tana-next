@@ -15,7 +15,10 @@ export function withAuth(Component: NextComponentType) {
 				const accessToken = localStorage.getItem('accessToken');
 				if (!accessToken)
 					router.replace({ pathname: '/auth/login', query: { redirect: router.pathname } }, '/auth/login');
-				else login();
+				else
+					login().catch(() =>
+						router.replace({ pathname: '/auth/login', query: { redirect: router.pathname } }, '/auth/login')
+					);
 			}
 		}, [authUser]);
 

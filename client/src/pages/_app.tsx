@@ -17,19 +17,22 @@ import 'swiper/css';
 import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { useTheme } from './theme/hooks';
+import { useTheme } from '@modules/theme/hooks';
 dayjs.locale('vi');
 
 export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
 	const { getSetting } = useSettingStore();
+	const { mode, getTheme } = useTheme();
 	const { token } = theme.useToken();
-	const { mode } = useTheme();
 
 	// Fetch user data
 	useEffect(() => {
 		// fetch setting
 		getSetting();
+
+		// fetch theme
+		getTheme();
 
 		if (!authUser) {
 			// fetch user data if accessToken is exist

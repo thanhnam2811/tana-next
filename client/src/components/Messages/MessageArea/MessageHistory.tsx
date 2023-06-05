@@ -1,6 +1,6 @@
 import { GroupAvatar, MyIconButton } from '@components/MUI';
-import { InfinitFetcherType } from '@hooks';
-import { MessageType } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { MessageType } from '@common/types';
 import { Avatar, Box, CircularProgress, Slide, Stack, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { useAuth } from '@modules/auth/hooks';
@@ -13,7 +13,7 @@ import { MessageItem } from './MessageItem';
 interface Props {
 	// eslint-disable-next-line no-unused-vars
 	onMediaPreview: (media: any) => void;
-	fetcher: InfinitFetcherType<MessageType>;
+	fetcher: FetcherType<MessageType>;
 }
 
 export const MessagesHistory = ({ onMediaPreview, fetcher }: Props) => {

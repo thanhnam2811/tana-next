@@ -1,5 +1,5 @@
 import { reactOptions } from '@assets/data';
-import { ReactionType } from '@interfaces';
+import { ReactionType } from '@common/types';
 import { Avatar, Button, Popover, PopoverProps, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import styles from './Popover.module.scss';

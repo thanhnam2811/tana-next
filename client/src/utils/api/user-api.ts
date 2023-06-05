@@ -1,4 +1,4 @@
-import { UserFormType, UserType } from '@interfaces';
+import { UserFormType, UserType } from '@common/types';
 import apiClient from './apiClient';
 
 export const userApi = {

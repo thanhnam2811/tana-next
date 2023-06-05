@@ -1,10 +1,10 @@
-import { InfinitFetcherType } from '@hooks';
-import { UserType } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { UserType } from '@common/types';
 import { List } from 'antd';
 import React, { useEffect } from 'react';
 
 interface Props {
-	fetcher: InfinitFetcherType<UserType>;
+	fetcher: FetcherType<UserType>;
 	threshHold?: number;
 }
 

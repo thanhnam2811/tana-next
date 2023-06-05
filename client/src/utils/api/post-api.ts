@@ -1,6 +1,6 @@
 import { ReactionType } from '@components/Popup';
 import apiClient, { apiCaller } from './apiClient';
-import { PostFormType, PostType } from '@interfaces';
+import { PostFormType, PostType } from '@common/types';
 
 export const postApi = {
 	react: (id: string, reaction: ReactionType) => apiClient.put(`/posts/${id}/react`, { type: reaction }),

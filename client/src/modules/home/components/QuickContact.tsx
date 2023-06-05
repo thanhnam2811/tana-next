@@ -1,4 +1,4 @@
-import { IPaginationResponse, UserType } from '@interfaces';
+import { IPaginationResponse, UserType } from '@common/types';
 import { UserAvatar } from '@modules/user/components';
 import { swrFetcher, userApi } from '@utils/api';
 import { Button, Divider, List, Space, Typography } from 'antd';

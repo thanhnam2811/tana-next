@@ -1,6 +1,6 @@
 import { apiClient } from '@common/api';
 import { CommentType } from '../types';
-import { ReactionType } from '@interfaces';
+import { ReactionType } from '@common/types';
 
 export const reactToCommentApi = (postId: string, commentId: string, reaction: ReactionType) =>
 	apiClient

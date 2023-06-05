@@ -2,7 +2,7 @@ import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { FilterUser, ListUser } from '@components/List/ListUser';
 import { Navigate } from '@components/Tab';
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import Layout, { withLayout } from '@layout/components';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -41,7 +41,7 @@ function Friends() {
 	const type = (router.query.type as FriendsType) || 'friends';
 
 	const relationship = relationshipData[type]?.relationship;
-	const userFetcher = useInfiniteFetcherSWR({ api: `/users/searchUser/${type}` });
+	const userFetcher = useFetcher({ api: `/users/searchUser/${type}` });
 	const [, setUserPreview] = useState<any>(null); // TODO: preview user
 
 	const changeType = (type: FriendsType) => {
