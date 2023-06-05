@@ -2,7 +2,7 @@ import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { FriendTab, InfoTab, PostTab } from '@components/Profile/tabs';
 import { Navigate } from '@components/Tab';
-import Layout, { withLayout } from '@layout';
+import Layout, { withLayout } from '@layout/components';
 import { CircularProgress } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
 import { userApi } from '@utils/api';

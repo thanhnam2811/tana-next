@@ -1,28 +1,30 @@
 import { useSettingStore } from '@store';
-import '@styles/global.scss';
 import { SERVER_URL } from '@utils/common';
-import 'aos/dist/aos.css';
-import 'draft-js/dist/Draft.css';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
-import 'swiper/css';
-
 import { useAuth } from '@modules/auth/hooks';
 import { Analytics } from '@vercel/analytics/react';
-import dayjs from 'dayjs';
-import 'dayjs/locale/vi';
 import { App, ConfigProvider, theme } from 'antd';
 
-// Set default locale to Vietnamese
+import '@styles/global.scss';
+import 'aos/dist/aos.css';
+import 'draft-js/dist/Draft.css';
+import 'swiper/css';
+
+import viVn from 'antd/locale/vi_VN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import { useTheme } from './theme/hooks';
 dayjs.locale('vi');
 
 export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
 	const { getSetting } = useSettingStore();
 	const { token } = theme.useToken();
+	const { mode } = useTheme();
 
 	// Fetch user data
 	useEffect(() => {
@@ -54,7 +56,17 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 	}, [authUser?._id]);
 
 	return (
-		<ConfigProvider>
+		<ConfigProvider
+			locale={viVn}
+			theme={{
+				token: {
+					borderRadius: 12,
+				},
+				algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+			}}
+			input={{ autoComplete: 'off' }}
+			select={{ showSearch: true }}
+		>
 			<Toaster position="bottom-right" />
 
 			<NextProgress color={token.colorPrimary} delay={300} height={2} />

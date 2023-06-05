@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 import { getPostApi } from '../api';
 import { PostCard } from '../components';
 import { PostType } from '../types';
-import Layout from '@layout';
+import Layout from '@layout/components';
 
 interface Props {
 	post?: PostType;

@@ -1,8 +1,8 @@
-import { HeaderRight } from '@layout/Header';
 import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Badge, Button } from 'antd';
 import Link from 'next/link';
 import { HiBell } from 'react-icons/hi2';
+import { HeaderRight } from '../Header';
 
 export function NavBarRight() {
 	const { authUser } = useAuth();

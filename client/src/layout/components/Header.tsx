@@ -1,6 +1,7 @@
 import classnames from 'classnames';
 import { DetailedHTMLProps, HTMLAttributes, forwardRef } from 'react';
-import styles from './Layout.module.scss';
+import styles from '../styles/Layout.module.scss';
+
 import { theme } from 'antd';
 
 interface Props {
