@@ -62,7 +62,6 @@ export function NavBarRight() {
 		<HeaderRight>
 			<Dropdown
 				arrow
-				trigger={['click']}
 				dropdownRender={() => (
 					<Card
 						title="Thông báo"
