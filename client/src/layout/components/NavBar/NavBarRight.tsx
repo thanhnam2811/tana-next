@@ -1,6 +1,10 @@
+import { useFetcher } from '@common/hooks';
 import { useAuth } from '@modules/auth/hooks';
+import { NotificationType } from '@modules/notification/types';
 import { useTheme } from '@modules/theme/hooks';
-import { Avatar, Badge, Button, Dropdown, MenuProps } from 'antd';
+import { UserAvatar } from '@modules/user/components';
+import { getTimeAgo } from '@utils/common';
+import { Avatar, Badge, Button, Card, Dropdown, List, MenuProps, Space, Typography } from 'antd';
 import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
 import { HiBell, HiCog6Tooth, HiExclamationTriangle, HiMoon, HiSun, HiUser } from 'react-icons/hi2';
@@ -9,6 +13,7 @@ import { HeaderRight } from '../Header';
 export function NavBarRight() {
 	const { authUser, logout } = useAuth();
 	const { mode, toggleTheme } = useTheme();
+	const notiFetcher = useFetcher<NotificationType>({ api: `/users/notifications` });
 
 	if (!authUser)
 		return (
@@ -55,11 +60,51 @@ export function NavBarRight() {
 
 	return (
 		<HeaderRight>
-			<Badge count={5} offset={[-4, 4]}>
-				<Button shape="circle" size="large">
-					<HiBell />
-				</Button>
-			</Badge>
+			<Dropdown
+				arrow
+				trigger={['click']}
+				dropdownRender={() => (
+					<Card
+						title="Thông báo"
+						extra={<Button type="link">Đánh dấu tất cả là đã xem</Button>}
+						style={{ width: 400 }}
+						bodyStyle={{ maxHeight: 400, overflow: 'hidden auto', padding: 8 }}
+						headStyle={{ padding: 16 }}
+					>
+						<List
+							dataSource={notiFetcher.data}
+							split={false}
+							renderItem={(noti) => (
+								<Link href={noti.link}>
+									<Button
+										type="text"
+										style={{ height: 'auto', width: '100%', justifyContent: 'flex-start' }}
+									>
+										<Space align="start">
+											<UserAvatar user={noti.sender} size={40} />
+
+											<Space direction="vertical" align="start" style={{ textAlign: 'justify' }}>
+												<Typography.Text strong style={{ whiteSpace: 'break-spaces' }}>
+													{noti.content}
+												</Typography.Text>
+												<Typography.Text type="secondary">
+													{getTimeAgo(noti.createdAt)}
+												</Typography.Text>
+											</Space>
+										</Space>
+									</Button>
+								</Link>
+							)}
+						/>
+					</Card>
+				)}
+			>
+				<Badge count={5} offset={[-4, 4]}>
+					<Button shape="circle" size="large">
+						<HiBell />
+					</Button>
+				</Badge>
+			</Dropdown>
 
 			<Dropdown menu={{ items: avatarDropdownItems }} arrow>
 				<Button shape="circle" size="large">

@@ -58,6 +58,12 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 		};
 	}, [authUser?._id]);
 
+	const AppContainer = (props: React.ComponentProps<typeof App>) => {
+		const { token } = theme.useToken();
+
+		return <App style={{ backgroundColor: token.colorBgLayout }} {...props} />;
+	};
+
 	return (
 		<ConfigProvider
 			locale={viVn}
@@ -74,9 +80,9 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 
 			<NextProgress color={token.colorPrimary} delay={300} height={2} />
 
-			<App style={{ backgroundColor: token.colorBgLayout }}>
+			<AppContainer>
 				<Component {...pageProps} />
-			</App>
+			</AppContainer>
 
 			<Analytics />
 		</ConfigProvider>
