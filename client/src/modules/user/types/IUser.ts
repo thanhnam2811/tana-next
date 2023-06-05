@@ -1,4 +1,4 @@
-import { IData, IMedia, IPrivacy } from '@interfaces';
+import { IData, IMedia, IPrivacy } from '@common/types';
 
 export type ContactType =
 	| 'phone'

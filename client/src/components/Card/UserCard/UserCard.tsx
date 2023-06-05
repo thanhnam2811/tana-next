@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiCheckCircle, HiPlusCircle, HiUser, HiUserMinus, HiUserPlus, HiXCircle } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
-import { RelationshipType } from '@interfaces';
+import { RelationshipType } from '@common/types';
 
 type ChipRelationshipType = Record<
 	RelationshipType,

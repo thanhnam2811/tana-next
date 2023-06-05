@@ -1,5 +1,5 @@
-import { useInfiniteFetcherSWR, useInfiniteFetcherSWROptions } from '@hooks';
-import { IData } from '@interfaces';
+import { useFetcher, FetcherProps } from '@common/hooks';
+import { IData } from '@common/types';
 import { stringUtil } from '@utils/common';
 import { Select, SelectProps } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
@@ -16,8 +16,8 @@ export function SelectApi<T extends IData = any>({
 	params,
 	limit,
 	...props
-}: Props<T> & SelectProps<T> & useInfiniteFetcherSWROptions) {
-	const fetcher = useInfiniteFetcherSWR<T>({ api, params, limit });
+}: Props<T> & SelectProps<T> & FetcherProps) {
+	const fetcher = useFetcher<T>({ api, params, limit });
 
 	const handeScroll = (e: any) => {
 		const isBottom = e.target.scrollHeight - (e.target.scrollTop + e.target.clientHeight) < scrollThreshold;

@@ -1,5 +1,5 @@
 import { urlUtil } from '@common/utils';
-import { PostType } from '@interfaces';
+import { PostType } from '@common/types';
 import { getPostApi } from '@modules/post/api';
 import PostPage from '@modules/post/pages/PostPage';
 import axios from 'axios';

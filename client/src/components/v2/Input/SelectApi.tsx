@@ -1,11 +1,11 @@
-import { InfinitFetcherType } from '@hooks';
-import { IData } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { IData } from '@common/types';
 import { stringUtil } from '@utils/common';
 import { Select, SelectProps } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
 
 interface Props<T extends IData> {
-	fetcher: InfinitFetcherType<T>;
+	fetcher: FetcherType<T>;
 	scrollThreshold?: number;
 	toOption: (item: T) => DefaultOptionType;
 }

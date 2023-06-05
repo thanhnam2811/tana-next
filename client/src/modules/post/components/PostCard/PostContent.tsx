@@ -1,5 +1,5 @@
 // import { RichTextInput } from '@components/v2/Input';
-import { PostType } from '@interfaces';
+import { PostType } from '@common/types';
 import { Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import styles from './PostCard.module.scss';

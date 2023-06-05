@@ -1,5 +1,5 @@
 import { WhiteBox } from '@components/Box';
-import { UserType } from '@interfaces';
+import { UserType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
 import { List, Typography } from 'antd';
 import { toast } from 'react-hot-toast';

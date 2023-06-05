@@ -1,5 +1,5 @@
-import { useInfiniteFetcherSWR } from '@hooks';
-import { CommentFormType, CommentType, PostType, ReactionType } from '@interfaces';
+import { useFetcher } from '@common/hooks';
+import { CommentFormType, CommentType, PostType, ReactionType } from '@common/types';
 import { Button, Form, Input, List, Space } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import React, { useState } from 'react';
@@ -17,7 +17,7 @@ export function ListComment({ post, comment }: Props) {
 	const isReply = !!comment;
 
 	const api = isReply ? `posts/${post._id}/comments/${comment?._id}/replies` : `posts/${post._id}/comments`;
-	const fetcher = useInfiniteFetcherSWR<CommentType>({ api });
+	const fetcher = useFetcher<CommentType>({ api });
 
 	const handleDelete = async (commentId: string) => {
 		try {

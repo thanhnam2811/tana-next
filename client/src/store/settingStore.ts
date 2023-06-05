@@ -1,4 +1,4 @@
-import { ISetting } from '@interfaces';
+import { ISetting } from '@common/types';
 import { create } from 'zustand';
 
 export interface ISettingStore {

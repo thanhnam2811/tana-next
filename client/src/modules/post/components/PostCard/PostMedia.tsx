@@ -1,4 +1,4 @@
-import { IMedia } from '@interfaces/common';
+import { IMedia } from '@common/types/common';
 import { Button, Col, Image, Row } from 'antd';
 import { HiX } from 'react-icons/hi';
 import styles from './PostCard.module.scss';

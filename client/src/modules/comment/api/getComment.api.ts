@@ -1,5 +1,5 @@
 import { apiClient } from '@common/api';
-import { IPaginationResponse } from '@interfaces';
+import { IPaginationResponse } from '@common/types';
 import { CommentType } from '../types';
 
 export const getCommentApi = (postId: string) =>

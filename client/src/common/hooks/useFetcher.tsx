@@ -1,88 +1,10 @@
-import { IData, IPaginationParams, IPaginationResponse } from '@interfaces';
-import apiClient, { swrFetcher } from '@utils/api/apiClient';
+import { swrFetcher } from '@common/api';
+import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
 import { stringUtil } from '@utils/common';
-import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
-
-export function useInfiniteFetcher<T extends IData>(api: string): InfinitFetcherType<T> {
-	const [fetching, setFetching] = useState(false);
-	const [data, setData] = useState<T[]>([]);
-
-	const [hasMore, setHasMore] = useState(true);
-	const [params, setParams] = useState<any>({
-		offset: 0,
-		size: 20,
-	});
-
-	const fetch = useCallback(
-		async (params: any) => {
-			setFetching(true);
-
-			try {
-				const res: { data: IPaginationResponse<T> } = await apiClient.get(api, { params });
-				const { totalItems, items } = res.data;
-				setData((prev) => [...prev, ...items]);
-				setHasMore(totalItems > params.offset + params.size);
-				setParams(params);
-			} catch (error: any) {
-				toast.error(error.toString());
-			}
-
-			setFetching(false);
-		},
-		[api]
-	);
-
-	const loadMore = useCallback(() => fetch({ ...params, offset: data.length }), [data.length, fetch, params]);
-
-	const reload = useCallback(() => {
-		setData([]);
-		setHasMore(true);
-		return fetch({ ...params, offset: 0 });
-	}, [fetch, params]);
-
-	const filter = useCallback(
-		(filter: any) => {
-			setData([]);
-			return fetch({ ...params, ...filter, offset: 0 });
-		},
-		[fetch, params]
-	);
-
-	const updateData = useCallback(
-		(id: string, newData: any) =>
-			setData((prev) => prev.map((item) => (item._id === id ? { ...item, ...newData } : item))),
-		[]
-	);
-
-	const addData = useCallback((newData: any) => setData((prev) => [newData, ...prev]), []);
-
-	const removeData = useCallback((id: string) => setData((prev) => prev.filter((item) => item._id !== id)), []);
-
-	const fetcher = useMemo(
-		() => ({
-			api,
-			data,
-			updateData,
-			addData,
-			removeData,
-			fetching,
-			hasMore,
-			params,
-			fetch,
-			loadMore,
-			filter,
-			reload,
-			validating: false,
-		}),
-		[api, data, updateData, addData, removeData, fetching, hasMore, params, fetch, loadMore, filter, reload]
-	);
-
-	return fetcher;
-}
+import { useCallback, useMemo } from 'react';
 
 // T: Data type,
-export type InfinitFetcherType<T extends IData> = {
+export type FetcherType<T extends IData> = {
 	data: T[];
 	updateData: (id: string, newData: Partial<T>) => void;
 	addData: (newData: T) => void;
@@ -100,17 +22,13 @@ export type InfinitFetcherType<T extends IData> = {
 
 import useSWRInfinite from 'swr/infinite';
 
-export interface useInfiniteFetcherSWROptions {
+export interface FetcherProps {
 	api: string;
 	limit?: number;
 	params?: IPaginationParams;
 }
 
-export const useInfiniteFetcherSWR = <T extends IData = any>({
-	api,
-	limit = 20,
-	params = {},
-}: useInfiniteFetcherSWROptions): InfinitFetcherType<T> => {
+export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {} }: FetcherProps): FetcherType<T> => {
 	const getKey = useCallback(
 		(pageIndex: number, prevData: IPaginationResponse<T>) => {
 			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size: limit });

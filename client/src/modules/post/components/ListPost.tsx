@@ -1,4 +1,4 @@
-import { InfinitFetcherType } from '@hooks';
+import { FetcherType } from '@common/hooks';
 import { ListComment } from '@modules/comment/components';
 import { Collapse } from '@mui/material';
 import { Card, List } from 'antd';
@@ -9,7 +9,7 @@ import { PostCard } from './PostCard';
 
 interface Props {
 	containerId?: string;
-	fetcher: InfinitFetcherType<PostType>;
+	fetcher: FetcherType<PostType>;
 }
 
 export function ListPost({ containerId, fetcher }: Props) {

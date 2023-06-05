@@ -6,7 +6,7 @@ import { Avatar, Button, Tooltip, Typography, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
-import styles from '../styles/Layout.module.scss';
+import styles from '../../styles/Layout.module.scss';
 import { NavBarRight } from './NavBarRight';
 
 const items = [

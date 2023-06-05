@@ -1,6 +1,6 @@
 import { UserCard } from '@components/Card/UserCard';
-import { InfinitFetcherType } from '@hooks';
-import { RelationshipType, UserType } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { RelationshipType, UserType } from '@common/types';
 import { Box, CircularProgress, Collapse, Typography } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
@@ -8,7 +8,7 @@ import { TransitionGroup } from 'react-transition-group';
 interface Props {
 	type?: string;
 	relationship?: RelationshipType;
-	fetcher: InfinitFetcherType<UserType>;
+	fetcher: FetcherType<UserType>;
 	onUserClick: (user: any) => void;
 }
 

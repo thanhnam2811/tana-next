@@ -1,4 +1,4 @@
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
 import { CreatePost, ListPost } from '@modules/post/components';
@@ -6,7 +6,7 @@ import { PostType } from '@modules/post/types';
 import { QuickContact, ShortCut } from '../components';
 
 function HomePage() {
-	const postFetch = useInfiniteFetcherSWR<PostType>({ api: 'posts/home' });
+	const postFetch = useFetcher<PostType>({ api: 'posts/home' });
 
 	return (
 		<>

@@ -1,4 +1,4 @@
-import { IData, IMedia, UserType } from '@interfaces';
+import { IData, IMedia, UserType } from '@common/types';
 
 interface IComment extends IData {
 	_id: string;

@@ -1,5 +1,5 @@
-import { useInfiniteFetcherSWR } from '@hooks';
-import { CommentType } from '@interfaces';
+import { useFetcher } from '@common/hooks';
+import { CommentType } from '@common/types';
 import { Box, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
 import { getTimeAgo } from '@utils/common';
 import { getFileIcon } from '@utils/data';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const ListFiles = ({ conversation }: Props) => {
-	const fileFetcher = useInfiniteFetcherSWR<CommentType>({ api: `conversations/${conversation?._id}/files/other` });
+	const fileFetcher = useFetcher<CommentType>({ api: `conversations/${conversation?._id}/files/other` });
 
 	if (fileFetcher.fetching) {
 		return (

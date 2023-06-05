@@ -1,5 +1,5 @@
 import { apiClient } from '@common/api';
-import { ReactionType } from '@interfaces';
+import { ReactionType } from '@common/types';
 import { PostType } from '../types';
 
 export const reactToPostApi = (id: string, reaction: ReactionType) =>
