@@ -1,14 +1,8 @@
 import { create } from 'zustand';
 import { darkTheme, lightTheme } from '../data/theme.data';
-import { ITheme } from '../types/them.type';
+import { IThemeStore } from '../types/IThemeStore';
 
-interface ThemeStore {
-	mode: 'light' | 'dark';
-	theme: ITheme;
-	toggleTheme: () => void;
-}
-
-const useThemeStore = create<ThemeStore>()((set) => ({
+export const useThemeStore = create<IThemeStore>()((set) => ({
 	mode: localStorage.getItem('theme') === 'dark' ? 'dark' : 'light',
 	theme: lightTheme,
 	toggleTheme: () => {
@@ -22,5 +16,3 @@ const useThemeStore = create<ThemeStore>()((set) => ({
 		});
 	},
 }));
-
-export default useThemeStore;

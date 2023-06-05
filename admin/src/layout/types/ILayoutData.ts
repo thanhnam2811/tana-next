@@ -1,4 +1,4 @@
-export default interface ILayoutData {
+export interface ILayoutData {
 	path: string;
 	title: string;
 	icon?: React.ReactNode;

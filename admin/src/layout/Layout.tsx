@@ -23,17 +23,18 @@ import {
 } from 'react-icons/io5';
 import { RiMoonFill, RiSunFill } from 'react-icons/ri';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import styles from '../styles/Layout.module.scss';
-import getLayoutMenuItems from '../utils/getLayoutMenuItems';
-import getBreadcrumbItems from '../utils/getBreadcrumbItems';
-import useAuthStore from '@/modules/auth/hooks/useAuthStore';
-import useThemeStore from '@/modules/theme/hooks/useThemeStore';
+import styles from './styles/Layout.module.scss';
+import { useThemeStore } from '@theme/hooks';
+import { getBreadcrumbItems, getLayoutMenuItems } from './utils';
+import { useAuthStore } from '@modules/auth/hooks';
 
 const { Sider, Header, Content } = AntdLayout;
 const menuItems = getLayoutMenuItems();
 
 export default function Layout() {
-	const { isAuth, logout } = useAuthStore();
+	const { user, logout } = useAuthStore();
+	const isAuth = !!user;
+
 	const navigate = useNavigate();
 	const { pathname } = useLocation();
 	const [collapsed, setCollapsed] = useState(true);

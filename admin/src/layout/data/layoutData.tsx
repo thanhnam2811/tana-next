@@ -1,11 +1,13 @@
-import DashboardPage from '@/modules/dashboard/pages/Dashboard';
 import Icon from '@ant-design/icons';
 import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
-import ILayoutData from '../types/ILayoutData';
-import UserPage from '@/modules/account/user/pages/UserPage';
+import { ILayoutData } from '@layout/types';
 
-const layoutData: ILayoutData[] = [
+import UserPage from '@modules/account/user/pages/UserPage';
+import AdminPage from '@modules/account/admin/pages/AdminPage';
+import DashboardPage from '@modules/dashboard/pages/Dashboard';
+
+export const layoutData: ILayoutData[] = [
 	{
 		path: 'dashboard',
 		title: 'Trang chủ',
@@ -27,7 +29,7 @@ const layoutData: ILayoutData[] = [
 				path: 'admin',
 				title: 'Quản trị viên',
 				icon: <Icon component={RiShieldUserLine} />,
-				element: <div>Admin</div>,
+				element: <AdminPage />,
 			},
 			{
 				path: 'role',
@@ -38,5 +40,3 @@ const layoutData: ILayoutData[] = [
 		],
 	},
 ];
-
-export default layoutData;

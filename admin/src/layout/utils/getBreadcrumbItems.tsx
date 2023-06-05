@@ -1,6 +1,6 @@
+import { layoutData } from '@layout/data';
+import { ILayoutData } from '@layout/types';
 import { BreadcrumbProps } from 'antd';
-import layoutData from '../data/layoutData';
-import ILayoutData from '../types/ILayoutData';
 import { Link } from 'react-router-dom';
 
 const findLayoutItem = (path: string, parentChildren?: ILayoutData[]): ILayoutData | null => {
@@ -9,7 +9,7 @@ const findLayoutItem = (path: string, parentChildren?: ILayoutData[]): ILayoutDa
 	return item || null;
 };
 
-export default function getBreadcrumbItems(pathname: string) {
+export function getBreadcrumbItems(pathname: string) {
 	const items: BreadcrumbProps['items'] = [];
 
 	const layoutItems: ILayoutData[] = [];

@@ -1,7 +1,7 @@
-import { API_URL, MAX_RETRY } from '@/config';
 import axios from 'axios';
 import handleApiError from './handleApiError';
 import retryRequest from './retryRequest';
+import { API_URL, MAX_RETRY } from '@common/config';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: unknown) => axios.isAxiosError(error) && error.response?.status === 401;

@@ -1,10 +1,8 @@
 import { create } from 'zustand';
-import loginApi, { ILoginParams } from '../api/login.api';
-import IAuthStore from '../types/IAuthStore';
-import getProfileApi from '../api/getProfile.api';
+import { ILoginParams, getProfileApi, loginApi } from '../api';
+import { IAuthStore } from '../types/IAuthStore';
 
-const useAuthStore = create<IAuthStore>()((set) => ({
-	isAuth: false,
+export const useAuthStore = create<IAuthStore>()((set) => ({
 	user: null,
 
 	login: async (params: ILoginParams) => {
@@ -16,7 +14,7 @@ const useAuthStore = create<IAuthStore>()((set) => ({
 		localStorage.setItem('refreshToken', refreshToken);
 
 		// Set user and isAuth to true
-		set({ isAuth: true, user });
+		set({ user });
 	},
 
 	getProfile: async () => {
@@ -24,7 +22,7 @@ const useAuthStore = create<IAuthStore>()((set) => ({
 		const user = await getProfileApi();
 
 		// Set user and isAuth to true
-		set({ isAuth: true, user });
+		set({ user });
 	},
 
 	logout: () => {
@@ -33,8 +31,6 @@ const useAuthStore = create<IAuthStore>()((set) => ({
 		localStorage.removeItem('refreshToken');
 
 		// Set user and isAuth to false
-		set({ isAuth: false, user: null });
+		set({ user: null });
 	},
 }));
-
-export default useAuthStore;
