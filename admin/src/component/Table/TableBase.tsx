@@ -1,9 +1,9 @@
-import { swrFetcher } from '@/api';
-import { IPaginationResponse } from '@/interface';
+import { IPaginationResponse } from '@/types/api.type';
 import { Table, TableProps, Card, CardProps, Space, Button } from 'antd';
 import { useState } from 'react';
 import useSWR from 'swr';
 import { ReloadOutlined } from '@ant-design/icons';
+import swrFetcher from '@/api/swrFetcher';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;
