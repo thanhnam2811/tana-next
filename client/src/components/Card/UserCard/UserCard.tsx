@@ -1,4 +1,4 @@
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { LoadingButton } from '@mui/lab';
 import { Box, Button, Card, CardContent, CardMedia, Chip, SxProps, Typography } from '@mui/material';
 import { userApi } from '@utils/api';
@@ -7,18 +7,18 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiCheckCircle, HiPlusCircle, HiUser, HiUserMinus, HiUserPlus, HiXCircle } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
+import { RelationshipType } from '@common/types';
 
-export type Relationship = 'friend' | 'sent' | 'received' | 'none' | 'you';
-
-type ChipRelationship = {
-	[key in Relationship]: {
+type ChipRelationshipType = Record<
+	RelationshipType,
+	{
 		label: string;
-		color: 'success' | 'info' | 'secondary' | 'default' | 'error' | 'warning' | 'primary';
+		color: 'success' | 'info' | 'secondary' | 'primary' | 'default' | 'error' | 'warning';
 		Icon: IconType;
-	};
-};
+	}
+>;
 
-const chipMap: ChipRelationship = {
+const chipMap: ChipRelationshipType = {
 	friend: {
 		label: 'Bạn bè',
 		color: 'success',
@@ -48,15 +48,15 @@ const chipMap: ChipRelationship = {
 
 interface Props {
 	user: any;
-	relationship?: Relationship;
+	relationship?: RelationshipType;
 	sx?: SxProps;
 	onClick?: (user: any) => void;
 }
 
 export const UserCard = ({ user, relationship = 'friend', sx = {}, onClick }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useUserStore();
-	const isCurrentUser = user._id === currentUser?._id;
+	const { authUser } = useAuth();
+	const isCurrentUser = user._id === authUser?._id;
 
 	const [loading, setLoading] = useState(false);
 	const [relationshipState, setRelationshipState] = useState(relationship);

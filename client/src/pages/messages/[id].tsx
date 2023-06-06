@@ -1,16 +1,16 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
 import { ListConversation } from '@components/List/ListConversation';
 import { MyIconButton, SearchInput } from '@components/MUI';
 import { DetailArea } from '@components/Messages/DetailArea';
 import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
-import { InfinitFetcherType, useInfiniteFetcherSWR } from '@hooks';
-import { Content, Sider, withLayout } from '@layout/v2';
+import { FetcherType, useFetcher } from '@common/hooks';
+import { ConversationType } from '@common/types';
+import Layout, { withLayout } from '@layout/components';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
-import { Layout } from 'antd';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -20,7 +20,7 @@ export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
 	updateConversation: (conv: any) => void;
 	conversation: any;
-	convFetcher: InfinitFetcherType;
+	convFetcher: FetcherType<ConversationType>;
 	fetching: boolean;
 	isDirect: boolean;
 } | null>(null);
@@ -30,7 +30,7 @@ function MessagesPage() {
 	const { id } = router.query;
 	const all = !id || id === 'all';
 
-	const convFetcher = useInfiniteFetcherSWR({ api: 'conversations' });
+	const convFetcher = useFetcher<ConversationType>({ api: 'conversations' });
 	const handleSearch = (value: string) => convFetcher.filter({ key: value }); // TODO: change to search
 
 	const [conversation, setConversation] = useState<any>(null);
@@ -112,12 +112,12 @@ function MessagesPage() {
 	const handleCloseModalCreate = () => setOpenModalCreate(false);
 
 	return (
-		<Layout hasSider>
+		<>
 			{id && id !== 'all' && (
 				<MediaViewModal open={openMediaPreview} onClose={handleCloseMediaPreview} mediaData={mediaPreview} />
 			)}
 
-			<Sider fixed align="left">
+			<Layout.Sider align="left">
 				<WhiteBox
 					sx={{
 						py: '8px',
@@ -160,7 +160,7 @@ function MessagesPage() {
 						<ListConversation fetcher={convFetcher} scrollableTarget="list-conversation" />
 					</Box>
 				</WhiteBox>
-			</Sider>
+			</Layout.Sider>
 
 			{!all && conversation ? (
 				<MessageContext.Provider
@@ -172,14 +172,14 @@ function MessagesPage() {
 						updateConversation,
 					}}
 				>
-					<Content style={{ width: '100%', maxWidth: '100%' }}>
+					<Layout.Content style={{ width: '100%', maxWidth: '100%' }}>
 						<MessageArea onMediaPreview={handleMediaPreview} />
-					</Content>
+					</Layout.Content>
 
 					{showDetail && (
-						<Sider fixed align="right">
+						<Layout.Sider align="right">
 							<DetailArea />
-						</Sider>
+						</Layout.Sider>
 					)}
 				</MessageContext.Provider>
 			) : (
@@ -187,7 +187,7 @@ function MessagesPage() {
 					Chọn cuộc trò chuyện để xem tin nhắn
 				</Box>
 			)}
-		</Layout>
+		</>
 	);
 }
 

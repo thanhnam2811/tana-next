@@ -1,5 +1,6 @@
 import { SearchInput } from '@components/MUI';
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
+import { UserType } from '@common/types';
 import { LoadingButton } from '@mui/lab';
 import {
 	Avatar,
@@ -50,7 +51,7 @@ export function ConversationModal({
 }: Props) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const searchFetcher = useInfiniteFetcherSWR({ api: 'users/searchUser/friends' });
+	const searchFetcher = useFetcher<UserType>({ api: 'users/searchUser/friends' });
 	const searchResults = searchFetcher.data;
 
 	const handleSearch = (value: string) => searchFetcher.filter({ key: value });
@@ -72,7 +73,7 @@ export function ConversationModal({
 		}
 	};
 
-	const [listMember, setListMember] = useState<any[]>([]);
+	const [listMember, setListMember] = useState<UserType[]>([]);
 
 	const renderListResult = () =>
 		searchResults

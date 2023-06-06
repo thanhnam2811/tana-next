@@ -1,16 +1,14 @@
-import { InfinitFetcherType } from '@hooks';
-import { UserType } from '@interfaces';
+import { FetcherType } from '@common/hooks';
+import { UserType } from '@common/types';
 import { List } from 'antd';
 import React, { useEffect } from 'react';
 
 interface Props {
-	fetcher: InfinitFetcherType<UserType>;
+	fetcher: FetcherType<UserType>;
 	threshHold?: number;
 }
 
 export function ListFriend({ fetcher, threshHold = 200 }: Props) {
-	console.log('ListFriend');
-
 	useEffect(() => {
 		const handleScroll = (e: Event) => {
 			const el = e.target;

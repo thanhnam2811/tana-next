@@ -4,30 +4,22 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { authApi } from './api';
 import { router } from './routes';
-import { useAuthStore, useThemeStore } from './store';
+import useAuthStore from '@/modules/auth/hooks/useAuthStore';
+import useThemeStore from '@/modules/theme/hooks/useThemeStore';
 dayjs.locale('vi');
 
 function App() {
 	const [loading, setLoading] = useState(true);
-	const { login, logout } = useAuthStore();
+	const { logout, getProfile } = useAuthStore();
 	const { mode } = useThemeStore();
 
 	// get current user
 	useEffect(() => {
-		const fetchUser = async () => {
-			try {
-				const { data } = await authApi.getProfile();
-				if (data) login(data);
-			} catch (error) {
-				logout();
-			}
-			setLoading(false);
-		};
-
-		fetchUser();
-	}, [login, logout]);
+		getProfile()
+			.catch(logout)
+			.finally(() => setLoading(false));
+	}, [getProfile, logout]);
 
 	if (loading)
 		return (

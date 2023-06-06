@@ -1,4 +1,4 @@
-import { useInfiniteFetcherSWR } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import { Avatar, Box, CircularProgress, Dialog, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { getTimeAgo, stringUtil } from '@utils/common';
 import { isVideo } from '@utils/data';
@@ -18,7 +18,7 @@ interface Props {
 export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 	const router = useRouter();
 	const id = router.query.id as string;
-	const fetcher = useInfiniteFetcherSWR({ api: `conversations/${id}/files/media` });
+	const fetcher = useFetcher({ api: `conversations/${id}/files/media` });
 	const listMedia = fetcher.data;
 
 	const [media, setMedia] = useState<any>(mediaData);

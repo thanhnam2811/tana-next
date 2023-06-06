@@ -1,5 +1,5 @@
 export * from './ConversationMembersModal';
 export * from './ConversationModal';
+export * from './InfoModal';
 export * from './MediaViewModal';
-export * from './PostModal';
 export * from './UserFilterModal';
