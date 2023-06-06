@@ -1,1 +1,1 @@
-export * from './BaseTable';
+export * from './TableBase';

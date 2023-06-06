@@ -1,4 +1,4 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 

@@ -17,7 +17,6 @@ export interface IFile {
 	deleted: boolean;
 	createdAt: string;
 	updatedAt: string;
-	__v: number;
 }
 
 export const fileApi = {

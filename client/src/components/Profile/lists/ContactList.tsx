@@ -1,8 +1,8 @@
 import { contactOptions } from '@assets/data';
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IContact, IPrivacy } from '@interfaces';
-import { useUserStore } from '@store';
+import { IContact, IPrivacy } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { Button, List } from 'antd';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -19,7 +19,7 @@ interface ContactModalData {
 }
 
 export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps) => {
-	const { updateProfile } = useUserStore();
+	const { updateAuthUser } = useAuth();
 	const [contacts, setContacts] = useState(init);
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +47,7 @@ export const ContactList = ({ contacts: init, isCurrentUser }: ContactListProps)
 
 		try {
 			// Update profile
-			await updateProfile({ contact: newContacts });
+			await updateAuthUser({ contact: newContacts });
 
 			// Notify
 			toast.success(`${updateNotify} thành công!`);

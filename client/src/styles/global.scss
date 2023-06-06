@@ -10,6 +10,10 @@
 	--animate-duration: 0.5s !important;
 }
 
+body {
+	overflow: hidden auto;
+}
+
 /* Common */
 /* Hide scrollbar for Chrome, Safari and Opera */
 .hide-scrollbar::-webkit-scrollbar {
@@ -262,4 +266,8 @@ button.ant-btn {
 	align-items: center;
 	justify-content: flex-end;
 	gap: 8px;
+}
+
+.ant-space-item {
+	display: contents;
 }
