@@ -1,6 +1,6 @@
 import useSWR from 'swr';
-import IDashboardData from '../types/IDashboardData';
+import { IDashboardData } from '../types';
 
-export default function useDashboardData() {
+export function useDashboardData() {
 	return useSWR<IDashboardData>('/admin/dashboard');
 }
