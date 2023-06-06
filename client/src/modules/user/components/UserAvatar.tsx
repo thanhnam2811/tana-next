@@ -32,7 +32,7 @@ export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: P
 			<Avatar
 				shape="circle"
 				src={user?.profilePicture.link}
-				icon={<HiUser />}
+				icon={<HiUser size={avtSize} />}
 				{...avatarProps}
 				style={{ width: avtSize, height: avtSize, border: 'none', ...avatarProps?.style }}
 			/>
