@@ -1,4 +1,4 @@
-import { IPicture, UserType } from '@common/types/user.type';
+import { IPicture, UserType } from '@common/types';
 import { PageTableBase } from '@components/PageTableBase';
 import { Avatar } from 'antd';
 import { ColumnType } from 'antd/es/table';

@@ -24,6 +24,129 @@ const {
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
 class PostController {
+	//search post by content
+	async search(req, res, next) {
+		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const { q } = req.query;
+		try {
+			Post.paginate(
+				{ $text: { $search: q } },
+				{
+					sort: { createdAt: -1 },
+					populate: [
+						{
+							path: 'author',
+							select: '_id fullname profilePicture isOnline friends',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'lastestFiveComments',
+							populate: {
+								path: 'author',
+								select: '_id fullname profilePicture isOnline',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
+							},
+						},
+						{
+							path: 'tags',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.includes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.excludes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'media',
+							select: '_id link',
+						},
+					],
+				}
+			)
+				.then(async (data) => {
+					const posts = data.docs;
+					const listPosts = [];
+					if (!req.user) {
+						posts.map((post) => {
+							const postObject = post.toObject();
+							postObject.reactOfUser = 'none';
+							listPosts.push(postObject);
+						});
+						// getListPost(res, data, listPosts);
+						const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
+						//pagination for listPosts
+						const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
+						res.status(200).send({
+							totalItems: listPostsFilter.length,
+							items: listPostsPaginate,
+							totalPages: Math.ceil(listPosts.length / limit),
+							currentPage: Math.floor(offset / limit),
+							offset: offset,
+						});
+					} else {
+						Promise.all(
+							posts.map(async (post) => {
+								const postObject = post.toObject();
+								postObject.reactOfUser = 'none';
+								const react = await React.findOne({ post: post._id, user: req.user._id });
+								if (react) {
+									postObject.reactOfUser = react.type;
+								}
+								listPosts.push(postObject);
+							})
+						).then(async () => {
+							//sort post by date desc
+							listPosts.sort((a, b) => {
+								return new Date(b.createdAt) - new Date(a.createdAt);
+							});
+							// getListPost(res, data, listPosts);
+							const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
+							//pagination for listPosts
+							const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
+							res.status(200).send({
+								totalItems: listPostsFilter.length,
+								items: listPostsPaginate,
+								totalPages: Math.ceil(listPosts.length / limit),
+								currentPage: Math.floor(offset / limit),
+								offset: offset,
+							});
+						});
+					}
+				})
+				.catch((err) => {
+					return next(
+						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+					);
+				});
+		} catch (err) {
+			console.error(err);
+			return next(
+				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
+		}
+	}
+
 	//[POST] create a post
 	async add(req, res, next) {
 		try {
@@ -54,6 +177,22 @@ class PostController {
 					select: '_id fullname profilePicture isOnline',
 					populate: {
 						path: 'profilePicture',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
 					},
 				})
 				.populate({
@@ -115,6 +254,22 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
 					})
 					.populate({
@@ -199,6 +354,22 @@ class PostController {
 						},
 						{
 							path: 'tags',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.includes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.excludes',
 							select: '_id fullname profilePicture isOnline',
 							populate: {
 								path: 'profilePicture',
@@ -463,7 +634,6 @@ class PostController {
 	async get(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id)
-				.populate('author', '_id fullname profilePicture isOnline')
 				.populate({
 					path: 'lastestFiveComments',
 					populate: {
@@ -485,6 +655,22 @@ class PostController {
 				})
 				.populate({
 					path: 'tags',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
 					select: '_id fullname profilePicture isOnline',
 					populate: {
 						path: 'profilePicture',
@@ -560,6 +746,22 @@ class PostController {
 							path: 'media',
 							select: '_id link',
 						},
+						{
+							path: 'privacy.includes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.excludes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
 					],
 				}
 			)
@@ -624,6 +826,22 @@ class PostController {
 				})
 				.populate({
 					path: 'tags',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
 					select: '_id fullname profilePicture isOnline',
 					populate: {
 						path: 'profilePicture',
@@ -737,6 +955,22 @@ class PostController {
 						{
 							path: 'media',
 							select: '_id link',
+						},
+						{
+							path: 'privacy.includes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+						{
+							path: 'privacy.excludes',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
 						},
 					],
 				}

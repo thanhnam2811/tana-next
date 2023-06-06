@@ -1,10 +1,10 @@
 import { AvatarBadge } from '@components/MUI/AvatarBadge';
 import { ConversationMembersModal, ConversationModal } from '@components/Modal';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Avatar } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { UpdateMembersType, conversationApi } from '@utils/api';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
@@ -13,7 +13,7 @@ import { FiUserPlus } from 'react-icons/fi';
 import { Menu, MenuOptionProps } from '../components';
 
 export function MembersMenu() {
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 	const { conversation, isDirect, updateConversation, convFetcher } = useContext(MessageContext)!;
 	const router = useRouter();
 
@@ -102,11 +102,11 @@ export function MembersMenu() {
 								height: 40,
 							}}
 						>
-							{getShortName(user.fullname)}
+							{stringUtil.getShortName(user.fullname)}
 						</Avatar>
 					</AvatarBadge>
 				),
-				label: nickname || user.fullname + (user._id === currentUser?._id ? ' (Bạn)' : ''),
+				label: nickname || user.fullname + (user._id === authUser?._id ? ' (Bạn)' : ''),
 				subLabel: (
 					<>
 						Thêm bời <b>{addedBy.fullname}</b> vào <b>{dayjs(addedAt).format('DD/MM/YYYY')}</b>

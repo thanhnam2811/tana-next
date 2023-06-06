@@ -1,7 +1,6 @@
 import axios from 'axios';
-import handleApiError from './handleApiError';
-import retryRequest from './retryRequest';
 import { API_URL, MAX_RETRY } from '@common/config';
+import { handleApiError, retryRequest } from '.';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: unknown) => axios.isAxiosError(error) && error.response?.status === 401;
@@ -43,4 +42,4 @@ apiClient.interceptors.response.use(
 	}
 );
 
-export default apiClient;
+export { apiClient };

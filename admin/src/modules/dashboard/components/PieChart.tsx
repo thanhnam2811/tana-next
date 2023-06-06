@@ -1,7 +1,7 @@
 import { Pie, PieConfig } from '@ant-design/plots';
 import { Card } from 'antd';
 
-export default function PieChart() {
+export function PieChart() {
 	const data = [
 		{
 			type: 'Dữ liệu 1',

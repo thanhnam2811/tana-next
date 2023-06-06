@@ -1,41 +1,69 @@
 import { Line, LineConfig } from '@ant-design/plots';
-import { Typography } from 'antd';
-import { DatePickerProps } from 'antd';
-import { Card, DatePicker, Select, Space } from 'antd';
-import { useEffect, useState } from 'react';
+import { Card, DatePicker, DatePickerProps, Select, Space, Typography } from 'antd';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import useSWR from 'swr';
+import { IUserAccessData } from '../types';
+import { swrFetcher } from '@common/api';
 
-export default function LineChart() {
+export function LineChart() {
 	const [type, setType] = useState<DatePickerProps['picker']>('date');
-	const [data, setData] = useState([]);
 
-	useEffect(() => {
-		asyncFetch();
-	}, []);
+	const lastWeek = dayjs().subtract(1, 'week').toDate();
+	const today = dayjs().toDate();
+	const [range, setRange] = useState<[Date, Date]>([lastWeek, today]);
 
-	const asyncFetch = () => {
-		fetch('https://gw.alipayobjects.com/os/bmw-prod/1d565782-dde4-4bb6-8946-ea6a38ccf184.json')
-			.then((response) => response.json())
-			.then((json) => setData(json))
-			.catch((error) => {
-				console.log('fetch data failed', error);
+	const { data } = useSWR<IUserAccessData>(
+		`/admin/usersAccess?start=${dayjs(range[0]).format('YYYY-MM-DD')}&end=${dayjs(range[1]).format('YYYY-MM-DD')}`,
+		swrFetcher
+	);
+
+	const convertData = (data?: IUserAccessData): { time: string; name: string; total: number }[] => {
+		const result: { time: string; name: string; total: number }[] = [];
+		if (!data) return result;
+
+		for (const key in data) {
+			result.push({
+				time: key,
+				name: 'Lượt truy cập',
+				total: data[key].totalAccess,
 			});
+
+			result.push({
+				time: key,
+				name: 'Người dùng mới',
+				total: data[key].totalUserCreations,
+			});
+		}
+		return result;
 	};
 
 	const config: LineConfig = {
-		data,
+		data: convertData(data),
 		padding: 'auto',
-		xField: 'Date',
-		yField: 'scales',
+		yField: 'total',
+		xField: 'time',
 		xAxis: {
-			// type: 'timeCat',
-			tickCount: 5,
+			label: {
+				formatter: (v) => dayjs(v).format('DD/MM/YYYY'),
+			},
+		},
+		seriesField: 'name',
+		legend: {
+			position: 'top',
 		},
 		smooth: true,
+		animation: {
+			appear: {
+				animation: 'path-in',
+				duration: 5000,
+			},
+		},
 	};
 
 	return (
 		<Card
-			title="Line chart"
+			title="Lượt truy cập và người dùng mới"
 			extra={
 				<Space>
 					<Typography.Title level={5} style={{ margin: 0 }}>
@@ -50,7 +78,19 @@ export default function LineChart() {
 						<Select.Option value="year">Năm</Select.Option>
 					</Select>
 
-					<DatePicker picker={type} onChange={console.log} />
+					<DatePicker
+						picker={type}
+						onChange={(date) => {
+							setRange([date?.toDate() ?? lastWeek, range[1]]);
+						}}
+					/>
+
+					<DatePicker
+						picker={type}
+						onChange={(date) => {
+							setRange([range[0], date?.toDate() ?? today]);
+						}}
+					/>
 				</Space>
 			}
 		>

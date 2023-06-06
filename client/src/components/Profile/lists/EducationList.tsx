@@ -1,7 +1,7 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IEducation } from '@interfaces';
-import { useUserStore } from '@store';
+import { IEducation, IPrivacy } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ interface EducationModalData {
 }
 
 export const EducationList = ({ educations: init, isCurrentUser }: EducationListProps) => {
-	const { updateProfile } = useUserStore();
+	const { updateAuthUser } = useAuth();
 	const [educations, setEducations] = useState(init);
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +47,7 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 
 		try {
 			// Update profile
-			await updateProfile({ education: newEducations });
+			await updateAuthUser({ education: newEducations });
 
 			// Notify
 			toast.success(`${updateNotify} thành công!`);
@@ -69,8 +69,6 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 	};
 
 	const handleModalSubmit = (data: IEducation) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {
@@ -84,6 +82,12 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 		const newEducation = [...educations];
 		newEducation.splice(index, 1);
 		optimisticUpdate(newEducation, 'Xóa liên hệ');
+	};
+
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
+		const newEdu = [...educations];
+		newEdu[index].privacy = value;
+		optimisticUpdate(newEdu, 'Thay đổi quyền riêng tư');
 	};
 
 	return (
@@ -105,42 +109,51 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 				}
 				bordered
 				dataSource={educations}
-				renderItem={(edu, index) => (
-					<List.Item
-						actions={[
-							<PrivacyDropdown key="privacy" value={edu.privacy.value} />,
+				renderItem={(edu, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
+							<PrivacyDropdown
+								key="privacy"
+								value={edu.privacy}
+								onChange={(value) => handlePrivacyChange(value, index)}
+							/>,
 							<Button
 								key="edit"
 								type="text"
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: edu, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={
-								<>
-									Trường: <b>{edu.school}</b>
-								</>
-							}
-							description={
-								<>
-									Chuyên ngành:{' '}
-									<b>
-										{edu.major} ({edu.degree})
-									</b>
-								</>
-							}
-							style={{ width: '100%' }}
-						/>
-						<i>
-							{[edu.from && `Từ ${formatDate(edu.from)}`, edu.to && `Đến ${formatDate(edu.to)}`]
-								.filter(Boolean)
-								.join(' - ')}
-						</i>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta
+								title={
+									<>
+										Trường: <b>{edu.school}</b>
+									</>
+								}
+								description={
+									<>
+										Chuyên ngành:{' '}
+										<b>
+											{edu.major} ({edu.degree})
+										</b>
+									</>
+								}
+								style={{ width: '100%' }}
+							/>
+							<i>
+								{[edu.from && `Từ ${formatDate(edu.from)}`, edu.to && `Đến ${formatDate(edu.to)}`]
+									.filter(Boolean)
+									.join(' - ')}
+							</i>
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

@@ -1,7 +1,7 @@
 import { GroupAvatar, UserAvatar } from '@components/MUI';
 import { Button, ButtonProps, Grid, Skeleton, Typography } from '@mui/material';
-import { useUserStore } from '@store';
-import { getTimeAgo, renderHTML } from '@utils/common';
+import { useAuth } from '@modules/auth/hooks';
+import { getTimeAgo, stringUtil } from '@utils/common';
 import { useRouter } from 'next/router';
 
 type Props = {
@@ -10,14 +10,14 @@ type Props = {
 };
 
 export function ConversationItem({ conversation, isActived, ...props }: Props & ButtonProps) {
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 	const router = useRouter();
 
 	let { avatar, name } = conversation;
 	const { _id, members, lastest_message, updatedAt } = conversation;
 
 	const isDirect = members?.length === 2;
-	const receiver = isDirect && members?.find((member: any) => member.user._id !== user?._id);
+	const receiver = isDirect && members?.find((member: any) => member.user._id !== authUser?._id);
 	if (isDirect) {
 		console.log('receiver', receiver);
 
@@ -93,7 +93,7 @@ export function ConversationItem({ conversation, isActived, ...props }: Props & 
 					variant="body2"
 				>
 					<strong>{lastest_message?.sender?.fullname?.concat(': ')}</strong>
-					{renderHTML(lastest_message?.text || '<i>Chưa có tin nhắn</i>')}
+					{stringUtil.renderHTML(lastest_message?.text || '<i>Chưa có tin nhắn</i>')}
 				</Typography>
 			</Grid>
 		</Button>

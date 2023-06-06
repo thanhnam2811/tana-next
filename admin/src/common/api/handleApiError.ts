@@ -13,4 +13,4 @@ const handleApiError = (error: unknown) => {
 	return Promise.reject(message);
 };
 
-export default handleApiError;
+export { handleApiError };

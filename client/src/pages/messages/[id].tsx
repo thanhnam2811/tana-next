@@ -1,11 +1,13 @@
-import { withAuth } from '@components/Auth';
+import { withAuth } from '@modules/auth/components';
 import { WhiteBox } from '@components/Box';
-import { ListConversation } from '@components/List';
+import { ListConversation } from '@components/List/ListConversation';
 import { MyIconButton, SearchInput } from '@components/MUI';
-import { DetailArea, MessageArea } from '@components/Messages';
+import { DetailArea } from '@components/Messages/DetailArea';
+import { MessageArea } from '@components/Messages/MessageArea';
 import { ConversationModal, MediaViewModal } from '@components/Modal';
-import { InfinitFetcherType, useInfiniteFetcher } from '@hooks';
-import { CenterArea, ContainerArea, LeftArea, RightArea } from '@layout';
+import { FetcherType, useFetcher } from '@common/hooks';
+import { ConversationType } from '@common/types';
+import Layout, { withLayout } from '@layout/components';
 import { Badge, Box, Stack, Typography } from '@mui/material';
 import { useSettingStore } from '@store';
 import { conversationApi } from '@utils/api';
@@ -18,7 +20,7 @@ export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
 	updateConversation: (conv: any) => void;
 	conversation: any;
-	convFetcher: InfinitFetcherType;
+	convFetcher: FetcherType<ConversationType>;
 	fetching: boolean;
 	isDirect: boolean;
 } | null>(null);
@@ -28,7 +30,7 @@ function MessagesPage() {
 	const { id } = router.query;
 	const all = !id || id === 'all';
 
-	const convFetcher = useInfiniteFetcher('conversations');
+	const convFetcher = useFetcher<ConversationType>({ api: 'conversations' });
 	const handleSearch = (value: string) => convFetcher.filter({ key: value }); // TODO: change to search
 
 	const [conversation, setConversation] = useState<any>(null);
@@ -62,11 +64,6 @@ function MessagesPage() {
 		convFetcher.updateData(newConv._id, newConv); // update data in list
 		setConversation(newConv); // update data in detail
 	};
-
-	// fetch data when page load
-	useEffect(() => {
-		convFetcher.reload();
-	}, []);
 
 	// set conversation when change ID
 	const idRef = useRef(id);
@@ -115,12 +112,12 @@ function MessagesPage() {
 	const handleCloseModalCreate = () => setOpenModalCreate(false);
 
 	return (
-		<ContainerArea>
+		<>
 			{id && id !== 'all' && (
 				<MediaViewModal open={openMediaPreview} onClose={handleCloseMediaPreview} mediaData={mediaPreview} />
 			)}
 
-			<LeftArea fixed>
+			<Layout.Sider align="left">
 				<WhiteBox
 					sx={{
 						py: '8px',
@@ -163,7 +160,7 @@ function MessagesPage() {
 						<ListConversation fetcher={convFetcher} scrollableTarget="list-conversation" />
 					</Box>
 				</WhiteBox>
-			</LeftArea>
+			</Layout.Sider>
 
 			{!all && conversation ? (
 				<MessageContext.Provider
@@ -175,14 +172,14 @@ function MessagesPage() {
 						updateConversation,
 					}}
 				>
-					<CenterArea width="100%">
+					<Layout.Content style={{ width: '100%', maxWidth: '100%' }}>
 						<MessageArea onMediaPreview={handleMediaPreview} />
-					</CenterArea>
+					</Layout.Content>
 
 					{showDetail && (
-						<RightArea fixed>
+						<Layout.Sider align="right">
 							<DetailArea />
-						</RightArea>
+						</Layout.Sider>
 					)}
 				</MessageContext.Provider>
 			) : (
@@ -190,8 +187,8 @@ function MessagesPage() {
 					Chọn cuộc trò chuyện để xem tin nhắn
 				</Box>
 			)}
-		</ContainerArea>
+		</>
 	);
 }
 
-export default withAuth(MessagesPage);
+export default withAuth(withLayout(MessagesPage));

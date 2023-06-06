@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useInfiniteFetcher } from '@hooks';
+import { SearchInput } from '@components/MUI';
+import { useFetcher } from '@common/hooks';
+import { UserType } from '@common/types';
 import { LoadingButton } from '@mui/lab';
 import {
 	Avatar,
@@ -17,12 +18,12 @@ import {
 	Tooltip,
 	Typography,
 } from '@mui/material';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
+import React, { useState } from 'react';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { TransitionGroup } from 'react-transition-group';
 import Swal from 'sweetalert2';
-import { SearchInput } from '@components/MUI';
 
 const Transition = React.forwardRef(function Transition(props: { children: JSX.Element }, ref) {
 	return (
@@ -50,12 +51,8 @@ export function ConversationModal({
 }: Props) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const searchFetcher = useInfiniteFetcher('users/searchUser/friends');
+	const searchFetcher = useFetcher<UserType>({ api: 'users/searchUser/friends' });
 	const searchResults = searchFetcher.data;
-
-	useEffect(() => {
-		searchFetcher.reload();
-	}, []);
 
 	const handleSearch = (value: string) => searchFetcher.filter({ key: value });
 
@@ -71,13 +68,12 @@ export function ConversationModal({
 			await onSubmit(listMember);
 
 			setListMember([]);
-			searchFetcher.reload();
 			handleClose();
 			setIsSubmitting(false);
 		}
 	};
 
-	const [listMember, setListMember] = useState<any[]>([]);
+	const [listMember, setListMember] = useState<UserType[]>([]);
 
 	const renderListResult = () =>
 		searchResults
@@ -104,7 +100,7 @@ export function ConversationModal({
 						onClick={() => setListMember((prev) => [...prev, member])}
 					>
 						<Avatar src={member.profilePicture?.link} alt={member.fullname} sx={{ marginRight: '16px' }}>
-							{getShortName(member.fullname)}
+							{stringUtil.getShortName(member.fullname)}
 						</Avatar>
 
 						<Typography fontSize={16} fontWeight={600}>
@@ -147,7 +143,7 @@ export function ConversationModal({
 						>
 							<Tooltip title={member.fullname}>
 								<Avatar src={member.profilePicture?.link} alt={member.fullname}>
-									{getShortName(member.fullname)}
+									{stringUtil.getShortName(member.fullname)}
 								</Avatar>
 							</Tooltip>
 						</Badge>

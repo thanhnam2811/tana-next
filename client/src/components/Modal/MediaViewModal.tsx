@@ -1,6 +1,6 @@
-import { useInfiniteFetcher } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import { Avatar, Box, CircularProgress, Dialog, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { getShortName, getTimeAgo } from '@utils/common';
+import { getTimeAgo, stringUtil } from '@utils/common';
 import { isVideo } from '@utils/data';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -18,13 +18,8 @@ interface Props {
 export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 	const router = useRouter();
 	const id = router.query.id as string;
-	const fetcher = useInfiniteFetcher(`conversations/${id}/files/media`);
+	const fetcher = useFetcher({ api: `conversations/${id}/files/media` });
 	const listMedia = fetcher.data;
-
-	// Reload when change conversation
-	useEffect(() => {
-		if (id && id !== 'all') fetcher.reload();
-	}, [id]);
 
 	const [media, setMedia] = useState<any>(mediaData);
 
@@ -106,7 +101,7 @@ export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 				{/* Left */}
 				<Stack direction="row">
 					<Avatar src={media?.creator?.profilePicture?.link} alt={media?.creator?.fullname}>
-						{getShortName(media?.creator?.fullname)}
+						{stringUtil.getShortName(media?.creator?.fullname)}
 					</Avatar>
 
 					<Stack direction="column" justifyContent="space-between" ml="8px">

@@ -1,4 +1,3 @@
-import { SERVER_URL } from '@utils/common';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Check if error is unauthorized (status code 401)
@@ -58,7 +57,7 @@ const retryRequest = async (error: AxiosError) => {
 
 // Create an axios instance
 const apiClient = axios.create({
-	baseURL: SERVER_URL,
+	baseURL: process.env.SERVER_URL,
 	headers: {
 		'Content-Type': 'application/json',
 		'Max-Retry': MAX_RETRY,
@@ -69,7 +68,7 @@ const apiClient = axios.create({
 });
 
 export const apiCaller = axios.create({
-	baseURL: SERVER_URL,
+	baseURL: process.env.SERVER_URL,
 	headers: {
 		'Content-Type': 'application/json',
 	},
@@ -106,5 +105,9 @@ apiClient.interceptors.response.use(
 		return handleError(error);
 	}
 );
+
+export function swrFetcher<T>(url: string) {
+	return apiClient.get<T>(url).then((res) => res.data);
+}
 
 export default apiClient;
