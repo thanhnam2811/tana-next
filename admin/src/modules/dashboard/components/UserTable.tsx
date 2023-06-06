@@ -35,15 +35,11 @@ export function UserTable() {
 	};
 
 	return (
-		<Card title="Người dùng mới" extra={<Button onClick={viewAll}>Xem tất cả</Button>}>
+		<Card title="Người dùng mới" extra={<Button onClick={viewAll}>Xem tất cả</Button>} bodyStyle={{ padding: 12 }}>
 			<TableBase<UserType>
 				endpoint="/admin/searchUser"
 				columns={columns}
 				pagination={{ position: [] }} // hide pagination
-				// onRow={(user) => ({
-				// 	style: { cursor: 'pointer' },
-				// 	onClick: () => navigate(`/account/user/${user._id}`),
-				// })}
 			/>
 		</Card>
 	);

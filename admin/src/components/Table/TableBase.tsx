@@ -1,35 +1,26 @@
-import { Table, TableProps, Card, CardProps, Space, Button } from 'antd';
-import { useState } from 'react';
-import useSWR from 'swr';
-import { ReloadOutlined } from '@ant-design/icons';
-import { IPaginationResponse } from '@common/types/api.type';
 import { swrFetcher } from '@common/api';
+import { IPaginationResponse } from '@common/types/api.type';
+import { Button, Table, TableProps, Tooltip } from 'antd';
+import { useState } from 'react';
+import { IoRefresh } from 'react-icons/io5';
+import useSWR from 'swr';
+import styles from './Table.module.scss';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;
-	cardProps?: CardProps;
 }
 
-export function TableBase<T extends object>({ endpoint, cardProps, ...props }: TableBaseProps<T>) {
+export function TableBase<T extends object>({ endpoint, ...props }: TableBaseProps<T>) {
 	const [pagination, setPagination] = useState({
 		current: 1,
 		pageSize: 5,
 	});
 
 	const swrKey = `${endpoint}?page=${pagination.current - 1}&size=${pagination.pageSize}`;
-	const { data, isLoading, mutate } = useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
+	const { data, isLoading, mutate, isValidating } = useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
 
 	return (
-		<Card
-			{...cardProps}
-			extra={
-				<Space>
-					{cardProps?.extra}
-
-					<Button type="text" shape="circle" onClick={() => mutate()} icon={<ReloadOutlined />} />
-				</Space>
-			}
-		>
+		<div className={styles.container}>
 			<Table<T>
 				rowKey="_id"
 				pagination={{
@@ -46,6 +37,16 @@ export function TableBase<T extends object>({ endpoint, cardProps, ...props }: T
 				dataSource={data?.items || []}
 				{...props}
 			/>
-		</Card>
+
+			<Tooltip title="Làm mới">
+				<Button
+					shape="circle"
+					onClick={() => mutate()}
+					loading={isValidating}
+					icon={<IoRefresh />}
+					className={styles.refresh}
+				/>
+			</Tooltip>
+		</div>
 	);
 }
