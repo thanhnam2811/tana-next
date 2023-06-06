@@ -2,10 +2,12 @@ import Icon from '@ant-design/icons';
 import { Card, Col, Row, Statistic, StatisticProps } from 'antd';
 import { IoPeopleOutline } from 'react-icons/io5';
 import { LineChart, PieChart, UserTable } from '../components';
-import { useDashboardData } from '../hooks';
+import useSWR from 'swr';
+import { IDashboardData } from '../types';
+import swrFetcher from '@/api/swrFetcher';
 
 export default function DashboardPage() {
-	const { data, isLoading } = useDashboardData();
+	const { data, isLoading } = useSWR<IDashboardData>('/admin/dashboard', swrFetcher);
 
 	const dashboardCard: StatisticProps[] = [
 		{

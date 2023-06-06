@@ -13,8 +13,8 @@ export function LineChart() {
 	const today = dayjs().toDate();
 	const [range, setRange] = useState<[Date, Date]>([lastWeek, today]);
 
-	const { data, isLoading } = useSWR<IUserAccessData>(
-		`/admin/usersAccess?start=2023-05-01&end=2023-05-31&type`,
+	const { data } = useSWR<IUserAccessData>(
+		`/admin/usersAccess?start=${dayjs(range[0]).format('YYYY-MM-DD')}&end=${dayjs(range[1]).format('YYYY-MM-DD')}`,
 		swrFetcher
 	);
 
@@ -80,15 +80,15 @@ export function LineChart() {
 
 					<DatePicker
 						picker={type}
-						onChange={(date, dateString) => {
-							console.log(date, dateString);
+						onChange={(date) => {
+							setRange([date?.toDate() ?? lastWeek, range[1]]);
 						}}
 					/>
 
 					<DatePicker
 						picker={type}
-						onChange={(date, dateString) => {
-							console.log(date, dateString);
+						onChange={(date) => {
+							setRange([range[0], date?.toDate() ?? today]);
 						}}
 					/>
 				</Space>
