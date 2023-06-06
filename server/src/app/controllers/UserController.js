@@ -1262,7 +1262,7 @@ class UserController {
 			const statistics = await User.aggregate([
 				{
 					$group: {
-						_id: '$gender',
+						_id: '$gender.value',
 						total: { $sum: 1 },
 					},
 				},
