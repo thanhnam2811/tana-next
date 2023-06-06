@@ -27,7 +27,7 @@ const columns: ColumnType<UserType>[] = [
 	},
 ];
 
-export default function UserTable() {
+export function UserTable() {
 	const navigate = useNavigate();
 
 	const viewAll = () => {
