@@ -1,6 +1,8 @@
-import { CallEndRounded, MicRounded, VideoCallRounded } from '@mui/icons-material';
+import CallEndRounded from '@mui/icons-material/CallEndRounded';
+import MicRounded from '@mui/icons-material/MicRounded';
+import VideoCallRounded from '@mui/icons-material/VideoCallRounded';
 import { Box, BoxProps, IconButton, Stack } from '@mui/material';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { authToken } from '@utils/api';
 import { MeetingProvider, useMeeting, useParticipant } from '@videosdk.live/react-sdk';
 import { useRouter } from 'next/router';
@@ -148,7 +150,7 @@ function Screen() {
 export function VideoCallScreen() {
 	const router = useRouter();
 	const { id } = router.query as { id: string };
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	return (
 		<MeetingProvider
@@ -156,7 +158,7 @@ export function VideoCallScreen() {
 				meetingId: id,
 				micEnabled: true,
 				webcamEnabled: true,
-				name: user!.fullname,
+				name: authUser!.fullname,
 			}}
 			token={authToken}
 		>

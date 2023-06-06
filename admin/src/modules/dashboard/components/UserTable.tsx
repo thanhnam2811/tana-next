@@ -1,4 +1,4 @@
-import { IPicture, UserType } from '@common/types/user.type';
+import { IPicture, UserType } from '@common/types';
 import { TableBase } from '@components/Table';
 import { Avatar, Button, Card } from 'antd';
 import { ColumnType } from 'antd/es/table';
@@ -27,7 +27,7 @@ const columns: ColumnType<UserType>[] = [
 	},
 ];
 
-export default function UserTable() {
+export function UserTable() {
 	const navigate = useNavigate();
 
 	const viewAll = () => {

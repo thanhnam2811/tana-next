@@ -1,7 +1,5 @@
 import { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import handleApiError from './handleApiError';
-import apiClient from './apiClient';
-import refreshAccessToken from './refreshToken';
+import { apiClient, handleApiError, refreshAccessToken } from '.';
 
 const excludeUrls = ['/admin/login', '/admin/refresh'];
 
@@ -38,4 +36,4 @@ const retryRequest = async (error: AxiosError) => {
 	}
 };
 
-export default retryRequest;
+export { retryRequest };

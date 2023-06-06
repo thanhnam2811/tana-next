@@ -1,10 +1,10 @@
 import { WhiteBox } from '@components/Box';
 import { GroupAvatar } from '@components/MUI';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Box, Grid, IconButton, Skeleton, Typography } from '@mui/material';
 import { MessageContext } from '@pages/messages/[id]';
 import { conversationApi } from '@utils/api';
-import { getShortName, showIncomingAlert } from '@utils/common';
+import { stringUtil, showIncomingAlert } from '@utils/common';
 import { useRouter } from 'next/router';
 import { useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -17,7 +17,7 @@ export function DetailArea() {
 	const { conversation, convFetcher, fetching, isDirect } = useContext(MessageContext)!;
 	const router = useRouter();
 
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 
 	const handleDeleteConversation = () =>
 		Swal.fire({
@@ -67,7 +67,7 @@ export function DetailArea() {
 		},
 	];
 
-	const receiver = isDirect && conversation.members.find((member: any) => member.user._id !== currentUser?._id);
+	const receiver = isDirect && conversation.members.find((member: any) => member.user._id !== authUser?._id);
 
 	if (receiver) {
 		conversation.avatar = receiver.user.profilePicture;
@@ -100,7 +100,7 @@ export function DetailArea() {
 										height: 80,
 									}}
 								>
-									{getShortName(conversation.name)}
+									{stringUtil.getShortName(conversation.name)}
 								</Avatar>
 							) : (
 								<GroupAvatar listMember={conversation.members} size={80} />

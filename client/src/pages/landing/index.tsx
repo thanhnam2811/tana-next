@@ -1,12 +1,13 @@
 import dynamic from 'next/dynamic';
 
 import { Goal, Mission, Value } from '@assets/images';
-import { CommentCard, PostCard } from '@components/Card';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import { Box, Button, Card, Container, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { ArrowForward } from '@mui/icons-material';
 import { useRouter } from 'next/router';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { useEffect } from 'react';
+import Aos from 'aos';
 
 const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing), {
 	ssr: false,
@@ -21,6 +22,13 @@ const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing
 
 export default function Landing() {
 	const router = useRouter();
+
+	useEffect(() => {
+		// init AOS
+		Aos.init({
+			throttleDelay: 99, // the delay on throttle used while scrolling the page (advanced)
+		});
+	}, []);
 
 	return (
 		<Box width="100%" overflow="hidden auto">
@@ -142,52 +150,6 @@ export default function Landing() {
 							<Typography variant="h5" sx={{ fontWeight: 700 }}>
 								Bài viết
 							</Typography>
-
-							<PostCard
-								post={{
-									_id: '64c3fb145b16e2fc8b45c6fc',
-									author: {
-										_id: '123',
-										fullname: 'John Doe',
-										profilePicture: {
-											link: 'https://example.com/john-doe-profile-picture.png',
-										},
-									},
-									content: 'This is an example post.',
-									createdAt: '2022-05-05T08:30:00.000Z',
-									reactions: {
-										like: 10,
-										love: 5,
-										haha: 2,
-									},
-									comments: [
-										{
-											_id: '64c3fb145b16e2fc8b45c6fc',
-											author: {
-												_id: '456',
-												fullname: 'Jane Smith',
-												profilePicture: {
-													link: 'https://example.com/jane-smith-profile-picture.png',
-												},
-											},
-											content: 'Nice post!',
-										},
-										{
-											_id: '64f20e8af28a2c3f67daf564',
-											author: {
-												_id: '789',
-												fullname: 'Bob Johnson',
-												profilePicture: {
-													link: 'https://example.com/bob-johnson-profile-picture.png',
-												},
-											},
-											content: 'Thanks for sharing!',
-										},
-									],
-								}}
-								handleReact={console.log}
-								width="100%"
-							/>
 						</Box>
 					</SwiperSlide>
 
@@ -196,35 +158,6 @@ export default function Landing() {
 							<Typography variant="h5" sx={{ fontWeight: 700 }}>
 								Bình luận
 							</Typography>
-
-							<CommentCard
-								post={{
-									_id: '64f20e8af28a2c3f67daf564',
-									author: {
-										_id: '123',
-										fullname: 'John Doe',
-										profilePicture: { link: 'https://example.com/johndoe.jpg' },
-									},
-									createdAt: '2022-05-05T13:30:00.000Z',
-									content: 'This is a post.',
-								}}
-								comment={{
-									_id: '64f20e8af28a2c3f67daf564',
-									author: {
-										_id: '456',
-										fullname: 'Jane Doe',
-										profilePicture: { link: 'https://example.com/janedoe.jpg' },
-									},
-									createdAt: '2022-05-06T09:45:00.000Z',
-									content: 'This is a comment.',
-								}}
-								isReply={false}
-								handleDelete={(commentId) => console.log('Deleting comment with ID:', commentId)}
-								handleReact={(commentId, reaction) =>
-									console.log('Reacting to comment with ID:', commentId, 'with reaction:', reaction)
-								}
-								sx={{ backgroundColor: 'white', width: '100%' }}
-							/>
 						</Box>
 					</SwiperSlide>
 					<SwiperSlide>Slide 3</SwiperSlide>

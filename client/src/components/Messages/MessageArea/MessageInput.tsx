@@ -1,5 +1,5 @@
 import { MyIconButton } from '@components/MUI';
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { Stack, TextField } from '@mui/material';
 import { showIncomingAlert } from '@utils/common';
 import { useRouter } from 'next/router';
@@ -17,7 +17,7 @@ const TYPING_TIMEOUT = 1000;
 export const MessageInput = ({ onSend, onChooseFile }: MessageInputProps) => {
 	const router = useRouter();
 	const { id } = router.query;
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	const inputRef = useRef<any>(null);
 	const onSubmit = () => {
@@ -38,7 +38,7 @@ export const MessageInput = ({ onSend, onChooseFile }: MessageInputProps) => {
 		// emit stop typing event
 		window.socket.emit('stopTypingMessage', {
 			conversation: id,
-			senderId: user?._id,
+			senderId: authUser?._id,
 		});
 
 		// clear typingRef
@@ -50,7 +50,7 @@ export const MessageInput = ({ onSend, onChooseFile }: MessageInputProps) => {
 		if (!typingRef.current)
 			window.socket.emit('typingMessage', {
 				conversation: id,
-				senderId: user?._id,
+				senderId: authUser?._id,
 			});
 		// if typingRef is not null, clear timeout
 		else clearTimeout(typingRef.current);

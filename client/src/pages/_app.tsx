@@ -1,112 +1,90 @@
-import { ScrollToTopButton } from '@components/Button';
-import { NavBar } from '@layout';
-import { Backdrop, Box, CircularProgress, CssBaseline, ThemeProvider, Typography } from '@mui/material';
-import { useSettingStore, useUserStore } from '@store';
-import '@styles/global.css';
-import { SERVER_URL, VERSION } from '@utils/common';
-import { getTheme } from '@utils/theme';
-import { ConfigProvider } from 'antd';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import 'draft-js/dist/Draft.css';
+import { useSettingStore } from '@store';
+import { SERVER_URL } from '@utils/common';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
-import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
+import { useAuth } from '@modules/auth/hooks';
+import { Analytics } from '@vercel/analytics/react';
+import { App, ConfigProvider, theme } from 'antd';
+
+import '@styles/global.scss';
+import 'aos/dist/aos.css';
+import 'draft-js/dist/Draft.css';
 import 'swiper/css';
 
+import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import locale from 'antd/lib/locale/vi_VN';
-
-// Set default locale to Vietnamese
+import { useTheme } from '@modules/theme/hooks';
 dayjs.locale('vi');
 
-export default function App({ Component, pageProps }: AppProps) {
-	const { user, getProfile } = useUserStore();
+export default function NextApp({ Component, pageProps }: AppProps) {
+	const { authUser, login } = useAuth();
 	const { getSetting } = useSettingStore();
+	const { mode, getTheme } = useTheme();
+	const { token } = theme.useToken();
 
 	// Fetch user data
-	const [isFetching, setIsFetching] = useState(true);
 	useEffect(() => {
-		// init AOS
-		AOS.init({
-			throttleDelay: 99, // the delay on throttle used while scrolling the page (advanced)
-		});
-
 		// fetch setting
 		getSetting();
 
-		// fetch user data if accessToken is exist
-		const accessToken = localStorage.getItem('accessToken');
-		if (accessToken) getProfile().finally(() => setIsFetching(false));
-		else setIsFetching(false);
+		// fetch theme
+		getTheme();
+
+		if (!authUser) {
+			// fetch user data if accessToken is exist
+			const accessToken = localStorage.getItem('accessToken');
+			if (accessToken) login();
+		}
 	}, []);
 
 	// Socket
 	useEffect(() => {
 		window.socket = io(SERVER_URL, { autoConnect: false });
-		if (user) {
+		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {
-				window.socket.emit('login', user?._id); // login to socket
+				window.socket.emit('login', authUser?._id); // login to socket
 			});
 		}
 		return () => {
-			if (user) {
+			if (authUser) {
 				window.socket.off('connect');
 				window.socket.disconnect(); // disconnect to socket
 			}
 		};
-	}, [user?._id]);
+	}, [authUser?._id]);
 
-	if (isFetching)
-		return (
-			<Backdrop
-				sx={{
-					bgcolor: '#fff',
-					zIndex: (theme) => theme.zIndex.drawer + 1,
-				}}
-				open
-			>
-				<CircularProgress color="primary" />
-			</Backdrop>
-		);
+	const AppContainer = (props: React.ComponentProps<typeof App>) => {
+		const { token } = theme.useToken();
+
+		return <App style={{ backgroundColor: token.colorBgLayout }} {...props} />;
+	};
 
 	return (
-		<>
-			<Head>
-				<title>TaNa - Kết nối và sáng tạo</title>
-				<meta name="viewport" content="initial-scale=1.0, width=device-width" />
-				<link rel="icon" href="/TaNa-logo.svg" />
-			</Head>
-
-			<NextProgress color="#29D" delay={300} height={2} />
-
+		<ConfigProvider
+			locale={viVn}
+			theme={{
+				token: {
+					borderRadius: 12,
+				},
+				algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+			}}
+			input={{ autoComplete: 'off' }}
+			select={{ showSearch: true }}
+		>
 			<Toaster position="bottom-right" />
 
-			<ThemeProvider theme={getTheme('light')}>
-				<CssBaseline />
-				<NavBar />
+			<NextProgress color={token.colorPrimary} delay={300} height={2} />
 
-				<Box sx={{ minHeight: 'calc(100vh - 64px)', mt: '64px', display: 'flex' }}>
-					<ConfigProvider locale={locale}>
-						<Component {...pageProps} />
-					</ConfigProvider>
-				</Box>
+			<AppContainer>
+				<Component {...pageProps} />
+			</AppContainer>
 
-				{/* Scroll to top */}
-				<ScrollToTopButton />
-
-				{/* Version */}
-				<Box sx={{ position: 'fixed', bottom: 0, right: 0, zIndex: 999, pointerEvents: 'none' }}>
-					<Typography variant="caption" color="textSecondary">
-						{VERSION}
-					</Typography>
-				</Box>
-			</ThemeProvider>
-		</>
+			<Analytics />
+		</ConfigProvider>
 	);
 }

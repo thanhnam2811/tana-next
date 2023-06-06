@@ -3,7 +3,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { ReloadOutlined } from '@ant-design/icons';
 import { IPaginationResponse } from '@common/types/api.type';
-import swrFetcher from '@common/api/swrFetcher';
+import { swrFetcher } from '@common/api';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;

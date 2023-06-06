@@ -1,4 +1,4 @@
-import { UserType } from '@common/types/user.type';
+import { UserType } from '@common/types';
 import { ILoginParams } from '../api/login.api';
 
 export interface IAuthStore {

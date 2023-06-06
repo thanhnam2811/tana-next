@@ -42,9 +42,9 @@ const ToolbarButton = ({ active, ...props }: ButtonProps & { active: boolean }) 
 );
 
 interface EditorProps {
-	value: string;
+	value?: string;
 	// eslint-disable-next-line no-unused-vars
-	onChange: (value: string) => void;
+	onChange?: (value: string) => void;
 	placeholder?: string;
 }
 
@@ -55,7 +55,7 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 		const contentState = newEditorState.getCurrentContent();
 		const contentStateString = stateToHTML(contentState);
 		setEditorState(newEditorState);
-		onChange(contentStateString);
+		onChange?.(contentStateString);
 	};
 
 	const handleKeyCommand = (command: string, editorState: EditorState) => {
@@ -82,7 +82,7 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 	const isInlineStyleActive = (inlineStyle: string) => editorState.getCurrentInlineStyle().has(inlineStyle);
 
 	return (
-		<Box p={2} borderRadius="0.5rem">
+		<>
 			<Box
 				display="flex"
 				alignItems="center"
@@ -90,13 +90,12 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 				flexWrap="wrap"
 				border="1px dashed #ccc"
 				p={1}
+				borderRadius={1}
 				sx={{
-					borderTopLeftRadius: '0.5rem',
-					borderTopRightRadius: '0.5rem',
+					borderBottomLeftRadius: 0,
+					borderBottomRightRadius: 0,
 					backgroundColor: '#fff',
 				}}
-				position="sticky"
-				top={0}
 			>
 				{INLINE_STYLES.map((type) => (
 					<ToolbarButton
@@ -122,12 +121,13 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 			</Box>
 
 			<Box
+				borderRadius={1}
 				sx={{
 					border: '1px dashed #ccc',
 					borderTop: 'none',
-					borderBottomLeftRadius: '0.5rem',
-					borderBottomRightRadius: '0.5rem',
-					p: '0.5rem',
+					borderTopLeftRadius: 0,
+					borderTopRightRadius: 0,
+					p: 1,
 					minHeight: '10rem',
 				}}
 			>
@@ -138,7 +138,7 @@ export const DraftEditor: React.FC<EditorProps> = ({ value = '', onChange, place
 					handleKeyCommand={handleKeyCommand}
 				/>
 			</Box>
-		</Box>
+		</>
 	);
 };
 

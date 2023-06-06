@@ -1,6 +1,7 @@
-import { IUser } from '@interfaces';
+import { UserType } from '@common/types';
 import { Avatar, AvatarProps, Badge, BadgeProps, useTheme } from '@mui/material';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
+import { useRouter } from 'next/router';
 
 interface Props {
 	active: boolean;
@@ -44,24 +45,35 @@ export const AvatarBadge = ({ active, size = 64, ...props }: Props & BadgeProps)
 };
 
 interface UserAvatarProps {
-	user: IUser;
+	user: UserType;
 	size: number;
 	badgeProps?: BadgeProps;
 }
 
-export const UserAvatar = ({ user, size, badgeProps, ...props }: UserAvatarProps & AvatarProps) => (
-	<AvatarBadge active={user.isOnline} size={size} {...badgeProps}>
-		<Avatar
-			sx={{
-				width: size,
-				height: size,
-				...props?.sx,
-			}}
-			alt={user.fullname}
-			src={user.profilePicture.link}
-			{...props}
-		>
-			{getShortName(user.fullname)}
-		</Avatar>
-	</AvatarBadge>
-);
+export const UserAvatar = ({ user, size, badgeProps, ...props }: UserAvatarProps & AvatarProps) => {
+	const router = useRouter();
+	const goToProfile = () => router.push(`/profile?id=${user._id}`);
+
+	return (
+		<AvatarBadge active={user.isOnline} size={size} {...badgeProps}>
+			<Avatar
+				sx={{
+					width: size,
+					height: size,
+					cursor: 'pointer',
+					transition: 'all 0.3s ease-in-out',
+					'&:hover': {
+						transform: 'scale(1.05)',
+					},
+					...props?.sx,
+				}}
+				alt={user.fullname}
+				src={user.profilePicture.link as string}
+				onClick={goToProfile}
+				{...props}
+			>
+				{stringUtil.getShortName(user.fullname)}
+			</Avatar>
+		</AvatarBadge>
+	);
+};

@@ -7,4 +7,8 @@ module.exports = (phase, { defaultConfig }) =>
 		images: {
 			domains: ['res.cloudinary.com'],
 		},
+		env: {
+			SERVER_URL: process.env.SERVER_URL,
+			BASE_URL: process.env.BASE_URL,
+		},
 	});

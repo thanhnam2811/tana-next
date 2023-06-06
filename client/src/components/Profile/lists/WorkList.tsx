@@ -1,7 +1,7 @@
 import { PrivacyDropdown } from '@components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
-import { IWork } from '@interfaces';
-import { useUserStore } from '@store';
+import { IPrivacy, IWork } from '@common/types';
+import { useAuth } from '@modules/auth/hooks';
 import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ interface WorkModalData {
 }
 
 export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
-	const { updateProfile } = useUserStore();
+	const { updateAuthUser } = useAuth();
 	const [works, setWorks] = useState(init);
 
 	const [modalOpen, setModalOpen] = useState(false);
@@ -47,7 +47,7 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 
 		try {
 			// Update profile
-			await updateProfile({ work: newWorks });
+			await updateAuthUser({ work: newWorks });
 
 			// Notify
 			toast.success(`${updateNotify} thành công!`);
@@ -69,8 +69,6 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 	};
 
 	const handleModalSubmit = (data: IWork) => {
-		console.log(data);
-
 		if (modalData?.index !== undefined) {
 			handleUpdate(data, modalData.index);
 		} else {
@@ -84,6 +82,12 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 		const newWork = [...works];
 		newWork.splice(index, 1);
 		optimisticUpdate(newWork, 'Xóa liên hệ');
+	};
+
+	const handlePrivacyChange = async (value: IPrivacy, index: number) => {
+		const newWorks = [...works];
+		newWorks[index].privacy = value;
+		optimisticUpdate(newWorks, 'Thay đổi quyền riêng tư');
 	};
 
 	return (
@@ -100,39 +104,48 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 				}
 				bordered
 				dataSource={works}
-				renderItem={(work, index) => (
-					<List.Item
-						actions={[
-							<PrivacyDropdown key="privacy" value={work.privacy.value} />,
+				renderItem={(work, index) => {
+					const actions = [];
+					if (isCurrentUser) {
+						actions.push(
+							<PrivacyDropdown
+								key="privacy"
+								value={work.privacy}
+								onChange={(value) => handlePrivacyChange(value, index)}
+							/>,
 							<Button
 								key="edit"
 								type="text"
 								icon={<HiPencil />}
 								onClick={() => openModal({ data: work, index })}
 							/>,
-							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />,
-						]}
-					>
-						<List.Item.Meta
-							title={
-								<>
-									Công ty: <b>{work.company}</b>
-								</>
-							}
-							description={
-								<>
-									Chức vụ: <b>{work.position}</b>
-								</>
-							}
-							style={{ width: '100%' }}
-						/>
-						<i>
-							{[work.from && `Từ ${formatDate(work.from)}`, work.to && `Đến ${formatDate(work.to)}`]
-								.filter(Boolean)
-								.join(' - ')}
-						</i>
-					</List.Item>
-				)}
+							<Button key="delete" type="text" icon={<HiTrash />} onClick={() => handleDelete(index)} />
+						);
+					}
+
+					return (
+						<List.Item actions={actions}>
+							<List.Item.Meta
+								title={
+									<>
+										Công ty: <b>{work.company}</b>
+									</>
+								}
+								description={
+									<>
+										Chức vụ: <b>{work.position}</b>
+									</>
+								}
+								style={{ width: '100%' }}
+							/>
+							<i>
+								{[work.from && `Từ ${formatDate(work.from)}`, work.to && `Đến ${formatDate(work.to)}`]
+									.filter(Boolean)
+									.join(' - ')}
+							</i>
+						</List.Item>
+					);
+				}}
 			/>
 		</>
 	);

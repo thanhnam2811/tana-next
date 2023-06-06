@@ -1,6 +1,8 @@
 import { WhiteBox } from '@components/Box';
-import { useInfiniteFetcher } from '@hooks';
+import { useFetcher } from '@common/hooks';
 import { Box, Divider, Grid, Typography, styled } from '@mui/material';
+import { MessageContext } from '@pages/messages/[id]';
+import { useAuth } from '@modules/auth/hooks';
 import { fileApi } from '@utils/api';
 import { messageApi } from '@utils/api/message-api';
 import { randomString } from '@utils/common';
@@ -13,8 +15,7 @@ import { MessageFooter } from './MessageFooter';
 import { MessageHeader } from './MessageHeader';
 import { MessagesHistory } from './MessageHistory';
 import { messageConfig } from './config';
-import { MessageContext } from '@pages/messages/[id]';
-import { useUserStore } from '@store';
+import { IMedia, MessageType } from '@common/types';
 
 interface Props {
 	// eslint-disable-next-line no-unused-vars
@@ -25,13 +26,17 @@ export function MessageArea({ onMediaPreview }: Props) {
 	const { conversation } = useContext(MessageContext)!;
 	const router = useRouter();
 	const id = router.query.id as string;
-	const messageFetcher = useInfiniteFetcher(`/conversations/${id}/messages`);
+	const messageFetcher = useFetcher<
+		MessageType & {
+			sending?: boolean; // for optimistic UI
+			error?: string; // for display error
+		}
+	>({ api: `/conversations/${id}/messages` });
 
 	const idRef = useRef(id);
 	// reload data when conversation change
 	useEffect(() => {
 		idRef.current = id;
-		messageFetcher.reload();
 
 		if (conversation) {
 			window.socket.on('receiveMessage', (msg: any) => {
@@ -44,7 +49,7 @@ export function MessageArea({ onMediaPreview }: Props) {
 		};
 	}, [id]);
 
-	const { user } = useUserStore();
+	const { authUser } = useAuth();
 
 	const handleSendMessage = async (text: string) => {
 		const isValidToSend = text?.trim() !== '' || filesSelected.length > 0;
@@ -55,9 +60,12 @@ export function MessageArea({ onMediaPreview }: Props) {
 		const newMessagePlaceholder = {
 			_id: sending_id,
 			text,
-			sender: user,
+			sender: authUser!,
 			sending: true,
-			media: filesSelected,
+			media: filesSelected.map<IMedia>((file) => ({ _id: randomString(10), link: URL.createObjectURL(file) })),
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			conversation: id,
 		};
 		messageFetcher.addData(newMessagePlaceholder);
 

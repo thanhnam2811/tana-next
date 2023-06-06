@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
-import apiClient from './apiClient';
+import { apiClient } from '.';
 
 const swrFetcher = (url: string, config?: AxiosRequestConfig) => apiClient.get(url, config).then((res) => res.data);
 
-export default swrFetcher;
+export { swrFetcher };

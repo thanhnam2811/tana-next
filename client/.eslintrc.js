@@ -30,5 +30,6 @@ module.exports = {
 		'no-empty-pattern': 'warn', // Warn about empty destructuring patterns
 		'react-hooks/exhaustive-deps': 'off', // Disable exhaustive-deps rule
 		'@typescript-eslint/no-non-null-assertion': 'off', // Allow non-null assertions
+		'react/display-name': 'off', // Allow missing display name in function components
 	},
 };

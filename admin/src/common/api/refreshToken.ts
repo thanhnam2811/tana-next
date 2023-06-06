@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiClient } from '.';
 
 const refreshAccessToken = async () => {
 	// Get refresh token from local storage
@@ -16,4 +16,4 @@ const refreshAccessToken = async () => {
 	return accessToken;
 };
 
-export default refreshAccessToken;
+export { refreshAccessToken };

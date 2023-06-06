@@ -1,4 +1,4 @@
-import { useUserStore } from '@store';
+import { useAuth } from '@modules/auth/hooks';
 import { LoadingButton } from '@mui/lab';
 import {
 	Avatar,
@@ -32,7 +32,7 @@ import {
 } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
-import { getShortName } from '@utils/common';
+import { stringUtil } from '@utils/common';
 import { MyIconButton } from '@components/MUI';
 import dayjs from 'dayjs';
 
@@ -46,11 +46,11 @@ interface Props {
 
 export const ConversationMembersModal = ({ open, onClose, member = {}, handleUpdateMembers }: Props) => {
 	const router = useRouter();
-	const { user: currentUser } = useUserStore();
+	const { authUser } = useAuth();
 
 	const { user = {}, role, nickname, addedBy = {}, addedAt, changedNicknameBy } = member;
 
-	const isCurrentUser = currentUser?._id === user?._id;
+	const isCurrentUser = authUser?._id === user?._id;
 
 	useEffect(() => {
 		handleCloseSendMsg(); // close send message dialog when close modal
@@ -193,7 +193,7 @@ export const ConversationMembersModal = ({ open, onClose, member = {}, handleUpd
 							height: 80,
 						}}
 					>
-						{getShortName(user.fullname)}
+						{stringUtil.getShortName(user.fullname)}
 					</Avatar>
 
 					<Stack direction="column" flex={1} overflow="hidden">

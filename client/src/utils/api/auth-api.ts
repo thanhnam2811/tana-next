@@ -1,4 +1,4 @@
-import { IUser } from '@interfaces';
+import { UserType } from '@common/types';
 import apiClient from './apiClient';
 
 export interface ILoginParams {
@@ -9,7 +9,7 @@ export interface ILoginParams {
 interface ILoginResponse {
 	accessToken: string;
 	refreshToken: string;
-	user: IUser;
+	user: UserType;
 }
 
 export interface IRegisterParams {
@@ -47,7 +47,7 @@ export const authApi = {
 
 	register: (data: IRegisterParams) => apiClient.post('/auth/register', data),
 
-	getProfile: () => apiClient.get<IUser>('users/profile'),
+	getProfile: () => apiClient.get<UserType>('users/profile'),
 
 	forgotPassword: (email: string) => apiClient.post('auth/password-reset', { email }),
 
