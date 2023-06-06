@@ -12,11 +12,10 @@ export function LineChart() {
 	const lastWeek = dayjs().subtract(1, 'week').toDate();
 	const today = dayjs().toDate();
 	const [range, setRange] = useState<[Date, Date]>([lastWeek, today]);
+	const start = dayjs(range[0]).format('YYYY-MM-DD');
+	const end = dayjs(range[1]).format('YYYY-MM-DD');
 
-	const { data } = useSWR<IUserAccessData>(
-		`/admin/usersAccess?start=${dayjs(range[0]).format('YYYY-MM-DD')}&end=${dayjs(range[1]).format('YYYY-MM-DD')}`,
-		swrFetcher
-	);
+	const { data } = useSWR<IUserAccessData>(`/admin/usersAccess?start=${start}&end=${end}&type=${type}`, swrFetcher);
 
 	const convertData = (data?: IUserAccessData): { time: string; name: string; total: number }[] => {
 		const result: { time: string; name: string; total: number }[] = [];
@@ -94,7 +93,7 @@ export function LineChart() {
 				</Space>
 			}
 		>
-			<Line {...config} />;
+			<Line {...config} />
 		</Card>
 	);
 }
