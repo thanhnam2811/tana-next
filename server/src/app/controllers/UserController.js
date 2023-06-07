@@ -491,8 +491,6 @@ class UserController {
 
 			const type = req.params.type;
 			let query = [];
-			//set limit and offset
-			query.push({ $skip: offset * 1 }, { $limit: limit * 1 });
 			if (type === 'all') {
 				query = querySearchAllUsers(req);
 			} else if (type === 'friends') {
@@ -571,21 +569,10 @@ class UserController {
 				});
 			}
 
-			User.aggregate(query).exec((err, data) => {
-				if (err) {
-					console.log(err);
-					return next(
-						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				}
-
-				//remove element 0 and 1 in query
-				query.splice(0, 2);
-				query.push({
-					$count: 'totalCount',
-				});
-
-				User.aggregate(query).exec((err, result) => {
+			User.aggregate(query)
+				.skip(offset)
+				.limit(limit)
+				.exec((err, data) => {
 					if (err) {
 						console.log(err);
 						return next(
@@ -594,74 +581,88 @@ class UserController {
 							)
 						);
 					}
-					const totalCount = result[0].totalCount;
 
-					User.populate(
-						data,
-						[
-							{ path: 'profilePicture', select: '_id link' },
-							{ path: 'coverPicture', select: '_id link' },
-						],
-						(err, data) => {
-							if (err) {
-								console.log(err);
-								return next(
-									createError.InternalServerError(
-										`${err.message} in method: ${req.method} of ${req.originalUrl}`
-									)
-								);
-							}
-							let users = data;
-							const usersList = [];
-							if (type === 'all') {
-								users.forEach((user) => {
-									const userObj = user;
-									if (
-										req.user.friends.some(
-											(friend) =>
-												friend.user && friend.user._id.toString() === user._id.toString()
-										)
-									) {
-										userObj.relationship = 'friend';
-									} else if (
-										req.user.sentRequests.some(
-											(sentRequest) =>
-												sentRequest.user &&
-												sentRequest.user._id.toString() === user._id.toString()
-										)
-									) {
-										userObj.relationship = 'sent';
-									} else if (
-										req.user.friendRequests.some(
-											(friendRequest) =>
-												friendRequest.user &&
-												friendRequest.user._id.toString() === user._id.toString()
-										)
-									) {
-										userObj.relationship = 'received';
-									} else {
-										userObj.relationship = 'none';
-									}
-									usersList.push(userObj);
-									usersList.forEach((user) => {
-										delete user.password;
-										delete user.refreshToken;
-									});
-								});
-								users = usersList;
-							}
-							return getListUser(
-								res,
-								totalCount,
-								users,
-								Math.ceil(users.length / limit),
-								Math.ceil(offset / limit),
-								offset * 1
+					query.push({
+						$count: 'totalCount',
+					});
+
+					User.aggregate(query).exec((err, result) => {
+						if (err) {
+							console.log(err);
+							return next(
+								createError.InternalServerError(
+									`${err.message} in method: ${req.method} of ${req.originalUrl}`
+								)
 							);
 						}
-					);
+						const totalCount = result[0].totalCount;
+
+						User.populate(
+							data,
+							[
+								{ path: 'profilePicture', select: '_id link' },
+								{ path: 'coverPicture', select: '_id link' },
+							],
+							(err, data) => {
+								if (err) {
+									console.log(err);
+									return next(
+										createError.InternalServerError(
+											`${err.message} in method: ${req.method} of ${req.originalUrl}`
+										)
+									);
+								}
+								let users = data;
+								const usersList = [];
+								if (type === 'all') {
+									users.forEach((user) => {
+										const userObj = user;
+										if (
+											req.user.friends.some(
+												(friend) =>
+													friend.user && friend.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'friend';
+										} else if (
+											req.user.sentRequests.some(
+												(sentRequest) =>
+													sentRequest.user &&
+													sentRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'sent';
+										} else if (
+											req.user.friendRequests.some(
+												(friendRequest) =>
+													friendRequest.user &&
+													friendRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'received';
+										} else {
+											userObj.relationship = 'none';
+										}
+										usersList.push(userObj);
+										usersList.forEach((user) => {
+											delete user.password;
+											delete user.refreshToken;
+										});
+									});
+									users = usersList;
+								}
+								return getListUser(
+									res,
+									totalCount,
+									users,
+									Math.ceil(totalCount / limit),
+									Math.ceil(offset / limit),
+									offset * 1
+								);
+							}
+						);
+					});
 				});
-			});
 		} catch (err) {
 			console.log(err);
 			return next(
