@@ -32,7 +32,6 @@ class PostController {
 			Post.paginate(
 				{ $text: { $search: q } },
 				{
-					sort: { createdAt: -1 },
 					populate: [
 						{
 							path: 'author',
@@ -468,7 +467,17 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
-							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'lastestFiveComments',
+						populate: {
+							path: 'author',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
 						},
 					})
 					.populate({
@@ -476,8 +485,27 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'media',
+						select: '_id link',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = 'none';
@@ -493,7 +521,17 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
-							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'lastestFiveComments',
+						populate: {
+							path: 'author',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
 						},
 					})
 					.populate({
@@ -501,8 +539,27 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'media',
+						select: '_id link',
 					});
 
 				const postReturn = postUpdated.toObject();
@@ -534,7 +591,17 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
-							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'lastestFiveComments',
+						populate: {
+							path: 'author',
+							select: '_id fullname profilePicture isOnline',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
 						},
 					})
 					.populate({
@@ -542,8 +609,27 @@ class PostController {
 						select: '_id fullname profilePicture isOnline',
 						populate: {
 							path: 'profilePicture',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'media',
+						select: '_id link',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = newReact.type;
@@ -681,6 +767,8 @@ class PostController {
 					path: 'media',
 					select: '_id link',
 				});
+
+			if (!post) return next(createError.NotFound('Post not found'));
 
 			let reactOfUser = 'none';
 
