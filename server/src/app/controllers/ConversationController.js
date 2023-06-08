@@ -232,33 +232,18 @@ class ConversationController {
 				return res.status(400).send('Cuộc hội thoại phải có ít nhất 2 thành viên');
 			}
 			if (newConversation.members.length === 2) {
-				const allConversations = await Conversation.find({
-					$or: [
-						{
-							'members.user': req.user._id,
+				const conv = await Conversation.aggregate([
+					{
+						$match: {
+							$and: [
+								{ 'members.user': { $all: [req.user._id, newConversation.members[0].user] } },
+								{ $expr: { $eq: [{ $size: '$members' }, 2] } },
+							],
 						},
-						{
-							'members.user': newConversation.members[0].user,
-						},
-					],
-				});
+					},
+				]);
 				// Check conversation with 2 members. It's only 1
-				let convID;
-
-				// Get ID of conversation with 2 members is req.user._id and newConversation.members[0] if it's exist
-				for (const conv of allConversations) {
-					if (
-						conv.members.length === 2 &&
-						conv.members.some((member) => member.user.toString() === req.user._id.toString()) &&
-						conv.members.some(
-							(member) => member.user.toString() === newConversation.members[0].user.toString()
-						)
-					) {
-						convID = conv._id;
-					}
-				}
-
-				if (!convID) {
+				if (!conv[0]) {
 					newConversation.history.push({
 						editor: req.user._id,
 						content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
@@ -279,7 +264,7 @@ class ConversationController {
 
 					res.status(200).json(await populateConversation(savedConversation._id));
 				} else {
-					const conversation = await populateConversation(convID);
+					const conversation = await populateConversation(conv[0]._id);
 					res.status(200).json(conversation);
 				}
 			} else {
