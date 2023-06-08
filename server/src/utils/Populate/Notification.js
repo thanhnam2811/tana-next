@@ -1,5 +1,5 @@
-exports.populateNotification = async (notification) => {
-	return await notification.populate({
+exports.populateNotification = (notification) =>
+	notification.populate({
 		path: 'sender',
 		select: '_id  fullname profilePicture',
 		populate: {
@@ -7,4 +7,3 @@ exports.populateNotification = async (notification) => {
 			select: '_id link',
 		},
 	});
-};

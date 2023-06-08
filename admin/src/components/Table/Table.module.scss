@@ -1,0 +1,22 @@
+.container {
+	position: relative;
+
+	.refresh {
+		position: absolute;
+		top: 8px;
+		right: 8px;
+
+		transition: all 0.3s ease-in-out;
+
+		// Hidden by default
+		opacity: 0;
+		transform: translateY(-16px) scale(0.6);
+	}
+
+	&:hover {
+		.refresh {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+}

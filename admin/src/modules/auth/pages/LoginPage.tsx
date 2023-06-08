@@ -1,14 +1,15 @@
-import { LoginSVG } from '@/assets';
 import { LockOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { App, Button, Card, Form, Input, Layout, Typography, theme } from 'antd';
 import { Navigate, useLocation } from 'react-router-dom';
 import { ILoginParams } from '../api/login.api';
-import useAuthStore from '../hooks/useAuthStore';
 import styles from '../styles/Login.module.scss';
+import { LoginSVG } from '@assets/images';
+import { useAuthStore } from '../hooks';
 
 export default function LoginPage() {
 	const { state } = useLocation();
-	const { isAuth, login } = useAuthStore();
+	const { user, login } = useAuthStore();
+	const isAuth = !!user;
 	const { message } = App.useApp();
 
 	const onFinish = async (values: ILoginParams) => {

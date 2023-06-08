@@ -1,14 +1,12 @@
-const { getPagination } = require('../../utils/Pagination');
-const Post = require('../models/Post');
-const Notification = require('../models/Notification');
-const { User } = require('../models/User');
-const Comment = require('../models/Comment');
-const isAuth = require('../middlewares/AuthMiddleware').isAuth;
-const React = require('../models/React');
 const createError = require('http-errors');
 const Joi = require('joi');
+const { getPagination } = require('../../utils/Pagination');
+const Post = require('../models/Post');
+const { User } = require('../models/User');
+const Comment = require('../models/Comment');
+const React = require('../models/React');
 const { getListPost, getListData } = require('../../utils/Response/listData');
-const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
+const { getAllPostWithPrivacy } = require('../../utils/Privacy/Post');
 const {
 	notificationForFriends,
 	notificationForTags,
@@ -20,11 +18,11 @@ const {
 	createActivityWithPost,
 	createActivityWithSharedPost,
 	createActivityWithReactPost,
-	createActivityWithTagPost,
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
+
 class PostController {
-	//search post by content
+	// search post by content
 	async search(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		const { q } = req.query;
@@ -87,21 +85,21 @@ class PostController {
 					const posts = data.docs;
 					const listPosts = [];
 					if (!req.user) {
-						posts.map((post) => {
+						posts.forEach((post) => {
 							const postObject = post.toObject();
 							postObject.reactOfUser = 'none';
 							listPosts.push(postObject);
 						});
 						// getListPost(res, data, listPosts);
 						const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-						//pagination for listPosts
+						// pagination for listPosts
 						const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 						res.status(200).send({
 							totalItems: listPostsFilter.length,
 							items: listPostsPaginate,
 							totalPages: Math.ceil(listPosts.length / limit),
 							currentPage: Math.floor(offset / limit),
-							offset: offset,
+							offset,
 						});
 					} else {
 						Promise.all(
@@ -115,29 +113,27 @@ class PostController {
 								listPosts.push(postObject);
 							})
 						).then(async () => {
-							//sort post by date desc
-							listPosts.sort((a, b) => {
-								return new Date(b.createdAt) - new Date(a.createdAt);
-							});
+							// sort post by date desc
+							listPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 							// getListPost(res, data, listPosts);
 							const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-							//pagination for listPosts
+							// pagination for listPosts
 							const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 							res.status(200).send({
 								totalItems: listPostsFilter.length,
 								items: listPostsPaginate,
 								totalPages: Math.ceil(listPosts.length / limit),
 								currentPage: Math.floor(offset / limit),
-								offset: offset,
+								offset,
 							});
 						});
 					}
 				})
-				.catch((err) => {
-					return next(
+				.catch((err) =>
+					next(
 						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				});
+					)
+				);
 		} catch (err) {
 			console.error(err);
 			return next(
@@ -146,10 +142,10 @@ class PostController {
 		}
 	}
 
-	//[POST] create a post
+	// [POST] create a post
 	async add(req, res, next) {
 		try {
-			//validate request body
+			// validate request body
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
@@ -198,11 +194,11 @@ class PostController {
 					path: 'media',
 					select: '_id link',
 				});
-			//create a notification for all tags of this post and all friends of the author
+			// create a notification for all tags of this post and all friends of the author
 			await notificationForTags(savedPost, req.user);
 			await notificationForFriends(savedPost, req.user);
 
-			//save activity for user
+			// save activity for user
 			await createActivityWithPost(post, req.user);
 
 			res.status(200).json(post);
@@ -212,17 +208,17 @@ class PostController {
 		}
 	}
 
-	//[PUT] update a post
+	// [PUT] update a post
 	async update(req, res, next) {
 		try {
-			//validate request body
+			// validate request body
 			const schema = Joi.object({
 				content: Joi.string(),
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
 				privacy: Joi.object({
 					value: Joi.string().valid('public', 'private', 'friends', 'includes', 'excludes').required(),
-					//check if privacy is includes or excludes
+					// check if privacy is includes or excludes
 					includes: Joi.when('value', {
 						is: Joi.string().valid('includes'),
 						then: Joi.array().items(Joi.string().required()).required(),
@@ -288,17 +284,17 @@ class PostController {
 		}
 	}
 
-	//[Delete] delete a post
+	// [Delete] delete a post
 	async delete(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
 			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
 				await post.delete();
-				//delete all comments of this post
+				// delete all comments of this post
 				await Comment.deleteMany({ post: req.params.id });
-				//delete all reactions of this post
+				// delete all reactions of this post
 				await React.deleteMany({ post: req.params.id });
-				//update the number of shares of the post
+				// update the number of shares of the post
 				const sharedPost = await Post.findById(post.sharedPost);
 				if (sharedPost) {
 					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
@@ -318,7 +314,7 @@ class PostController {
 		}
 	}
 
-	//[Get] get all posts of a user by id
+	// [Get] get all posts of a user by id
 	async getAll(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		// get posts of a user by id and sort by date
@@ -386,21 +382,21 @@ class PostController {
 					const posts = data.docs;
 					const listPosts = [];
 					if (!req.user) {
-						posts.map((post) => {
+						posts.forEach((post) => {
 							const postObject = post.toObject();
 							postObject.reactOfUser = 'none';
 							listPosts.push(postObject);
 						});
 						// getListPost(res, data, listPosts);
 						const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-						//pagination for listPosts
+						// pagination for listPosts
 						const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 						res.status(200).send({
 							totalItems: listPostsFilter.length,
 							items: listPostsPaginate,
 							totalPages: Math.ceil(listPosts.length / limit),
 							currentPage: Math.floor(offset / limit),
-							offset: offset,
+							offset,
 						});
 					} else {
 						Promise.all(
@@ -414,29 +410,27 @@ class PostController {
 								listPosts.push(postObject);
 							})
 						).then(async () => {
-							//sort post by date desc
-							listPosts.sort((a, b) => {
-								return new Date(b.createdAt) - new Date(a.createdAt);
-							});
+							// sort post by date desc
+							listPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 							// getListPost(res, data, listPosts);
 							const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-							//pagination for listPosts
+							// pagination for listPosts
 							const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 							res.status(200).send({
 								totalItems: listPostsFilter.length,
 								items: listPostsPaginate,
 								totalPages: Math.ceil(listPosts.length / limit),
 								currentPage: Math.floor(offset / limit),
-								offset: offset,
+								offset,
 							});
 						});
 					}
 				})
-				.catch((err) => {
-					return next(
+				.catch((err) =>
+					next(
 						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				});
+					)
+				);
 		} catch (err) {
 			console.error(err);
 			return next(
@@ -451,16 +445,16 @@ class PostController {
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
-			//check if the user has reacted this post before
+			// check if the user has reacted this post before
 			const listReactOfPost = await React.find({ post: req.params.id });
 			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user._id.toString());
 			if (userReacted && userReacted.type.toString() === req.body.type.toString()) {
-				//if user has reacted, remove the reaction
+				// if user has reacted, remove the reaction
 				await React.findByIdAndDelete(userReacted._id);
-				//update the number of reactions of the post
+				// update the number of reactions of the post
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: -1 } });
 
-				//populate post and add reactOfUser field to the post
+				// populate post and add reactOfUser field to the post
 				const postUpdated = await Post.findById(req.params.id)
 					.populate({
 						path: 'author',
@@ -511,10 +505,10 @@ class PostController {
 				postReturn.reactOfUser = 'none';
 				res.status(200).json(postReturn);
 			} else if (userReacted && userReacted.type.toString() !== req.body.type.toString()) {
-				//if user has reacted but change the type of reaction
+				// if user has reacted but change the type of reaction
 				userReacted.type = req.body.type;
 				await userReacted.save();
-				//populate post and add reactOfUser field to the post
+				// populate post and add reactOfUser field to the post
 				const postUpdated = await Post.findById(req.params.id)
 					.populate({
 						path: 'author',
@@ -566,25 +560,25 @@ class PostController {
 				postReturn.reactOfUser = req.body.type;
 				res.status(200).json(postReturn);
 			} else {
-				//if user has not reacted, add a new reaction
+				// if user has not reacted, add a new reaction
 				const newReact = new React({
 					post: req.params.id,
 					user: req.user._id,
 					type: req.body.type,
 				});
 				await newReact.save();
-				//update the number of reactions of the post
+				// update the number of reactions of the post
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
-				//create a notification for the author of the post
+				// create a notification for the author of the post
 				if (post.author.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 				}
 
-				//save activity for user
+				// save activity for user
 				await createActivityWithReactPost(post, req.user);
 
-				//populate post and add reactOfUser field to the post
+				// populate post and add reactOfUser field to the post
 				const postUpdated = await Post.findById(req.params.id)
 					.populate({
 						path: 'author',
@@ -643,10 +637,10 @@ class PostController {
 		}
 	}
 
-	//share a post
+	// share a post
 	async share(req, res, next) {
 		try {
-			//validate request body
+			// validate request body
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
@@ -662,14 +656,14 @@ class PostController {
 				author: req.user._id,
 			});
 			const savedPost = await newPost.save();
-			//update the number of shares of the post
+			// update the number of shares of the post
 			await Post.findByIdAndUpdate(req.params.id, { $inc: { numberShare: 1 } });
-			//create a notification for the author of the post
+			// create a notification for the author of the post
 			if (post.author.toString() !== req.user._id.toString()) {
 				await notificationForSharedPost(savedPost, req.user);
 			}
 
-			//save activity for user
+			// save activity for user
 			await createActivityWithSharedPost(savedPost, req.user);
 
 			res.status(200).send(savedPost);
@@ -681,7 +675,7 @@ class PostController {
 		}
 	}
 
-	//get all reactions of a post
+	// get all reactions of a post
 	async getAllReactions(req, res, next) {
 		try {
 			const listReact = await React.find({ post: req.params.id }).populate({
@@ -692,7 +686,7 @@ class PostController {
 					select: '_id link',
 				},
 			});
-			//classify reactions by type
+			// classify reactions by type
 			const listLike = listReact.filter((react) => react.type === 'like');
 			const listLove = listReact.filter((react) => react.type === 'love');
 			const listHaha = listReact.filter((react) => react.type === 'haha');
@@ -716,7 +710,7 @@ class PostController {
 		}
 	}
 
-	//[Get] get a post by id
+	// [Get] get a post by id
 	async get(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id)
@@ -773,7 +767,7 @@ class PostController {
 			let reactOfUser = 'none';
 
 			if (req.user) {
-				//get type of reaction of the user to the post
+				// get type of reaction of the user to the post
 				const react = await React.findOne({ post: req.params.id, user: req.user._id });
 				if (react) {
 					reactOfUser = react.type;
@@ -791,7 +785,7 @@ class PostController {
 		}
 	}
 
-	//[Get] get all posts of a user by id
+	// [Get] get all posts of a user by id
 	async getAllOfUser(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		// get posts of a user by query id and sort by date
@@ -854,7 +848,7 @@ class PostController {
 				}
 			)
 				.then((data) => {
-					//get type of reaction of the user to the post
+					// get type of reaction of the user to the post
 					const posts = data.docs;
 					const listPosts = [];
 					Promise.all(
@@ -871,11 +865,11 @@ class PostController {
 						getListPost(res, data, listPosts);
 					});
 				})
-				.catch((err) => {
-					return next(
+				.catch((err) =>
+					next(
 						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				});
+					)
+				);
 		} catch (err) {
 			console.error(err);
 			return next(
@@ -884,14 +878,14 @@ class PostController {
 		}
 	}
 
-	//[Get] get all posts of user's friends and user random posts
+	// [Get] get all posts of user's friends and user random posts
 	async getPostInHome(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		// get posts of a user by query id and sort by date
 		try {
 			const listFriendId = req.user.friends.map((friend) => friend.user._id);
 			listFriendId.push(req.user._id);
-			let listPost = await Post.find({ author: { $in: listFriendId } })
+			const listPost = await Post.find({ author: { $in: listFriendId } })
 				.sort({ createdAt: -1 })
 				.populate({
 					path: 'author',
@@ -941,9 +935,9 @@ class PostController {
 					select: '_id link',
 				});
 
-			//:TODO: if listPost is empty, get random posts
+			// :TODO: if listPost is empty, get random posts
 
-			//get type of reaction of the user to the post
+			// get type of reaction of the user to the post
 			const listPosts = [];
 			await Promise.all(
 				listPost.map(async (post) => {
@@ -957,20 +951,18 @@ class PostController {
 				})
 			).then(async () => {
 				// getListPost(res, data, listPosts);
-				//sort post by date desc
-				listPosts.sort((a, b) => {
-					return new Date(b.createdAt) - new Date(a.createdAt);
-				});
+				// sort post by date desc
+				listPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 				// getListPost(res, data, listPosts);
 				const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
-				//pagination for listPosts
+				// pagination for listPosts
 				const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 				return res.status(200).send({
 					totalItems: listPostsFilter.length,
 					items: listPostsPaginate,
 					totalPages: Math.ceil(listPosts.length / limit),
 					currentPage: Math.floor(offset / limit),
-					offset: offset,
+					offset,
 				});
 			});
 		} catch (err) {
@@ -981,7 +973,7 @@ class PostController {
 		}
 	}
 
-	//[Get] files media in posts of user
+	// [Get] files media in posts of user
 	async getFilesInPost(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
@@ -998,12 +990,12 @@ class PostController {
 		}
 	}
 
-	//[GET] get all posts
+	// [GET] get all posts
 	async getAllPosts(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		// get posts of a user by query id and sort by date
 		try {
-			//check role Admin
+			// check role Admin
 			if (req.user.role.name !== 'ADMIN') return next(createError.Forbidden('Bạn không có quyền truy cập'));
 
 			Post.paginate(
@@ -1066,11 +1058,11 @@ class PostController {
 				.then((data) => {
 					getListData(res, data);
 				})
-				.catch((err) => {
-					return next(
+				.catch((err) =>
+					next(
 						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				});
+					)
+				);
 		} catch (error) {
 			console.error(error);
 			return next(

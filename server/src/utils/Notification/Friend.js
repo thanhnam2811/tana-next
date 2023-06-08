@@ -13,10 +13,10 @@ async function notificationRequestFriend(currentUser, user) {
 		receiver: friend,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(user._id, eventName.NOTIFICATION, {
 		type: notificationType.SEND_REQUEST_FRIEND,
 		data: popNotification,
@@ -33,10 +33,10 @@ async function notificationAcceptFriend(currentUser, user) {
 		receiver: friend,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(user._id, eventName.NOTIFICATION, {
 		type: notificationType.ACCEPT_REQUEST_FRIEND,
 		data: popNotification,

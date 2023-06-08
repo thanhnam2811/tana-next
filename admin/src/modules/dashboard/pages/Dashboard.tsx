@@ -4,7 +4,7 @@ import { IoPeopleOutline } from 'react-icons/io5';
 import { LineChart, PieChart, UserTable } from '../components';
 import useSWR from 'swr';
 import { IDashboardData } from '../types';
-import swrFetcher from '@/api/swrFetcher';
+import { swrFetcher } from '@common/api';
 
 export default function DashboardPage() {
 	const { data, isLoading } = useSWR<IDashboardData>('/admin/dashboard', swrFetcher);

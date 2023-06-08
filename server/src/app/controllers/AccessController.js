@@ -1,8 +1,8 @@
-const Access = require('../models/Access');
 const moment = require('moment');
+const Access = require('../models/Access');
 
 class AccessController {
-	//Update access of user in day when user connect on socket
+	// Update access of user in day when user connect on socket
 	async updateAccessInDay() {
 		try {
 			const access = await Access.findOne({

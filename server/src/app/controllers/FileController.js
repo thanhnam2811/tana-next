@@ -1,15 +1,13 @@
-const rootDir = require('path').resolve('./');
-const path = require('path');
-const File = require('../models/File');
-const fs = require('fs');
-const cloudinary = require('../../configs/cloudinary');
-const cloudinaryV2 = require('cloudinary').v2;
 const createError = require('http-errors');
+const fs = require('fs');
+const cloudinaryV2 = require('cloudinary').v2;
+const cloudinary = require('../../configs/cloudinary');
+const File = require('../models/File');
 
 class FileController {
 	async uploadFiles(req, res, next) {
 		try {
-			const uploader = async (path) => await cloudinary.uploads(path, 'Files');
+			const uploader = (path) => cloudinary.uploads(path, 'Files');
 			if (req.files.length <= 0) {
 				return res.status(400).send({ message: 'Bạn nên chọn ít nhất là 1 file để upload.' });
 			}
@@ -40,7 +38,7 @@ class FileController {
 
 			res.status(200).json({
 				message: 'files uploaded thành công!!!',
-				files: files,
+				files,
 			});
 		} catch (err) {
 			console.log(err);

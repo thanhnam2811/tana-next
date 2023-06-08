@@ -1,8 +1,9 @@
-const { User } = require('../models/User');
-const Activity = require('./../models/Activity');
 const createError = require('http-errors');
+const { User } = require('../models/User');
+const Activity = require('../models/Activity');
 const { getPagination } = require('../../utils/Pagination');
 const { getListData } = require('../../utils/Response/listData');
+
 class ActivityController {
 	async getAllActivityOfUser(req, res, next) {
 		try {
@@ -135,11 +136,11 @@ class ActivityController {
 	async createActivityForUser(user, type, target, content, link) {
 		try {
 			await Activity.create({
-				user: user,
-				type: type,
-				target: target,
-				content: content,
-				link: link,
+				user,
+				type,
+				target,
+				content,
+				link,
 			});
 		} catch (error) {
 			console.log(error);
@@ -152,19 +153,17 @@ class ActivityController {
 			const activity = await Activity.findById(req.params.id);
 			if (!activity) {
 				res.status(404).json({
-					message: 'Activity không tìm thấy với id ' + req.params.id,
+					message: `Activity không tìm thấy với id ${req.params.id}`,
+				});
+			} else if (activity.user.toString() === req.user._id.toString()) {
+				const result = await Activity.findByIdAndDelete(req.params.id);
+				res.status(200).json({
+					activity: result,
 				});
 			} else {
-				if (activity.user.toString() === req.user._id.toString()) {
-					const result = await Activity.findByIdAndDelete(req.params.id);
-					res.status(200).json({
-						activity: result,
-					});
-				} else {
-					res.status(403).json({
-						message: "You don't have permission to delete this activity!",
-					});
-				}
+				res.status(403).json({
+					message: "You don't have permission to delete this activity!",
+				});
 			}
 		} catch (err) {
 			console.log(err);
