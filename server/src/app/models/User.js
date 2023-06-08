@@ -3,7 +3,6 @@ const mongooseDelete = require('mongoose-delete');
 const mongoosePaginate = require('mongoose-paginate-v2');
 const Joi = require('joi');
 const { PrivacyModel, validatePrivacy } = require('./Privacy');
-const { is } = require('date-fns/locale');
 
 const education = mongoose.Schema(
 	{
@@ -22,7 +21,7 @@ const education = mongoose.Schema(
 		to: {
 			type: Date,
 		},
-		//privacy
+		// privacy
 		privacy: {
 			type: PrivacyModel.schema,
 			default: {
@@ -54,7 +53,7 @@ const work = mongoose.Schema(
 		to: {
 			type: Date,
 		},
-		//privacy
+		// privacy
 		privacy: {
 			type: PrivacyModel.schema,
 			default: {
@@ -81,7 +80,7 @@ const contact = mongoose.Schema(
 		value: {
 			type: String,
 		},
-		//privacy
+		// privacy
 		privacy: {
 			type: PrivacyModel.schema,
 			default: {
@@ -116,7 +115,7 @@ const gender = mongoose.Schema(
 			enum: ['nam', 'nữ', 'khác'],
 			default: 'nữ',
 		},
-		//privacy
+		// privacy
 		privacy: {
 			type: PrivacyModel.schema,
 			default: {
@@ -230,7 +229,7 @@ const UserSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-//soft delete
+// soft delete
 UserSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: 'all',
@@ -296,14 +295,14 @@ const validate = (user) => {
 	return schema.validate(user);
 };
 
-//paginate
+// paginate
 UserSchema.plugin(mongoosePaginate);
 
 const hiddenField = ['password', 'refreshToken'];
 const User = mongoose.model(
 	'User',
 	UserSchema.set('toJSON', {
-		transform: function (doc, user, opt) {
+		transform(doc, user) {
 			hiddenField.forEach((field) => delete user[field]);
 			return user;
 		},

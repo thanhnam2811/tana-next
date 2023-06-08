@@ -1,12 +1,11 @@
+const Joi = require('joi');
+const bcrypt = require('bcrypt');
+const createError = require('http-errors');
+const moment = require('moment');
 const UserController = require('./UserController');
 const AccessController = require('./AccessController');
 const { User } = require('../models/User');
-const Joi = require('joi');
-const bcrypt = require('bcrypt');
 const authMethod = require('../../auth/auth.method');
-const redisClient = require('../../configs/redis/index');
-const createError = require('http-errors');
-const moment = require('moment');
 const { populateUserByEmail } = require('../../utils/Populate/User');
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -14,10 +13,10 @@ const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 class AdminController {
-	//login for admin
+	// login for admin
 	async login(req, res, next) {
 		try {
-			//validate
+			// validate
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
@@ -39,7 +38,7 @@ class AdminController {
 					.status(401)
 					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
 			}
-			//check account is being blocked (LockTime - current time > 0)
+			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
 				return res
 					.status(401)
@@ -48,26 +47,26 @@ class AdminController {
 
 			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
 			if (!isPasswordValid) {
-				//increase login attempt
+				// increase login attempt
 				user.loginAttempts++;
 				if (user.loginAttempts == 3) {
-					//lock account after 5 minutes
+					// lock account after 5 minutes
 					user.lockTime = Date.now() + 5 * 60 * 1000;
 					await user.save();
 					return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
-				} else if (user.loginAttempts > 3) {
-					//lock account forever
+				}
+				if (user.loginAttempts > 3) {
+					// lock account forever
 					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 					await user.save();
 					return res
 						.status(401)
 						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
-				} else {
-					await user.save();
-					return res.status(401).json('Mật khẩu không chính xác.');
 				}
+				await user.save();
+				return res.status(401).json('Mật khẩu không chính xác.');
 			}
-			//reset login attempt
+			// reset login attempt
 			user.loginAttempts = 0;
 			await user.save();
 
@@ -82,7 +81,7 @@ class AdminController {
 				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
 			}
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
-			//save refresh token to redis and set expire time
+			// save refresh token to redis and set expire time
 			// await redisClient.set(user._id, refreshToken);
 			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 
@@ -101,7 +100,7 @@ class AdminController {
 		}
 	}
 
-	//GET 4 parameters to show in admin page
+	// GET 4 parameters to show in admin page
 	async getDashboard(req, res, next) {
 		try {
 			const totalUser = await UserController.getTotalUser(req, res, next);
@@ -126,19 +125,19 @@ class AdminController {
 			if (statictisBy === 'age') {
 				const statictisByAge = await UserController.statisticsUserByAge(req, res, next);
 				return res.status(200).json(statictisByAge);
-			} else if (statictisBy === 'gender') {
+			}
+			if (statictisBy === 'gender') {
 				const statictisByGender = await UserController.statisticsUserByGender(req, res, next);
 				return res.status(200).json(statictisByGender);
-			} else {
-				return next(createError(400, 'Invalid statictisBy'));
 			}
+			return next(createError(400, 'Invalid statictisBy'));
 		} catch (error) {
 			console.log(error);
 			return next(createError(400, error));
 		}
 	}
 
-	//TODO: line chart
+	// TODO: line chart
 	async chartAccessUser(req, res, next) {
 		try {
 			console.log(moment().year(2023).week(23).startOf('week'));
@@ -151,12 +150,12 @@ class AdminController {
 			);
 			const user = await UserController.getNumUserCreatedDaily(req.query.start, req.query.end, req.query.type);
 
-			//group access and user by day
+			// group access and user by day
 			const mergedData = {};
 
 			// Merge "access" and "user" data by day
 			access.forEach((item) => {
-				const day = item.day;
+				const { day } = item;
 				if (!mergedData[day]) {
 					mergedData[day] = {};
 				}
@@ -164,7 +163,7 @@ class AdminController {
 			});
 
 			user.forEach((item) => {
-				const day = item.day;
+				const { day } = item;
 				if (!mergedData[day]) {
 					mergedData[day] = {};
 				}
@@ -196,18 +195,20 @@ class AdminController {
 		}
 	}
 
-	//change password user
+	// change password user
 	async changePassword(req, res, next) {
 		try {
-			const { email, newPassword } = req.body;
-			//generate new password
-			const salt = await bcrypt.genSalt(10);
-			const hashedPassword = await bcrypt.hash(req.body.password, salt);
+			const { email, password } = req.body;
 
 			const user = await User.findOne({ email });
 			if (!user) {
 				return next(createError(400, 'Email không tồn tại'));
 			}
+
+			// generate new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(password, salt);
+
 			user.password = hashedPassword;
 			await user.save();
 			return res.status(200).json('Đổi mật khẩu thành công');
@@ -217,7 +218,7 @@ class AdminController {
 		}
 	}
 
-	//get list new user
+	// get list new user
 	async getListNewUser(req, res, next) {
 		try {
 			const users = await UserController.getUserCreated(req, res, next);

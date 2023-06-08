@@ -10,13 +10,13 @@ async function notificationCreateComment(post, comment, user) {
 		content: `${user.fullname} đã bình luận một bài viết của bạn`,
 		link: `/post/${post._id}/comments/${comment._id}`,
 		sender: user._id,
-		receiver: receiver,
+		receiver,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(user._id, eventName.NOTIFICATION, {
 		type: notificationType.COMMENT_POST,
 		data: popNotification,
@@ -30,12 +30,12 @@ async function notificationReplyComment(commentSource, commentReply, user) {
 		content: `${user.fullname} đã trả lời một bình luận của bạn`,
 		link: `/post/${commentSource.post}/comments/${commentReply._id}`,
 		sender: user._id,
-		receiver: receiver,
+		receiver,
 	}).save();
 
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(user._id, eventName.NOTIFICATION, {
 		type: notificationType.REPLY_COMMENT,
 		data: popNotification,
@@ -49,12 +49,12 @@ async function notificationReactComment(comment, user) {
 		content: `${user.fullname} đã bày tỏ cảm xúc về một bình luận của bạn`,
 		link: `/post/${comment.post}/comments/${comment._id}`,
 		sender: user._id,
-		receiver: receiver,
+		receiver,
 	}).save();
 
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(user._id, eventName.NOTIFICATION, {
 		type: notificationType.REACT_COMMENT,
 		data: popNotification,
@@ -74,7 +74,7 @@ async function notificationTagComment(comment, user) {
 
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(tagsInComment, eventName.NOTIFICATION, {
 		type: notificationType.TAG_COMMENT,
 		data: popNotification,
