@@ -102,7 +102,7 @@ function FriendPage() {
 							grid={{ gutter: 16, column: 3 }}
 							renderItem={(item) => (
 								<List.Item>
-									<FriendCard user={item} />
+									<FriendCard user={item} reload={friendFetcher.reload} />
 								</List.Item>
 							)}
 						/>
