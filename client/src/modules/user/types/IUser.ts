@@ -49,7 +49,7 @@ interface IUser extends IData {
 	coverPicture: IMedia | string;
 
 	isOnline: boolean;
-	lastAccess: string;
+	lastAccess?: string;
 
 	relationship?: RelationshipType;
 

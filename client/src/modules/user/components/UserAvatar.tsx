@@ -1,6 +1,6 @@
-import { UserType } from '@common/types';
 import { Avatar, AvatarProps, Badge, BadgeProps, Skeleton, theme } from 'antd';
 import { HiUser } from 'react-icons/hi2';
+import { UserType } from '../types';
 
 interface Props {
 	user?: UserType;
