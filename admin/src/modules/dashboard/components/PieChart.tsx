@@ -6,9 +6,8 @@ import { useState } from 'react';
 import { swrFetcher } from '@common/api';
 
 export function PieChart() {
-	const [by, setBy] = useState('gender');
+	const [by] = useState('gender');
 	const { data } = useSWR<IStatisticData[]>(`/admin/statictisUser?by=${by}`, swrFetcher);
-	console.log(data);
 
 	const config: PieConfig = {
 		appendPadding: 10,
