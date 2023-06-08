@@ -33,7 +33,7 @@ class NotificationController {
 					],
 				}
 			)
-				.then((data) => {
+				.then(async (data) => {
 					const listNotifications = [];
 					data.docs.forEach((notification) => {
 						const notificationObject = notification.toObject();
@@ -42,7 +42,30 @@ class NotificationController {
 						);
 						listNotifications.push(notificationObject);
 					});
-					getListPost(res, data, listNotifications);
+
+					const numberUnread = await Notification.countDocuments({
+						receiver: {
+							$elemMatch: {
+								$eq: req.user._id,
+							},
+						},
+						read_by: {
+							$not: {
+								$elemMatch: {
+									readerId: req.user._id,
+								},
+							},
+						},
+					});
+
+					res.status(200).send({
+						totalItems: data.totalDocs,
+						items: listNotifications,
+						numberUnread,
+						totalPages: data.totalPages,
+						currentPage: data.page - 1,
+						offset: data.offset,
+					});
 				})
 				.catch((err) => {
 					console.log(err);
