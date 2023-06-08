@@ -3,7 +3,7 @@ const { populateUser } = require('../utils/Populate/User');
 const apiKey = process.env.API_KEY_VIDEOCALL;
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
-const eventName = require('./constant');
+const { eventName } = require('./constant');
 function RoomMagager(socket, io) {
 	// socket.on('joinRoom', (conversationId) => {
 	// 	console.log('joinRoom', conversationId);
@@ -74,10 +74,10 @@ function RoomMagager(socket, io) {
 		if (!conversation) return;
 
 		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== data.sender._id.toString())
+			.filter((member) => member.user.toString() !== msg.sender._id.toString())
 			.map((menber) => menber.user.toString());
-
-		SocketManager.sendToList(userIds, eventName.TYPING_MESSAG, msg);
+		console.log('socket', SocketManager);
+		SocketManager.sendToList(userIds, eventName.TYPING_MESSAGE, msg);
 	});
 
 	socket.on(eventName.STOP_TYPING_MESSAGE, async (msg) => {
@@ -86,7 +86,7 @@ function RoomMagager(socket, io) {
 		if (!conversation) return;
 
 		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== data.sender._id.toString())
+			.filter((member) => member.user.toString() !== msg.sender._id.toString())
 			.map((menber) => menber.user.toString());
 
 		SocketManager.sendToList(userIds, eventName.STOP_TYPING_MESSAGE, msg);
