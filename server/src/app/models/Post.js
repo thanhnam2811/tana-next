@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const mongoosePaginate = require('mongoose-paginate-v2');
-const { PrivacyModel, validatePrivacy } = require('./Privacy');
+const { PrivacyModel } = require('./Privacy');
 
 const PostSchema = new mongoose.Schema(
 	{
@@ -19,7 +19,7 @@ const PostSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
-		//lastest 5 first comments in post
+		// lastest 5 first comments in post
 		lastestFiveComments: [
 			{
 				type: mongoose.SchemaTypes.ObjectId,
@@ -28,12 +28,12 @@ const PostSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
-		//number react of post
+		// number react of post
 		numberReact: {
 			type: Number,
 			default: 0,
 		},
-		//number share post
+		// number share post
 		numberShare: {
 			type: Number,
 			default: 0,
@@ -42,7 +42,7 @@ const PostSchema = new mongoose.Schema(
 			type: Number,
 			default: 0,
 		},
-		//list tags in post
+		// list tags in post
 		tags: [
 			{
 				type: mongoose.SchemaTypes.ObjectId,
@@ -50,12 +50,12 @@ const PostSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
-		//ID of post shared
+		// ID of post shared
 		sharedPost: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Post',
 		},
-		//privacy
+		// privacy
 		privacy: {
 			type: PrivacyModel.schema,
 			default: {
@@ -68,13 +68,13 @@ const PostSchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-//soft delete
+// soft delete
 PostSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: 'all',
 });
 
-//paginate
+// paginate
 PostSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Post', PostSchema);

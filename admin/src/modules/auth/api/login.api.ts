@@ -1,5 +1,5 @@
-import apiClient from '@/api/apiClient';
-import { UserType } from '@/types/user.type';
+import { apiClient } from '@common/api';
+import { UserType } from '@common/types';
 
 export interface ILoginParams {
 	email: string;
@@ -12,7 +12,5 @@ interface ILoginResponse {
 	user: UserType;
 }
 
-const loginApi = ({ email, password }: ILoginParams) =>
+export const loginApi = ({ email, password }: ILoginParams) =>
 	apiClient.post<ILoginResponse>('/admin/login', { email, password }).then((res) => res.data);
-
-export default loginApi;

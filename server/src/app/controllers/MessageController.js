@@ -1,10 +1,10 @@
-const Message = require('../models/Message');
 const Joi = require('joi');
+const createError = require('http-errors');
+const crypto = require('crypto');
+const Message = require('../models/Message');
 const { getPagination } = require('../../utils/Pagination');
 const Conversation = require('../models/Conversation');
-const createError = require('http-errors');
 const { getListData } = require('../../utils/Response/listData');
-const crypto = require('crypto');
 const { openai } = require('../../configs/chatgpt');
 const SocketManager = require('../../socket/SocketManager');
 const eventName = require('../../socket/constant');
@@ -48,7 +48,7 @@ class MessageController {
 				newMessage.conversation = conversation._id;
 				newMessage.sender = req.user._id;
 				const savedMessage = await newMessage.save();
-				//populate sender
+				// populate sender
 				const message = await Message.findById(savedMessage._id)
 					.populate({
 						path: 'sender',
@@ -69,7 +69,7 @@ class MessageController {
 					.filter((member) => member.user.toString() !== message.sender._id.toString())
 					.map((menber) => menber.user.toString());
 
-				//send socket
+				// send socket
 				SocketManager.sendToList(userIds, eventName.SEND_MESSAGE, message);
 
 				res.status(200).json(message);
@@ -83,7 +83,7 @@ class MessageController {
 		}
 	}
 
-	//[PUT] update reader message
+	// [PUT] update reader message
 	async update(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
@@ -98,7 +98,7 @@ class MessageController {
 		}
 	}
 
-	//[Delete] delete a message
+	// [Delete] delete a message
 	async delete(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
@@ -118,8 +118,8 @@ class MessageController {
 		}
 	}
 
-	//[Get] get all messages
-	async getAll(req, res, next) {
+	// [Get] get all messages
+	async getAll(req, res) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
 		Message.paginate({}, { offset, limit })
@@ -134,15 +134,15 @@ class MessageController {
 	}
 
 	// [Get] fetch messages from conversationId
-	async fetchMessages(req, res, next) {
+	async fetchMessages(req, res) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
 		const conversation = await Conversation.findById(req.params.conversationId);
 
 		// check user has existing user deleted conversation
-		var index = -1;
+		let index = -1;
 		index = conversation.user_deleted.findIndex((item) => item.userId.toString() === req.user._id.toString());
-		var deletedDate = new Date(-1); // date BC
+		let deletedDate = new Date(-1); // date BC
 		if (index !== -1) {
 			deletedDate = conversation.user_deleted[index].deletedAt;
 		}
@@ -193,7 +193,7 @@ class MessageController {
 	// Chat with Chatgpt
 	async chatWithChatgpt(req, res, next) {
 		try {
-			//TODO: token fail updated
+			// TODO: token fail updated
 			const completion = await openai.createChatCompletion({
 				model: 'gpt-3.5-turbo',
 				messages: [{ role: 'user', content: `${req.body.text}` }],
