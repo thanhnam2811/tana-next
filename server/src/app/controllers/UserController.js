@@ -1252,6 +1252,7 @@ class UserController {
 				{
 					$group: {
 						_id: '$gender.value',
+						label: { $first: '$gender.label' },
 						total: { $sum: 1 },
 					},
 				},
