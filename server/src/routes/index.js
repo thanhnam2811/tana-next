@@ -1,3 +1,5 @@
+const createError = require('http-errors');
+const { v4: uuidv4 } = require('uuid');
 const Message = require('./messages');
 const Conversation = require('./conversations');
 const Auth = require('./auth');
@@ -9,12 +11,10 @@ const Comment = require('./comments');
 const Report = require('./reports');
 const Admin = require('./admin');
 const Notification = require('./notification');
-const createError = require('http-errors');
 const logEvents = require('../Helpers/logEvents');
-const { v4: uuidv4 } = require('uuid');
-const limiter = require('../app/middlewares/Limiter');
+
 function route(app) {
-	//cors handle
+	// cors handle
 	app.use((req, res, next) => {
 		const allowedOrigins = [
 			'http://localhost:5173',
@@ -23,7 +23,7 @@ function route(app) {
 			'https://tana-admin.vercel.app',
 			'https://tana.social',
 		];
-		const origin = req.headers.origin;
+		const { origin } = req.headers;
 		if (allowedOrigins.includes(origin)) {
 			res.setHeader('Access-Control-Allow-Origin', origin);
 		}
@@ -37,7 +37,7 @@ function route(app) {
 		next();
 	});
 
-	//limit access to 20 requests per 1 minutes
+	// limit access to 20 requests per 1 minutes
 	// app.use(limiter);
 	// route
 	app.use('/admin', Admin);
@@ -51,11 +51,12 @@ function route(app) {
 	app.use('/auth', Auth);
 	app.use('/notifications', Notification);
 	app.use('/reports', Report);
-	//get error 404
+	// get error 404
 	app.use((req, res, next) => {
 		next(createError(404, `Method: ${req.method} of ${req.originalUrl}  not found`));
 	});
-	//get all errors
+	// get all errors
+	// eslint-disable-next-line no-unused-vars
 	app.use((error, req, res, next) => {
 		logEvents(`idError: ${uuidv4()} - ${error.message}`);
 		res.status(error.status || 500);

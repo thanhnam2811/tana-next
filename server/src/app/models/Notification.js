@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
-const read_by = mongoose.Schema(
+const readBy = mongoose.Schema(
 	{
 		readerId: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -26,7 +26,7 @@ const NotificationSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		//link to object create notification
+		// link to object create notification
 		link: {
 			type: String,
 			required: true,
@@ -43,18 +43,18 @@ const NotificationSchema = new mongoose.Schema(
 				required: true,
 			},
 		],
-		read_by: [read_by],
+		readBy: [readBy],
 	},
 	{ timestamps: true }
 );
 
-//soft delete
+// soft delete
 NotificationSchema.plugin(mongooseDelete, {
 	deletedAt: true,
 	overrideMethods: 'all',
 });
 
-//paginate
+// paginate
 NotificationSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Notification', NotificationSchema);

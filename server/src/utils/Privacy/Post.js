@@ -1,5 +1,3 @@
-const Post = require('../../app/models/Post');
-
 async function getAllPostWithPrivacy(listPosts, req) {
 	try {
 		const posts = [];
@@ -8,29 +6,25 @@ async function getAllPostWithPrivacy(listPosts, req) {
 				posts.push(post);
 				return;
 			}
-			//check fields have privacy or not
+			// check fields have privacy or not
 			if (post.privacy) {
 				if (post.privacy.value === 'public') {
 					posts.push(post);
 				} else if (post.privacy.value === 'private') {
 					post = null;
-					return;
 				} else if (post.privacy.value === 'friends') {
 					const isFriend = post.author.friends.some(
 						(friend) => friend.user.toString() === req.user._id.toString()
 					);
 					if (isFriend) {
 						posts.push(post);
-						return;
 					}
-					return;
 				} else if (post.privacy.value === 'includes') {
 					if (!post.privacy.includes.some((user) => user._id == req.user._id)) {
 						post = null;
 						return;
 					}
 					posts.push(post);
-					return;
 				} else if (post.privacy.value === 'excludes') {
 					if (
 						!post.privacy.excludes.some((user) => user._id == req.user._id) &&
@@ -40,7 +34,6 @@ async function getAllPostWithPrivacy(listPosts, req) {
 						return;
 					}
 					post = null;
-					return;
 				}
 			}
 		});
@@ -59,10 +52,12 @@ async function getPostWithPrivacy(post, req) {
 		if (post.privacy) {
 			if (post.privacy.value === 'public') {
 				return post;
-			} else if (post.privacy.value === 'private') {
+			}
+			if (post.privacy.value === 'private') {
 				post = null;
 				return post;
-			} else if (post.privacy.value === 'friends') {
+			}
+			if (post.privacy.value === 'friends') {
 				const isFriend = post.author.friends.some(
 					(friend) => friend.user.toString() === req.user._id.toString()
 				);
