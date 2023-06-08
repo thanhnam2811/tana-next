@@ -1,10 +1,13 @@
 const axios = require('axios');
-const { populateUser } = require('../utils/Populate/User');
+
 const apiKey = process.env.API_KEY_VIDEOCALL;
+const { populateUser } = require('../utils/Populate/User');
+
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
 const eventName = require('./constant');
-function RoomMagager(socket, io) {
+
+function RoomMagager(socket) {
 	// socket.on('joinRoom', (conversationId) => {
 	// 	console.log('joinRoom', conversationId);
 	// 	socket.join(conversationId);
@@ -67,29 +70,29 @@ function RoomMagager(socket, io) {
 		});
 	});
 
-	//typing message
-	socket.on(eventName.TYPING_MESSAGE, async (msg) => {
-		console.log('typingMessage-----------', msg);
-		const conversation = await Conversation.findById(msg.conversation);
+	// typing message
+	socket.on(eventName.TYPING_MESSAGE, async (data) => {
+		console.log('typingMessage-----------', data);
+		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
 		const userIds = conversation.members
 			.filter((member) => member.user.toString() !== data.sender._id.toString())
 			.map((menber) => menber.user.toString());
 
-		SocketManager.sendToList(userIds, eventName.TYPING_MESSAG, msg);
+		SocketManager.sendToList(userIds, eventName.TYPING_MESSAG, data);
 	});
 
-	socket.on(eventName.STOP_TYPING_MESSAGE, async (msg) => {
+	socket.on(eventName.STOP_TYPING_MESSAGE, async (data) => {
 		console.log('stopTypingMessage-----------');
-		const conversation = await Conversation.findById(msg.conversation);
+		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
 		const userIds = conversation.members
 			.filter((member) => member.user.toString() !== data.sender._id.toString())
 			.map((menber) => menber.user.toString());
 
-		SocketManager.sendToList(userIds, eventName.STOP_TYPING_MESSAGE, msg);
+		SocketManager.sendToList(userIds, eventName.STOP_TYPING_MESSAGE, data);
 	});
 }
 
