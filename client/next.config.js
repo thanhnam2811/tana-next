@@ -5,7 +5,7 @@ module.exports = (phase, { defaultConfig }) =>
 	removeImports({
 		...defaultConfig,
 		images: {
-			domains: ['res.cloudinary.com'],
+			domains: ['res.cloudinary.com', 'via.placeholder.com'],
 		},
 		env: {
 			SERVER_URL: process.env.SERVER_URL,
