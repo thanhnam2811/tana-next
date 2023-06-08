@@ -5,8 +5,8 @@ import 'dayjs/locale/vi';
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
-import useAuthStore from '@/modules/auth/hooks/useAuthStore';
-import useThemeStore from '@/modules/theme/hooks/useThemeStore';
+import { useThemeStore } from '@theme/hooks';
+import { useAuthStore } from '@modules/auth/hooks';
 dayjs.locale('vi');
 
 function App() {

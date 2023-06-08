@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router({ mergeParams: true });
 const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 const CommentController = require('../app/controllers/CommentController');
@@ -6,7 +7,7 @@ const CommentController = require('../app/controllers/CommentController');
 router.post('/:id/reply', AuthoMiddleware.isAuth, CommentController.addReply);
 router.post('/', AuthoMiddleware.isAuth, CommentController.add);
 
-//react comment
+// react comment
 router.put('/:id/react', AuthoMiddleware.isAuth, CommentController.react);
 router.put('/:id', AuthoMiddleware.isAuth, CommentController.update);
 

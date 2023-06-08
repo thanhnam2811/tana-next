@@ -1,74 +1,7 @@
 const nodemailer = require('nodemailer');
 const emailValidator = require('deep-email-validator');
 
-const sendEmail = async (email, subject, link, user) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.HOST,
-            service: process.env.SERVICE,
-            port: 587,
-            secure: true,
-            auth: {
-                user: process.env.USER,
-                pass: process.env.PASS,
-            },
-        });
-
-        await transporter.sendMail({
-            from: process.env.FROM,
-            to: email,
-            subject: subject,
-            text: link,
-            html: emailTemplate(link, user.fullname),
-        });
-        //return true if email sent successfully
-        console.log('email sent sucessfully');
-        return true;
-    } catch (error) {
-        //return false if email sent failed
-        console.log(error, 'email not sent');
-        return false;
-    }
-};
-
-const isEmailValid = async (email) => {
-    return await emailValidator.validate(email);
-}
-
-
-//send mail to user verify email address and activated account
-const sendEmailVerify = async (email, subject, link, user) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.HOST,
-            service: process.env.SERVICE,
-            port: 587,
-            secure: true,
-            auth: {
-                user: process.env.USER,
-                pass: process.env.PASS,
-            },
-        });
-
-        await transporter.sendMail({
-            from: process.env.FROM,
-            to: email,
-            subject: subject,
-            text: link,
-            html: emailTemplateVerify(link, user.fullname),
-        });
-        //return true if email sent successfully
-        console.log('email sent sucessfully');
-        return true;
-    } catch (error) {
-        //return false if email sent failed
-        console.log(error, 'email not sent');
-        return false;
-    }
-};
-
-const emailTemplateVerify = (link, name) => {
-    return `
+const emailTemplateVerify = (link, name) => `
     <div style="background-color: #f5f5f5; padding: 20px 0;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px;">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -89,11 +22,8 @@ const emailTemplateVerify = (link, name) => {
         </div>
     </div>
     `;
-};
 
-
-const emailTemplate = (link, name) => {
-    return `<body
+const emailTemplate = (link, name) => `<body
     marginheight="0"
     topmargin="0"
     marginwidth="0"
@@ -265,10 +195,72 @@ const emailTemplate = (link, name) => {
     </table>
     <!--/100% body table-->
 </body>`;
+
+const sendEmail = async (email, subject, link, user) => {
+	try {
+		const transporter = nodemailer.createTransport({
+			host: process.env.HOST,
+			service: process.env.SERVICE,
+			port: 587,
+			secure: true,
+			auth: {
+				user: process.env.USER,
+				pass: process.env.PASS,
+			},
+		});
+
+		await transporter.sendMail({
+			from: process.env.FROM,
+			to: email,
+			subject,
+			text: link,
+			html: emailTemplate(link, user.fullname),
+		});
+		// return true if email sent successfully
+		console.log('email sent sucessfully');
+		return true;
+	} catch (error) {
+		// return false if email sent failed
+		console.log(error, 'email not sent');
+		return false;
+	}
+};
+
+const isEmailValid = (email) => emailValidator.validate(email);
+
+// send mail to user verify email address and activated account
+const sendEmailVerify = async (email, subject, link, user) => {
+	try {
+		const transporter = nodemailer.createTransport({
+			host: process.env.HOST,
+			service: process.env.SERVICE,
+			port: 587,
+			secure: true,
+			auth: {
+				user: process.env.USER,
+				pass: process.env.PASS,
+			},
+		});
+
+		await transporter.sendMail({
+			from: process.env.FROM,
+			to: email,
+			subject,
+			text: link,
+			html: emailTemplateVerify(link, user.fullname),
+		});
+		// return true if email sent successfully
+		console.log('email sent sucessfully');
+		return true;
+	} catch (error) {
+		// return false if email sent failed
+		console.log(error, 'email not sent');
+		return false;
+	}
 };
 
 module.exports = {
-    sendEmail,
-    sendEmailVerify,
-    isEmailValid,
+	sendEmail,
+	sendEmailVerify,
+	isEmailValid,
 };

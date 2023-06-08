@@ -1,10 +1,9 @@
+const createError = require('http-errors');
 const Notification = require('../models/Notification');
 const { getPagination } = require('../../utils/Pagination');
-const { getListData, getListPost } = require('../../utils/Response/listData');
-const createError = require('http-errors');
 
 class NotificationController {
-	//get Notification by user ID
+	// get Notification by user ID
 	async getNotifications(req, res) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
@@ -26,7 +25,7 @@ class NotificationController {
 							populate: { path: 'profilePicture', select: '_id link' },
 						},
 						{
-							path: 'read_by.readerId',
+							path: 'readBy.readerId',
 							select: '_id fullname profilePicture isOnline',
 							populate: { path: 'profilePicture', select: '_id link' },
 						},
@@ -37,7 +36,7 @@ class NotificationController {
 					const listNotifications = [];
 					data.docs.forEach((notification) => {
 						const notificationObject = notification.toObject();
-						notificationObject.isRead = notification.read_by.some(
+						notificationObject.isRead = notification.readBy.some(
 							(reader) => reader.readerId._id.toString() === req.user._id.toString()
 						);
 						listNotifications.push(notificationObject);
@@ -49,7 +48,7 @@ class NotificationController {
 								$eq: req.user._id,
 							},
 						},
-						read_by: {
+						readBy: {
 							$not: {
 								$elemMatch: {
 									readerId: req.user._id,
@@ -81,7 +80,7 @@ class NotificationController {
 		}
 	}
 
-	//get number of unread notifications
+	// get number of unread notifications
 	async getUnreadNotifications(req, res, next) {
 		try {
 			const count = await Notification.countDocuments({
@@ -90,7 +89,7 @@ class NotificationController {
 						$eq: req.user._id,
 					},
 				},
-				read_by: {
+				readBy: {
 					$not: {
 						$elemMatch: {
 							readerId: req.user._id,
@@ -121,7 +120,7 @@ class NotificationController {
 				return res.status(403).json({ message: 'Bạn không phải là người nhận thông báo này' });
 			}
 			if (
-				notification.read_by
+				notification.readBy
 					.map((item) => item.readerId.toString())
 					.some((readerId) => readerId === req.user._id.toString())
 			) {
@@ -129,7 +128,7 @@ class NotificationController {
 			}
 			await notification.updateOne({
 				$push: {
-					read_by: {
+					readBy: {
 						readerId: req.user._id,
 					},
 				},
@@ -146,7 +145,7 @@ class NotificationController {
 	async markAllAsRead(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-			//get all notification receivers include req.user._id
+			// get all notification receivers include req.user._id
 			const notifications = await Notification.paginate(
 				{
 					receiver: {
@@ -169,7 +168,7 @@ class NotificationController {
 				},
 				{
 					$push: {
-						read_by: {
+						readBy: {
 							readerId: req.user._id,
 						},
 					},
@@ -189,23 +188,21 @@ class NotificationController {
 			const notification = await Notification.findById(req.params.notificationId);
 			if (!notification) {
 				res.status(404).send({
-					message: 'Notification not found with id ' + req.params.notificationId,
+					message: `Notification not found with id ${req.params.notificationId}`,
+				});
+			} else if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
+				const result = await Notification.findByIdAndUpdate(
+					req.params.notificationId,
+					{ $pull: { receiver: req.user._id } },
+					{ new: true }
+				);
+				res.status(200).send({
+					notification: result,
 				});
 			} else {
-				if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
-					const result = await Notification.findByIdAndUpdate(
-						req.params.notificationId,
-						{ $pull: { receiver: req.user._id } },
-						{ new: true }
-					);
-					res.status(200).send({
-						notification: result,
-					});
-				} else {
-					res.status(403).send({
-						message: "You don't have permission to delete this notification!",
-					});
-				}
+				res.status(403).send({
+					message: "You don't have permission to delete this notification!",
+				});
 			}
 		} catch (err) {
 			console.log(err);
