@@ -509,7 +509,7 @@ class UserController {
 				// query = [
 				//     { _id: { $in: listFriendsOfUser }, $sort: { "friends.date": sort } },
 				// ];
-				query = [
+				query.push(
 					{ $match: { _id: { $in: listFriendsOfUser } } },
 					{ $addFields: { ListUsers: { $indexOfArray: [listFriendsOfUser, '$_id'] } } },
 					{ $sort: { ListUsers: 1 } },
@@ -518,8 +518,8 @@ class UserController {
 							ListUsers: 0,
 							refreshToken: 0,
 						},
-					},
-				];
+					}
+				);
 			} else if (type === 'requests') {
 				//get list request of user to list by oder by date
 				let listRequestOfUser = [];
@@ -534,7 +534,7 @@ class UserController {
 					}
 				});
 
-				query = [
+				query.push(
 					{ $match: { _id: { $in: listRequestOfUser } } },
 					{ $addFields: { ListUsers: { $indexOfArray: [listRequestOfUser, '$_id'] } } },
 					{ $sort: { ListUsers: 1 } },
@@ -543,8 +543,8 @@ class UserController {
 							ListUsers: 0,
 							refreshToken: 0,
 						},
-					},
-				];
+					}
+				);
 			} else if (type === 'suggests') {
 				query = await querySearchSuggestFriends(req, next);
 			} else {
@@ -569,24 +569,24 @@ class UserController {
 				});
 			}
 
-			//set limit and offset
-			query.push({ $skip: offset * 1 }, { $limit: limit * 1 });
+			User.aggregate(query)
+				.skip(offset)
+				.limit(limit)
+				.exec((err, data) => {
+					if (err) {
+						console.log(err);
+						return next(
+							createError.InternalServerError(
+								`${err.message} in method: ${req.method} of ${req.originalUrl}`
+							)
+						);
+					}
 
-			User.aggregate(query).exec((err, data) => {
-				if (err) {
-					console.log(err);
-					return next(
-						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				}
+					query.push({
+						$count: 'totalCount',
+					});
 
-				User.populate(
-					data,
-					[
-						{ path: 'profilePicture', select: '_id link' },
-						{ path: 'coverPicture', select: '_id link' },
-					],
-					(err, data) => {
+					User.aggregate(query).exec((err, result) => {
 						if (err) {
 							console.log(err);
 							return next(
@@ -595,54 +595,74 @@ class UserController {
 								)
 							);
 						}
-						let users = data;
-						const usersList = [];
-						if (type === 'all') {
-							users.forEach((user) => {
-								const userObj = user;
-								if (
-									req.user.friends.some(
-										(friend) => friend.user && friend.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'friend';
-								} else if (
-									req.user.sentRequests.some(
-										(sentRequest) =>
-											sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'sent';
-								} else if (
-									req.user.friendRequests.some(
-										(friendRequest) =>
-											friendRequest.user &&
-											friendRequest.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'received';
-								} else {
-									userObj.relationship = 'none';
+						const totalCount = result[0].totalCount;
+
+						User.populate(
+							data,
+							[
+								{ path: 'profilePicture', select: '_id link' },
+								{ path: 'coverPicture', select: '_id link' },
+							],
+							(err, data) => {
+								if (err) {
+									console.log(err);
+									return next(
+										createError.InternalServerError(
+											`${err.message} in method: ${req.method} of ${req.originalUrl}`
+										)
+									);
 								}
-								usersList.push(userObj);
-								usersList.forEach((user) => {
-									delete user.password;
-									delete user.refreshToken;
-								});
-							});
-							users = usersList;
-						}
-						return getListUser(
-							res,
-							users.length,
-							users,
-							Math.ceil(users.length / limit),
-							Math.ceil(offset / limit),
-							offset * 1
+								let users = data;
+								const usersList = [];
+								if (type === 'all') {
+									users.forEach((user) => {
+										const userObj = user;
+										if (
+											req.user.friends.some(
+												(friend) =>
+													friend.user && friend.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'friend';
+										} else if (
+											req.user.sentRequests.some(
+												(sentRequest) =>
+													sentRequest.user &&
+													sentRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'sent';
+										} else if (
+											req.user.friendRequests.some(
+												(friendRequest) =>
+													friendRequest.user &&
+													friendRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'received';
+										} else {
+											userObj.relationship = 'none';
+										}
+										usersList.push(userObj);
+										usersList.forEach((user) => {
+											delete user.password;
+											delete user.refreshToken;
+										});
+									});
+									users = usersList;
+								}
+								return getListUser(
+									res,
+									totalCount,
+									users,
+									Math.ceil(totalCount / limit),
+									Math.ceil(offset / limit),
+									offset * 1
+								);
+							}
 						);
-					}
-				);
-			});
+					});
+				});
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -783,22 +803,24 @@ class UserController {
 					},
 				});
 			}
-			query.push({ $skip: offset * 1 }, { $limit: limit * 1 });
 
-			User.aggregate(query).exec((err, data) => {
-				if (err) {
-					console.log(err);
-					return next(
-						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-					);
-				}
-				User.populate(
-					data,
-					[
-						{ path: 'profilePicture', select: '_id link' },
-						{ path: 'coverPicture', select: '_id link' },
-					],
-					(err, data) => {
+			User.aggregate(query)
+				.skip(offset)
+				.limit(limit)
+				.exec((err, data) => {
+					if (err) {
+						console.log(err);
+						return next(
+							createError.InternalServerError(
+								`${err.message} in method: ${req.method} of ${req.originalUrl}`
+							)
+						);
+					}
+					query.push({
+						$count: 'totalCount',
+					});
+
+					User.aggregate(query).exec((err, result) => {
 						if (err) {
 							console.log(err);
 							return next(
@@ -807,54 +829,73 @@ class UserController {
 								)
 							);
 						}
-						let users = data;
-						const usersList = [];
-						users.forEach((user) => {
-							const userObj = user;
-							if (!req.user) {
-								userObj.relationship = 'none';
-							} else {
-								if (
-									req.user.friends.some(
-										(friend) => friend.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'friend';
-								} else if (
-									req.user.sentRequests.some(
-										(sentRequest) => sentRequest.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'sent';
-								} else if (
-									req.user.friendRequests.some(
-										(friendRequest) => friendRequest.user._id.toString() === user._id.toString()
-									)
-								) {
-									userObj.relationship = 'received';
-								} else {
-									userObj.relationship = 'none';
-								}
-							}
+						const totalCount = result[0].totalCount;
 
-							usersList.push(userObj);
-							usersList.forEach((user) => {
-								delete user.password;
-								delete user.refreshToken;
-							});
-						});
-						users = usersList;
-						return getListUser(
-							res,
-							users.length,
-							users,
-							Math.ceil(users.length / limit),
-							Math.ceil(offset / limit),
-							offset * 1
+						User.populate(
+							data,
+							[
+								{ path: 'profilePicture', select: '_id link' },
+								{ path: 'coverPicture', select: '_id link' },
+							],
+							(err, data) => {
+								if (err) {
+									console.log(err);
+									return next(
+										createError.InternalServerError(
+											`${err.message} in method: ${req.method} of ${req.originalUrl}`
+										)
+									);
+								}
+								let users = data;
+								const usersList = [];
+								users.forEach((user) => {
+									const userObj = user;
+									if (!req.user) {
+										userObj.relationship = 'none';
+									} else {
+										if (
+											req.user.friends.some(
+												(friend) => friend.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'friend';
+										} else if (
+											req.user.sentRequests.some(
+												(sentRequest) => sentRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'sent';
+										} else if (
+											req.user.friendRequests.some(
+												(friendRequest) =>
+													friendRequest.user._id.toString() === user._id.toString()
+											)
+										) {
+											userObj.relationship = 'received';
+										} else {
+											userObj.relationship = 'none';
+										}
+									}
+
+									usersList.push(userObj);
+									usersList.forEach((user) => {
+										delete user.password;
+										delete user.refreshToken;
+									});
+								});
+								users = usersList;
+								return getListUser(
+									res,
+									totalCount,
+									users,
+									Math.ceil(totalCount / limit),
+									Math.ceil(offset / limit),
+									offset * 1
+								);
+							}
 						);
-					}
-				);
-			});
+					});
+				});
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -1243,7 +1284,7 @@ class UserController {
 			const statistics = await User.aggregate([
 				{
 					$group: {
-						_id: '$gender',
+						_id: '$gender.value',
 						total: { $sum: 1 },
 					},
 				},

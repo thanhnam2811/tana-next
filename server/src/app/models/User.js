@@ -203,7 +203,18 @@ const UserSchema = new mongoose.Schema(
 			type: String,
 			max: 50,
 		},
-		gender: gender,
+		gender: {
+			type: gender,
+			default: {
+				type: 'male',
+				label: 'nam',
+				privacy: {
+					value: 'public',
+					includes: [],
+					excludes: [],
+				},
+			},
+		},
 		birthdate: {
 			type: Date,
 		},
