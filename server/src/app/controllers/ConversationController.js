@@ -10,6 +10,8 @@ const { getPagination } = require('../../utils/Pagination');
 const Message = require('../models/Message');
 const { populateConversation } = require('../../utils/Populate/Conversation');
 const File = require('../models/File');
+const mongoose = require('mongoose');
+
 const { getListData } = require('../../utils/Response/listData');
 const getLocationByIPAddress = require('../../configs/location');
 // set encryption algorithm
@@ -201,49 +203,59 @@ class ConversationController {
 			return next(createError.BadRequest(error.details[0].message));
 		}
 
-		// set addedBy to current user
-		await Promise.all(
-			req.body.members.map(async (member) => {
-				const user = await User.findById(member.user);
-				if (!user) return next(createError.NotFound('Không tìm thấy người dùng để thêm vào cuộc hội thoại'));
-
-				member.nickname = user.fullname;
-				member.addedBy = req.user._id;
-				return member;
-			})
-		);
-
 		// remove name if req.body.member.lenght = 1
 		if (req.body.members.length === 1) {
 			req.body.name = undefined;
 		}
 
-		const newConversation = new Conversation(req.body);
-		newConversation.members.push({
-			user: req.user._id,
-			nickname: req.user.fullname,
-			role: 'admin',
-			addedBy: req.user._id,
-		});
-		newConversation.creator = req.user._id;
-
 		try {
-			if (newConversation.members.length < 2) {
+			if (req.body.members.length < 1) {
 				return res.status(400).send('Cuộc hội thoại phải có ít nhất 2 thành viên');
 			}
-			if (newConversation.members.length === 2) {
+			if (req.body.members.length == 1) {
 				const conv = await Conversation.aggregate([
 					{
 						$match: {
 							$and: [
-								{ 'members.user': { $all: [req.user._id, newConversation.members[0].user] } },
-								{ $expr: { $eq: [{ $size: '$members' }, 2] } },
+								{
+									members: {
+										$elemMatch: { user: mongoose.Types.ObjectId(req.body.members[0].user) },
+									},
+								},
+								{ members: { $elemMatch: { user: mongoose.Types.ObjectId(req.user._id) } } },
+								{
+									members: {
+										$size: 2,
+									},
+								},
 							],
 						},
 					},
 				]);
 				// Check conversation with 2 members. It's only 1
 				if (!conv[0]) {
+					await Promise.all(
+						req.body.members.map(async (member) => {
+							const user = await User.findById(member.user);
+							if (!user)
+								return next(
+									createError.NotFound('Không tìm thấy người dùng để thêm vào cuộc hội thoại')
+								);
+
+							member.nickname = user.fullname;
+							member.addedBy = req.user._id;
+							return member;
+						})
+					);
+
+					const newConversation = new Conversation(req.body);
+					newConversation.members.push({
+						user: req.user._id,
+						nickname: req.user.fullname,
+						role: 'admin',
+						addedBy: req.user._id,
+					});
+					newConversation.creator = req.user._id;
 					newConversation.history.push({
 						editor: req.user._id,
 						content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
@@ -268,6 +280,26 @@ class ConversationController {
 					res.status(200).json(conversation);
 				}
 			} else {
+				await Promise.all(
+					req.body.members.map(async (member) => {
+						const user = await User.findById(member.user);
+						if (!user)
+							return next(createError.NotFound('Không tìm thấy người dùng để thêm vào cuộc hội thoại'));
+
+						member.nickname = user.fullname;
+						member.addedBy = req.user._id;
+						return member;
+					})
+				);
+
+				const newConversation = new Conversation(req.body);
+				newConversation.members.push({
+					user: req.user._id,
+					nickname: req.user.fullname,
+					role: 'admin',
+					addedBy: req.user._id,
+				});
+
 				newConversation.history.push({
 					editor: req.user._id,
 					content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
