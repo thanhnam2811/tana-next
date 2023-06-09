@@ -1,8 +1,7 @@
-import { UserType } from '@/types/user.type';
+import { UserType } from '@common/types';
 import { ILoginParams } from '../api/login.api';
 
-export default interface IAuthStore {
-	isAuth: boolean;
+export interface IAuthStore {
 	user: UserType | null;
 	login: (params: ILoginParams) => Promise<void>;
 	getProfile: () => Promise<void>;

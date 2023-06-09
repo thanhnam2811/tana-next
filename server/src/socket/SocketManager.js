@@ -16,7 +16,7 @@ class SocketManager {
 
 	/**
 	 *
-	 * @param {srting} userId user id
+	 * @param {string} userId user id
 	 * @returns {Socket} socket
 	 */
 	getUser(userId) {

@@ -14,10 +14,10 @@ async function notificationForFriends(post, user) {
 		receiver: friendsOfAuthor,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.sendToList(friendsOfAuthor, eventName.NOTIFICATION, {
 		type: notificationType.NEW_POST,
 		data: popNotification,
@@ -25,7 +25,7 @@ async function notificationForFriends(post, user) {
 }
 
 async function notificationForTags(post, user) {
-	const tags = post.tags;
+	const { tags } = post;
 	if (!tags || tags.length === 0) return;
 
 	const notification = await new Notification({
@@ -36,10 +36,10 @@ async function notificationForTags(post, user) {
 		receiver: tags,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.sendToList(tags, eventName.NOTIFICATION, {
 		type: notificationType.TAG_POST,
 		data: popNotification,
@@ -47,7 +47,7 @@ async function notificationForTags(post, user) {
 }
 
 async function notificationForSharedPost(post, user) {
-	const sharedPost = post.sharedPost;
+	const { sharedPost } = post;
 	if (!sharedPost) return;
 
 	const receiver = [sharedPost.author];
@@ -57,13 +57,13 @@ async function notificationForSharedPost(post, user) {
 		content: `${user.fullname} đã chia sẻ một bài viết của bạn`,
 		link: `/post/${post._id}`,
 		sender: user._id,
-		receiver: receiver,
+		receiver,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(receiver, eventName.NOTIFICATION, {
 		type: notificationType.SHARE_POST,
 		data: popNotification,
@@ -77,13 +77,13 @@ async function notificationForReactPost(post, user) {
 		content: `${user.fullname} đã bày tỏ cảm xúc về một bài viết của bạn`,
 		link: `/post/${post._id}`,
 		sender: user._id,
-		receiver: receiver,
+		receiver,
 	}).save();
 
-	//populate notification
+	// populate notification
 	const popNotification = await populateNotification(notification);
 
-	//send socket
+	// send socket
 	SocketManager.send(receiver, eventName.NOTIFICATION, {
 		type: notificationType.REACT_POST,
 		data: popNotification,

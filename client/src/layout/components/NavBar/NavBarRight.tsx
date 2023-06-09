@@ -9,11 +9,13 @@ import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
 import { HiBell, HiCog6Tooth, HiExclamationTriangle, HiMoon, HiSun, HiUser } from 'react-icons/hi2';
 import { HeaderRight } from '../Header';
+import { useReport } from '@modules/report/hooks';
 
 export function NavBarRight() {
 	const { authUser, logout } = useAuth();
 	const { mode, toggleTheme } = useTheme();
 	const notiFetcher = useFetcher<NotificationType>({ api: `/users/notifications` });
+	const { openReport } = useReport({ type: 'bug' });
 
 	if (!authUser)
 		return (
@@ -49,6 +51,7 @@ export function NavBarRight() {
 			key: 'report',
 			label: 'Báo cáo sự cố',
 			icon: <HiExclamationTriangle />,
+			onClick: openReport,
 		},
 		{
 			key: 'logout',

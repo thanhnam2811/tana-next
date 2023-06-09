@@ -1,10 +1,9 @@
+const createError = require('http-errors');
+const Joi = require('joi');
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 const React = require('../models/React');
-const { User } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
-const createError = require('http-errors');
-const Joi = require('joi');
 const {
 	notificationCreateComment,
 	notificationReplyComment,
@@ -16,14 +15,14 @@ const {
 	createActivityWithComment,
 	createActivityWithReplyComment,
 	createActivityWithReactComment,
-	createActivityWithTagComment,
 } = require('../../utils/Activity/comment');
 const { getListPost } = require('../../utils/Response/listData');
+
 class CommentController {
-	//[POST] create a comment
+	// [POST] create a comment
 	async add(req, res, next) {
 		try {
-			//validate request body
+			// validate request body
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
@@ -39,25 +38,25 @@ class CommentController {
 			const post = await Post.findById(req.params.postId);
 			if (post) {
 				const savedComment = await newComment.save();
-				//add comment to lastétFiveComments of post
+				// add comment to lastétFiveComments of post
 				post.lastestFiveComments.unshift(savedComment._id);
 				if (post.lastestFiveComments.length > 5) {
 					post.lastestFiveComments.pop();
 				}
-				//save post
+				// save post
 				await post.save();
 
-				//increase number of comments of post
+				// increase number of comments of post
 				await Post.findByIdAndUpdate(req.params.postId, { $inc: { numberComment: 1 } });
 
-				//create notification for author of post
+				// create notification for author of post
 				await notificationCreateComment(post, savedComment, req.user);
 				await notificationTagComment(savedComment, req.user);
 
-				//save activity for user
+				// save activity for user
 				await createActivityWithComment(savedComment, req.user);
 
-				//populate author, media
+				// populate author, media
 				const comment = await Comment.findById(savedComment._id)
 					.populate({
 						path: 'author',
@@ -83,9 +82,9 @@ class CommentController {
 		}
 	}
 
-	//[PUT] update a comment
+	// [PUT] update a comment
 	async update(req, res, next) {
-		//validate request body
+		// validate request body
 		const schema = Joi.object({
 			content: Joi.string().required(),
 			media: Joi.array().items(Joi.string()),
@@ -117,17 +116,17 @@ class CommentController {
 		}
 	}
 
-	//[PUT] react a comment
+	// [PUT] react a comment
 	async react(req, res, next) {
 		try {
 			const comment = await Comment.findById(req.params.id);
 			if (comment) {
 				const reactOfUser = await React.findOne({ user: req.user._id, comment: req.params.id });
-				//check if user has reacted to comment before
+				// check if user has reacted to comment before
 				if (reactOfUser && reactOfUser.type.toString() === req.body.type.toString()) {
-					//delete react of user
+					// delete react of user
 					await React.findByIdAndDelete(reactOfUser._id);
-					//decrease number of reacts of comment
+					// decrease number of reacts of comment
 					await Comment.findByIdAndUpdate(req.params.id, { $inc: { numberReact: -1 } });
 
 					const commentUpdated = await Comment.findById(req.params.id)
@@ -148,7 +147,7 @@ class CommentController {
 					commentWithReactUser.reactOfUser = 'none';
 					res.status(200).json(commentWithReactUser);
 				} else if (reactOfUser && reactOfUser.type.toString() !== req.body.type.toString()) {
-					//update react of user
+					// update react of user
 					await React.findByIdAndUpdate(reactOfUser._id, { $set: { type: req.body.type } });
 
 					const commentUpdated = await Comment.findById(req.params.id)
@@ -169,16 +168,16 @@ class CommentController {
 					commentWithReactUser.reactOfUser = req.body.type;
 					res.status(200).json(commentWithReactUser);
 				} else {
-					//create new react of user
+					// create new react of user
 					const newReact = new React({ user: req.user._id, comment: req.params.id, type: req.body.type });
 					await newReact.save();
-					//increase number of reacts of comment
+					// increase number of reacts of comment
 					await Comment.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
-					//create notification for author of comment
+					// create notification for author of comment
 					await notificationReactComment(comment, req.user);
 
-					//save activity for user
+					// save activity for user
 					await createActivityWithReactComment(comment, req.user);
 
 					const commentUpdated = await Comment.findById(req.params.id)
@@ -210,8 +209,8 @@ class CommentController {
 		}
 	}
 
-	//[Delete] delete a comment
-	async delete(req, res, next) {
+	// [Delete] delete a comment
+	async delete(req, res) {
 		const comment = await Comment.findById(req.params.id).populate(
 			'author',
 			'_id fullname profilePicture isOnline'
@@ -223,22 +222,22 @@ class CommentController {
 				post.author.toString() === req.user._id.toString()
 			) {
 				await comment.delete();
-				//check comment is included in lastestFiveComments of post
+				// check comment is included in lastestFiveComments of post
 				const index = post.lastestFiveComments.indexOf(req.params.id);
 				if (index > -1) {
-					//update lastestFiveComments of post = top 5 comments lastest and not replyTo
+					// update lastestFiveComments of post = top 5 comments lastest and not replyTo
 					post.lastestFiveComments = await Comment.find({ post: req.params.postId, replyTo: null })
 						.sort({ createdAt: -1 })
 						.limit(5)
 						.select('_id');
 				}
-				//delete all replies of comment and return number of replies deleted
+				// delete all replies of comment and return number of replies deleted
 				const numberReplyDeleted = await Comment.deleteMany({ replyTo: req.params.id });
-				//decrease number of comments of post
+				// decrease number of comments of post
 				await Post.findByIdAndUpdate(req.params.postId, {
 					$inc: { numberComment: -1 - numberReplyDeleted.deletedCount },
 				});
-				//save and return post populated with comments
+				// save and return post populated with comments
 				await post.save();
 				res.status(200).json(comment);
 			} else {
@@ -248,11 +247,12 @@ class CommentController {
 			res.status(404).json('Bình luận không tồn tại');
 		}
 	}
-	//[POST] add a reply to a comment
+
+	// [POST] add a reply to a comment
 	async addReply(req, res, next) {
 		const comment = await Comment.findById(req.params.id);
 		if (comment) {
-			//validate request body
+			// validate request body
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				media: Joi.array().items(Joi.string()),
@@ -267,17 +267,17 @@ class CommentController {
 			newComment.replyTo = req.params.id;
 			const savedComment = await newComment.save();
 
-			//create notification for author of comment
+			// create notification for author of comment
 			await notificationReplyComment(comment, savedComment, req.user);
 			await notificationTagComment(savedComment, req.user);
 
-			//save activity for user
+			// save activity for user
 			await createActivityWithReplyComment(savedComment, req.user);
 
-			//increase number comment of post
+			// increase number comment of post
 			await Post.findByIdAndUpdate(req.params.postId, { $inc: { numberComment: 1 } });
 
-			//increase number reply of comment
+			// increase number reply of comment
 			await Comment.findByIdAndUpdate(req.params.id, { $inc: { numberReply: 1 } });
 
 			// return comment populated with author and media
@@ -300,7 +300,7 @@ class CommentController {
 		}
 	}
 
-	//[GET] get all replies of a comment
+	// [GET] get all replies of a comment
 	async getAllReplies(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		try {
@@ -324,7 +324,7 @@ class CommentController {
 				}
 			)
 				.then((data) => {
-					//get type of reaction of the user to the comment
+					// get type of reaction of the user to the comment
 					const comments = data.docs;
 					const listComments = [];
 					Promise.all(
@@ -340,10 +340,8 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
-						//sort post by date desc
-						listComments.sort((a, b) => {
-							return new Date(b.createdAt) - new Date(a.createdAt);
-						});
+						// sort post by date desc
+						listComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 						getListPost(res, data, listComments);
 					});
 				})
@@ -360,7 +358,7 @@ class CommentController {
 		}
 	}
 
-	//[GET] get all comments of a post (not include replies)
+	// [GET] get all comments of a post (not include replies)
 	async getAllOfPost(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		try {
@@ -384,7 +382,7 @@ class CommentController {
 				}
 			)
 				.then((data) => {
-					//get type of reaction of the user to the comment
+					// get type of reaction of the user to the comment
 					const comments = data.docs;
 					const listComments = [];
 					Promise.all(
@@ -400,10 +398,8 @@ class CommentController {
 							listComments.push(commentObject);
 						})
 					).then(() => {
-						//sort post by date desc
-						listComments.sort((a, b) => {
-							return new Date(b.createdAt) - new Date(a.createdAt);
-						});
+						// sort post by date desc
+						listComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 						getListPost(res, data, listComments);
 					});
 				})
@@ -420,7 +416,7 @@ class CommentController {
 		}
 	}
 
-	//[GET] get a comment
+	// [GET] get a comment
 	async get(req, res, next) {
 		try {
 			const comment = await Comment.findById(req.params.id).populate({

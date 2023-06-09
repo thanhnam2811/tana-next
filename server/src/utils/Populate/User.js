@@ -1,5 +1,5 @@
-const { User } = require('../../app/models/User');
 const moongose = require('mongoose');
+const { User } = require('../../app/models/User');
 
 exports.populateImage = async (userID) => {
 	const user = await User.findById(moongose.Types.ObjectId(userID))
