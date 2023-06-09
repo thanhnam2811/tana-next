@@ -70,9 +70,7 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 		<ConfigProvider
 			locale={viVn}
 			theme={{
-				token: {
-					borderRadius: 12,
-				},
+				token: {},
 				algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
 			}}
 			input={{ autoComplete: 'off' }}
