@@ -767,12 +767,20 @@ class PostController {
 			let reactOfUser = 'none';
 
 			if (req.user) {
+				const posts = await getAllPostWithPrivacy([post], req);
+				if (posts.length === 0) {
+					return res.status(403).json('Bạn không có quyền xem bài viết này');
+				}
+
 				// get type of reaction of the user to the post
 				const react = await React.findOne({ post: req.params.id, user: req.user._id });
 				if (react) {
 					reactOfUser = react.type;
 				}
+			} else {
+				if (post.privacy.value != 'public') return res.status(401).json('Bạn không có quyền xem bài viết này');
 			}
+
 			const postObject = post.toObject();
 			postObject.reactOfUser = reactOfUser;
 			//
