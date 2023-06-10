@@ -49,11 +49,13 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 			window.socket.on('connect', () => {
 				window.socket.emit('login', authUser?._id); // login to socket
 			});
+			console.log('connected to socket');
 		}
 		return () => {
 			if (authUser) {
 				window.socket.off('connect');
 				window.socket.disconnect(); // disconnect to socket
+				console.log('disconnected to socket');
 			}
 		};
 	}, [authUser?._id]);

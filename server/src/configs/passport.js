@@ -31,6 +31,7 @@ module.exports = function passportConfig(passport) {
 								email: profile.emails[0].value,
 								fullname: profile.displayName,
 								profilePicture: avatar?._id,
+								isVerified: true,
 							});
 							// update file creator
 							if (avatar) {
@@ -79,6 +80,7 @@ module.exports = function passportConfig(passport) {
 								email: profile.emails[0].value,
 								fullname: profile.displayName,
 								profilePicture: avatar?._id,
+								isVerified: true,
 							});
 							// update file creator
 							if (avatar) {

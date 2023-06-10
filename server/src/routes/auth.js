@@ -22,6 +22,8 @@ router.get(
 	AuthoController.loginGithub
 );
 
+router.get('/verify/:userId/:token', AuthoController.verify);
+
 // REFRESH ACCESS_TOKEN
 router.post('/refresh', AuthoController.refreshToken);
 
