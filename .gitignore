@@ -1,4 +1,8 @@
 # common
-**/node_modules/ 
+**/node_modules/*
 
-*.env
+# environments
+**/*.env
+
+# bfg
+bfg.jar
