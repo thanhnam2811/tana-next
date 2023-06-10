@@ -1,4 +1,4 @@
-export default interface IDashboardData {
+export interface IDashboardData {
 	totalUser: number;
 	numUserOnline: number;
 	numAccessInDay: number;

@@ -1,12 +1,11 @@
-import { Logo } from '@assets/logo';
 import Layout from '@layout/components';
-import { HeaderCenter, HeaderLeft } from '../Header';
 import { useAuth } from '@modules/auth/hooks';
-import { Avatar, Button, Tooltip, Typography, theme } from 'antd';
-import Link from 'next/link';
+import { Button, Tooltip, Typography, theme } from 'antd';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
 import styles from '../../styles/Layout.module.scss';
+import { HeaderCenter } from '../Header';
+import { NavBarLeft } from './NavBarLeft';
 import { NavBarRight } from './NavBarRight';
 
 const items = [
@@ -39,13 +38,7 @@ export default function NavBar() {
 
 	return (
 		<Layout.Header>
-			<HeaderLeft>
-				<Link href="/" style={{ display: 'flex' }}>
-					<Button shape="circle" size="large">
-						<Avatar src={Logo.src} />
-					</Button>
-				</Link>
-			</HeaderLeft>
+			<NavBarLeft />
 
 			<HeaderCenter>
 				{authUser ? (
