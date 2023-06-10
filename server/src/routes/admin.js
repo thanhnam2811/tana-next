@@ -7,7 +7,7 @@ const UserController = require('../app/controllers/UserController');
 const ActivityController = require('../app/controllers/ActivityController');
 
 router.get('/dashboard', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.getDashboard);
-router.get('/statictisUser', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.statictisUserPieChart);
+router.get('/statisticsUser', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.statictisUserPieChart);
 router.get('/reports', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, ReportController.getAllReports);
 router.get('/newUsers', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.getListNewUser);
 router.get('/usersAccess', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.chartAccessUser);

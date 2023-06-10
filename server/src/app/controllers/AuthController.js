@@ -123,6 +123,7 @@ class AuthoController {
 					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 			userSave.refreshToken = refreshToken;
+			userSave.isVerified = true;
 			await userSave.save();
 
 			return res.redirect(
@@ -157,6 +158,7 @@ class AuthoController {
 					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
 			}
 			userSave.refreshToken = refreshToken;
+			userSave.isVerified = true;
 			await userSave.save();
 
 			return res.redirect(
@@ -189,6 +191,29 @@ class AuthoController {
 				return res
 					.status(401)
 					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+			}
+
+			//check isVerify
+			if (!user.isVerified) {
+				const exsitToken = await Token.findOne({
+					userId: user._id,
+				});
+
+				if (exsitToken) {
+					await exsitToken.deleteOne();
+				}
+
+				// send email verify
+				const token = await new Token({
+					userId: user._id,
+					token: crypto.randomBytes(16).toString('hex'),
+				}).save();
+
+				const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
+				const status = await sendEmailVerify(user.email, 'Verify account', link, user);
+				if (!status) return res.status(500).json('Gửi email xác nhận thất bại. Vui lòng thử lại!!!');
+
+				return res.status(401).json('Tài khoản chưa được xác nhận. Vui lòng kiểm tra email!!!');
 			}
 			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {

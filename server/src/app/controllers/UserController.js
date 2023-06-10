@@ -567,7 +567,8 @@ class UserController {
 								)
 							);
 						}
-						const { totalCount } = result[0];
+
+						const { totalCount } = result[0] ? result[0] : { totalCount: 0 };
 
 						User.populate(
 							data,
@@ -803,7 +804,7 @@ class UserController {
 								)
 							);
 						}
-						const { totalCount } = result[0];
+						const { totalCount } = result[0] ? result[0] : { totalCount: 0 };
 
 						User.populate(
 							data,
@@ -1251,6 +1252,7 @@ class UserController {
 				{
 					$group: {
 						_id: '$gender.value',
+						label: { $first: '$gender.label' },
 						total: { $sum: 1 },
 					},
 				},
