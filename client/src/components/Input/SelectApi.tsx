@@ -7,11 +7,13 @@ import { DefaultOptionType } from 'antd/es/select';
 interface Props<T extends IData> {
 	scrollThreshold?: number;
 	toOption: (item: T) => DefaultOptionType;
+	renderOption?: (item: T) => React.ReactNode;
 }
 
 export function SelectApi<T extends IData = any>({
 	scrollThreshold = 100,
 	toOption,
+	renderOption,
 	api,
 	params,
 	limit,
@@ -29,7 +31,7 @@ export function SelectApi<T extends IData = any>({
 
 	return (
 		<Select
-			options={fetcher.data.map(toOption)}
+			options={!renderOption ? fetcher.data.map(toOption) : undefined} // if renderOption is defined, options will be rendered by renderOption
 			loading={fetcher.fetching}
 			onPopupScroll={handeScroll}
 			filterOption={(input, option) => {
@@ -38,6 +40,9 @@ export function SelectApi<T extends IData = any>({
 			}}
 			showSearch
 			{...props}
-		/>
+		>
+			{renderOption &&
+				fetcher.data.map((item) => <Select.Option key={item._id}>{renderOption(item)}</Select.Option>)}
+		</Select>
 	);
 }

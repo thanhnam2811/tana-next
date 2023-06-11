@@ -1,12 +1,14 @@
 import { FetcherType, useFetcher } from '@common/hooks';
 import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
-import { Button, Card, Input, List, Space, Tooltip, Typography } from 'antd';
+import { Button, Card, Divider, Input, List, Space, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import React from 'react';
-import { HiPlus } from 'react-icons/hi2';
-import { ConversationListItem } from '../components';
-import { ConversationType } from '../types';
+import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { HiPencilSquare } from 'react-icons/hi2';
+import { createConversationApi, updateConversationApi } from '../api';
+import { ConversationListItem, ConversationContent, CreateConversationModal } from '../components';
+import { ConversationCreateType, ConversationType } from '../types';
 
 export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
@@ -18,11 +20,49 @@ export const MessageContext = React.createContext<{
 } | null>(null);
 
 function MessagesPage() {
+	const convFetcher = useFetcher<ConversationType>({ api: 'conversations' });
+
 	const router = useRouter();
 	const id = router.query.id as string;
-	const all = !id || id === 'all';
 
-	const convFetcher = useFetcher<ConversationType>({ api: 'conversations' });
+	const [createModal, setCreateModal] = useState(false);
+	const openCreateModal = () => setCreateModal(true);
+	const closeCreateModal = () => setCreateModal(false);
+
+	const createConversation = async (data: ConversationCreateType) => {
+		const toastId = toast.loading('Đang tạo cuộc trò chuyện...');
+
+		try {
+			const conv = await createConversationApi(data);
+
+			toast.success('Tạo cuộc trò chuyện thành công!', { id: toastId });
+
+			convFetcher.addData(conv);
+
+			// Chuyển đến trang chat
+			router.push({ pathname: '/messages', query: { id: conv._id } });
+
+			closeCreateModal();
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+	};
+
+	const updateConversation = async (id: string, data: ConversationCreateType) => {
+		const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
+
+		try {
+			const conv = await updateConversationApi(id, data);
+
+			await convFetcher.updateData(id, conv);
+
+			toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
+
+			closeCreateModal();
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+	};
 
 	return (
 		<>
@@ -35,8 +75,14 @@ function MessagesPage() {
 									Cuộc trò chuyện
 								</Typography.Title>
 
+								<CreateConversationModal
+									open={createModal}
+									onClose={closeCreateModal}
+									onCreate={createConversation}
+								/>
+
 								<Tooltip title="Tạo cuộc trò chuyện">
-									<Button shape="circle" icon={<HiPlus />} />
+									<Button shape="circle" icon={<HiPencilSquare />} onClick={openCreateModal} />
 								</Tooltip>
 							</Space>
 
@@ -59,15 +105,30 @@ function MessagesPage() {
 				</Card>
 			</Layout.Sider>
 
-			<Layout.Content>
-				{all ? (
+			{id ? (
+				<ConversationContent />
+			) : (
+				<Layout.Content>
 					<Space style={{ width: '100%', height: '100%', justifyContent: 'center' }} align="center">
-						<Typography.Title level={4}>Chọn một cuộc trò chuyện để bắt đầu</Typography.Title>
+						<Space direction="vertical" align="center">
+							<Typography.Text strong>Chọn một cuộc trò chuyện để bắt đầu</Typography.Text>
+
+							<Divider style={{ margin: 0 }}>
+								<Typography.Text type="secondary">Hoặc</Typography.Text>
+							</Divider>
+
+							<Button
+								type="primary"
+								onClick={openCreateModal}
+								icon={<HiPencilSquare />}
+								style={{ width: 'fit-content' }}
+							>
+								Tạo mới
+							</Button>
+						</Space>
 					</Space>
-				) : (
-					<Typography.Title level={4}>Cuộc trò chuyện: {id}</Typography.Title>
-				)}
-			</Layout.Content>
+				</Layout.Content>
+			)}
 		</>
 	);
 }

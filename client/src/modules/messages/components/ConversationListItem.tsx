@@ -1,5 +1,4 @@
 import { useAuth } from '@modules/auth/hooks';
-import { UserAvatar } from '@modules/user/components';
 import { getTimeAgo } from '@utils/common';
 import { Button, Typography, theme } from 'antd';
 import Link from 'next/link';
@@ -32,11 +31,7 @@ export function ConversationListItem({ conversation }: Props) {
 		<Link href={`/messages?id=${conversation._id}`} draggable className={styles.container}>
 			<Button className={active ? styles.active : ''} type={active ? 'primary' : 'text'} block>
 				<div className={styles.avatar}>
-					{isDirect ? (
-						<UserAvatar user={receiver!} size={40} />
-					) : (
-						<ConversationAvatar conversation={conversation} size={40} />
-					)}
+					<ConversationAvatar conversation={conversation} size={40} />
 				</div>
 
 				<div className={styles.content}>

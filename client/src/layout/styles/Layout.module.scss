@@ -75,7 +75,15 @@
 
 	div.left,
 	div.right {
-		flex: 0 0 320px;
+		width: 320px;
+
+		transition: all 0.2s ease-in-out;
+
+		&.collapse {
+			width: 0;
+			overflow: hidden;
+			opacity: 0;
+		}
 	}
 
 	aside {
@@ -89,6 +97,8 @@
 		display: flex;
 		flex-direction: column;
 
+		transition: all 0.2s ease-in-out;
+
 		&.left {
 			left: 0;
 			padding-right: 0;
@@ -98,13 +108,24 @@
 			right: 0;
 			padding-left: 0;
 		}
+
+		&.collapse {
+			width: 0;
+			overflow: hidden;
+		}
 	}
 
 	.content {
 		max-width: 800px;
 		width: 100%;
+		flex: 1;
+		overflow: hidden;
 
 		margin: 0 auto;
 		padding: 16px;
+
+		&.fixed {
+			height: calc(100vh - 64px);
+		}
 	}
 }

@@ -1,8 +1,8 @@
-import { UserType } from '@modules/user/types';
-import { MessageType } from './IMessage';
 import { IData, IMedia } from '@common/types';
+import { MessageType } from '@modules/messages/types';
+import { UserType } from '@modules/user/types';
 
-export interface Member {
+export interface IMember {
 	user: UserType;
 	role: string;
 	nickname: string;
@@ -11,19 +11,21 @@ export interface Member {
 }
 
 interface IConversation extends IData {
-	_id: string;
-	members: Member[];
+	members: IMember[] | string[];
 	name: string;
-	deleted: boolean;
 	history: History[];
-	user_deleted: any[];
-	creator: string;
 	lastest_message: MessageType;
 	avatar: IMedia;
 }
 
 // For use
-export type ConversationType = IConversation;
+export type ConversationType = IConversation & { members: IMember[] };
 
 // For form
-export type ConversationFormType = Partial<IConversation>;
+export type ConversationFormType = Partial<IConversation & { members: string[] }>;
+
+// For create
+export type ConversationCreateType = {
+	members: { user: string; role?: string }[];
+	name?: string;
+};

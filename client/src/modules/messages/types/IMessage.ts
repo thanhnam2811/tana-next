@@ -13,10 +13,12 @@ interface IMessage extends IData {
 	reader?: UserType[];
 	sender: UserType;
 	conversation: string;
+
+	sending?: boolean; // for UI
 }
 
 // For use
 export type MessageType = IMessage & { media: IMedia[] };
 
 // For form
-export type MessageFormType = Partial<IMessage & { media: string[] }>;
+export type MessageFormType = IMessage & { media: string[] };
