@@ -76,10 +76,9 @@ function RoomMagager(socket, io) {
 		if (!conversation) return;
 
 		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== msg.sender._id.toString())
+			.filter((member) => member.user.toString() !== data.sender._id.toString())
 			.map((menber) => menber.user.toString());
-		console.log('socket', SocketManager);
-		SocketManager.sendToList(userIds, eventName.TYPING_MESSAGE, msg);
+		SocketManager.sendToList(userIds, eventName.TYPING_MESSAGE, data);
 	});
 
 	socket.on(eventName.STOP_TYPING_MESSAGE, async (data) => {
@@ -88,7 +87,7 @@ function RoomMagager(socket, io) {
 		if (!conversation) return;
 
 		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== msg.sender._id.toString())
+			.filter((member) => member.user.toString() !== data.sender._id.toString())
 			.map((menber) => menber.user.toString());
 
 		SocketManager.sendToList(userIds, eventName.STOP_TYPING_MESSAGE, data);
