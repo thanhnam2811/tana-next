@@ -291,6 +291,7 @@ class ConversationController {
 						return member;
 					})
 				);
+				req.body.name = req.body.members.map((x) => x.nickname).join(', ');
 
 				const newConversation = new Conversation(req.body);
 				newConversation.members.push({
@@ -330,6 +331,7 @@ class ConversationController {
 	// [Get] get conv of a user
 	async getConversationOfUser(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const { q } = req.query;
 		try {
 			Conversation.paginate(
 				{
@@ -338,6 +340,26 @@ class ConversationController {
 							user: req.user._id,
 						},
 					},
+					$or: [
+						{
+							$and: [
+								{ name: { $exists: true } }, // Name field exists
+								{ name: { $regex: q, $options: 'i' } }, // Name matches the search query
+							],
+						},
+						{
+							$and: [
+								{ name: { $exists: false } }, // Name field does not exist
+								{
+									members: {
+										$elemMatch: {
+											nickname: { $regex: q, $options: 'i' }, // Nickname matches the search query
+										},
+									},
+								},
+							],
+						},
+					],
 				},
 				{
 					offset,
