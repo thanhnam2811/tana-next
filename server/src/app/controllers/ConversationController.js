@@ -331,7 +331,8 @@ class ConversationController {
 	// [Get] get conv of a user
 	async getConversationOfUser(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const { q } = req.query;
+		const q = req.query.q ?? '';
+
 		try {
 			Conversation.paginate(
 				{
