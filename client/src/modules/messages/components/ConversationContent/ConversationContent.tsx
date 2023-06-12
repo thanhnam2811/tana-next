@@ -1,7 +1,7 @@
 import { swrFetcher } from '@common/api';
 import Layout from '@layout/components';
 import { useAuth } from '@modules/auth/hooks';
-import { ConversationType } from '@modules/messages/types';
+import { ConversationFormType, ConversationType } from '@modules/messages/types';
 import { getConversationInfo } from '@modules/messages/utils';
 import { Button, Card, Space, Spin, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
@@ -12,8 +12,14 @@ import useSWR from 'swr';
 import { ConversationAvatar } from '../ConversationAvatar';
 import { ConversationDetail } from '../ConversationDetail';
 import { ConversationMessage } from './ConversationMessage';
+import { toast } from 'react-hot-toast';
+import { updateConversationApi } from '@modules/messages/api';
 
-export function ConversationContent() {
+interface Props {
+	onUpdate?: (id: string, data: ConversationType) => void;
+}
+
+export function ConversationContent({ onUpdate }: Props) {
 	const { authUser } = useAuth();
 	const router = useRouter();
 
@@ -21,7 +27,7 @@ export function ConversationContent() {
 	const toggleDetail = () => setDetail((prev) => !prev);
 
 	const id = router.query.id as string;
-	const { isLoading, data } = useSWR<ConversationType>(`/conversations/${id}`, swrFetcher);
+	const { isLoading, data, mutate } = useSWR<ConversationType>(`/conversations/${id}`, swrFetcher);
 
 	if (isLoading)
 		return (
@@ -44,6 +50,21 @@ export function ConversationContent() {
 	const conversation = data!;
 
 	const { description, name } = getConversationInfo(conversation, authUser!);
+
+	const updateConversation = async (data: ConversationFormType) => {
+		const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
+
+		try {
+			const conv = await updateConversationApi(id, data);
+			mutate(conv);
+
+			onUpdate?.(id, conv);
+
+			toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+	};
 
 	return (
 		<>
@@ -82,7 +103,7 @@ export function ConversationContent() {
 			</Layout.Content>
 
 			<Layout.Sider align="right" collapse={!detail}>
-				<ConversationDetail conversation={conversation} />
+				<ConversationDetail conversation={conversation} onUpdate={updateConversation} />
 			</Layout.Sider>
 		</>
 	);

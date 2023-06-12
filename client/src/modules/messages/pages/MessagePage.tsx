@@ -48,22 +48,6 @@ function MessagesPage() {
 		}
 	};
 
-	// const updateConversation = async (id: string, data: ConversationCreateType) => {
-	// 	const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
-
-	// 	try {
-	// 		const conv = await updateConversationApi(id, data);
-
-	// 		await convFetcher.updateData(id, conv);
-
-	// 		toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
-
-	// 		closeCreateModal();
-	// 	} catch (error: any) {
-	// 		toast.error(error.message || error.toString(), { id: toastId });
-	// 	}
-	// };
-
 	return (
 		<>
 			<Layout.Sider align="left">
@@ -106,7 +90,7 @@ function MessagesPage() {
 			</Layout.Sider>
 
 			{id ? (
-				<ConversationContent />
+				<ConversationContent onUpdate={convFetcher.updateData} />
 			) : (
 				<Layout.Content>
 					<Space style={{ width: '100%', height: '100%', justifyContent: 'center' }} align="center">

@@ -35,7 +35,7 @@ export function ConversationAvatar({ conversation, size = DF_SIZE }: Props) {
 
 			fullname: conversation.name,
 			email: '',
-			isOnline: members.some(({ user }) => user?.isOnline),
+			isOnline: false,
 
 			profilePicture: avatar,
 			coverPicture: avatar,
@@ -44,7 +44,7 @@ export function ConversationAvatar({ conversation, size = DF_SIZE }: Props) {
 			work: [],
 			education: [],
 		};
-		return <UserAvatar user={convUser} size={size} />;
+		return <UserAvatar user={convUser} avtSize={size} />;
 	}
 
 	let data = members.map(({ user }) => user).filter((user) => !!user?.profilePicture?.link);

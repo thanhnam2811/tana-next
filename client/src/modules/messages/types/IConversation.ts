@@ -15,14 +15,14 @@ interface IConversation extends IData {
 	name: string;
 	history: History[];
 	lastest_message: MessageType;
-	avatar: IMedia;
+	avatar: IMedia | string;
 }
 
 // For use
-export type ConversationType = IConversation & { members: IMember[] };
+export type ConversationType = IConversation & { members: IMember[]; avatar: IMedia };
 
 // For form
-export type ConversationFormType = Partial<IConversation & { members: string[] }>;
+export type ConversationFormType = Partial<IConversation & { members: string[]; avatar: string }>;
 
 // For create
 export type ConversationCreateType = {

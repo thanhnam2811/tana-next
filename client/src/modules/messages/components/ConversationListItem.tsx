@@ -1,5 +1,5 @@
 import { useAuth } from '@modules/auth/hooks';
-import { getTimeAgo } from '@utils/common';
+import { getTimeAgo, stringUtil } from '@utils/common';
 import { Button, Typography, theme } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -47,7 +47,7 @@ export function ConversationListItem({ conversation }: Props) {
 							strong={unread}
 							className={styles.text}
 						>
-							{lastest_message?.text || <i>Không có tin nhắn</i>}
+							{stringUtil.renderHTML(lastest_message?.text) || <i>Không có tin nhắn</i>}
 						</Typography.Text>
 
 						<Typography.Text className={styles.time_ago}>
