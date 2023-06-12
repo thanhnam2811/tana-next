@@ -3,6 +3,7 @@ import { UserType } from '@modules/user/types';
 import { ConversationType } from '../types';
 import { useAuth } from '@modules/auth/hooks';
 import { getConversationInfo } from '../utils';
+import { theme } from 'antd';
 
 interface Props {
 	conversation: ConversationType;
@@ -18,6 +19,7 @@ const MAX_AVATAR = 5;
 const DF_SIZE = 80;
 
 export function ConversationAvatar({ conversation, size = DF_SIZE }: Props) {
+	const { token } = theme.useToken();
 	const { authUser } = useAuth();
 	const { members, avatar } = conversation;
 	const { isDirect, receiver } = getConversationInfo(conversation, authUser!);
@@ -65,7 +67,15 @@ export function ConversationAvatar({ conversation, size = DF_SIZE }: Props) {
 	// Show avatars in a circle box, avatar size is 40px
 	return (
 		<div
-			style={{ position: 'relative', width: size, height: size, backgroundColor: '#e0e0e0', borderRadius: '50%' }}
+			style={{
+				position: 'relative',
+				width: size,
+				height: size,
+				borderRadius: '50%',
+				border: '1px solid',
+				borderColor: token.colorBorder,
+				overflow: 'hidden',
+			}}
 		>
 			{data.map((user, index) => (
 				<div

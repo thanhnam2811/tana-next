@@ -19,10 +19,11 @@ import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { toast } from 'react-hot-toast';
 import { uploadFileApi } from '@common/api';
+import { InfoMenu } from './menu';
 
 interface Props {
 	conversation: ConversationType;
-	onUpdate?: (conversation: ConversationFormType) => void;
+	onUpdate: (conversation: ConversationFormType) => Promise<void>;
 }
 
 export function ConversationDetail({ conversation, onUpdate }: Props) {
@@ -41,7 +42,7 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 					<Typography.Text strong>Thông tin</Typography.Text>
 				</Space>
 			),
-			children: <div>Thông tin</div>,
+			children: <InfoMenu conversation={conversation} onUpdate={onUpdate} />,
 		},
 		{
 			key: 'members',
@@ -100,7 +101,7 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 			const { files } = await uploadFileApi([file]);
 			toast.success('Tải ảnh lên thành công!', { id: toastId });
 
-			await onUpdate?.({ avatar: files[0]._id });
+			await onUpdate({ avatar: files[0]._id });
 		} catch (error: any) {
 			toast.error(error.message || error.toString());
 		}
