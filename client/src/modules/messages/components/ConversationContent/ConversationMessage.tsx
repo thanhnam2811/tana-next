@@ -4,7 +4,7 @@ import { sendMessageApi } from '@modules/messages/api';
 import { MessageFormType, MessageType } from '@modules/messages/types';
 import { UserAvatar } from '@modules/user/components';
 import { randomString, stringUtil } from '@utils/common';
-import { Button, Space, Spin, Tag, theme } from 'antd';
+import { Button, Form, Space, Spin, Tag, Typography, theme } from 'antd';
 import classnames from 'classnames';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
@@ -12,11 +12,14 @@ import { HiArrowSmallDown } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from '../../styles/ConversationMessage.module.scss';
 import MessageInput from '../MessageInput';
+import { FileRejection, useDropzone } from 'react-dropzone';
+import { conversationConfig } from '@modules/messages/utils';
 
 export function ConversationMessage() {
 	const { authUser } = useAuth();
 	const router = useRouter();
 	const { token } = theme.useToken();
+	const [form] = Form.useForm<MessageFormType>();
 
 	const id = router.query.id as string;
 
@@ -71,9 +74,19 @@ export function ConversationMessage() {
 		};
 	}, []);
 
+	const onDropAccepted = (acceptedFiles: File[]) => console.log({ acceptedFiles });
+
+	const onDropRejected = (rejectedFiles: FileRejection[]) => {
+		console.log(rejectedFiles);
+	};
+
+	const dropzone = useDropzone({ onDropAccepted, onDropRejected, ...conversationConfig.dropzone });
+
+	const { getRootProps, getInputProps, isDragAccept, isDragReject } = dropzone;
+
 	return (
-		<div className={styles.container}>
-			<div className={styles.history}>
+		<Form className={styles.container} form={form}>
+			<div className={styles.history} {...getRootProps()}>
 				<div className={styles.history_content} id="messages-history">
 					<InfiniteScroll
 						scrollableTarget="messages-history"
@@ -155,11 +168,26 @@ export function ConversationMessage() {
 					className={styles.scroll_down}
 					id="scroll-down-btn"
 				/>
+
+				<div
+					className={styles.dropzone}
+					style={{
+						zIndex: isDragAccept || isDragReject ? 1 : -1,
+						opacity: isDragAccept || isDragReject ? 1 : 0,
+					}}
+				>
+					<input {...getInputProps()} />
+					<div className={styles.dropzone_content} style={{ borderColor: token.colorPrimary }}>
+						<Typography.Text strong>Gửi file</Typography.Text>
+
+						<Typography.Text type="secondary">Thả file vào đây để gửi</Typography.Text>
+					</div>
+				</div>
 			</div>
 
 			<div className={styles.input_container}>
 				<MessageInput onSend={sendMessage} />
 			</div>
-		</div>
+		</Form>
 	);
 }

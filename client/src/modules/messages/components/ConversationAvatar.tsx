@@ -2,6 +2,7 @@ import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
 import { ConversationType } from '../types';
 import { useAuth } from '@modules/auth/hooks';
+import { getConversationInfo } from '../utils';
 
 interface Props {
 	conversation: ConversationType;
@@ -19,11 +20,10 @@ const DF_SIZE = 80;
 export function ConversationAvatar({ conversation, size = DF_SIZE }: Props) {
 	const { authUser } = useAuth();
 	const { members, avatar } = conversation;
+	const { isDirect, receiver } = getConversationInfo(conversation, authUser!);
 
-	const isDirect = members.length === 2;
 	if (isDirect) {
-		const member = members.find(({ user }) => user?._id !== authUser?._id);
-		return <UserAvatar user={member?.user} avtSize={size} />;
+		return <UserAvatar user={receiver?.user} avtSize={size} />;
 	}
 
 	if (avatar) {

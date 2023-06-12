@@ -2,7 +2,7 @@ import { swrFetcher } from '@common/api';
 import Layout from '@layout/components';
 import { useAuth } from '@modules/auth/hooks';
 import { ConversationType } from '@modules/messages/types';
-import { getTimeAgo } from '@utils/common';
+import { getConversationInfo } from '@modules/messages/utils';
 import { Button, Card, Space, Spin, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ import { HiPhone, HiVideoCamera } from 'react-icons/hi2';
 import { TiInfoLarge } from 'react-icons/ti';
 import useSWR from 'swr';
 import { ConversationAvatar } from '../ConversationAvatar';
+import { ConversationDetail } from '../ConversationDetail';
 import { ConversationMessage } from './ConversationMessage';
 
 export function ConversationContent() {
@@ -42,16 +43,7 @@ export function ConversationContent() {
 
 	const conversation = data!;
 
-	const isDirect = conversation?.members.length === 2;
-	const receiver = conversation?.members.find(({ user }) => user._id !== authUser!._id)?.user;
-
-	const description = isDirect
-		? receiver?.isOnline
-			? 'Đang hoạt động'
-			: receiver?.lastAccess
-			? `Hoạt động ${getTimeAgo(receiver?.lastAccess)}`
-			: 'Không hoạt động'
-		: `${conversation?.members.length} thành viên`;
+	const { description, name } = getConversationInfo(conversation, authUser!);
 
 	return (
 		<>
@@ -65,7 +57,7 @@ export function ConversationContent() {
 
 							<Space direction="vertical" size={0} style={{ width: '100%', flex: 1, overflow: 'hidden' }}>
 								<Typography.Title level={5} style={{ margin: 0 }} ellipsis>
-									{isDirect ? receiver?.fullname : conversation?.name}
+									{name}
 								</Typography.Title>
 								<Typography.Text type="secondary">{description}</Typography.Text>
 							</Space>
@@ -90,7 +82,7 @@ export function ConversationContent() {
 			</Layout.Content>
 
 			<Layout.Sider align="right" collapse={!detail}>
-				Thông tin
+				<ConversationDetail conversation={conversation} />
 			</Layout.Sider>
 		</>
 	);
