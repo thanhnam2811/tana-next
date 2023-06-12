@@ -6,8 +6,8 @@ import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencilSquare } from 'react-icons/hi2';
-import { createConversationApi, updateConversationApi } from '../api';
-import { ConversationListItem, ConversationContent, CreateConversationModal } from '../components';
+import { createConversationApi } from '../api';
+import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
 import { ConversationCreateType, ConversationType } from '../types';
 
 export const MessageContext = React.createContext<{
@@ -48,21 +48,21 @@ function MessagesPage() {
 		}
 	};
 
-	const updateConversation = async (id: string, data: ConversationCreateType) => {
-		const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
+	// const updateConversation = async (id: string, data: ConversationCreateType) => {
+	// 	const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
 
-		try {
-			const conv = await updateConversationApi(id, data);
+	// 	try {
+	// 		const conv = await updateConversationApi(id, data);
 
-			await convFetcher.updateData(id, conv);
+	// 		await convFetcher.updateData(id, conv);
 
-			toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
+	// 		toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
 
-			closeCreateModal();
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-	};
+	// 		closeCreateModal();
+	// 	} catch (error: any) {
+	// 		toast.error(error.message || error.toString(), { id: toastId });
+	// 	}
+	// };
 
 	return (
 		<>
