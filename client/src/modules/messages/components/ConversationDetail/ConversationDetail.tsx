@@ -2,7 +2,20 @@ import { uploadFileApi } from '@common/api';
 import { useAuth } from '@modules/auth/hooks';
 import { ConversationFormType, ConversationType } from '@modules/messages/types';
 import { getConversationInfo } from '@modules/messages/utils';
-import { Badge, Button, Card, Collapse, CollapsePanelProps, Space, Tooltip, Typography, Upload, theme } from 'antd';
+import {
+	App,
+	Badge,
+	Button,
+	Card,
+	Collapse,
+	CollapsePanelProps,
+	Form,
+	Space,
+	Tooltip,
+	Typography,
+	Upload,
+	theme,
+} from 'antd';
 import ImgCrop from 'antd-img-crop';
 import { toast } from 'react-hot-toast';
 import { HiLogout } from 'react-icons/hi';
@@ -20,6 +33,8 @@ import { TiInfoLarge } from 'react-icons/ti';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
+import { SelectApi } from '@components/v2/Input';
+import { useFetcher } from '@common/hooks';
 
 interface Props {
 	conversation: ConversationType;
@@ -28,9 +43,11 @@ interface Props {
 
 export function ConversationDetail({ conversation, onUpdate }: Props) {
 	const { token } = theme.useToken();
+	const { modal } = App.useApp();
 	const { authUser } = useAuth();
 
 	const { isDirect, name, description } = getConversationInfo(conversation, authUser!);
+	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
 
 	const collapsePanels: CollapsePanelProps[] = [
 		{
@@ -55,7 +72,32 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 			),
 			extra: (
 				<Tooltip title="Thêm thành viên">
-					<Button size="small" shape="circle" icon={<HiUserPlus />} />
+					<Button
+						size="small"
+						shape="circle"
+						icon={<HiUserPlus />}
+						onClick={(e) => {
+							e.stopPropagation();
+
+							modal.info({
+								title: 'Thêm thành viên',
+								content: (
+									<Form onFinish={alert}>
+										<Form.Item name="member">
+											<SelectApi
+												fetcher={friendFetcher}
+												toOption={(user) => ({
+													value: user._id,
+													label: user.fullname,
+												})}
+												mode="multiple"
+											/>
+										</Form.Item>
+									</Form>
+								),
+							});
+						}}
+					/>
 				</Tooltip>
 			),
 			children: <MemberMenu conversation={conversation} />,
@@ -116,10 +158,6 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 					<ImgCrop zoomSlider>
 						<Upload
 							fileList={[]}
-							// onChange={({ file }) => {
-							// 	if (!file.originFileObj) return;
-							// 	handleChangeAvatar(file.originFileObj);
-							// }}
 							beforeUpload={(file) => {
 								handleChangeAvatar(file);
 								return false;
