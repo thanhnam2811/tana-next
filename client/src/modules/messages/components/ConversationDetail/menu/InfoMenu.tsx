@@ -1,7 +1,7 @@
 import { ConversationFormType, ConversationType } from '@modules/messages/types';
 import { App, Button, Input, InputRef, Space } from 'antd';
 import React from 'react';
-import { HiPencil } from 'react-icons/hi2';
+import { HiMagnifyingGlass, HiPencil } from 'react-icons/hi2';
 import { useRef } from 'react';
 
 interface Props {
@@ -26,6 +26,10 @@ export function InfoMenu({ onUpdate, conversation }: Props) {
 		<Space direction="vertical" style={{ width: '100%' }}>
 			<Button block icon={<HiPencil />} onClick={handleChangeName}>
 				Đổi tên
+			</Button>
+
+			<Button block icon={<HiMagnifyingGlass />}>
+				Tìm kiếm
 			</Button>
 		</Space>
 	);
