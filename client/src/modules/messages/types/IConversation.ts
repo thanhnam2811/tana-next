@@ -4,7 +4,7 @@ import { UserType } from '@modules/user/types';
 
 export interface IMember {
 	user: UserType;
-	role: string;
+	role: 'admin' | 'member';
 	nickname: string;
 	addedAt: string;
 	addedBy: UserType;

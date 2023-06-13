@@ -1,8 +1,10 @@
+import { uploadFileApi } from '@common/api';
 import { useAuth } from '@modules/auth/hooks';
 import { ConversationFormType, ConversationType } from '@modules/messages/types';
 import { getConversationInfo } from '@modules/messages/utils';
 import { Badge, Button, Card, Collapse, CollapsePanelProps, Space, Tooltip, Typography, Upload, theme } from 'antd';
 import ImgCrop from 'antd-img-crop';
+import { toast } from 'react-hot-toast';
 import { HiLogout } from 'react-icons/hi';
 import {
 	HiBellSnooze,
@@ -17,9 +19,7 @@ import {
 import { TiInfoLarge } from 'react-icons/ti';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
-import { toast } from 'react-hot-toast';
-import { uploadFileApi } from '@common/api';
-import { InfoMenu } from './menu';
+import { InfoMenu, MemberMenu } from './menu';
 
 interface Props {
 	conversation: ConversationType;
@@ -58,7 +58,7 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 					<Button size="small" shape="circle" icon={<HiUserPlus />} />
 				</Tooltip>
 			),
-			children: <div>Thành viên</div>,
+			children: <MemberMenu conversation={conversation} />,
 		},
 		{
 			key: 'media',
