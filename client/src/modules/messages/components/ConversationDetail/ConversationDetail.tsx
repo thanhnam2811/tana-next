@@ -18,6 +18,7 @@ import {
 	theme,
 } from 'antd';
 import ImgCrop from 'antd-img-crop';
+import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { HiLogout } from 'react-icons/hi';
 import {
@@ -27,6 +28,7 @@ import {
 	HiDocument,
 	HiExclamationTriangle,
 	HiPhoto,
+	HiUser,
 	HiUserPlus,
 	HiUsers,
 } from 'react-icons/hi2';
@@ -43,7 +45,7 @@ export function ConversationDetail() {
 	const { modal } = App.useApp();
 	const { authUser } = useAuth();
 
-	const { isDirect, name, description } = getConversationInfo(conversation, authUser!);
+	const { isDirect, name, description, receiver } = getConversationInfo(conversation, authUser!);
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
 
 	const [addMemberForm] = Form.useForm<{ members: string[] }>();
@@ -71,6 +73,7 @@ export function ConversationDetail() {
 			),
 			okText: 'Thêm',
 			onOk: () => addMemberForm.submit(),
+			okCancel: true,
 			closable: true,
 			maskClosable: true,
 		});
@@ -185,8 +188,10 @@ export function ConversationDetail() {
 
 					<Space size={8} split>
 						{isDirect ? (
-							<Tooltip title="Tạo nhóm">
-								<Button shape="circle" icon={<HiUserPlus />} />
+							<Tooltip title="Trang cá nhân">
+								<Link href={`/profile?id=${receiver?.user._id}`} passHref>
+									<Button shape="circle" icon={<HiUser />} />
+								</Link>
 							</Tooltip>
 						) : (
 							<Tooltip title="Rời nhóm">

@@ -43,7 +43,6 @@ export function ConversationListItem({ conversation }: Props) {
 					<div className={styles.lastest_message}>
 						<Typography.Text
 							type="secondary"
-							ellipsis
 							style={{ color: unread ? token.colorText : undefined }}
 							strong={unread}
 							className={styles.text}

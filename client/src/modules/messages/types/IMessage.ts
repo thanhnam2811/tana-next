@@ -21,4 +21,4 @@ interface IMessage extends IData {
 export type MessageType = IMessage & { media: IMedia[] };
 
 // For form
-export type MessageFormType = IMessage & { media: string[] };
+export type MessageFormType = IMessage & { media: string[]; files: File[] };

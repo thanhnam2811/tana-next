@@ -15,6 +15,9 @@ export function InfoMenu() {
 			okText: 'Lưu',
 			cancelText: 'Hủy',
 			onOk: () => updateConversationForm({ name: inputNameRef.current!.input?.value }),
+			okCancel: true,
+			closable: true,
+			maskClosable: true,
 		});
 
 	return (

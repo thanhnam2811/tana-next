@@ -60,6 +60,7 @@ export function MemberDropdown({ conversation, member, onUpdateMember, ...props 
 						</Form>
 					),
 					onOk: () => changeNicknameForm.submit(),
+					okCancel: true,
 					closable: true,
 					maskClosable: true,
 				}),

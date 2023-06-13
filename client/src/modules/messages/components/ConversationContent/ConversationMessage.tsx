@@ -1,22 +1,22 @@
 import { useFetcher } from '@common/hooks';
+import { randomUtil, stringUtil } from '@common/utils';
 import { useAuth } from '@modules/auth/hooks';
 import { sendMessageApi } from '@modules/messages/api';
 import { MessageFormType, MessageType } from '@modules/messages/types';
+import { conversationConfig } from '@modules/messages/utils';
 import { UserAvatar } from '@modules/user/components';
-import { stringUtil } from '@common/utils';
-import { Button, Form, Space, Spin, Tag, theme, Typography } from 'antd';
+import { App, Button, Form, Input, List, Space, Spin, Tag, Tooltip, Typography, theme } from 'antd';
+import { TextAreaRef } from 'antd/es/input/TextArea';
 import classnames from 'classnames';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
-import { HiArrowSmallDown } from 'react-icons/hi2';
+import { FileRejection, useDropzone } from 'react-dropzone';
+import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from './ConversationMessage.module.scss';
-import MessageInput from '../MessageInput';
-import { FileRejection, useDropzone } from 'react-dropzone';
-import { conversationConfig } from '@modules/messages/utils';
-import { randomUtil } from '@common/utils';
 
 export function ConversationMessage() {
+	const { modal } = App.useApp();
 	const { authUser } = useAuth();
 	const router = useRouter();
 	const { token } = theme.useToken();
@@ -28,7 +28,11 @@ export function ConversationMessage() {
 
 	const { data: listMessage } = msgFetcher;
 
+	const textInputRef = useRef<TextAreaRef>(null);
 	const sendMessage = async (data: MessageFormType) => {
+		form.resetFields();
+		setTimeout(() => textInputRef.current?.focus(), 0);
+
 		const msgPlaceholder: MessageType = {
 			...data,
 			_id: randomUtil.string(24),
@@ -75,10 +79,42 @@ export function ConversationMessage() {
 		};
 	}, []);
 
-	const onDropAccepted = (acceptedFiles: File[]) => console.log({ acceptedFiles });
+	const onDropAccepted = (acceptedFiles: File[]) => {
+		const files = (form.getFieldValue('files') as File[]) || [];
+		files.push(...acceptedFiles);
+		console.log({ files });
+
+		form.setFieldValue('files', files);
+	};
 
 	const onDropRejected = (rejectedFiles: FileRejection[]) => {
-		console.log(rejectedFiles);
+		console.log({ rejectedFiles });
+
+		modal.error({
+			title: 'File không hợp lệ',
+			content: (
+				<List
+					bordered
+					size="small"
+					dataSource={rejectedFiles}
+					renderItem={(item) => {
+						const error = item.errors.pop();
+						return (
+							<List.Item>
+								<List.Item.Meta
+									title={item.file.name}
+									description={
+										<Typography.Text type="danger" strong>
+											{error?.message || 'Lỗi không xác định'}
+										</Typography.Text>
+									}
+								/>
+							</List.Item>
+						);
+					}}
+				/>
+			),
+		});
 	};
 
 	const dropzone = useDropzone({ onDropAccepted, onDropRejected, ...conversationConfig.dropzone });
@@ -86,7 +122,7 @@ export function ConversationMessage() {
 	const { getRootProps, getInputProps, isDragAccept, isDragReject } = dropzone;
 
 	return (
-		<Form className={styles.container} form={form}>
+		<Form className={styles.container} form={form} onFinish={sendMessage} initialValues={{ files: [], text: '' }}>
 			<div className={styles.history} {...getRootProps()}>
 				<div className={styles.history_content} id="messages-history">
 					<InfiniteScroll
@@ -127,7 +163,6 @@ export function ConversationMessage() {
 							const isNextGroup = next && next.sender?._id === item.sender?._id;
 
 							const contentClasses = [styles.message_content];
-							if (item.sending) contentClasses.push(styles.sending);
 
 							return (
 								<Space
@@ -156,6 +191,8 @@ export function ConversationMessage() {
 									>
 										{item.text}
 									</div>
+
+									{item.sending && <Spin size="small" style={{ alignSelf: 'center' }} />}
 								</Space>
 							);
 						})}
@@ -177,6 +214,8 @@ export function ConversationMessage() {
 						opacity: isDragAccept || isDragReject ? 1 : 0,
 					}}
 				>
+					<Form.Item name="files" hidden />
+
 					<input {...getInputProps()} />
 					<div className={styles.dropzone_content} style={{ borderColor: token.colorPrimary }}>
 						<Typography.Text strong>Gửi file</Typography.Text>
@@ -187,7 +226,46 @@ export function ConversationMessage() {
 			</div>
 
 			<div className={styles.input_container}>
-				<MessageInput onSend={sendMessage} />
+				<Space className={styles.input} style={{ borderColor: token.colorBorder }}>
+					<Tooltip title="Đính kèm">
+						<Button shape="circle" icon={<HiPaperClip />} />
+					</Tooltip>
+
+					<Tooltip title="Thêm icon">
+						<Button shape="circle" icon={<HiFaceSmile />} />
+					</Tooltip>
+
+					<Form.Item
+						name="text"
+						rules={[
+							{
+								required: true,
+								message: 'Vui lòng nhập tin nhắn',
+							},
+						]}
+						noStyle
+					>
+						<Input.TextArea
+							placeholder="Nhập tin nhắn"
+							autoSize={{ maxRows: 5 }}
+							bordered={false}
+							onPressEnter={(e) => {
+								if (e.shiftKey) return;
+
+								const text = e.currentTarget.value?.trim();
+								if (!text) return;
+
+								e.preventDefault();
+								form.submit();
+							}}
+							ref={textInputRef}
+						/>
+					</Form.Item>
+
+					<Tooltip title="Gửi">
+						<Button shape="circle" icon={<HiPaperAirplane />} htmlType="submit" />
+					</Tooltip>
+				</Space>
 			</div>
 		</Form>
 	);

@@ -7,7 +7,7 @@ import { urlUtil } from '@common/utils';
 // T: Data type,
 export type FetcherType<T extends IData> = {
 	data: T[];
-	updateData: (id: string, newData: Partial<T>) => void;
+	updateData: (id: string, newData: T) => void;
 	addData: (newData: T) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
@@ -67,7 +67,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		// Make a shallow copy of the existing data array and add the new data to the beginning
 		const newItems = [newData, ...data];
 
-		// Update the cache with the new data
+		// Update the cache with the new data (don't mutate the existing cache)
 		mutate((prevData) => {
 			const newPages = prevData?.map((page, index) => {
 				const startIndex = index * limit,
@@ -79,25 +79,30 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 				};
 			});
 			return newPages;
-		});
+		}, false); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
-	const updateData = (id: string, newData: Partial<T>) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.map((item) => (item._id === id ? { ...item, ...newData } : item));
-
+	const updateData = (id: string, newData: T) => {
 		// Update the cache with the new data
 		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
+			let updated = false;
+			const newPages = prevData?.map((page) => {
+				if (updated) return page;
+
 				return {
 					...page,
-					items: newItems.slice(startIndex, endIndex),
+					items: page.items.map((item) => {
+						if (item._id === id) {
+							updated = true;
+							console.log({ item, newData });
+							return newData;
+						}
+						return item;
+					}),
 				};
 			});
 			return newPages;
-		});
+		}, false); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const removeData = (id: string) => {
@@ -116,7 +121,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 				};
 			});
 			return newPages;
-		});
+		}, false); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const fetch = (params: object) => {
