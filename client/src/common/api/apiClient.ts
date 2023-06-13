@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { SERVER_URL } from '@common/config';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.response?.status === 401;
@@ -57,7 +58,7 @@ const retryRequest = async (error: AxiosError) => {
 
 // Create an axios instance
 const apiClient = axios.create({
-	baseURL: process.env.SERVER_URL,
+	baseURL: SERVER_URL,
 	headers: {
 		'Content-Type': 'application/json',
 		'Max-Retry': MAX_RETRY,

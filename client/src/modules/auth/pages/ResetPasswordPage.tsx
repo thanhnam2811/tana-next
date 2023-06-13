@@ -1,5 +1,5 @@
 import { withLayout } from '@layout/components';
-import { Button, Card, Col, Divider, Form, Input, Row, Typography, theme } from 'antd';
+import { Button, Card, Col, Divider, Form, Input, Row, theme, Typography } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';

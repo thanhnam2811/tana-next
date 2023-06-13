@@ -1,7 +1,8 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { stringUtil } from '@utils/common';
 import { useCallback, useMemo } from 'react';
+import useSWRInfinite from 'swr/infinite';
+import { urlUtil } from '@common/utils';
 
 // T: Data type,
 export type FetcherType<T extends IData> = {
@@ -20,8 +21,6 @@ export type FetcherType<T extends IData> = {
 	api: string;
 };
 
-import useSWRInfinite from 'swr/infinite';
-
 export interface FetcherProps {
 	api: string;
 	limit?: number;
@@ -31,14 +30,14 @@ export interface FetcherProps {
 export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {} }: FetcherProps): FetcherType<T> => {
 	const getKey = useCallback(
 		(pageIndex: number, prevData: IPaginationResponse<T>) => {
-			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size: limit });
+			if (pageIndex === 0) return urlUtil.generateUrl(api, { ...params, size: limit });
 
 			const prevOffset = Number(prevData?.offset) || 0;
 			const prevItems = prevData?.items || [];
 			if (prevOffset + prevItems.length >= prevData.totalItems) return null; // No more data
 
 			const offset = prevOffset + prevItems.length;
-			return stringUtil.generateUrl(api, { ...params, offset, size: limit });
+			return urlUtil.generateUrl(api, { ...params, offset, size: limit });
 		},
 		[limit, api, params]
 	);

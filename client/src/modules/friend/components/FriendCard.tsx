@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
-import { App, Button, Card, Dropdown, MenuProps, Tooltip, Typography, message, theme } from 'antd';
+import { App, Button, Card, Dropdown, MenuProps, message, theme, Tooltip, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { HiDotsHorizontal } from 'react-icons/hi';

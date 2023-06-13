@@ -11,10 +11,10 @@ import {
 	CollapsePanelProps,
 	Form,
 	Space,
+	theme,
 	Tooltip,
 	Typography,
 	Upload,
-	theme,
 } from 'antd';
 import ImgCrop from 'antd-img-crop';
 import { toast } from 'react-hot-toast';
@@ -33,7 +33,7 @@ import { TiInfoLarge } from 'react-icons/ti';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
-import { SelectApi } from '@components/v2/Input';
+import { SelectApi } from 'src/common/components/Input';
 import { useFetcher } from '@common/hooks';
 
 interface Props {

@@ -1,12 +1,12 @@
-import { PrivacyDropdown } from '@components/Button';
+import { PrivacyDropdown } from 'src/common/components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
 import { IEducation, IPrivacy } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
-import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencil, HiPlus, HiTrash } from 'react-icons/hi2';
+import { dateUtil } from '@common/utils';
 
 interface EducationListProps {
 	educations: IEducation[];
@@ -147,7 +147,10 @@ export const EducationList = ({ educations: init, isCurrentUser }: EducationList
 								style={{ width: '100%' }}
 							/>
 							<i>
-								{[edu.from && `Từ ${formatDate(edu.from)}`, edu.to && `Đến ${formatDate(edu.to)}`]
+								{[
+									edu.from && `Từ ${dateUtil.formatDate(edu.from)}`,
+									edu.to && `Đến ${dateUtil.formatDate(edu.to)}`,
+								]
 									.filter(Boolean)
 									.join(' - ')}
 							</i>

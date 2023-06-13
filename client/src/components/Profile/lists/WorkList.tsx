@@ -1,12 +1,12 @@
-import { PrivacyDropdown } from '@components/Button';
+import { PrivacyDropdown } from 'src/common/components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
 import { IPrivacy, IWork } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
-import { formatDate } from '@utils/common';
 import { Button, List } from 'antd';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencil, HiPlus, HiTrash } from 'react-icons/hi2';
+import { dateUtil } from '@common/utils';
 
 interface WorkListProps {
 	works: IWork[];
@@ -139,7 +139,10 @@ export const WorkList = ({ works: init, isCurrentUser }: WorkListProps) => {
 								style={{ width: '100%' }}
 							/>
 							<i>
-								{[work.from && `Từ ${formatDate(work.from)}`, work.to && `Đến ${formatDate(work.to)}`]
+								{[
+									work.from && `Từ ${dateUtil.formatDate(work.from)}`,
+									work.to && `Đến ${dateUtil.formatDate(work.to)}`,
+								]
 									.filter(Boolean)
 									.join(' - ')}
 							</i>

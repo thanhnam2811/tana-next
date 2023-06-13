@@ -1,16 +1,16 @@
-import { PrivacyDropdown } from '@components/Button';
-import { RichTextInput } from '@components/v2/Input';
+import { PrivacyDropdown } from 'src/common/components/Button';
+import { RichTextInput } from 'src/common/components/Input';
 import { PostFormType, PostType } from '@common/types';
 import { IMedia } from '@common/types/common';
 import { Collapse } from '@mui/material';
 import { fileApi } from '@utils/api';
-import { randomString } from '@utils/common';
 import { COLORS } from '@utils/theme';
 import { Button, Card, Form, Modal, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { PostMedia } from './PostCard';
+import { randomUtil } from '@common/utils';
 
 interface Props {
 	data?: PostType;
@@ -36,7 +36,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			const media: IMediaFile = {
-				_id: randomString(10),
+				_id: randomUtil.string(10),
 				link: URL.createObjectURL(file),
 				file,
 			};

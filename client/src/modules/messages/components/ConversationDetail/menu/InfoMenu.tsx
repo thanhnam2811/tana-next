@@ -1,8 +1,7 @@
 import { ConversationFormType, ConversationType } from '@modules/messages/types';
 import { App, Button, Input, InputRef, Space } from 'antd';
-import React from 'react';
+import React, { useRef } from 'react';
 import { HiMagnifyingGlass, HiPencil } from 'react-icons/hi2';
-import { useRef } from 'react';
 
 interface Props {
 	onUpdate: (conversation: ConversationFormType) => Promise<void>;

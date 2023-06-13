@@ -1,7 +1,6 @@
-import { WhiteBox } from '@components/Box';
 import { UserType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
-import { List, Typography } from 'antd';
+import { Card, List, Typography } from 'antd';
 import { toast } from 'react-hot-toast';
 import { HiPencil } from 'react-icons/hi2';
 import { ContactList } from '../lists';
@@ -28,7 +27,7 @@ export const InfoTab = ({ user }: Props) => {
 	};
 
 	return (
-		<WhiteBox p={2}>
+		<Card bodyStyle={{ padding: '1rem' }}>
 			<List header={<Typography.Title level={2}>Thông tin cá nhân</Typography.Title>}>
 				<List.Item>
 					<List.Item.Meta
@@ -75,6 +74,6 @@ export const InfoTab = ({ user }: Props) => {
 					/>
 				</List.Item>
 			</List>
-		</WhiteBox>
+		</Card>
 	);
 };

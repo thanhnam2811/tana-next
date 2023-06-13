@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import styles from '../styles/MessageInput.module.scss';
-import { Button, Form, Input, Space, Tooltip, theme } from 'antd';
+import styles from './MessageInput.module.scss';
+import { Button, Form, Input, Space, theme, Tooltip } from 'antd';
 import { HiFaceSmile, HiPaperAirplane, HiPaperClip } from 'react-icons/hi2';
 import { MessageFormType } from '../types';
 import { TextAreaRef } from 'antd/es/input/TextArea';

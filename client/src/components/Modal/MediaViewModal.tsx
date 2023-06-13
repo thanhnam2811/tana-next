@@ -1,6 +1,6 @@
 import { useFetcher } from '@common/hooks';
 import { Avatar, Box, CircularProgress, Dialog, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { getTimeAgo, stringUtil } from '@utils/common';
+import { stringUtil } from '@common/utils';
 import { isVideo } from '@utils/data';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { BsArrowDownCircle, BsArrowUpCircle } from 'react-icons/bs';
 import { HiDownload, HiX } from 'react-icons/hi';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { dateUtil } from '@common/utils';
 
 interface Props {
 	open: boolean;
@@ -110,7 +111,7 @@ export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 						</Typography>
 
 						<Typography fontSize={12} fontWeight={400}>
-							{getTimeAgo(media?.createdAt)}
+							{dateUtil.getTimeAgo(media?.createdAt)}
 						</Typography>
 					</Stack>
 				</Stack>

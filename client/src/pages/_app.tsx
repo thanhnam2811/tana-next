@@ -1,5 +1,4 @@
 import { useSettingStore } from '@store';
-import { SERVER_URL } from '@utils/common';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
@@ -17,7 +16,9 @@ import 'swiper/css';
 import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { useTheme } from '@modules/theme/hooks';
+import { useTheme } from 'src/layout/hooks';
+import { SERVER_URL } from '@common/config';
+
 dayjs.locale('vi');
 
 export default function NextApp({ Component, pageProps }: AppProps) {
@@ -43,7 +44,7 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 
 	// Socket
 	useEffect(() => {
-		window.socket = io(SERVER_URL, { autoConnect: false });
+		window.socket = io(SERVER_URL!, { autoConnect: false });
 		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {

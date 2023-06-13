@@ -1,11 +1,12 @@
 import { useAuth } from '@modules/auth/hooks';
-import { getTimeAgo, stringUtil } from '@utils/common';
-import { Button, Typography, theme } from 'antd';
+import { stringUtil } from '@common/utils';
+import { Button, theme, Typography } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import styles from '../styles/ConversationListItem.module.scss';
+import styles from './ConversationListItem.module.scss';
 import { ConversationType } from '../types';
 import { ConversationAvatar } from './ConversationAvatar';
+import { dateUtil } from '@common/utils';
 
 interface Props {
 	conversation: ConversationType;
@@ -51,7 +52,7 @@ export function ConversationListItem({ conversation }: Props) {
 						</Typography.Text>
 
 						<Typography.Text className={styles.time_ago}>
-							{getTimeAgo(lastest_message?.createdAt)}
+							{dateUtil.getTimeAgo(lastest_message?.createdAt)}
 						</Typography.Text>
 					</div>
 				</div>

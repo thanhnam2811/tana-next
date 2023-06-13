@@ -1,9 +1,10 @@
-import { SelectApi } from '@components/Input';
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
 import { Button, Form, Input, Modal, Space, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { ConversationCreateType, ConversationFormType } from '../types';
+import { SelectApi } from '@common/components/Input';
+import { useFetcher } from '@common/hooks';
 
 interface Props {
 	open: boolean;
@@ -33,6 +34,8 @@ export function CreateConversationModal({ open, onClose, onCreate }: Props) {
 		onClose();
 	};
 
+	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/friends` });
+
 	return (
 		<Modal
 			title="Tạo cuộc trò chuyện"
@@ -60,7 +63,7 @@ export function CreateConversationModal({ open, onClose, onCreate }: Props) {
 					]}
 				>
 					<SelectApi<UserType>
-						api="users/searchUser/friends"
+						fetcher={friendFetcher}
 						mode="multiple"
 						toOption={(item) => ({ value: item._id, label: item.fullname })}
 						renderOption={(item) => (

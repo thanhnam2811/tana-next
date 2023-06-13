@@ -1,6 +1,6 @@
 import { UserType } from '@modules/user/types';
 import { ConversationType } from '../types';
-import { getTimeAgo } from '@utils/common';
+import { dateUtil } from '@common/utils';
 
 export const getConversationInfo = (conversation: ConversationType, authUser: UserType) => {
 	const isDirect = conversation.members.length === 2;
@@ -11,7 +11,7 @@ export const getConversationInfo = (conversation: ConversationType, authUser: Us
 		? receiver?.user.isOnline
 			? 'Đang hoạt động'
 			: receiver?.user.lastAccess
-			? `Hoạt động ${getTimeAgo(receiver?.user.lastAccess)}`
+			? `Hoạt động ${dateUtil.getTimeAgo(receiver?.user.lastAccess)}`
 			: 'Không hoạt động'
 		: `${conversation.members.length} thành viên`;
 

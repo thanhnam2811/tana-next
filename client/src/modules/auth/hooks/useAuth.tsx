@@ -1,6 +1,6 @@
 import { userApi } from '@utils/api';
 import { create } from 'zustand';
-import { loginTokenApi, loginApi } from '../api';
+import { loginApi, loginTokenApi } from '../api';
 import { IUseAuth } from '../types';
 
 export const useAuth = create<IUseAuth>()((set, get) => ({

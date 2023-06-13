@@ -1,15 +1,15 @@
 import { reactOptions } from '@assets/data';
 import { UserAvatar } from '@modules/user/components';
-import { ReactPopover } from '@components/v2/Popover';
+import { ReactPopover } from 'src/common/components/Popover';
 import { PostType, ReactionType } from '@common/types';
 import { Collapse } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
-import { getTimeAgo } from '@utils/common';
 import { Avatar, Button, List } from 'antd';
 import { useState } from 'react';
 import { HiOutlineChatBubbleLeft, HiOutlineHandThumbUp, HiOutlineTrash } from 'react-icons/hi2';
 import { CommentType } from '../types';
 import { ListComment } from './ListComment';
+import { dateUtil } from '@common/utils';
 
 interface Props {
 	post: PostType;
@@ -72,7 +72,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			<List.Item
 				style={{ borderBottom: '1px solid #e8e8e8' }}
 				actions={actions}
-				extra={<span className="time-ago">{getTimeAgo(comment.createdAt)}</span>}
+				extra={<span className="time-ago">{dateUtil.getTimeAgo(comment.createdAt)}</span>}
 			>
 				<List.Item.Meta
 					avatar={<UserAvatar user={comment.author} size={48} />}

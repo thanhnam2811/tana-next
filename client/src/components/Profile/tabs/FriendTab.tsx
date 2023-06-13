@@ -1,7 +1,6 @@
 import { WhiteBox } from '@components/Box';
-import { FilterUser } from '@components/List/ListUser';
-import { ListFriend } from '@components/v2/List/ListFriend';
 import { useFetcher } from '@common/hooks';
+import { ListFriend } from '@common/components/List/ListFriend';
 
 interface Props {
 	user: any;
@@ -12,8 +11,6 @@ export function FriendTab({ user }: Props) {
 
 	return (
 		<WhiteBox p={2}>
-			<FilterUser fetcher={userFetcher} />
-
 			<ListFriend fetcher={userFetcher} />
 		</WhiteBox>
 	);

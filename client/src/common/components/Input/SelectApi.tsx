@@ -1,19 +1,22 @@
 import { FetcherType } from '@common/hooks';
 import { IData } from '@common/types';
-import { stringUtil } from '@utils/common';
 import { Select, SelectProps } from 'antd';
 import { DefaultOptionType } from 'antd/es/select';
+import { stringUtil } from '@common/utils';
+import { ReactNode } from 'react';
 
 interface Props<T extends IData> {
 	fetcher: FetcherType<T>;
 	scrollThreshold?: number;
 	toOption: (item: T) => DefaultOptionType;
+	renderOption?: (item: T) => ReactNode;
 }
 
 export function SelectApi<T extends IData = any>({
 	fetcher,
 	scrollThreshold = 100,
 	toOption,
+	renderOption,
 	...props
 }: Props<T> & SelectProps<T>) {
 	const handeScroll = (e: any) => {
@@ -26,7 +29,7 @@ export function SelectApi<T extends IData = any>({
 
 	return (
 		<Select
-			options={fetcher.data.map(toOption)}
+			options={!renderOption ? fetcher.data.map(toOption) : undefined} // if renderOption is defined, options will be rendered by renderOption
 			loading={fetcher.fetching}
 			onPopupScroll={handeScroll}
 			filterOption={(input, option) => {
@@ -35,6 +38,9 @@ export function SelectApi<T extends IData = any>({
 			}}
 			showSearch
 			{...props}
-		/>
+		>
+			{renderOption &&
+				fetcher.data.map((item) => <Select.Option key={item._id}>{renderOption(item)}</Select.Option>)}
+		</Select>
 	);
 }

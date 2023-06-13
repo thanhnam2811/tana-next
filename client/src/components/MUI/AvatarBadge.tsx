@@ -1,6 +1,6 @@
 import { UserType } from '@common/types';
 import { Avatar, AvatarProps, Badge, BadgeProps, useTheme } from '@mui/material';
-import { stringUtil } from '@utils/common';
+import { stringUtil } from '@common/utils';
 import { useRouter } from 'next/router';
 
 interface Props {

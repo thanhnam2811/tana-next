@@ -3,17 +3,18 @@ import { useAuth } from '@modules/auth/hooks';
 import { sendMessageApi } from '@modules/messages/api';
 import { MessageFormType, MessageType } from '@modules/messages/types';
 import { UserAvatar } from '@modules/user/components';
-import { randomString, stringUtil } from '@utils/common';
-import { Button, Form, Space, Spin, Tag, Typography, theme } from 'antd';
+import { stringUtil } from '@common/utils';
+import { Button, Form, Space, Spin, Tag, theme, Typography } from 'antd';
 import classnames from 'classnames';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
 import { HiArrowSmallDown } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import styles from '../../styles/ConversationMessage.module.scss';
+import styles from './ConversationMessage.module.scss';
 import MessageInput from '../MessageInput';
 import { FileRejection, useDropzone } from 'react-dropzone';
 import { conversationConfig } from '@modules/messages/utils';
+import { randomUtil } from '@common/utils';
 
 export function ConversationMessage() {
 	const { authUser } = useAuth();
@@ -30,7 +31,7 @@ export function ConversationMessage() {
 	const sendMessage = async (data: MessageFormType) => {
 		const msgPlaceholder: MessageType = {
 			...data,
-			_id: randomString(24),
+			_id: randomUtil.string(24),
 			sender: authUser!,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),

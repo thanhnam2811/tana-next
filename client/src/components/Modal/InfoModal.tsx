@@ -1,9 +1,9 @@
 import { contactOptions, privacyOptions } from '@assets/data';
 import { IContact, IEducation, IWork } from '@common/types';
-import { DATE_FORMAT } from '@utils/common';
 import { Button, DatePicker, Form, Input, Modal, Select, Space } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
+import { DATE_FORMAT } from '@common/utils';
 
 interface InfoModalProps<T> {
 	open: boolean;

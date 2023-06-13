@@ -2,7 +2,7 @@ import { AvatarBadge } from '@components/MUI/AvatarBadge';
 import { Avatar, Badge, Box, Button, IconButton, Stack, SxProps, Tooltip, Typography } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
 import { conversationApi, fileApi, userApi } from '@utils/api';
-import { stringUtil } from '@utils/common';
+import { stringUtil } from '@common/utils';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useRef } from 'react';
 import { toast } from 'react-hot-toast';

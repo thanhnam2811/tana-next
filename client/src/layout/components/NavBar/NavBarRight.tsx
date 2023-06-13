@@ -1,34 +1,21 @@
 import { useFetcher } from '@common/hooks';
 import { useAuth } from '@modules/auth/hooks';
 import { NotificationType } from '@modules/notification/types';
-import { useTheme } from '@modules/theme/hooks';
+import { useTheme } from 'src/layout/hooks';
 import { UserAvatar } from '@modules/user/components';
-import { getTimeAgo } from '@utils/common';
 import { Avatar, Badge, Button, Card, Dropdown, List, MenuProps, Space, Typography } from 'antd';
 import Link from 'next/link';
 import { HiLogout } from 'react-icons/hi';
 import { HiBell, HiCog6Tooth, HiExclamationTriangle, HiMoon, HiSun, HiUser } from 'react-icons/hi2';
 import { HeaderRight } from '../Header';
 import { useReport } from '@modules/report/hooks';
+import { dateUtil } from '@common/utils';
 
 export function NavBarRight() {
 	const { authUser, logout } = useAuth();
 	const { mode, toggleTheme } = useTheme();
 	const notiFetcher = useFetcher<NotificationType>({ api: `/users/notifications` });
 	const { openReport } = useReport({ type: 'bug' });
-
-	if (!authUser)
-		return (
-			<HeaderRight>
-				<Link href="/auth/login" draggable>
-					<Button type="primary">Đăng nhập</Button>
-				</Link>
-
-				<Link href="/auth/register" draggable>
-					<Button>Đăng ký</Button>
-				</Link>
-			</HeaderRight>
-		);
 
 	const avatarDropdownItems: MenuProps['items'] = [
 		{
@@ -90,7 +77,7 @@ export function NavBarRight() {
 													{noti.content}
 												</Typography.Text>
 												<Typography.Text type="secondary">
-													{getTimeAgo(noti.createdAt)}
+													{dateUtil.getTimeAgo(noti.createdAt)}
 												</Typography.Text>
 											</Space>
 										</Space>

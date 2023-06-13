@@ -1,5 +1,5 @@
 import { contactOptions } from '@assets/data';
-import { PrivacyDropdown } from '@components/Button';
+import { PrivacyDropdown } from 'src/common/components/Button';
 import { InfoModal } from '@components/Modal/InfoModal';
 import { IContact, IPrivacy } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';

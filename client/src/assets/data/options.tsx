@@ -1,7 +1,7 @@
 import Reaction from '@assets/icons/reactions';
 import { ContactType, EducationType, PrivacyValueType, ReactionType, WorkType } from '@common/types';
 import { COLORS } from '@utils/theme';
-import { HiGlobeAsiaAustralia, HiLockClosed, HiUserPlus, HiUsers, HiUserMinus } from 'react-icons/hi2';
+import { HiGlobeAsiaAustralia, HiLockClosed, HiUserMinus, HiUserPlus, HiUsers } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
 
 export interface IOption<T> {
