@@ -14,6 +14,7 @@ import { ConversationDetail } from '../ConversationDetail';
 import { ConversationMessage } from './ConversationMessage';
 import { toast } from 'react-hot-toast';
 import { updateConversationApi } from '@modules/messages/api';
+import { ConversationProvider } from '@modules/messages/hooks';
 
 interface Props {
 	onUpdate?: (id: string, data: ConversationType) => void;
@@ -48,17 +49,19 @@ export function ConversationContent({ onUpdate }: Props) {
 		);
 
 	const conversation = data!;
-
 	const { description, name } = getConversationInfo(conversation, authUser!);
 
-	const updateConversation = async (data: ConversationFormType) => {
+	const updateConversation = (data: ConversationType) => {
+		mutate(data);
+		onUpdate?.(id, data);
+	};
+
+	const updateConversationForm = async (data: ConversationFormType) => {
 		const toastId = toast.loading('Đang cập nhật cuộc trò chuyện...');
 
 		try {
 			const conv = await updateConversationApi(id, data);
-			mutate(conv);
-
-			onUpdate?.(id, conv);
+			updateConversation(conv);
 
 			toast.success('Cập nhật cuộc trò chuyện thành công!', { id: toastId });
 		} catch (error: any) {
@@ -67,7 +70,13 @@ export function ConversationContent({ onUpdate }: Props) {
 	};
 
 	return (
-		<>
+		<ConversationProvider
+			value={{
+				conversation,
+				updateConversation,
+				updateConversationForm,
+			}}
+		>
 			<Layout.Content style={{ maxWidth: '100%' }} fixed>
 				<Card
 					style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
@@ -103,8 +112,8 @@ export function ConversationContent({ onUpdate }: Props) {
 			</Layout.Content>
 
 			<Layout.Sider align="right" collapse={!detail}>
-				<ConversationDetail conversation={conversation} onUpdate={updateConversation} />
+				<ConversationDetail />
 			</Layout.Sider>
-		</>
+		</ConversationProvider>
 	);
 }

@@ -1,15 +1,16 @@
 import { apiClient } from '@common/api';
+import { ConversationType } from '../types';
 
 interface ChangeNicknameData {
 	conversationId: string;
-	userId: string;
+	userID: string;
 	nickname: string;
 }
 
-export const changeNicknameApi = ({ conversationId, userId, nickname }: ChangeNicknameData) =>
+export const changeNicknameApi = ({ conversationId, userID, nickname }: ChangeNicknameData) =>
 	apiClient
-		.patch(`/conversations/${conversationId}/members/changeNickname`, {
-			userId,
+		.patch<ConversationType>(`/conversations/${conversationId}/members/changeNickname`, {
+			userID,
 			nickname,
 		})
 		.then((res) => res.data);

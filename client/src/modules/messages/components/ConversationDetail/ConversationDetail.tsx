@@ -1,6 +1,7 @@
 import { uploadFileApi } from '@common/api';
+import { useFetcher } from '@common/hooks';
 import { useAuth } from '@modules/auth/hooks';
-import { ConversationFormType, ConversationType } from '@modules/messages/types';
+import { useConversationContext } from '@modules/messages/hooks';
 import { getConversationInfo } from '@modules/messages/utils';
 import {
 	App,
@@ -11,10 +12,10 @@ import {
 	CollapsePanelProps,
 	Form,
 	Space,
-	theme,
 	Tooltip,
 	Typography,
 	Upload,
+	theme,
 } from 'antd';
 import ImgCrop from 'antd-img-crop';
 import { toast } from 'react-hot-toast';
@@ -30,24 +31,50 @@ import {
 	HiUsers,
 } from 'react-icons/hi2';
 import { TiInfoLarge } from 'react-icons/ti';
+import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
-import { SelectApi } from 'src/common/components/Input';
-import { useFetcher } from '@common/hooks';
 
-interface Props {
-	conversation: ConversationType;
-	onUpdate: (conversation: ConversationFormType) => Promise<void>;
-}
+export function ConversationDetail() {
+	const { conversation, updateConversationForm } = useConversationContext()!;
 
-export function ConversationDetail({ conversation, onUpdate }: Props) {
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
 	const { authUser } = useAuth();
 
 	const { isDirect, name, description } = getConversationInfo(conversation, authUser!);
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
+
+	const [addMemberForm] = Form.useForm<{ members: string[] }>();
+	const handleAddMember = async (values: { members: string[] }) => {
+		console.log(values);
+	};
+
+	const onAddMemberClick = () => {
+		modal.info({
+			title: 'Thêm thành viên',
+			content: (
+				<Form onFinish={handleAddMember} form={addMemberForm} initialValues={{ members: [] }}>
+					<Form.Item name="member">
+						<SelectApi
+							fetcher={friendFetcher}
+							toOption={(user) => ({
+								value: user._id,
+								label: user.fullname,
+								disabled: !!conversation.members.find(({ user: { _id } }) => _id === user._id),
+							})}
+							mode="multiple"
+						/>
+					</Form.Item>
+				</Form>
+			),
+			okText: 'Thêm',
+			onOk: () => addMemberForm.submit(),
+			closable: true,
+			maskClosable: true,
+		});
+	};
 
 	const collapsePanels: CollapsePanelProps[] = [
 		{
@@ -59,9 +86,12 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 					<Typography.Text strong>Thông tin</Typography.Text>
 				</Space>
 			),
-			children: <InfoMenu conversation={conversation} onUpdate={onUpdate} />,
+			children: <InfoMenu />,
 		},
-		{
+	];
+
+	if (!isDirect) {
+		collapsePanels.push({
 			key: 'members',
 			header: (
 				<Space>
@@ -78,30 +108,16 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 						icon={<HiUserPlus />}
 						onClick={(e) => {
 							e.stopPropagation();
-
-							modal.info({
-								title: 'Thêm thành viên',
-								content: (
-									<Form onFinish={alert}>
-										<Form.Item name="member">
-											<SelectApi
-												fetcher={friendFetcher}
-												toOption={(user) => ({
-													value: user._id,
-													label: user.fullname,
-												})}
-												mode="multiple"
-											/>
-										</Form.Item>
-									</Form>
-								),
-							});
+							onAddMemberClick();
 						}}
 					/>
 				</Tooltip>
 			),
-			children: <MemberMenu conversation={conversation} />,
-		},
+			children: <MemberMenu />,
+		});
+	}
+
+	collapsePanels.push(
 		{
 			key: 'media',
 			header: (
@@ -123,19 +139,8 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 				</Space>
 			),
 			children: <div>Tệp</div>,
-		},
-		{
-			key: 'others',
-			header: (
-				<Space>
-					<HiExclamationTriangle />
-
-					<Typography.Text strong>Khác</Typography.Text>
-				</Space>
-			),
-			children: <div>Khác</div>,
-		},
-	];
+		}
+	);
 
 	const handleChangeAvatar = async (file: File) => {
 		const toastId = toast.loading('Đang tải ảnh lên...');
@@ -143,7 +148,7 @@ export function ConversationDetail({ conversation, onUpdate }: Props) {
 			const { files } = await uploadFileApi([file]);
 			toast.success('Tải ảnh lên thành công!', { id: toastId });
 
-			await onUpdate({ avatar: files[0]._id });
+			await updateConversationForm({ avatar: files[0]._id });
 		} catch (error: any) {
 			toast.error(error.message || error.toString());
 		}

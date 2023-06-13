@@ -1,8 +1,13 @@
 import { apiClient } from '@common/api';
+import { ConversationType } from '../types';
 
 interface RemoveMemberData {
 	conversationId: string;
-	userId: string;
+	userID: string;
 }
-export const removeMemberApi = ({ conversationId, userId }: RemoveMemberData) =>
-	apiClient.delete(`/conversations/${conversationId}/members/${userId}`).then((res) => res.data);
+export const removeMemberApi = ({ conversationId, userID }: RemoveMemberData) =>
+	apiClient
+		.patch<ConversationType>(`/conversations/${conversationId}/members/remove`, {
+			userID,
+		})
+		.then((res) => res.data);

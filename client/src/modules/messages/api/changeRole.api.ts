@@ -1,15 +1,16 @@
 import { apiClient } from '@common/api';
+import { ConversationType } from '../types';
 
 interface ChangeRoleData {
 	conversationId: string;
-	userId: string;
+	userID: string;
 	role: 'admin' | 'member';
 }
 
-export const changeRoleApi = ({ conversationId, userId, role }: ChangeRoleData) =>
+export const changeRoleApi = ({ conversationId, userID, role }: ChangeRoleData) =>
 	apiClient
-		.patch(`/conversations/${conversationId}/members/changeRole`, {
-			userId,
+		.patch<ConversationType>(`/conversations/${conversationId}/members/changeRole`, {
+			userID,
 			role,
 		})
 		.then((res) => res.data);

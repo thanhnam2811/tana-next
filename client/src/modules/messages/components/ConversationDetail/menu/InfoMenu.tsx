@@ -1,14 +1,10 @@
-import { ConversationFormType, ConversationType } from '@modules/messages/types';
+import { useConversationContext } from '@modules/messages/hooks';
 import { App, Button, Input, InputRef, Space } from 'antd';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { HiMagnifyingGlass, HiPencil } from 'react-icons/hi2';
 
-interface Props {
-	onUpdate: (conversation: ConversationFormType) => Promise<void>;
-	conversation: ConversationType;
-}
-
-export function InfoMenu({ onUpdate, conversation }: Props) {
+export function InfoMenu() {
+	const { conversation, updateConversationForm } = useConversationContext()!;
 	const { modal } = App.useApp();
 
 	const inputNameRef = useRef<InputRef>(null);
@@ -18,7 +14,7 @@ export function InfoMenu({ onUpdate, conversation }: Props) {
 			content: <Input placeholder="Tên cuộc trò chuyện" defaultValue={conversation.name} ref={inputNameRef} />,
 			okText: 'Lưu',
 			cancelText: 'Hủy',
-			onOk: () => onUpdate({ name: inputNameRef.current!.input?.value }),
+			onOk: () => updateConversationForm({ name: inputNameRef.current!.input?.value }),
 		});
 
 	return (

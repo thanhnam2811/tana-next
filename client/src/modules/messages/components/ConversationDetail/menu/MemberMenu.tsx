@@ -1,15 +1,12 @@
-import { ConversationType } from '@modules/messages/types';
+import { useAuth } from '@modules/auth/hooks';
+import { useConversationContext } from '@modules/messages/hooks';
 import { UserAvatar } from '@modules/user/components';
 import { Button, List, Space, Tag, Typography } from 'antd';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { MemberDropdown } from '../../MemberDropdown';
-import { useAuth } from '@modules/auth/hooks';
 
-interface Props {
-	conversation: ConversationType;
-}
-
-export function MemberMenu({ conversation }: Props) {
+export function MemberMenu() {
+	const { conversation, updateConversation } = useConversationContext()!;
 	const { authUser } = useAuth();
 
 	return (
@@ -18,7 +15,7 @@ export function MemberMenu({ conversation }: Props) {
 			renderItem={(member) => (
 				<List.Item
 					extra={
-						<MemberDropdown conversation={conversation} member={member}>
+						<MemberDropdown conversation={conversation} member={member} onUpdateMember={updateConversation}>
 							<Button shape="circle" size="small" icon={<HiDotsHorizontal />} />
 						</MemberDropdown>
 					}

@@ -10,9 +10,10 @@ import { changeNicknameApi, changeRoleApi, removeMemberApi } from '@modules/mess
 interface Props {
 	conversation: ConversationType;
 	member: IMember;
+	onUpdateMember?: (conversation: ConversationType) => void;
 }
 
-export function MemberDropdown({ conversation, member, ...props }: Props & DropdownProps) {
+export function MemberDropdown({ conversation, member, onUpdateMember, ...props }: Props & DropdownProps) {
 	const { modal } = App.useApp();
 	const { authUser } = useAuth();
 
@@ -23,11 +24,13 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 	const handleChangeNickname = async (values: { nickname: string }) => {
 		const toastId = toast.loading('Đang đổi biệt danh...');
 		try {
-			await changeNicknameApi({
+			const updated = await changeNicknameApi({
 				conversationId: conversation._id,
-				userId: member.user._id,
+				userID: member.user._id,
 				nickname: values.nickname,
 			});
+			onUpdateMember?.(updated);
+
 			toast.success('Đổi biệt danh thành công!', { id: toastId });
 		} catch (error) {
 			toast.error('Đổi biệt danh thất bại!', { id: toastId });
@@ -57,6 +60,8 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 						</Form>
 					),
 					onOk: () => changeNicknameForm.submit(),
+					closable: true,
+					maskClosable: true,
 				}),
 		},
 	];
@@ -80,11 +85,13 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 	const handleChangeRole = async (role: 'admin' | 'member') => {
 		const toastId = toast.loading('Đang thay đổi quyền...');
 		try {
-			await changeRoleApi({
+			const updated = await changeRoleApi({
 				conversationId: conversation._id,
-				userId: member.user._id,
+				userID: member.user._id,
 				role,
 			});
+			onUpdateMember?.(updated);
+
 			toast.success('Thay đổi quyền thành công!', { id: toastId });
 		} catch (error) {
 			toast.error('Thay đổi quyền thất bại!', { id: toastId });
@@ -94,10 +101,12 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 	const handleRemoveMember = async () => {
 		const toastId = toast.loading('Đang xóa thành viên...');
 		try {
-			await removeMemberApi({
+			const updated = await removeMemberApi({
 				conversationId: conversation._id,
-				userId: member.user._id,
+				userID: member.user._id,
 			});
+			onUpdateMember?.(updated);
+
 			toast.success('Xóa thành viên thành công!', { id: toastId });
 		} catch (error) {
 			toast.error('Xóa thành viên thất bại!', { id: toastId });
