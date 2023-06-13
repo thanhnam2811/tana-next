@@ -5,7 +5,7 @@ import { App, Dropdown, DropdownProps, Form, Input, MenuProps } from 'antd';
 import { merge } from 'lodash';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
-import { changeNicknameApi, changeRoleApi } from '@modules/messages/api';
+import { changeNicknameApi, changeRoleApi, removeMemberApi } from '@modules/messages/api';
 
 interface Props {
 	conversation: ConversationType;
@@ -31,20 +31,6 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 			toast.success('Đổi biệt danh thành công!', { id: toastId });
 		} catch (error) {
 			toast.error('Đổi biệt danh thất bại!', { id: toastId });
-		}
-	};
-
-	const handleChangeRole = async (role: 'admin' | 'member') => {
-		const toastId = toast.loading('Đang thay đổi quyền...');
-		try {
-			await changeRoleApi({
-				conversationId: conversation._id,
-				userId: member.user._id,
-				role,
-			});
-			toast.success('Thay đổi quyền thành công!', { id: toastId });
-		} catch (error) {
-			toast.error('Thay đổi quyền thất bại!', { id: toastId });
 		}
 	};
 
@@ -91,6 +77,33 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 		});
 	}
 
+	const handleChangeRole = async (role: 'admin' | 'member') => {
+		const toastId = toast.loading('Đang thay đổi quyền...');
+		try {
+			await changeRoleApi({
+				conversationId: conversation._id,
+				userId: member.user._id,
+				role,
+			});
+			toast.success('Thay đổi quyền thành công!', { id: toastId });
+		} catch (error) {
+			toast.error('Thay đổi quyền thất bại!', { id: toastId });
+		}
+	};
+
+	const handleRemoveMember = async () => {
+		const toastId = toast.loading('Đang xóa thành viên...');
+		try {
+			await removeMemberApi({
+				conversationId: conversation._id,
+				userId: member.user._id,
+			});
+			toast.success('Xóa thành viên thành công!', { id: toastId });
+		} catch (error) {
+			toast.error('Xóa thành viên thất bại!', { id: toastId });
+		}
+	};
+
 	// Only admin can change role, remove member
 	if (authMember?.role === 'admin') {
 		items.push(
@@ -115,6 +128,7 @@ export function MemberDropdown({ conversation, member, ...props }: Props & Dropd
 			{
 				key: 'remove',
 				label: 'Xóa khỏi nhóm',
+				onClick: handleRemoveMember,
 			}
 		);
 	}
