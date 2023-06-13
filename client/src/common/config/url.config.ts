@@ -1,1 +1,1 @@
-export const { SERVER_URL } = process.env;
+export const SERVER_URL = process.env.SERVER_URL;
