@@ -138,6 +138,7 @@ class MessageController {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
 		const conversation = await Conversation.findById(req.params.conversationId);
+		if (!conversation) return res.status(404).send('Không tìm thấy cuộc hội thoại');
 
 		// check user has existing user deleted conversation
 		let index = -1;

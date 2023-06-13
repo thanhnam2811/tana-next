@@ -708,6 +708,12 @@ class ConversationController {
 					if (error) {
 						return res.status(400).send(error.details[0].message);
 					}
+
+					//check conversation 2 members can't remove
+					if (conversation.members.length == 2) {
+						return res.status(403).send('Không thể xóa thành viên trong cuộc hội thoại 2 người');
+					}
+
 					if (adminOfConversation.includes(req.user._id.toString())) {
 						// check if length of members is 2 => remove conversation
 						if (conversation.members.length == 2) {
