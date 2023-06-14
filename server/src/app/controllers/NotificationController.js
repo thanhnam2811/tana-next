@@ -152,10 +152,11 @@ class NotificationController {
 					},
 				},
 			});
-			if (notifications.docs.length === 0) {
+			console.log(notifications);
+			if (notifications.length === 0) {
 				return res.status(404).json({ message: 'Thông báo không được tìm thấy' });
 			}
-			const notificationIds = notifications.docs.map((notification) => notification._id);
+			const notificationIds = notifications.map((notification) => notification._id);
 			await Notification.updateMany(
 				{
 					_id: {
