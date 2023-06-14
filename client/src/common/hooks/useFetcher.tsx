@@ -5,7 +5,7 @@ import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
 
 // T: Data type,
-export type FetcherType<T extends IData, U extends IPaginationResponse<T>> = {
+export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
 	data: T[];
 	listRes?: U[];
 	updateData: (id: string, newData: T) => void;
