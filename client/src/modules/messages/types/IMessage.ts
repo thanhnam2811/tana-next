@@ -1,4 +1,4 @@
-import { IData, IFile, IMedia } from '@common/types';
+import { IData, IFile } from '@common/types';
 import { UserType } from '@modules/user/types';
 
 interface IMessage extends IData {
