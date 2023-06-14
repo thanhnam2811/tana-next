@@ -11,11 +11,12 @@ import {
 	Collapse,
 	CollapsePanelProps,
 	Form,
+	Popconfirm,
 	Space,
+	theme,
 	Tooltip,
 	Typography,
 	Upload,
-	theme,
 } from 'antd';
 import ImgCrop from 'antd-img-crop';
 import Link from 'next/link';
@@ -37,8 +38,11 @@ import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
+import { leaveConversationApi } from '@modules/messages/api';
+import { useRouter } from 'next/router';
 
 export function ConversationDetail() {
+	const router = useRouter();
 	const { conversation, updateConversationForm } = useConversationContext()!;
 
 	const { token } = theme.useToken();
@@ -153,7 +157,19 @@ export function ConversationDetail() {
 
 			await updateConversationForm({ avatar: files[0]._id });
 		} catch (error: any) {
-			toast.error(error.message || error.toString());
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+	};
+
+	const handleLeaveConversation = async () => {
+		const toastId = toast.loading('Đang rời khỏi nhóm...');
+		try {
+			await leaveConversationApi(conversation._id);
+			await router.replace({ pathname: router.pathname, query: { id: null } });
+
+			toast.success('Rời nhóm thành công!', { id: toastId });
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
 		}
 	};
 
@@ -194,9 +210,14 @@ export function ConversationDetail() {
 								</Link>
 							</Tooltip>
 						) : (
-							<Tooltip title="Rời nhóm">
-								<Button shape="circle" icon={<HiLogout />} />
-							</Tooltip>
+							<Popconfirm
+								title="Bạn có chắc chắn muốn rời khỏi nhóm này không?"
+								onConfirm={handleLeaveConversation}
+							>
+								<Tooltip title="Rời nhóm">
+									<Button shape="circle" icon={<HiLogout />} />
+								</Tooltip>
+							</Popconfirm>
 						)}
 
 						<Tooltip title="Tắt thông báo">

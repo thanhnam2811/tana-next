@@ -39,9 +39,9 @@ export const PictureContainer = ({ user }: Props) => {
 	const handleChangeCoverPic = async (e: ChangeEvent<HTMLInputElement>) => {
 		const { files } = e.target;
 		if (files?.length) {
+			const toastId = toast.loading('Đang tải ảnh lên...');
 			try {
 				// Upload file
-				const toastId = toast.loading('Đang tải ảnh lên...');
 				const { data } = await fileApi.upload(files);
 				const file = data.files[0];
 
@@ -55,7 +55,7 @@ export const PictureContainer = ({ user }: Props) => {
 				// Show toast
 				toast.success('Cập nhật ảnh bìa thành công!', { id: toastId });
 			} catch (error) {
-				toast.error(error?.toString() || 'Có lỗi xảy ra! Vui lòng thử lại');
+				toast.error(error?.toString() || 'Có lỗi xảy ra! Vui lòng thử lại', { id: toastId });
 			}
 		}
 	};
@@ -64,9 +64,9 @@ export const PictureContainer = ({ user }: Props) => {
 	const handleChangeProfilePic = async (e: ChangeEvent<HTMLInputElement>) => {
 		const { files } = e.target;
 		if (files?.length) {
+			const toastId = toast.loading('Đang tải ảnh lên...');
 			try {
 				// Upload file
-				const toastId = toast.loading('Đang tải ảnh lên...');
 				const { data } = await fileApi.upload(files);
 				const file = data.files[0];
 
@@ -80,7 +80,7 @@ export const PictureContainer = ({ user }: Props) => {
 				// Show toast
 				toast.success('Cập nhật ảnh đại diện thành công!', { id: toastId });
 			} catch (error) {
-				toast.error(error?.toString() || 'Có lỗi xảy ra! Vui lòng thử lại');
+				toast.error(error?.toString() || 'Có lỗi xảy ra! Vui lòng thử lại', { id: toastId });
 			}
 		}
 	};
