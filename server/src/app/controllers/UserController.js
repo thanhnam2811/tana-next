@@ -132,8 +132,8 @@ class UserController {
 
 	// [PUT] set password
 	async setPassword(req, res, next) {
-		if (req.params.id.toString() === req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() === req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				if (user.password) {
 					return res
@@ -152,20 +152,20 @@ class UserController {
 					{ new: true }
 				);
 				res.status(200).json(updatedUser);
-			} catch (err) {
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn chỉ có thể đặt mật khẩu cho tài khoản của bạn!!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn chỉ có thể đặt mật khẩu cho tài khoản của bạn!!!!');
+		} catch (err) {
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
 	// [PUT] update password
 	async updatePassword(req, res, next) {
-		if (req.params.id.toString() === req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() === req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const validPassword = await bcrypt.compare(req.body.oldPassword, user.password);
 				if (!validPassword) {
@@ -177,13 +177,13 @@ class UserController {
 					$set: { password: hashPassword },
 				});
 				res.status(200).json('Cập nhật mật khẩu thành công!!!');
-			} catch (err) {
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn chỉ có thể cập nhật thông tin tài khoản của bạn!!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn chỉ có thể cập nhật thông tin tài khoản của bạn!!!!');
+		} catch (err) {
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -243,8 +243,8 @@ class UserController {
 
 	// send friend request
 	async sendFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				// check arrray object friends of currentUser has user._id or not
@@ -280,21 +280,21 @@ class UserController {
 					});
 					res.status(200).json('Hủy yêu cầu kết bạn thành công!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể gửi yêu cầu kết bạn cho chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể gửi yêu cầu kết bạn cho chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
 	// accept friend request
 	async acceptFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (
@@ -319,21 +319,21 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
 	// reject friend request
 	async rejectFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (
@@ -348,21 +348,21 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
 	// unfriend
 	async unfriend(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (currentUser.friends.some((friend) => friend.user.toString() === req.params.id)) {
@@ -385,14 +385,14 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể hủy kết bạn với người này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể hủy kết bạn với chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể hủy kết bạn với chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
@@ -942,130 +942,151 @@ class UserController {
 	}
 
 	// search user by name
-	async search(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		User.paginate(
-			{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+	async search(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			User.paginate(
+				{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (error) {
+			console.log(error);
+			return next(
+				createHttpError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
+		}
 	}
 
 	// search user in admin
-	async searchUser(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const roleUserID = mongoose.Types.ObjectId('6389667eb7991bdd04987103');
-		User.paginate(
-			{
-				fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-				role: roleUserID,
-			},
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+	async searchUser(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const roleUserID = mongoose.Types.ObjectId('6389667eb7991bdd04987103');
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					role: roleUserID,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
+		}
 	}
 
 	async searchAdmin(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
-		User.paginate(
-			{
-				fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-				role: roleUserID,
-			},
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					role: roleUserID,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (err) {
+			console.log(err);
+			return next(
+				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
+		}
 	}
 
 	// get all users

@@ -134,60 +134,67 @@ class MessageController {
 	}
 
 	// [Get] fetch messages from conversationId
-	async fetchMessages(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+	async fetchMessages(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
-		const conversation = await Conversation.findById(req.params.conversationId);
-		if (!conversation) return res.status(404).send('Không tìm thấy cuộc hội thoại');
+			const conversation = await Conversation.findById(req.params.conversationId);
+			// if (!conversation) return res.status(404).send('Không tìm thấy cuộc hội thoại');
 
-		// check user has existing user deleted conversation
-		let index = -1;
-		index = conversation.user_deleted.findIndex((item) => item.userId.toString() === req.user._id.toString());
-		let deletedDate = new Date(-1); // date BC
-		if (index !== -1) {
-			deletedDate = conversation.user_deleted[index].deletedAt;
-		}
-		if (conversation.members.some((mem) => mem.user.toString() === req.user._id.toString())) {
-			Message.paginate(
-				{ conversation: req.params.conversationId, createdAt: { $gte: deletedDate } },
-				{
-					offset,
-					limit,
-					sort: { createdAt: -1 },
-					populate: [
-						{
-							path: 'sender',
-							select: '_id  fullname profilePicture',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
+			// check user has existing user deleted conversation
+			let index = -1;
+			index = conversation.user_deleted.findIndex((item) => item.userId.toString() === req.user._id.toString());
+			let deletedDate = new Date(-1); // date BC
+			if (index !== -1) {
+				deletedDate = conversation.user_deleted[index].deletedAt;
+			}
+			if (conversation.members.some((mem) => mem.user.toString() === req.user._id.toString())) {
+				Message.paginate(
+					{ conversation: req.params.conversationId, createdAt: { $gte: deletedDate } },
+					{
+						offset,
+						limit,
+						sort: { createdAt: -1 },
+						populate: [
+							{
+								path: 'sender',
+								select: '_id  fullname profilePicture',
+								populate: {
+									path: 'profilePicture',
+									select: '_id link',
+								},
 							},
-						},
-						{
-							path: 'media',
-						},
-					],
-				}
-			)
-				.then((data) => {
-					data.docs.forEach((message) => {
-						if (message.iv) {
-							const iv = Buffer.from(message.iv, 'base64');
-							const decipher = crypto.createDecipheriv(algorithm, key, iv);
-							let decryptedData = decipher.update(message.text, 'hex', 'utf-8');
-							decryptedData += decipher.final('utf-8');
-							message.text = decryptedData;
-						}
+							{
+								path: 'media',
+							},
+						],
+					}
+				)
+					.then((data) => {
+						data.docs.forEach((message) => {
+							if (message.iv) {
+								const iv = Buffer.from(message.iv, 'base64');
+								const decipher = crypto.createDecipheriv(algorithm, key, iv);
+								let decryptedData = decipher.update(message.text, 'hex', 'utf-8');
+								decryptedData += decipher.final('utf-8');
+								message.text = decryptedData;
+							}
+						});
+						getListData(res, data);
+					})
+					.catch((err) => {
+						res.status(500).send({
+							message: err.message || 'Some error occurred while retrieving tutorials.',
+						});
 					});
-					getListData(res, data);
-				})
-				.catch((err) => {
-					res.status(500).send({
-						message: err.message || 'Some error occurred while retrieving tutorials.',
-					});
-				});
-		} else {
-			res.status(403).send('Bạn không có trong cuộc hội thoại này!!!');
+			} else {
+				res.status(403).send('Bạn không có trong cuộc hội thoại này!!!');
+			}
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+			);
 		}
 	}
 
