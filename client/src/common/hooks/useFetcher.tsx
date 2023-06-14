@@ -5,8 +5,9 @@ import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
 
 // T: Data type,
-export type FetcherType<T extends IData> = {
+export type FetcherType<T extends IData, U extends IPaginationResponse<T>> = {
 	data: T[];
+	listRes?: U[];
 	updateData: (id: string, newData: T) => void;
 	addData: (newData: T) => void;
 	removeData: (id: string) => void;
@@ -27,9 +28,13 @@ export interface FetcherProps {
 	params?: IPaginationParams;
 }
 
-export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {} }: FetcherProps): FetcherType<T> => {
+export const useFetcher = <T extends IData = any, U extends IPaginationResponse<T> = IPaginationResponse<T>>({
+	api,
+	limit = 20,
+	params = {},
+}: FetcherProps): FetcherType<T, U> => {
 	const getKey = useCallback(
-		(pageIndex: number, prevData: IPaginationResponse<T>) => {
+		(pageIndex: number, prevData: U) => {
 			if (pageIndex === 0) return urlUtil.generateUrl(api, { ...params, size: limit });
 
 			const prevOffset = Number(prevData?.offset) || 0;
@@ -49,7 +54,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		mutate,
 		size: page,
 		setSize: setPage,
-	} = useSWRInfinite<IPaginationResponse<T>>(getKey, swrFetcher);
+	} = useSWRInfinite<U>(getKey, swrFetcher);
 
 	const { data, hasMore } = useMemo(() => {
 		const memo = { data: [], hasMore: true };
@@ -145,6 +150,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 	const fetcher = useMemo(
 		() => ({
 			data,
+			listRes,
 			params,
 			fetching,
 			validating,
