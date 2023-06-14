@@ -60,7 +60,7 @@ export function ConversationMessage() {
 
 		try {
 			// Upload file
-			if (data.files && data.files.length > 0) {
+			if (data.files?.length) {
 				const uploaded = await uploadFileApi(data.files);
 				data.media = uploaded.files.map(({ _id }) => _id);
 				delete data.files;
@@ -69,8 +69,12 @@ export function ConversationMessage() {
 			// Send message
 			const msg = await sendMessageApi(id, data);
 			msgFetcher.updateData(msgPlaceholder._id, msg);
-		} catch (error) {
-			msgFetcher.removeData(msgPlaceholder._id);
+		} catch (error: any) {
+			msgFetcher.updateData(msgPlaceholder._id, {
+				...msgPlaceholder,
+				sending: false,
+				error: error.message || error.toString(),
+			});
 		}
 	};
 
@@ -182,6 +186,12 @@ export function ConversationMessage() {
 									message={item}
 									prevCombine={prevCombine}
 									nextCombine={nextCombine}
+									onRetry={() =>
+										sendMessage({
+											...item,
+											media: item.media?.map((file) => file._id),
+										})
+									}
 								/>
 							);
 						})}

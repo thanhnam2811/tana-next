@@ -15,6 +15,7 @@ interface IMessage extends IData {
 	conversation: string;
 
 	sending?: boolean; // for UI
+	error?: string; // for UI
 }
 
 // For use
