@@ -144,18 +144,14 @@ class NotificationController {
 
 	async markAllAsRead(req, res, next) {
 		try {
-			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			// get all notification receivers include req.user._id
-			const notifications = await Notification.paginate(
-				{
-					receiver: {
-						$elemMatch: {
-							$eq: req.user._id,
-						},
+			const notifications = await Notification.find({
+				receiver: {
+					$elemMatch: {
+						$eq: req.user._id,
 					},
 				},
-				{ limit, offset }
-			);
+			});
 			if (notifications.docs.length === 0) {
 				return res.status(404).json({ message: 'Thông báo không được tìm thấy' });
 			}

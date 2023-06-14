@@ -124,11 +124,16 @@ class ConversationController {
 	async leaveConversation(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
+			if (!conversation) return res.status(404).send('Không tìm thấy cuộc trò chuyện');
+
+			if (conversation.members.length === 2)
+				return res.status(400).send('Không thể rời khỏi cuộc trò chuyện 2 người');
+
 			let index = -1;
 			index = conversation.members.findIndex((item) => item.user.toString() === req.user._id.toString());
 			if (index !== -1) {
+				const adminOfConversation = conversation.members.filter((member) => member.role === 'admin');
 				conversation.members.splice(index, 1);
-				const adminOfConversation = conversation.members.find((member) => member.role === 'admin');
 				if (
 					adminOfConversation.length === 1 &&
 					adminOfConversation.user.toString() === req.user._id.toString()
