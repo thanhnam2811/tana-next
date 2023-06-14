@@ -14,6 +14,9 @@ import { FileRejection, useDropzone } from 'react-dropzone';
 import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from './ConversationMessage.module.scss';
+import { MessageItem } from '@modules/messages/components';
+import { IFile } from '@common/types';
+import { uploadFileApi } from '@common/api';
 
 export function ConversationMessage() {
 	const { modal } = App.useApp();
@@ -42,9 +45,30 @@ export function ConversationMessage() {
 			media: [],
 			sending: true,
 		};
+
+		if (data.files)
+			msgPlaceholder.media = data.files?.map<IFile>((file) => ({
+				_id: randomUtil.string(24),
+				name: file.name,
+				originalname: file.name,
+				link: URL.createObjectURL(file),
+				size: file.size,
+				type: file.type,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			}));
+
 		msgFetcher.addData(msgPlaceholder);
 
 		try {
+			// Upload file
+			if (data.files && data.files.length > 0) {
+				const uploaded = await uploadFileApi(data.files);
+				data.media = uploaded.files.map(({ _id }) => _id);
+				delete data.files;
+			}
+
+			// Send message
 			const msg = await sendMessageApi(id, data);
 			msgFetcher.updateData(msgPlaceholder._id, msg);
 		} catch (error) {
@@ -87,9 +111,7 @@ export function ConversationMessage() {
 		form.setFieldValue('files', files);
 	};
 
-	const onDropRejected = (rejectedFiles: FileRejection[]) => {
-		console.log({ rejectedFiles });
-
+	const onDropRejected = (rejectedFiles: FileRejection[]) =>
 		modal.error({
 			title: 'File không hợp lệ',
 			content: (
@@ -115,7 +137,6 @@ export function ConversationMessage() {
 				/>
 			),
 		});
-	};
 
 	const dropzone = useDropzone({ onDropAccepted, onDropRejected, ...conversationConfig.dropzone });
 
@@ -151,49 +172,19 @@ export function ConversationMessage() {
 									</Tag>
 								);
 
-							const classes = [styles.message];
-
-							const isMine = item.sender?._id === authUser!._id;
-							classes.push(isMine ? styles.me : styles.other);
-
 							const prev = listMessage[index - 1];
-							const isPrevGroup = prev && prev.sender?._id === item.sender?._id;
+							const prevCombine = prev && prev.sender?._id === item.sender?._id;
 
 							const next = listMessage[index + 1];
-							const isNextGroup = next && next.sender?._id === item.sender?._id;
-
-							const contentClasses = [styles.message_content];
+							const nextCombine = next && next.sender?._id === item.sender?._id;
 
 							return (
-								<Space
+								<MessageItem
 									key={item._id}
-									style={{
-										marginTop: isNextGroup ? 2 : 8,
-										marginBottom: isPrevGroup ? 2 : 8,
-									}}
-									className={classnames(classes)}
-									align="end"
-								>
-									{!isMine && (
-										<UserAvatar
-											user={item.sender}
-											style={{ visibility: isPrevGroup ? 'hidden' : 'visible' }}
-											avtSize={20}
-										/>
-									)}
-
-									<div
-										className={classnames(contentClasses)}
-										style={{
-											backgroundColor: isMine ? token.colorBorder : undefined,
-											borderColor: token.colorBorder,
-										}}
-									>
-										{item.text}
-									</div>
-
-									{item.sending && <Spin size="small" style={{ alignSelf: 'center' }} />}
-								</Space>
+									message={item}
+									prevCombine={prevCombine}
+									nextCombine={nextCombine}
+								/>
 							);
 						})}
 					</InfiniteScroll>

@@ -1,10 +1,10 @@
-import { IData, IMedia } from '@common/types';
+import { IData, IFile, IMedia } from '@common/types';
 import { UserType } from '@modules/user/types';
 
 interface IMessage extends IData {
 	_id: string;
 	text: string;
-	media: IMedia[] | string[]; // string[] for create, update post
+	media: IFile[] | string[]; // string[] for create, update post
 
 	deleted?: boolean;
 	isSystem?: boolean;
@@ -18,7 +18,7 @@ interface IMessage extends IData {
 }
 
 // For use
-export type MessageType = IMessage & { media: IMedia[] };
+export type MessageType = IMessage & { media: IFile[] };
 
 // For form
-export type MessageFormType = IMessage & { media: string[]; files: File[] };
+export type MessageFormType = IMessage & { media: string[]; files?: File[] };

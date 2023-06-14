@@ -1,14 +1,12 @@
 import { useFetcher } from '@common/hooks';
 import { Avatar, Box, CircularProgress, Dialog, IconButton, Stack, Tooltip, Typography } from '@mui/material';
-import { stringUtil } from '@common/utils';
-import { isVideo } from '@utils/data';
+import { dateUtil, fileUtil, stringUtil } from '@common/utils';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { BsArrowDownCircle, BsArrowUpCircle } from 'react-icons/bs';
 import { HiDownload, HiX } from 'react-icons/hi';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { dateUtil } from '@common/utils';
 
 interface Props {
 	open: boolean;
@@ -154,7 +152,7 @@ export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 					alignItems="center"
 					flex={1}
 				>
-					{isVideo(media) ? (
+					{fileUtil.isVideo(media.name) ? (
 						<video src={media?.link} className="media-view" controls />
 					) : (
 						<Image
@@ -224,7 +222,7 @@ export const MediaViewModal = ({ open, onClose, mediaData }: Props) => {
 								key={file._id}
 								onClick={() => setMedia(file)}
 							>
-								{isVideo(file) ? (
+								{fileUtil.isVideo(file.name) ? (
 									<video className="list-media-item" src={file.link} />
 								) : (
 									<Image

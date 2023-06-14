@@ -1,4 +1,4 @@
-import { isValidateFileSize, isValidateFileType } from '@utils/data';
+import { fileUtil } from '@utils/data';
 import { FileError } from 'react-dropzone';
 import { IConversationConfig } from '../types';
 
@@ -25,7 +25,7 @@ export const conversationConfig: IConversationConfig = {
 		},
 		validator: (file) => {
 			// Check file type
-			if (!isValidateFileType(file)) {
+			if (!fileUtil.isValidFileType(file.name)) {
 				const error: FileError = {
 					code: 'file-type-not-allowed',
 					message: 'File không hợp lệ!',
@@ -35,7 +35,7 @@ export const conversationConfig: IConversationConfig = {
 			}
 
 			// Check file size
-			else if (!isValidateFileSize(file)) {
+			else if (!fileUtil.isValidFileSize(file.size)) {
 				const error: FileError = {
 					code: 'file-size-too-large',
 					message: `File quá lớn! (Tối đa ${maxFileSizeMB} MB)`,
