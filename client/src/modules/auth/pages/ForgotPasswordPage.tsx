@@ -22,7 +22,7 @@ const ForgotPasswordPage = () => {
 
 			toast.success('Gửi yêu thành công! Vui lòng kiểm tra email của bạn.', { id: toastId });
 
-			router.push('/auth/reset-password');
+			await router.push('/auth/reset-password');
 		} catch (error) {
 			toast.error(`Gửi yêu thất bại! Lỗi: ${error}`, { id: toastId });
 		}

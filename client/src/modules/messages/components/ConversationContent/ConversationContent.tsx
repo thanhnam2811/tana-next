@@ -52,8 +52,8 @@ export function ConversationContent({ onUpdate }: Props) {
 	const { description, name } = getConversationInfo(conversation, authUser!);
 
 	const updateConversation = (data: ConversationType) => {
-		mutate(data);
 		onUpdate?.(id, data);
+		return mutate(data);
 	};
 
 	const updateConversationForm = async (data: ConversationFormType) => {

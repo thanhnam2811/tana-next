@@ -73,41 +73,44 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		const newItems = [newData, ...data];
 
 		// Update the cache with the new data (don't mutate the existing cache)
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems + 1,
-				};
-			});
-			return newPages;
-		}, false); // Optimistically update the data to add the new item to the beginning of the list
+		mutate(
+			(prevData) =>
+				prevData?.map((page, index) => {
+					const startIndex = index * limit,
+						endIndex = (index + 1) * limit;
+					return {
+						...page,
+						items: newItems.slice(startIndex, endIndex),
+						totalItems: page.totalItems + 1,
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const updateData = (id: string, newData: T) => {
-		// Update the cache with the new data
-		mutate((prevData) => {
-			let updated = false;
-			const newPages = prevData?.map((page) => {
-				if (updated) return page;
+		let updated = false;
 
-				return {
-					...page,
-					items: page.items.map((item) => {
-						if (item._id === id) {
-							updated = true;
-							console.log({ item, newData });
-							return newData;
-						}
-						return item;
-					}),
-				};
-			});
-			return newPages;
-		}, false); // Optimistically update the data to add the new item to the beginning of the list
+		// Update the cache with the new data
+		mutate(
+			(prevData) =>
+				prevData?.map((page) => {
+					if (updated) return page;
+
+					return {
+						...page,
+						items: page.items.map((item) => {
+							if (item._id === id) {
+								updated = true;
+								console.log({ item, newData });
+								return newData;
+							}
+							return item;
+						}),
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const removeData = (id: string) => {
@@ -115,18 +118,19 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		const newItems = data.filter((item) => item._id !== id);
 
 		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems - 1,
-				};
-			});
-			return newPages;
-		}, false); // Optimistically update the data to add the new item to the beginning of the list
+		mutate(
+			(prevData) =>
+				prevData?.map((page, index) => {
+					const startIndex = index * limit,
+						endIndex = (index + 1) * limit;
+					return {
+						...page,
+						items: newItems.slice(startIndex, endIndex),
+						totalItems: page.totalItems - 1,
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const fetch = (params: object) => {

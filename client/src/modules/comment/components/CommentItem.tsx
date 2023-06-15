@@ -37,7 +37,6 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 				icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
 				size="small"
 				type="text"
-				style={{ color: reaction?.color }}
 			>
 				{comment.numberReact}
 			</Button>

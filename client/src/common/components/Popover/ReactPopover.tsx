@@ -39,7 +39,6 @@ export function ReactPopover({ reaction: valProps, onReact: onChange, ...props }
 								onClick={() => handleReaction(react.value)}
 								shape="circle"
 								type={active ? 'primary' : 'text'}
-								style={{ backgroundColor: active ? `${react.color}60` : undefined }}
 								icon={<Avatar src={react.img} />}
 							/>
 						);

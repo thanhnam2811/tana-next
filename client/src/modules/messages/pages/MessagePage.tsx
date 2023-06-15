@@ -40,7 +40,7 @@ function MessagesPage() {
 			convFetcher.addData(conv);
 
 			// Chuyển đến trang chat
-			router.push({ pathname: '/messages', query: { id: conv._id } });
+			await router.push({ pathname: '/messages', query: { id: conv._id } });
 
 			closeCreateModal();
 		} catch (error: any) {

@@ -1,4 +1,4 @@
-import { fileUtil } from '@utils/data';
+import { fileUtil } from 'src/modules/auth/data';
 import { FileError } from 'react-dropzone';
 import { IConversationConfig } from '../types';
 

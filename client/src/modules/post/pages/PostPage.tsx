@@ -1,12 +1,12 @@
-import { useAuth } from '@modules/auth/hooks';
 import { ListComment } from '@modules/comment/components';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Row, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
-import { getPostApi } from '../api';
+import React from 'react';
 import { PostCard } from '../components';
 import { PostType } from '../types';
 import Layout from '@layout/components';
+import useSWR from 'swr';
+import { swrFetcher } from '@common/api';
 
 interface Props {
 	post?: PostType;
@@ -14,31 +14,27 @@ interface Props {
 
 export default function PostPage({ post: serverPost }: Props) {
 	const router = useRouter();
-	const { authUser } = useAuth();
+	const { id } = router.query as { id: string };
 
-	const [post, setPost] = React.useState<PostType | undefined>(serverPost);
+	const { data, isLoading } = useSWR<PostType>(`/posts/${id}`, swrFetcher);
+	const post = data || serverPost;
 
-	useEffect(() => {
-		const fetchPost = async () => {
-			const id = router.query.id as string;
-			try {
-				const post = await getPostApi(id);
-				setPost(post);
-			} catch (error) {
-				console.log(error);
-			}
-		};
+	if (!post) {
+		if (!isLoading)
+			return (
+				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+					<Spin size="large" />
+				</Layout.Container>
+			);
+		else
+			return (
+				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+					<Typography.Text strong>Bài viết không tồn tại, hoặc đã bị xóa</Typography.Text>
+				</Layout.Container>
+			);
+	}
 
-		if (router.isReady) {
-			if (!post || authUser) {
-				fetchPost();
-			}
-		}
-	}, [router.isReady]);
-
-	const handleDelete = () => {
-		router.push('/'); // Go to home page after deleting
-	};
+	const handleDelete = () => router.push('/'); // Go to home page after deleting
 
 	return (
 		<Layout.Container>

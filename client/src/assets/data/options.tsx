@@ -1,6 +1,5 @@
 import Reaction from '@assets/icons/reactions';
 import { PrivacyValueType, ReactionType } from '@common/types';
-import { COLORS } from '@utils/theme';
 import { HiGlobeAsiaAustralia, HiLockClosed, HiUserMinus, HiUserPlus, HiUsers } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
 import { ContactType, EducationType, WorkType } from '@modules/user/types';
@@ -124,41 +123,34 @@ export const workOptions: IOption<WorkType>[] = [
 ];
 
 export const reactOptions: (IOption<ReactionType> & {
-	color: string;
 	img: string;
 })[] = [
 	{
-		color: COLORS.info,
 		img: Reaction.Like.src,
 		label: 'Thích',
 		value: 'like',
 	},
 	{
-		color: COLORS.love,
 		img: Reaction.Love.src,
 		label: 'Yêu thích',
 		value: 'love',
 	},
 	{
-		color: COLORS.warning,
 		img: Reaction.Haha.src,
 		label: 'Haha',
 		value: 'haha',
 	},
 	{
-		color: COLORS.warning,
 		img: Reaction.Wow.src,
 		label: 'Wow',
 		value: 'wow',
 	},
 	{
-		color: COLORS.gray,
 		img: Reaction.Sad.src,
 		label: 'Buồn',
 		value: 'sad',
 	},
 	{
-		color: COLORS.error,
 		img: Reaction.Angry.src,
 		label: 'Phẫn nộ',
 		value: 'angry',

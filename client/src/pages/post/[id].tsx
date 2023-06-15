@@ -1,4 +1,4 @@
-import { urlUtil } from '@common/utils';
+import { stringUtil, urlUtil } from '@common/utils';
 import { PostType } from '@common/types';
 import { getPostApi } from '@modules/post/api';
 import PostPage from '@modules/post/pages/PostPage';
@@ -18,6 +18,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 
 		return { props: { post } };
 	} catch (error) {
+		console.log(error);
 		if (axios.isAxiosError(error)) {
 			if (error.response?.status === 404) {
 				return { notFound: true };
@@ -31,6 +32,18 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 export default function Post({ post }: Props) {
 	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
+	let title = 'Bạn cần đăng nhập để xem bài viết này';
+	if (post?.content) {
+		const text = stringUtil.htmlToPlainText(post?.content);
+		const firstSentence = text.split('.').shift();
+		title = firstSentence || text;
+	}
+
+	let pictureUrl = urlUtil.getFullUrl('/logo.png');
+	if (post?.media[0]?.link) {
+		pictureUrl = post?.media[0]?.link;
+	}
+
 	return (
 		<>
 			<Head>
@@ -42,7 +55,10 @@ export default function Post({ post }: Props) {
 				<meta property="og:title" content="TaNa - Kết nối và sáng tạo" />
 				<meta property="og:description" content={post?.content} />
 				<meta property="og:url" content={link} />
-				<meta property="og:image" content={post?.media[0]?.link} />
+				<meta property="og:image" content={pictureUrl} />
+
+				{/* Title */}
+				<title>{title}</title>
 			</Head>
 
 			<PostPage post={post} />

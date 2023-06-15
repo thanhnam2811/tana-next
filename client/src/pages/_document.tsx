@@ -21,7 +21,6 @@ export default function Document() {
 
 			<title>TaNa - Kết nối và sáng tạo</title>
 			<meta name="viewport" content="initial-scale=1.0, width=device-width" />
-			<link rel="icon" href="/TaNa-logo.svg" />
 			<meta name="description" content="Mạng xã hội TaNa - Kết nối và sáng tạo" />
 			<link rel="canonical" href="https://www.tana.social" />
 
