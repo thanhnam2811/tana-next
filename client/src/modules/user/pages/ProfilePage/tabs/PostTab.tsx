@@ -35,9 +35,7 @@ export function PostTab() {
 
 						{/* Action */}
 						{isCurrentUser && (
-							<div className={styles.avatar_action}>
-								<Button shape="circle" icon={<HiCamera />} size="large" />
-							</div>
+							<Button className={styles.avatar_action} shape="circle" icon={<HiCamera />} size="small" />
 						)}
 					</div>
 

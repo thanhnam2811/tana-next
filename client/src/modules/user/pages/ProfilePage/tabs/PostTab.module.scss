@@ -31,21 +31,21 @@
 		.avatar_container {
 			position: relative;
 			width: 16vw;
+			max-width: 200px;
+			min-width: 120px;
 			margin-top: -6vw;
 			aspect-ratio: 1/1;
 
-			.avatar {
+			> div:first-child {
 				border-radius: 50%;
 				object-fit: cover;
+				overflow: hidden;
 			}
 
 			.avatar_action {
 				position: absolute;
 				right: 0;
 				bottom: 0;
-
-				display: flex;
-				height: fit-content;
 			}
 		}
 
