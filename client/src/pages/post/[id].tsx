@@ -34,10 +34,11 @@ export default function Post({ post }: Props) {
 
 	let title = 'Bạn cần đăng nhập để xem bài viết này';
 	let description = 'Đây là bài viết không công khai. Để xem bài viết này, bạn cần đăng nhập.';
-	if (post?.content) {
-		const text = stringUtil.htmlToPlainText(post?.content);
-		const firstSentence = text.split('.').shift();
-		title = firstSentence || text;
+	if (post) {
+		const author = post.author.fullname;
+		title = `Bài viết của ${author}`;
+
+		const text = stringUtil.htmlToPlainText(post.content);
 		description = text;
 	}
 
