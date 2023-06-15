@@ -64,7 +64,7 @@ function Index() {
 	return (
 		<UserProvider value={{ user }}>
 			<Layout.Sider align="left">
-				<Card bodyStyle={{ padding: '8px 0' }}>
+				<Card bodyStyle={{ padding: 8 }}>
 					<Menu
 						mode="vertical"
 						style={{ width: '100%', border: 'none' }}
