@@ -9,6 +9,7 @@ import { UploadImage } from '@common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
 import { toast } from 'react-hot-toast';
 import { uploadFileApi } from '@common/api';
+import { ReactNode } from 'react';
 
 export function PostTab() {
 	const { token } = theme.useToken();
@@ -48,13 +49,64 @@ export function PostTab() {
 		}
 	};
 
+	const actions: ReactNode[] = [];
+
+	if (!isCurrentUser) {
+		switch (user.relationship) {
+			case 'none':
+				actions.push(
+					<Button key="add-friend" type="primary" icon={<HiUserPlus />} onClick={console.log}>
+						Kết bạn
+					</Button>
+				);
+				break;
+			case 'friend':
+				actions.push(
+					<Button key="unfriend" type="primary" onClick={console.log}>
+						Bạn bè
+					</Button>,
+					<Button key="chat" onClick={console.log}>
+						Nhắn tin
+					</Button>
+				);
+				break;
+			case 'sent':
+				actions.push(
+					<Button key="cancel-request" onClick={console.log}>
+						Đã gửi lời mời
+					</Button>
+				);
+				break;
+			case 'received':
+				actions.push(
+					<Button key="accept-request" type="primary" onClick={console.log}>
+						Chấp nhận
+					</Button>,
+					<Button key="decline-request" onClick={console.log} danger>
+						Từ chối
+					</Button>
+				);
+				break;
+			default:
+				break;
+		}
+	}
+
+	console.log({ user, actions });
+
 	return (
 		<>
 			{/* Header */}
 			<div className={styles.header}>
 				{/* Cover */}
 				<div className={styles.cover_container}>
-					<Image src={user.coverPicture.link} alt="cover" className={styles.cover} />
+					<Image
+						src={user.coverPicture?.link}
+						alt="cover"
+						className={styles.cover}
+						fallback="http://via.placeholder.com/1600x900?text=Không có ảnh bìa"
+						preview={!!user.coverPicture}
+					/>
 
 					{/* Action */}
 					{isCurrentUser && (
@@ -81,9 +133,10 @@ export function PostTab() {
 						<Image
 							wrapperClassName={styles.avatar_wrapper}
 							wrapperStyle={{ borderColor: token.colorBgLayout }}
-							src={user.profilePicture.link}
+							src={user.profilePicture?.link}
 							alt="avatar"
 							fallback="http://via.placeholder.com/160x160?text=Avatar"
+							preview={!!user.profilePicture}
 						/>
 
 						{/* Action */}
@@ -102,18 +155,7 @@ export function PostTab() {
 						</Typography.Title>
 
 						{/* Actions */}
-						<div className={styles.actions}>
-							{/* Follow */}
-							<Button type="primary" icon={<HiUserPlus />}>
-								Theo dõi
-							</Button>
-
-							{/* Message */}
-							<Button>Nhắn tin</Button>
-
-							{/* More */}
-							<Button>...</Button>
-						</div>
+						<div className={styles.actions}>{actions}</div>
 					</div>
 				</div>
 			</div>
