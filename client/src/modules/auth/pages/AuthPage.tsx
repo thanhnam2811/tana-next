@@ -1,8 +1,9 @@
+// noinspection JSIgnoredPromiseFromCall
+
 import { withLayout } from '@layout/components';
 import { Col, Row } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
-import { toast } from 'react-hot-toast';
 import Lottie from 'react-lottie-player';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import { useAuth } from '../hooks';
@@ -20,11 +21,10 @@ function AuthPage() {
 	// Check if user is logged in
 	const { authUser } = useAuth();
 	useEffect(() => {
-		if (authUser) {
-			toast('Bạn đã đăng nhập rồi!', { icon: '👋' });
+		if (authUser && router.isReady) {
 			router.replace((from as string) || '/home');
 		}
-	}, []);
+	}, [router.isReady, authUser]);
 
 	return (
 		<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">

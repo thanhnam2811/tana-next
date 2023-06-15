@@ -9,7 +9,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { useEffect } from 'react';
 import Aos from 'aos';
 
-const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing), {
+const Banner = dynamic(() => import('src/common/components/Landing').then((m) => m.Landing), {
 	ssr: false,
 	loading: (loadingProps) => {
 		if (loadingProps.error) {
@@ -20,7 +20,7 @@ const Banner = dynamic(() => import('@components/Landing').then((m) => m.Landing
 	},
 });
 
-export default function Landing() {
+export default function LandingPage() {
 	const router = useRouter();
 
 	useEffect(() => {

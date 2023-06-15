@@ -1,6 +1,5 @@
-import { userApi } from '@utils/api';
 import { create } from 'zustand';
-import { loginTokenApi, loginApi } from '../api';
+import { loginApi, loginTokenApi, updateProfileApi } from '../api';
 import { IUseAuth } from '../types';
 
 export const useAuth = create<IUseAuth>()((set, get) => ({
@@ -55,7 +54,7 @@ export const useAuth = create<IUseAuth>()((set, get) => ({
 
 		try {
 			// Update to server
-			const { data: user } = await userApi.update(data);
+			const user = await updateProfileApi(data);
 			set({ authUser: user });
 		} catch (error) {
 			// Rollback if error

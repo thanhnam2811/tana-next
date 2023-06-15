@@ -1,11 +1,10 @@
 import { reactOptions } from '@assets/data';
-import { PrivacyDropdown } from '@components/Button';
+import { PrivacyDropdown } from 'src/common/components/Button';
 import { UserAvatar } from '@modules/user/components';
-import { ReactPopover, SharePopover } from '@components/v2/Popover';
+import { ReactPopover, SharePopover } from 'src/common/components/Popover';
 import { IPrivacy, PostType } from '@common/types';
 import { ReactionType } from '@common/types/common';
 import { useAuth } from '@modules/auth/hooks';
-import { getTimeAgo, randomNumber } from '@utils/common';
 import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space } from 'antd';
 import Link from 'next/link';
 import { HiArchive, HiBell, HiDotsHorizontal, HiEyeOff, HiLink } from 'react-icons/hi';
@@ -23,7 +22,7 @@ import { PostMedia } from './PostMedia';
 import { deletePostApi, reactToPostApi, updatePostApi } from '@modules/post/api';
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
-import { urlUtil } from '@common/utils';
+import { dateUtil, randomUtil, urlUtil } from '@common/utils';
 
 const { Meta } = Card;
 
@@ -78,7 +77,7 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 	if (loading)
 		return (
 			<Card>
-				<Skeleton active avatar paragraph={{ rows: randomNumber(1, 4) }} />
+				<Skeleton active avatar paragraph={{ rows: randomUtil.number(1, 4) }} />
 			</Card>
 		);
 
@@ -177,7 +176,6 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 					<Button
 						icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
 						type="text"
-						style={{ color: reaction?.color }}
 						disabled={!authUser} // Disable if user is not logged in
 					>
 						{reaction?.label || 'Thích'}
@@ -202,7 +200,7 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 				<Meta
 					avatar={<UserAvatar user={author} avtSize={48} />}
 					title={author.fullname}
-					description={<span className="time-ago">{getTimeAgo(post!.createdAt)}</span>}
+					description={<span className="time-ago">{dateUtil.getTimeAgo(post!.createdAt)}</span>}
 					className={styles.meta}
 				/>
 			}

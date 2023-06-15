@@ -115,7 +115,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -124,11 +130,16 @@ class ConversationController {
 	async leaveConversation(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
+			if (!conversation) return res.status(404).send('Không tìm thấy cuộc trò chuyện');
+
+			if (conversation.members.length === 2)
+				return res.status(400).send('Không thể rời khỏi cuộc trò chuyện 2 người');
+
 			let index = -1;
 			index = conversation.members.findIndex((item) => item.user.toString() === req.user._id.toString());
 			if (index !== -1) {
+				const adminOfConversation = conversation.members.filter((member) => member.role === 'admin');
 				conversation.members.splice(index, 1);
-				const adminOfConversation = conversation.members.find((member) => member.role === 'admin');
 				if (
 					adminOfConversation.length === 1 &&
 					adminOfConversation.user.toString() === req.user._id.toString()
@@ -146,7 +157,13 @@ class ConversationController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -173,7 +190,13 @@ class ConversationController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -291,6 +314,7 @@ class ConversationController {
 						return member;
 					})
 				);
+				req.body.name = req.body.members.map((x) => x.nickname).join(', ');
 
 				const newConversation = new Conversation(req.body);
 				newConversation.members.push({
@@ -322,7 +346,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -330,6 +360,8 @@ class ConversationController {
 	// [Get] get conv of a user
 	async getConversationOfUser(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const q = req.query.q ?? '';
+
 		try {
 			Conversation.paginate(
 				{
@@ -338,6 +370,26 @@ class ConversationController {
 							user: req.user._id,
 						},
 					},
+					$or: [
+						{
+							$and: [
+								{ name: { $exists: true } }, // Name field exists
+								{ name: { $regex: q, $options: 'i' } }, // Name matches the search query
+							],
+						},
+						{
+							$and: [
+								{ name: { $exists: false } }, // Name field does not exist
+								{
+									members: {
+										$elemMatch: {
+											nickname: { $regex: q, $options: 'i' }, // Nickname matches the search query
+										},
+									},
+								},
+							],
+						},
+					],
 				},
 				{
 					offset,
@@ -400,7 +452,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -538,7 +596,13 @@ class ConversationController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -600,7 +664,13 @@ class ConversationController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -685,6 +755,12 @@ class ConversationController {
 					if (error) {
 						return res.status(400).send(error.details[0].message);
 					}
+
+					//check conversation 2 members can't remove
+					if (conversation.members.length == 2) {
+						return res.status(403).send('Không thể xóa thành viên trong cuộc hội thoại 2 người');
+					}
+
 					if (adminOfConversation.includes(req.user._id.toString())) {
 						// check if length of members is 2 => remove conversation
 						if (conversation.members.length == 2) {
@@ -793,7 +869,13 @@ class ConversationController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -819,7 +901,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -875,7 +963,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -967,7 +1061,13 @@ class ConversationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

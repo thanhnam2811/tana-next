@@ -137,29 +137,31 @@ class NotificationController {
 		} catch (error) {
 			console.log(error.message);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
 
 	async markAllAsRead(req, res, next) {
 		try {
-			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			// get all notification receivers include req.user._id
-			const notifications = await Notification.paginate(
-				{
-					receiver: {
-						$elemMatch: {
-							$eq: req.user._id,
-						},
+			const notifications = await Notification.find({
+				receiver: {
+					$elemMatch: {
+						$eq: req.user._id,
 					},
 				},
-				{ limit, offset }
-			);
-			if (notifications.docs.length === 0) {
+			});
+			if (notifications.length === 0) {
 				return res.status(404).json({ message: 'Thông báo không được tìm thấy' });
 			}
-			const notificationIds = notifications.docs.map((notification) => notification._id);
+			const notificationIds = notifications.map((notification) => notification._id);
 			await Notification.updateMany(
 				{
 					_id: {
@@ -178,7 +180,13 @@ class NotificationController {
 		} catch (error) {
 			console.log(error.message);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

@@ -1,5 +1,5 @@
+import { UserType } from '@modules/user/types';
 import { MessageType } from './IMessage';
-import { UserType } from './IUser';
 import { IData, IMedia } from './common';
 
 export interface Member {

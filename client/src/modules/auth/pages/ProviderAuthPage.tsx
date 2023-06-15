@@ -1,10 +1,12 @@
+// noinspection JSIgnoredPromiseFromCall
+
 import { withLayout } from '@layout/components';
-import { authProviders } from '@utils/data';
 import { Avatar, Card, Spin } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks';
+import { authProviders } from '@modules/auth/data';
 
 const ProviderAuthPage = () => {
 	const router = useRouter();
@@ -28,11 +30,11 @@ const ProviderAuthPage = () => {
 
 				// Show success toast and redirect to home page
 				toast.success(`Đăng nhập với ${provider?.name} thành công!`, { id: toastId });
-				router.replace('/');
+				await router.replace('/');
 			} catch (error: any) {
 				// Show error toast and redirect to login page
 				toast.error(`Đăng nhập với ${provider?.name} thất bại! Lỗi: ${error.toString()}`, { id: toastId });
-				router.replace('/auth/login');
+				await router.replace('/auth/login');
 			}
 		};
 

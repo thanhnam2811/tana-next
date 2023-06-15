@@ -1,12 +1,13 @@
 import Layout from '@layout/components';
 import { useAuth } from '@modules/auth/hooks';
-import { Button, Tooltip, Typography, theme } from 'antd';
+import { Button, theme, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import { FiHome, FiMessageSquare, FiUser, FiUsers } from 'react-icons/fi';
 import styles from '../../styles/Layout.module.scss';
-import { HeaderCenter } from '../Header';
+import { HeaderCenter, HeaderRight } from '../Header';
 import { NavBarLeft } from './NavBarLeft';
 import { NavBarRight } from './NavBarRight';
+import Link from 'next/link';
 
 const items = [
 	{
@@ -70,7 +71,19 @@ export default function NavBar() {
 				)}
 			</HeaderCenter>
 
-			<NavBarRight />
+			{authUser ? (
+				<NavBarRight />
+			) : (
+				<HeaderRight>
+					<Link href="/auth/login" draggable>
+						<Button type="primary">Đăng nhập</Button>
+					</Link>
+
+					<Link href="/auth/register" draggable>
+						<Button>Đăng ký</Button>
+					</Link>
+				</HeaderRight>
+			)}
 		</Layout.Header>
 	);
 }

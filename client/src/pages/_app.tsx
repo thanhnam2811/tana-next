@@ -1,8 +1,8 @@
-import { useSettingStore } from '@store';
-import { SERVER_URL } from '@utils/common';
+// noinspection JSIgnoredPromiseFromCall
+
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import { useAuth } from '@modules/auth/hooks';
@@ -17,25 +17,23 @@ import 'swiper/css';
 import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { useTheme } from '@modules/theme/hooks';
+import { useTheme } from 'src/layout/hooks';
+import { SERVER_URL } from '@common/config';
+
 dayjs.locale('vi');
 
 export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
-	const { getSetting } = useSettingStore();
 	const { mode, getTheme } = useTheme();
 	const { token } = theme.useToken();
 
 	// Fetch user data
 	useEffect(() => {
-		// fetch setting
-		getSetting();
-
 		// fetch theme
 		getTheme();
 
 		if (!authUser) {
-			// fetch user data if accessToken is exist
+			// fetch user data if accessToken exist
 			const accessToken = localStorage.getItem('accessToken');
 			if (accessToken) login();
 		}
@@ -43,7 +41,7 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 
 	// Socket
 	useEffect(() => {
-		window.socket = io(SERVER_URL, { autoConnect: false });
+		window.socket = io(SERVER_URL!, { autoConnect: false });
 		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {

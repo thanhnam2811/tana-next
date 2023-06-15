@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { SERVER_URL } from '@common/config';
 
 export const apiServer = axios.create({
-	baseURL: process.env.SERVER_URL,
+	baseURL: SERVER_URL,
 	headers: {
 		'Content-Type': 'application/json',
 	},

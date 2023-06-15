@@ -1,12 +1,14 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { stringUtil } from '@utils/common';
 import { useCallback, useMemo } from 'react';
+import useSWRInfinite from 'swr/infinite';
+import { urlUtil } from '@common/utils';
 
 // T: Data type,
-export type FetcherType<T extends IData> = {
+export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
 	data: T[];
-	updateData: (id: string, newData: Partial<T>) => void;
+	listRes?: U[];
+	updateData: (id: string, newData: T) => void;
 	addData: (newData: T) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
@@ -20,25 +22,27 @@ export type FetcherType<T extends IData> = {
 	api: string;
 };
 
-import useSWRInfinite from 'swr/infinite';
-
 export interface FetcherProps {
 	api: string;
 	limit?: number;
 	params?: IPaginationParams;
 }
 
-export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {} }: FetcherProps): FetcherType<T> => {
+export const useFetcher = <T extends IData = any, U extends IPaginationResponse<T> = IPaginationResponse<T>>({
+	api,
+	limit = 20,
+	params = {},
+}: FetcherProps): FetcherType<T, U> => {
 	const getKey = useCallback(
-		(pageIndex: number, prevData: IPaginationResponse<T>) => {
-			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size: limit });
+		(pageIndex: number, prevData: U) => {
+			if (pageIndex === 0) return urlUtil.generateUrl(api, { ...params, size: limit });
 
 			const prevOffset = Number(prevData?.offset) || 0;
 			const prevItems = prevData?.items || [];
 			if (prevOffset + prevItems.length >= prevData.totalItems) return null; // No more data
 
 			const offset = prevOffset + prevItems.length;
-			return stringUtil.generateUrl(api, { ...params, offset, size: limit });
+			return urlUtil.generateUrl(api, { ...params, offset, size: limit });
 		},
 		[limit, api, params]
 	);
@@ -50,7 +54,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		mutate,
 		size: page,
 		setSize: setPage,
-	} = useSWRInfinite<IPaginationResponse<T>>(getKey, swrFetcher);
+	} = useSWRInfinite<U>(getKey, swrFetcher);
 
 	const { data, hasMore } = useMemo(() => {
 		const memo = { data: [], hasMore: true };
@@ -68,37 +72,45 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		// Make a shallow copy of the existing data array and add the new data to the beginning
 		const newItems = [newData, ...data];
 
-		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems + 1,
-				};
-			});
-			return newPages;
-		});
+		// Update the cache with the new data (don't mutate the existing cache)
+		mutate(
+			(prevData) =>
+				prevData?.map((page, index) => {
+					const startIndex = index * limit,
+						endIndex = (index + 1) * limit;
+					return {
+						...page,
+						items: newItems.slice(startIndex, endIndex),
+						totalItems: page.totalItems + 1,
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
-	const updateData = (id: string, newData: Partial<T>) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.map((item) => (item._id === id ? { ...item, ...newData } : item));
+	const updateData = (id: string, newData: T) => {
+		let updated = false;
 
 		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-				};
-			});
-			return newPages;
-		});
+		mutate(
+			(prevData) =>
+				prevData?.map((page) => {
+					if (updated) return page;
+
+					return {
+						...page,
+						items: page.items.map((item) => {
+							if (item._id === id) {
+								updated = true;
+								console.log({ item, newData });
+								return newData;
+							}
+							return item;
+						}),
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const removeData = (id: string) => {
@@ -106,18 +118,19 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		const newItems = data.filter((item) => item._id !== id);
 
 		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems - 1,
-				};
-			});
-			return newPages;
-		});
+		mutate(
+			(prevData) =>
+				prevData?.map((page, index) => {
+					const startIndex = index * limit,
+						endIndex = (index + 1) * limit;
+					return {
+						...page,
+						items: newItems.slice(startIndex, endIndex),
+						totalItems: page.totalItems - 1,
+					};
+				}),
+			false
+		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
 	const fetch = (params: object) => {
@@ -141,6 +154,7 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 	const fetcher = useMemo(
 		() => ({
 			data,
+			listRes,
 			params,
 			fetching,
 			validating,
