@@ -20,7 +20,7 @@ export default function PostPage({ post: serverPost }: Props) {
 	const post = data || serverPost;
 
 	if (!post) {
-		if (!isLoading)
+		if (isLoading)
 			return (
 				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<Spin size="large" />
