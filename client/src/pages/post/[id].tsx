@@ -33,10 +33,12 @@ export default function Post({ post }: Props) {
 	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
 	let title = 'Bạn cần đăng nhập để xem bài viết này';
+	let description = 'Đây là bài viết không công khai. Để xem bài viết này, bạn cần đăng nhập.';
 	if (post?.content) {
 		const text = stringUtil.htmlToPlainText(post?.content);
 		const firstSentence = text.split('.').shift();
 		title = firstSentence || text;
+		description = text;
 	}
 
 	let pictureUrl = urlUtil.getFullUrl('/logo.png');
@@ -52,8 +54,8 @@ export default function Post({ post }: Props) {
 
 				{/* Social media meta tags */}
 				<meta property="og:type" content="website" />
-				<meta property="og:title" content="TaNa - Kết nối và sáng tạo" />
-				<meta property="og:description" content={post?.content} />
+				<meta property="og:title" content={title} />
+				<meta property="og:description" content={description} />
 				<meta property="og:url" content={link} />
 				<meta property="og:image" content={pictureUrl} />
 
