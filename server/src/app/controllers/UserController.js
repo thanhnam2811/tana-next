@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
-const createHttpError = require('http-errors');
+const createError = require('http-errors');
 const { User, validate } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
 const { populateUser } = require('../../utils/Populate/User');
@@ -99,7 +99,13 @@ async function querySearchSuggestFriends(req, next) {
 	} catch (err) {
 		console.log(err);
 		return next(
-			createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			createError.InternalServerError(
+				`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					req.body,
+					null,
+					2
+				)}`
+			)
 		);
 	}
 }
@@ -125,7 +131,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -157,7 +169,13 @@ class UserController {
 			}
 		} catch (err) {
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -182,7 +200,13 @@ class UserController {
 			}
 		} catch (err) {
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -198,7 +222,13 @@ class UserController {
 				});
 			} catch (err) {
 				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+					createError.InternalServerError(
+						`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+							req.body,
+							null,
+							2
+						)}`
+					)
 				);
 			}
 		} else {
@@ -217,7 +247,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -236,7 +272,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -286,7 +328,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -325,7 +373,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -354,7 +408,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -391,7 +451,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -445,15 +511,19 @@ class UserController {
 				.catch((err) => {
 					console.log(err);
 					return next(
-						createHttpError.InternalServerError(
-							`${err.message} in method: ${req.method} of ${req.originalUrl}`
-						)
+						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
 					);
 				});
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -548,7 +618,7 @@ class UserController {
 					if (err) {
 						console.log(err);
 						return next(
-							createHttpError.InternalServerError(
+							createError.InternalServerError(
 								`${err.message} in method: ${req.method} of ${req.originalUrl}`
 							)
 						);
@@ -562,7 +632,7 @@ class UserController {
 						if (err) {
 							console.log(err);
 							return next(
-								createHttpError.InternalServerError(
+								createError.InternalServerError(
 									`${err.message} in method: ${req.method} of ${req.originalUrl}`
 								)
 							);
@@ -580,7 +650,7 @@ class UserController {
 								if (err) {
 									console.log(err);
 									return next(
-										createHttpError.InternalServerError(
+										createError.InternalServerError(
 											`${err.message} in method: ${req.method} of ${req.originalUrl}`
 										)
 									);
@@ -639,7 +709,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -719,15 +795,19 @@ class UserController {
 				.catch((err) => {
 					console.log(err);
 					return next(
-						createHttpError.InternalServerError(
-							`${err.message} in method: ${req.method} of ${req.originalUrl}`
-						)
+						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
 					);
 				});
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -786,7 +866,7 @@ class UserController {
 					if (err) {
 						console.log(err);
 						return next(
-							createHttpError.InternalServerError(
+							createError.InternalServerError(
 								`${err.message} in method: ${req.method} of ${req.originalUrl}`
 							)
 						);
@@ -799,7 +879,7 @@ class UserController {
 						if (err) {
 							console.log(err);
 							return next(
-								createHttpError.InternalServerError(
+								createError.InternalServerError(
 									`${err.message} in method: ${req.method} of ${req.originalUrl}`
 								)
 							);
@@ -816,7 +896,7 @@ class UserController {
 								if (err) {
 									console.log(err);
 									return next(
-										createHttpError.InternalServerError(
+										createError.InternalServerError(
 											`${err.message} in method: ${req.method} of ${req.originalUrl}`
 										)
 									);
@@ -871,7 +951,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -936,7 +1022,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -983,7 +1075,13 @@ class UserController {
 		} catch (error) {
 			console.log(error);
 			return next(
-				createHttpError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1034,7 +1132,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1084,7 +1188,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1108,13 +1218,19 @@ class UserController {
 		try {
 			const user = await getUserWithPrivacy(req);
 			if (!user) {
-				return next(createHttpError.NotFound('User not found'));
+				return next(createError.NotFound('User not found'));
 			}
 			res.status(200).json(user);
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1124,10 +1240,10 @@ class UserController {
 		try {
 			const user = await populateUser(req.params.id);
 			if (!user) {
-				return next(createHttpError.NotFound('Tài khoản không toàn tại'));
+				return next(createError.NotFound('Tài khoản không toàn tại'));
 			}
 			if (user.lockTime > Date.now()) {
-				return next(createHttpError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
+				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
 			}
 			// lock account 100 years
 			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
@@ -1136,7 +1252,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1146,7 +1268,7 @@ class UserController {
 		try {
 			const user = await populateUser(req.params.id);
 			if (!user) {
-				return next(createHttpError.NotFound('User not found'));
+				return next(createError.NotFound('User not found'));
 			}
 			if (user.lockTime > Date.now()) {
 				// update lockTime < now
@@ -1155,11 +1277,17 @@ class UserController {
 				await user.save();
 				return res.status(200).json(user);
 			}
-			return next(createHttpError.BadRequest('Tài khoản chưa bị khóa'));
+			return next(createError.BadRequest('Tài khoản chưa bị khóa'));
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1183,7 +1311,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1198,7 +1332,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1261,7 +1401,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1282,7 +1428,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1295,7 +1447,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1307,7 +1465,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1331,7 +1495,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

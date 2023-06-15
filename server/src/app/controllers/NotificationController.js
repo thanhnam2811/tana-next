@@ -137,7 +137,13 @@ class NotificationController {
 		} catch (error) {
 			console.log(error.message);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -174,7 +180,13 @@ class NotificationController {
 		} catch (error) {
 			console.log(error.message);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
