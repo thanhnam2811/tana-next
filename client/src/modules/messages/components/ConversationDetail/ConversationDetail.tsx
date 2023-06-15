@@ -16,9 +16,7 @@ import {
 	theme,
 	Tooltip,
 	Typography,
-	Upload,
 } from 'antd';
-import ImgCrop from 'antd-img-crop';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { HiLogout } from 'react-icons/hi';
