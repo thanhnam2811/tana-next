@@ -29,7 +29,9 @@ export default function PostPage({ post: serverPost }: Props) {
 		else
 			return (
 				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-					<Typography.Text strong>Bài viết không tồn tại, hoặc đã bị xóa</Typography.Text>
+					<Typography.Text strong>
+						Bài viết không tồn tại, hoặc bạn không có quyền xem bài viết này
+					</Typography.Text>
 				</Layout.Container>
 			);
 	}
