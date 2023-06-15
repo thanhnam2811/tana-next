@@ -1,16 +1,16 @@
-import React, { ReactNode } from 'react';
-import { withAuth } from '@modules/auth/components';
+import { swrFetcher } from '@common/api';
 import Layout, { withLayout } from '@layout/components';
-import { Card, Menu, Spin } from 'antd';
-import { IconType } from 'react-icons/lib';
-import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
-import { useRouter } from 'next/router';
+import { withAuth } from '@modules/auth/components';
 import { useAuth } from '@modules/auth/hooks';
-import useSWR from 'swr';
 import { UserProvider } from '@modules/user/hooks';
 import { UserType } from '@modules/user/types';
-import { swrFetcher } from '@common/api';
-import { InfoTab, PostTab } from './tabs';
+import { Card, Menu, Spin } from 'antd';
+import { useRouter } from 'next/router';
+import { ReactNode } from 'react';
+import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
+import { IconType } from 'react-icons/lib';
+import useSWR from 'swr';
+import { FriendTab, InfoTab, PostTab } from './tabs';
 
 type TabType = 'posts' | 'friends' | 'media' | 'about';
 const tabList: { label: string; Icon: IconType; tab: TabType; component: ReactNode }[] = [
@@ -24,7 +24,7 @@ const tabList: { label: string; Icon: IconType; tab: TabType; component: ReactNo
 		label: 'Bạn bè',
 		Icon: HiUsers,
 		tab: 'friends',
-		component: <div>Bạn bè</div>,
+		component: <FriendTab />,
 	},
 	{
 		label: 'Thông tin',
