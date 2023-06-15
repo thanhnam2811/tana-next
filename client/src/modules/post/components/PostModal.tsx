@@ -1,16 +1,15 @@
-import { PrivacyDropdown } from '@components/Button';
-import { RichTextInput } from '@components/v2/Input';
+import { PrivacyDropdown } from 'src/common/components/Button';
+import { RichTextInput } from 'src/common/components/Input';
 import { PostFormType, PostType } from '@common/types';
 import { IMedia } from '@common/types/common';
 import { Collapse } from '@mui/material';
-import { fileApi } from '@utils/api';
-import { randomString } from '@utils/common';
-import { COLORS } from '@utils/theme';
-import { Button, Card, Form, Modal, Space } from 'antd';
+import { Button, Card, Form, Modal, Space, theme } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { PostMedia } from './PostCard';
+import { randomUtil } from '@common/utils';
+import { uploadFileApi } from '@common/api';
 
 interface Props {
 	data?: PostType;
@@ -25,6 +24,7 @@ interface IMediaFile extends IMedia {
 }
 
 export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) => {
+	const { token } = theme.useToken();
 	const isEdit = !!data?._id; // Nếu có id thì là edit
 
 	const mediaInputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +36,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			const media: IMediaFile = {
-				_id: randomString(10),
+				_id: randomUtil.string(10),
 				link: URL.createObjectURL(file),
 				file,
 			};
@@ -90,9 +90,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		if (newFiles.length) {
 			const toastId = toast.loading('Đang tải lên ảnh, video...');
 			try {
-				const {
-					data: { files },
-				} = await fileApi.upload(newFiles);
+				const { files } = await uploadFileApi(newFiles);
 
 				data.media = [...data.media, ...files.map(({ _id }) => _id)];
 				toast.success('Tải lên ảnh, video thành công', { id: toastId });
@@ -165,7 +163,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 						<Button
 							type="text"
 							shape="circle"
-							icon={<HiPhoto color={COLORS.success} />}
+							icon={<HiPhoto color={token.colorSuccess} />}
 							onClick={() => mediaInputRef.current?.click()}
 							style={{ marginLeft: 'auto' }}
 						/>
@@ -173,14 +171,14 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 						<Button
 							type="text"
 							shape="circle"
-							icon={<HiPlayCircle color={COLORS.info} />}
+							icon={<HiPlayCircle color={token.colorPrimary} />}
 							onClick={() => mediaInputRef.current?.click()}
 						/>
 
 						<Button
 							type="text"
 							shape="circle"
-							icon={<HiMapPin color={COLORS.warning} />}
+							icon={<HiMapPin color={token.colorWarning} />}
 							onClick={() => alert('Chức năng đang phát triển')}
 						/>
 					</Space>

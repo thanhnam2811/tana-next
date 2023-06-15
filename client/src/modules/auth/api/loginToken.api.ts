@@ -1,4 +1,4 @@
 import { apiClient } from '@common/api';
-import { UserType } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 export const loginTokenApi = () => apiClient.get<UserType>('/users/profile').then((res) => res.data);

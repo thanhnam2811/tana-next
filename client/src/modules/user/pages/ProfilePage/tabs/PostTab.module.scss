@@ -1,0 +1,69 @@
+.header {
+	position: relative;
+
+	.cover_container {
+		position: relative;
+		width: 100%;
+
+		.cover {
+			width: 100%;
+			aspect-ratio: 16/9;
+			border-radius: 0.5rem;
+			object-fit: cover;
+		}
+
+		.cover_action {
+			position: absolute;
+			right: 16px;
+			top: 16px;
+
+			display: flex;
+			height: fit-content;
+		}
+	}
+
+	.bottom {
+		position: relative;
+		display: flex;
+		gap: 1rem;
+		padding: 1rem;
+
+		.avatar_container {
+			position: relative;
+			width: 16vw;
+			max-width: 200px;
+			min-width: 120px;
+			margin-top: -6vw;
+			aspect-ratio: 1/1;
+
+			> div:first-child {
+				border-radius: 50%;
+				object-fit: cover;
+				overflow: hidden;
+			}
+
+			.avatar_action {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+			}
+		}
+
+		.content {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			flex: 1;
+
+			.name {
+				font-size: 1.5rem;
+				font-weight: 500;
+			}
+
+			.actions {
+				display: flex;
+				gap: 1rem;
+			}
+		}
+	}
+}

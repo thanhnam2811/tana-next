@@ -1,0 +1,22 @@
+.message {
+	width: 100%;
+	padding-right: 8px;
+
+	display: flex;
+
+	&.me {
+		flex-direction: row-reverse;
+	}
+
+	&.other {
+		flex-direction: row;
+	}
+
+	.container {
+		max-width: 50%;
+		padding: 4px 8px;
+		border-radius: 16px;
+		border: 1px solid;
+		word-break: break-all;
+	}
+}

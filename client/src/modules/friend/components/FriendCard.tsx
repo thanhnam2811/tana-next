@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
-import { App, Button, Card, Dropdown, MenuProps, Tooltip, Typography, message, theme } from 'antd';
+import { App, Button, Card, Dropdown, MenuProps, theme, Tooltip, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { HiDotsHorizontal } from 'react-icons/hi';
@@ -17,6 +17,7 @@ import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../
 import { FriendType } from '../types';
 import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 interface Props {
 	user: UserType;
@@ -55,11 +56,11 @@ export function FriendCard({ user, reload }: Props) {
 			okText: 'Hủy kết bạn',
 			okType: 'danger',
 			cancelText: 'Thoát',
-			onOk: () =>
-				unFriendApi(user._id).then(() => {
-					message.success('Hủy kết bạn thành công');
-					reload?.();
-				}),
+			onOk: async () => {
+				await unFriendApi(user._id);
+				toast.success('Hủy kết bạn thành công');
+				reload?.();
+			},
 		});
 
 	const handleCancelRequest = () =>
@@ -78,18 +79,18 @@ export function FriendCard({ user, reload }: Props) {
 			okText: 'Hủy lời mời',
 			okType: 'danger',
 			cancelText: 'Thoát',
-			onOk: () =>
-				requestFriendApi(user._id).then(() => {
-					message.success('Hủy lời mời kết bạn thành công');
-					reload?.();
-				}),
+			onOk: async () => {
+				await requestFriendApi(user._id);
+				toast.success('Hủy lời mời kết bạn thành công');
+				reload?.();
+			},
 		});
 
-	const handleAcceptRequest = () =>
-		acceptFriendApi(user._id).then(() => {
-			message.success('Chấp nhận lời mời kết bạn thành công');
-			reload?.();
-		});
+	const handleAcceptRequest = async () => {
+		await acceptFriendApi(user._id);
+		toast.success('Chấp nhận lời mời kết bạn thành công');
+		reload?.();
+	};
 
 	const handleRejectRequest = () =>
 		modal.confirm({
@@ -106,33 +107,18 @@ export function FriendCard({ user, reload }: Props) {
 			okText: 'Từ chối',
 			okType: 'danger',
 			cancelText: 'Thoát',
-			onOk: () =>
-				rejectFriendApi(user._id).then(() => {
-					message.success('Từ chối lời mời kết bạn thành công');
-					reload?.();
-				}),
+			onOk: async () => {
+				await rejectFriendApi(user._id);
+				toast.success('Từ chối lời mời kết bạn thành công');
+				reload?.();
+			},
 		});
 
-	const handleSendRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Gửi lời mời kết bạn đến <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					<strong>{user.fullname}</strong> sẽ nhận được thông báo về lời mời kết bạn của bạn.
-				</span>
-			),
-			okText: 'Gửi lời mời',
-			cancelText: 'Thoát',
-			onOk: () =>
-				requestFriendApi(user._id).then(() => {
-					message.success('Gửi lời mời kết bạn thành công');
-					reload?.();
-				}),
-		});
+	const handleSendRequest = async () => {
+		await requestFriendApi(user._id);
+		toast.success('Gửi lời mời kết bạn thành công');
+		reload?.();
+	};
 
 	switch (relationship) {
 		case 'friend':

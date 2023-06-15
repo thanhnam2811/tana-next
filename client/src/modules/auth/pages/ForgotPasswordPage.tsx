@@ -1,5 +1,5 @@
 import { withLayout } from '@layout/components';
-import { Button, Card, Col, Divider, Form, Input, Row, Typography, theme } from 'antd';
+import { Button, Card, Col, Divider, Form, Input, Row, theme, Typography } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
@@ -22,7 +22,7 @@ const ForgotPasswordPage = () => {
 
 			toast.success('Gửi yêu thành công! Vui lòng kiểm tra email của bạn.', { id: toastId });
 
-			router.push('/auth/reset-password');
+			await router.push('/auth/reset-password');
 		} catch (error) {
 			toast.error(`Gửi yêu thất bại! Lỗi: ${error}`, { id: toastId });
 		}

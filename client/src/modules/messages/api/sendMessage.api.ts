@@ -1,5 +1,5 @@
 import { apiClient } from '@common/api';
-import { MessageFormType } from '../types';
+import { MessageFormType, MessageType } from '../types';
 
 export const sendMessageApi = (convId: string, data: MessageFormType) =>
-	apiClient.post(`conversations/${convId}/messages`, data).then((res) => res.data);
+	apiClient.post<MessageType>(`conversations/${convId}/messages`, data).then((res) => res.data);

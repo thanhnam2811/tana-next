@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './PostCard.module.scss';
 import dynamic from 'next/dynamic';
 
-const RichTextViewer = dynamic(() => import('@components/v2/Input').then((mod) => mod.RichTextViewer), {
+const RichTextViewer = dynamic(() => import('src/common/components/Input').then((mod) => mod.RichTextViewer), {
 	ssr: false,
 });
 

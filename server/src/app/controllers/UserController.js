@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
-const createHttpError = require('http-errors');
+const createError = require('http-errors');
 const { User, validate } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
 const { populateUser } = require('../../utils/Populate/User');
@@ -99,7 +99,13 @@ async function querySearchSuggestFriends(req, next) {
 	} catch (err) {
 		console.log(err);
 		return next(
-			createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+			createError.InternalServerError(
+				`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					req.body,
+					null,
+					2
+				)}`
+			)
 		);
 	}
 }
@@ -125,15 +131,21 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
 
 	// [PUT] set password
 	async setPassword(req, res, next) {
-		if (req.params.id.toString() === req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() === req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				if (user.password) {
 					return res
@@ -152,20 +164,26 @@ class UserController {
 					{ new: true }
 				);
 				res.status(200).json(updatedUser);
-			} catch (err) {
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn chỉ có thể đặt mật khẩu cho tài khoản của bạn!!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn chỉ có thể đặt mật khẩu cho tài khoản của bạn!!!!');
+		} catch (err) {
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
 	// [PUT] update password
 	async updatePassword(req, res, next) {
-		if (req.params.id.toString() === req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() === req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const validPassword = await bcrypt.compare(req.body.oldPassword, user.password);
 				if (!validPassword) {
@@ -177,13 +195,19 @@ class UserController {
 					$set: { password: hashPassword },
 				});
 				res.status(200).json('Cập nhật mật khẩu thành công!!!');
-			} catch (err) {
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn chỉ có thể cập nhật thông tin tài khoản của bạn!!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn chỉ có thể cập nhật thông tin tài khoản của bạn!!!!');
+		} catch (err) {
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -198,7 +222,13 @@ class UserController {
 				});
 			} catch (err) {
 				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+					createError.InternalServerError(
+						`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+							req.body,
+							null,
+							2
+						)}`
+					)
 				);
 			}
 		} else {
@@ -217,7 +247,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -236,15 +272,21 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
 
 	// send friend request
 	async sendFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				// check arrray object friends of currentUser has user._id or not
@@ -280,21 +322,27 @@ class UserController {
 					});
 					res.status(200).json('Hủy yêu cầu kết bạn thành công!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể gửi yêu cầu kết bạn cho chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể gửi yêu cầu kết bạn cho chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
 	// accept friend request
 	async acceptFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (
@@ -319,21 +367,27 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
 	// reject friend request
 	async rejectFriendRequest(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (
@@ -348,21 +402,27 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
 	// unfriend
 	async unfriend(req, res, next) {
-		if (req.params.id.toString() !== req.user._id.toString()) {
-			try {
+		try {
+			if (req.params.id.toString() !== req.user._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const currentUser = await User.findById(req.user._id);
 				if (currentUser.friends.some((friend) => friend.user.toString() === req.params.id)) {
@@ -385,14 +445,20 @@ class UserController {
 				} else {
 					res.status(403).json('Bạn không thể hủy kết bạn với người này!!!');
 				}
-			} catch (err) {
-				console.log(err);
-				return next(
-					createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
-				);
+			} else {
+				return res.status(403).json('Bạn không thể hủy kết bạn với chính mình!!!');
 			}
-		} else {
-			return res.status(403).json('Bạn không thể hủy kết bạn với chính mình!!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -445,15 +511,19 @@ class UserController {
 				.catch((err) => {
 					console.log(err);
 					return next(
-						createHttpError.InternalServerError(
-							`${err.message} in method: ${req.method} of ${req.originalUrl}`
-						)
+						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
 					);
 				});
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -548,7 +618,7 @@ class UserController {
 					if (err) {
 						console.log(err);
 						return next(
-							createHttpError.InternalServerError(
+							createError.InternalServerError(
 								`${err.message} in method: ${req.method} of ${req.originalUrl}`
 							)
 						);
@@ -562,7 +632,7 @@ class UserController {
 						if (err) {
 							console.log(err);
 							return next(
-								createHttpError.InternalServerError(
+								createError.InternalServerError(
 									`${err.message} in method: ${req.method} of ${req.originalUrl}`
 								)
 							);
@@ -580,7 +650,7 @@ class UserController {
 								if (err) {
 									console.log(err);
 									return next(
-										createHttpError.InternalServerError(
+										createError.InternalServerError(
 											`${err.message} in method: ${req.method} of ${req.originalUrl}`
 										)
 									);
@@ -639,7 +709,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -719,15 +795,19 @@ class UserController {
 				.catch((err) => {
 					console.log(err);
 					return next(
-						createHttpError.InternalServerError(
-							`${err.message} in method: ${req.method} of ${req.originalUrl}`
-						)
+						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
 					);
 				});
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -786,7 +866,7 @@ class UserController {
 					if (err) {
 						console.log(err);
 						return next(
-							createHttpError.InternalServerError(
+							createError.InternalServerError(
 								`${err.message} in method: ${req.method} of ${req.originalUrl}`
 							)
 						);
@@ -799,7 +879,7 @@ class UserController {
 						if (err) {
 							console.log(err);
 							return next(
-								createHttpError.InternalServerError(
+								createError.InternalServerError(
 									`${err.message} in method: ${req.method} of ${req.originalUrl}`
 								)
 							);
@@ -816,7 +896,7 @@ class UserController {
 								if (err) {
 									console.log(err);
 									return next(
-										createHttpError.InternalServerError(
+										createError.InternalServerError(
 											`${err.message} in method: ${req.method} of ${req.originalUrl}`
 										)
 									);
@@ -871,7 +951,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -936,136 +1022,181 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
 
 	// search user by name
-	async search(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		User.paginate(
-			{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+	async search(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			User.paginate(
+				{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
 	}
 
 	// search user in admin
-	async searchUser(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const roleUserID = mongoose.Types.ObjectId('6389667eb7991bdd04987103');
-		User.paginate(
-			{
-				fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-				role: roleUserID,
-			},
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+	async searchUser(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const roleUserID = mongoose.Types.ObjectId('6389667eb7991bdd04987103');
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					role: roleUserID,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
 	}
 
 	async searchAdmin(req, res) {
-		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const roleUserID = mongoose.Types.ObjectId('63896676b7991bdd049870fe');
-		User.paginate(
-			{
-				fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-				role: roleUserID,
-			},
-			{
-				offset,
-				limit,
-				populate: [
-					{ path: 'profilePicture', select: '_id link' },
-					{ path: 'coverPicture', select: '_id link' },
-					{
-						path: 'friends.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'friendRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{
-						path: 'sentRequests.user',
-						select: '_id fullname profilePicture isOnline',
-						populate: { path: 'profilePicture', select: '_id link' },
-					},
-					{ path: 'role', select: '_id name' },
-				],
-			}
-		)
-			.then((data) => {
-				getListData(res, data);
-			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					role: roleUserID,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					res.status(500).send({
+						message: err.message || 'Some error occurred while retrieving tutorials.',
+					});
 				});
-			});
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
 	}
 
 	// get all users
@@ -1087,13 +1218,19 @@ class UserController {
 		try {
 			const user = await getUserWithPrivacy(req);
 			if (!user) {
-				return next(createHttpError.NotFound('User not found'));
+				return next(createError.NotFound('User not found'));
 			}
 			res.status(200).json(user);
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1103,10 +1240,10 @@ class UserController {
 		try {
 			const user = await populateUser(req.params.id);
 			if (!user) {
-				return next(createHttpError.NotFound('Tài khoản không toàn tại'));
+				return next(createError.NotFound('Tài khoản không toàn tại'));
 			}
 			if (user.lockTime > Date.now()) {
-				return next(createHttpError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
+				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
 			}
 			// lock account 100 years
 			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
@@ -1115,7 +1252,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1125,7 +1268,7 @@ class UserController {
 		try {
 			const user = await populateUser(req.params.id);
 			if (!user) {
-				return next(createHttpError.NotFound('User not found'));
+				return next(createError.NotFound('User not found'));
 			}
 			if (user.lockTime > Date.now()) {
 				// update lockTime < now
@@ -1134,11 +1277,17 @@ class UserController {
 				await user.save();
 				return res.status(200).json(user);
 			}
-			return next(createHttpError.BadRequest('Tài khoản chưa bị khóa'));
+			return next(createError.BadRequest('Tài khoản chưa bị khóa'));
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1162,7 +1311,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1177,7 +1332,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1240,7 +1401,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1261,7 +1428,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1274,7 +1447,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1286,7 +1465,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -1310,7 +1495,13 @@ class UserController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createHttpError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
