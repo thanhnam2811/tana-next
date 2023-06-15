@@ -114,24 +114,9 @@ export function FriendCard({ user, reload }: Props) {
 		});
 
 	const handleSendRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Gửi lời mời kết bạn đến <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					<strong>{user.fullname}</strong> sẽ nhận được thông báo về lời mời kết bạn của bạn.
-				</span>
-			),
-			okText: 'Gửi lời mời',
-			cancelText: 'Thoát',
-			onOk: () =>
-				requestFriendApi(user._id).then(() => {
-					message.success('Gửi lời mời kết bạn thành công');
-					reload?.();
-				}),
+		requestFriendApi(user._id).then(() => {
+			message.success('Gửi lời mời kết bạn thành công');
+			reload?.();
 		});
 
 	switch (relationship) {
