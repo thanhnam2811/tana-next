@@ -1,5 +1,5 @@
-import { UserFormType, UserType } from '@common/types';
 import apiClient from './apiClient';
+import { UserFormType, UserType } from '@modules/user/types';
 
 export const userApi = {
 	endpoint: {

@@ -1,5 +1,5 @@
 import { FetcherType } from '@common/hooks';
-import { UserType } from '@common/types';
+import { UserType } from '@modules/user/types';
 import { List } from 'antd';
 import React, { useEffect } from 'react';
 

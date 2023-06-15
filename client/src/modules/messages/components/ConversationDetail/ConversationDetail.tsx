@@ -40,6 +40,7 @@ import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
 import { leaveConversationApi } from '@modules/messages/api';
 import { useRouter } from 'next/router';
+import { UploadImage } from '@common/components/Button';
 
 export function ConversationDetail() {
 	const router = useRouter();
@@ -179,22 +180,14 @@ export function ConversationDetail() {
 			headStyle={{ padding: 8 }}
 			title={
 				<Space direction="vertical" className={styles.header} align="center">
-					<ImgCrop zoomSlider>
-						<Upload
-							fileList={[]}
-							beforeUpload={(file) => {
-								handleChangeAvatar(file);
-								return false;
-							}}
+					<UploadImage cropProps={{ zoomSlider: true }} onPickImage={handleChangeAvatar}>
+						<Badge
+							count={!isDirect ? <Button shape="circle" size="small" icon={<HiCamera />} /> : null}
+							offset={[-8, 64 - 8]}
 						>
-							<Badge
-								count={!isDirect ? <Button shape="circle" size="small" icon={<HiCamera />} /> : null}
-								offset={[-8, 64 - 8]}
-							>
-								<ConversationAvatar conversation={conversation} size={64} />
-							</Badge>
-						</Upload>
-					</ImgCrop>
+							<ConversationAvatar conversation={conversation} size={64} />
+						</Badge>
+					</UploadImage>
 
 					<Typography.Title level={5} className={styles.name}>
 						{name}

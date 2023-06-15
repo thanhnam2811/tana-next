@@ -1,8 +1,9 @@
 import Reaction from '@assets/icons/reactions';
-import { ContactType, EducationType, PrivacyValueType, ReactionType, WorkType } from '@common/types';
+import { PrivacyValueType, ReactionType } from '@common/types';
 import { COLORS } from '@utils/theme';
 import { HiGlobeAsiaAustralia, HiLockClosed, HiUserMinus, HiUserPlus, HiUsers } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
+import { ContactType, EducationType, WorkType } from '@modules/user/types';
 
 export interface IOption<T> {
 	label: string;

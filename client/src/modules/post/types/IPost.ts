@@ -1,4 +1,5 @@
-import { IData, IMedia, IPrivacy, UserType } from '@common/types';
+import { IData, IMedia, IPrivacy } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 interface IPost extends IData {
 	author: UserType;

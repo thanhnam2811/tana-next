@@ -1,10 +1,11 @@
 import { getPrivacyOption, privacyOptions, PrivacyOptionType } from '@assets/data';
 import { SelectApi } from 'src/common/components/Input';
 import { useFetcher } from '@common/hooks';
-import { IPrivacy, PrivacyValueType, UserType } from '@common/types';
+import { IPrivacy, PrivacyValueType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
 import { Button, Dropdown, DropDownProps, Form, Input, Modal, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
+import { UserType } from '@modules/user/types';
 
 interface Props {
 	value?: IPrivacy;

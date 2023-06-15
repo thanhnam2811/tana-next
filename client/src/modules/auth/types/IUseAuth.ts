@@ -1,5 +1,5 @@
-import { UserFormType, UserType } from '@common/types';
 import { ILoginParams } from '@utils/api';
+import { UserFormType, UserType } from '@modules/user/types';
 
 export interface IUseAuth {
 	authUser: UserType | null;

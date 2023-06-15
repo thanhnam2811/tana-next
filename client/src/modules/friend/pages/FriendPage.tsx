@@ -4,7 +4,7 @@ import { withAuth } from '@modules/auth/components';
 import { UserType } from '@modules/user/types';
 import { Button, Card, Form, Input, List, Menu, Select, Space } from 'antd';
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { FriendCard } from '../components';
 import { friendTypeList } from '../data';
 import { FriendType, IFriendFilter } from '../types';
@@ -14,7 +14,7 @@ function FriendPage() {
 	const type = (router.query.type as FriendType) || 'friends';
 
 	const [filter, setFilter] = useState<IFriendFilter>({ sort: 'desc', gender: '' });
-	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/${type}`, params: filter });
+	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/${type}`, params: filter, limit: 12 });
 
 	const changeType = (type: FriendType) => router.push({ pathname: router.pathname, query: { type } });
 

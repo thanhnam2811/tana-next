@@ -1,5 +1,5 @@
+import { UserType } from '@modules/user/types';
 import { IPrivacy } from './IPrivacy';
-import { UserType } from './IUser';
 import { IData, IMedia } from './common';
 
 interface IPost extends IData {

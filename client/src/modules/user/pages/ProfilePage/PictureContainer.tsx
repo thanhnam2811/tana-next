@@ -145,7 +145,7 @@ export const PictureContainer = ({ user }: Props) => {
 				)}
 			</Box>
 
-			{/* Profile Picture and Name */}
+			{/* ProfilePage Picture and Name */}
 			<Box
 				sx={{
 					mt: {
@@ -158,7 +158,7 @@ export const PictureContainer = ({ user }: Props) => {
 				}}
 			>
 				<Stack alignItems="flex-end" direction="row" flexWrap="wrap">
-					{/* Profile Picture */}
+					{/* ProfilePage Picture */}
 					{isCurrentUser && (
 						<input
 							type="file"
