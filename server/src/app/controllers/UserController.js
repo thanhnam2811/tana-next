@@ -1216,11 +1216,28 @@ class UserController {
 	// get information of user: education, work, contact,... with privacy setting of user
 	async getUserInfo(req, res, next) {
 		try {
-			const user = await getUserWithPrivacy(req);
+			const user = await getUserWithPrivacy(req, res);
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			res.status(200).json(user);
+			const userObj = user.toObject();
+			if (!req.user) {
+				userObj.relationship = 'none';
+			} else {
+				if (req.user.friends.includes(user._id)) {
+					userObj.relationship = 'friend';
+				} else if (req.user.sentRequests.includes(user._id)) {
+					userObj.relationship = 'sent';
+				} else if (req.user.friendRequests.includes(user._id)) {
+					userObj.relationship = 'received';
+				} else if (req.user._id.toString() === user._id.toString()) {
+					userObj.relationship = 'self';
+				} else {
+					userObj.relationship = 'none';
+				}
+			}
+
+			return res.status(200).json(userObj);
 		} catch (err) {
 			console.log(err);
 			return next(

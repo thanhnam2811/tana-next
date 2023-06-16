@@ -1,10 +1,15 @@
-const { populateUser } = require('../Populate/User');
+const { populateUser, populateUserForOther } = require('../Populate/User');
 
 async function getUserWithPrivacy(req, res) {
 	try {
-		const user = await populateUser(req.params.id);
+		let user;
+		if (req.user && req.user_id.toString() === req.params.id.toString()) {
+			user = await populateUser(req.user_id);
+		} else {
+			user = await populateUserForOther(req.params.id);
+		}
 
-		if (!user) return res.status(404).send('User not found');
+		if (!user) return res.status(404).json('User not found');
 
 		// check fields have privacy or not
 		const fields = Object.keys(user._doc);
