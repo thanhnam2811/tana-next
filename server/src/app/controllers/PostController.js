@@ -837,6 +837,8 @@ class PostController {
 			res.status(200).json(postObject);
 		} catch (err) {
 			console.error(err);
+			if (err.kind.toString() == 'ObjectId')
+				return next(createError.NotFound(`Post not found with ${req.params.id}`));
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
