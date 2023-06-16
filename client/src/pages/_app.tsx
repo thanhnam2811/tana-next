@@ -1,5 +1,3 @@
-// noinspection JSIgnoredPromiseFromCall
-
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
 import React, { useEffect } from 'react';
