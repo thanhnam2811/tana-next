@@ -3,7 +3,7 @@ import Layout from '@layout/components';
 import dynamic from 'next/dynamic';
 import styles from './LandingPage.module.scss';
 import Aos from 'aos';
-import { Button, Card, Typography } from 'antd';
+import { Button, Card, theme, Typography } from 'antd';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { HiArrowRight } from 'react-icons/hi2';
 
