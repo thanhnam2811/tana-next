@@ -799,6 +799,12 @@ class ConversationController {
 						const index = conversation.members.findIndex(
 							(member) => member.user.toString() === req.body.userID.toString()
 						);
+
+						//user cannot update role for self
+						if (req.body.userID.toString() === req.user._id.toString()) {
+							return res.status(403).send('Bạn không thể thay đổi vai trò của chính mình');
+						}
+
 						let { nickname } = conversation.members[index];
 						if (!nickname) {
 							// get fullname of user will be removed
