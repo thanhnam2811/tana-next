@@ -8,7 +8,7 @@ import { ConversationAvatar, MessageItem } from '@modules/messages/components';
 import { useConversationContext } from '@modules/messages/hooks';
 import { MessageFormType, MessageType } from '@modules/messages/types';
 import { conversationConfig } from '@modules/messages/utils';
-import { App, Button, Form, Input, List, Space, Spin, Tag, Tooltip, Typography, theme } from 'antd';
+import { App, Button, Form, Image, Input, List, Space, Spin, Tag, Tooltip, Typography, theme } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
@@ -23,7 +23,7 @@ export function ConversationMessage() {
 	const router = useRouter();
 	const { token } = theme.useToken();
 	const [form] = Form.useForm<MessageFormType>();
-	const { conversation, info } = useConversationContext();
+	const { conversation, info, updateConversation } = useConversationContext();
 
 	const id = router.query.id as string;
 
@@ -46,31 +46,44 @@ export function ConversationMessage() {
 			sending: true,
 		};
 
-		if (data.files)
-			msgPlaceholder.media = data.files?.map<IFile>((file) => ({
-				_id: randomUtil.string(24),
-				name: file.name,
-				originalname: file.name,
-				link: URL.createObjectURL(file),
-				size: file.size,
-				type: file.type,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			}));
+		if (data._id) {
+			delete msgPlaceholder.error;
+			msgFetcher.updateData(data._id, msgPlaceholder);
+		} else {
+			if (data.files)
+				msgPlaceholder.media = data.files?.map<IFile>((file) => ({
+					_id: randomUtil.string(24),
+					name: file.name,
+					originalname: file.name,
+					link: URL.createObjectURL(file),
+					size: file.size,
+					type: file.type,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+				}));
 
-		msgFetcher.addData(msgPlaceholder);
+			msgFetcher.addData(msgPlaceholder);
+		}
 
 		try {
 			// Upload file
 			if (data.files?.length) {
 				const uploaded = await uploadFileApi(data.files);
 				data.media = uploaded.files.map(({ _id }) => _id);
-				delete data.files;
 			}
+			delete data.files;
 
 			// Send message
 			const msg = await sendMessageApi(id, data);
+
+			// Update data in fetcher
 			msgFetcher.updateData(msgPlaceholder._id, msg);
+
+			// Update last message in conversation
+			updateConversation({
+				...conversation,
+				lastest_message: msg,
+			});
 		} catch (error: any) {
 			msgFetcher.updateData(msgPlaceholder._id, {
 				...msgPlaceholder,
@@ -173,36 +186,38 @@ export function ConversationMessage() {
 						{/* Bottom ref */}
 						<div ref={bottomRef} />
 
-						{listMessage.map((item, index) => {
-							const isSystem = item.isSystem;
-							if (isSystem)
+						<Image.PreviewGroup>
+							{listMessage.map((item, index) => {
+								const isSystem = item.isSystem;
+								if (isSystem)
+									return (
+										<Tag color="cyan" className={styles.system_message}>
+											{stringUtil.renderHTML(item.text)}
+										</Tag>
+									);
+
+								const prev = listMessage[index - 1];
+								const prevCombine = prev && prev.sender?._id === item.sender?._id;
+
+								const next = listMessage[index + 1];
+								const nextCombine = next && next.sender?._id === item.sender?._id;
+
 								return (
-									<Tag color="cyan" className={styles.system_message}>
-										{stringUtil.renderHTML(item.text)}
-									</Tag>
+									<MessageItem
+										key={item._id}
+										message={item}
+										prevCombine={prevCombine}
+										nextCombine={nextCombine}
+										onRetry={() =>
+											sendMessage({
+												...item,
+												media: item.media?.map((file) => file._id),
+											})
+										}
+									/>
 								);
-
-							const prev = listMessage[index - 1];
-							const prevCombine = prev && prev.sender?._id === item.sender?._id;
-
-							const next = listMessage[index + 1];
-							const nextCombine = next && next.sender?._id === item.sender?._id;
-
-							return (
-								<MessageItem
-									key={item._id}
-									message={item}
-									prevCombine={prevCombine}
-									nextCombine={nextCombine}
-									onRetry={() =>
-										sendMessage({
-											...item,
-											media: item.media?.map((file) => file._id),
-										})
-									}
-								/>
-							);
-						})}
+							})}
+						</Image.PreviewGroup>
 					</InfiniteScroll>
 				</div>
 

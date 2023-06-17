@@ -37,10 +37,12 @@ export const fileUtil = {
 			}
 		} else {
 			const ext = file.name.split('.').pop();
+			let fileIcon = filesIcon.def;
 			if (ext && Object.keys(filesIcon).includes(ext)) {
-				return filesIcon[ext];
+				fileIcon = filesIcon[ext];
 			}
-			return filesIcon.def;
+
+			return fileIcon.src as string;
 		}
 	},
 
