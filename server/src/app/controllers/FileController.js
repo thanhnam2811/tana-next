@@ -22,6 +22,7 @@ class FileController {
 						originalname: file.originalname,
 						type: file.mimetype,
 						link: newPath.url,
+						size: file.size, //bytes
 						public_id: newPath.id,
 						creator: req.user._id,
 					});
