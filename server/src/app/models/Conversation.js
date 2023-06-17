@@ -76,6 +76,11 @@ const ConversationSchema = new mongoose.Schema(
 		},
 		history: [history],
 		user_deleted: [userDeletedAllMessages],
+		type: {
+			type: String,
+			enum: ['direct', 'group'],
+			default: 'direct',
+		},
 		avatar: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'File',

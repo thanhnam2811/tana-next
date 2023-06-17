@@ -23,6 +23,7 @@ router.get('/find/:userId', isAuth, ConversationController.getConversationByUser
 router.get('/:id/files/:type', isAuth, ConversationController.getAllMedia);
 
 // update conv
+
 router.patch('/:id/members/:type', isAuth, ConversationController.updateMembers);
 router.put('/:id/leave', isAuth, ConversationController.leaveConversation);
 router.put('/:id', isAuth, ConversationController.update);

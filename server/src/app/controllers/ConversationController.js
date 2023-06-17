@@ -251,6 +251,8 @@ class ConversationController {
 										$size: 2,
 									},
 								},
+								//check type = 'direct'
+								{ type: 'direct' },
 							],
 						},
 					},
@@ -270,6 +272,7 @@ class ConversationController {
 							return member;
 						})
 					);
+					req.body.type = 'direct';
 
 					const newConversation = new Conversation(req.body);
 					newConversation.members.push({
@@ -315,6 +318,7 @@ class ConversationController {
 					})
 				);
 				req.body.name = req.body.members.map((x) => x.nickname).join(', ');
+				req.body.type = 'group';
 
 				const newConversation = new Conversation(req.body);
 				newConversation.members.push({
@@ -713,11 +717,12 @@ class ConversationController {
 						member.addedBy = req.user._id;
 					});
 					// check members.length =2 => create new conversation
-					if (conversation.members.length == 2) {
+					if (conversation.members.length == 2 && conversation.type == 'direct') {
 						const newConversation = new Conversation({
 							members: conversation.members.concat(req.body.newMembers),
 							name: req.body.name,
 							creator: req.user._id,
+							type: 'group',
 						});
 
 						// create message system
@@ -756,16 +761,11 @@ class ConversationController {
 						return res.status(400).send(error.details[0].message);
 					}
 
-					//check conversation 2 members can't remove
-					if (conversation.members.length == 2) {
-						return res.status(403).send('Không thể xóa thành viên trong cuộc hội thoại 2 người');
-					}
-
 					if (adminOfConversation.includes(req.user._id.toString())) {
-						// check if length of members is 2 => remove conversation
-						if (conversation.members.length == 2) {
-							await Conversation.findByIdAndDelete(req.params.id);
-							return res.status(200).json('Xóa cuộc hội thoại thành công');
+						if (conversation.members.length == 2 && conversation.type == 'direct') {
+							return res
+								.status(403)
+								.json('Bạn không thể xóa thành viên trong cuộc trò chuyện giữa 2 người');
 						}
 						// get nickname of user will be removed
 						let nickname = conversation.members
@@ -793,6 +793,11 @@ class ConversationController {
 					if (error) {
 						return res.status(400).send(error.details[0].message);
 					}
+
+					if (conversation.members.length == 2 && conversation.type == 'direct') {
+						return res.status(400).json('Không thể thay đổi quyền trong cuộc trò chuyện giữa 2 người');
+					}
+
 					if (adminOfConversation.includes(req.user._id.toString())) {
 						// get nickname of user will be removed
 						// const member = conversation.members.filter(member => member.user.toString() === req.body.userID.toString());
