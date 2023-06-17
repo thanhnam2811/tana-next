@@ -27,7 +27,7 @@ class CommentController {
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError(400, error.details[0].message));
@@ -95,7 +95,7 @@ class CommentController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				media: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError(400, error.details[0].message));
@@ -289,7 +289,7 @@ class CommentController {
 				const schema = Joi.object({
 					content: Joi.string().required(),
 					media: Joi.array().items(Joi.string()),
-				});
+				}).unknown();
 				const { error } = schema.validate(req.body);
 				if (error) {
 					return next(createError(400, error.details[0].message));

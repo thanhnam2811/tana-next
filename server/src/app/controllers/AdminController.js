@@ -20,7 +20,7 @@ class AdminController {
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 

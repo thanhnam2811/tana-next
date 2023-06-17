@@ -219,7 +219,7 @@ class ConversationController {
 				otherwise: Joi.string().allow(null, '').default(''),
 			}),
 			avatar: Joi.string(),
-		});
+		}).unknown();
 
 		const { error } = schema.validate(req.body);
 		if (error) {
@@ -619,7 +619,7 @@ class ConversationController {
 				name: Joi.string().min(3).max(255),
 				avatar: Joi.string().min(3).max(255),
 				user_deleted: Joi.string(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return res.status(400).send(error.details[0].message);
@@ -700,7 +700,7 @@ class ConversationController {
 								})
 							)
 							.required(),
-					});
+					}).unknown();
 					const { error } = schema.validate(req.body);
 					if (error) {
 						return res.status(400).send(error.details[0].message);

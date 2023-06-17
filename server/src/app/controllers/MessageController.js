@@ -22,7 +22,9 @@ class MessageController {
 			const schema = Joi.object({
 				text: Joi.string().min(0),
 				media: Joi.array().items(Joi.string()),
-			}).or('text', 'media');
+			})
+				.or('text', 'media')
+				.unknown();
 
 			const { error } = schema.validate(req.body);
 			if (error) {

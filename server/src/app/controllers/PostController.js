@@ -161,7 +161,7 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
 				privacy: validatePrivacy,
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -240,7 +240,7 @@ class PostController {
 						otherwise: Joi.array().items(Joi.string()),
 					}),
 				}),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -682,7 +682,7 @@ class PostController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
