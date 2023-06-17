@@ -8,14 +8,30 @@ import { ConversationAvatar, MessageItem } from '@modules/messages/components';
 import { useConversationContext } from '@modules/messages/hooks';
 import { MessageFormType, MessageType } from '@modules/messages/types';
 import { conversationConfig } from '@modules/messages/utils';
-import { App, Button, Form, Image, Input, List, Space, Spin, Tag, Tooltip, Typography, theme } from 'antd';
+import {
+	App,
+	Badge,
+	Button,
+	Form,
+	Image,
+	Input,
+	List,
+	Popover,
+	Space,
+	Spin,
+	Tag,
+	Tooltip,
+	Typography,
+	theme,
+} from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
 import { FileRejection, useDropzone } from 'react-dropzone';
-import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip } from 'react-icons/hi2';
+import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip, HiPlus } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from './ConversationMessage.module.scss';
+import { HiX } from 'react-icons/hi';
 
 export function ConversationMessage() {
 	const { modal } = App.useApp();
@@ -120,10 +136,12 @@ export function ConversationMessage() {
 		};
 	}, []);
 
+	const files = Form.useWatch('files', form);
+	const inputFilesRef = useRef<HTMLInputElement>(null);
+
 	const onDropAccepted = (acceptedFiles: File[]) => {
 		const files = (form.getFieldValue('files') as File[]) || [];
 		files.push(...acceptedFiles);
-		console.log({ files });
 
 		form.setFieldValue('files', files);
 	};
@@ -238,7 +256,7 @@ export function ConversationMessage() {
 				>
 					<Form.Item name="files" hidden />
 
-					<input {...getInputProps()} />
+					<input {...getInputProps()} ref={inputFilesRef} />
 					<div className={styles.dropzone_content} style={{ borderColor: token.colorPrimary }}>
 						<Typography.Text strong>Gửi file</Typography.Text>
 
@@ -249,14 +267,6 @@ export function ConversationMessage() {
 
 			<div className={styles.input_container}>
 				<Space className={styles.input} style={{ borderColor: token.colorBorder }}>
-					<Tooltip title="Đính kèm">
-						<Button shape="circle" icon={<HiPaperClip />} />
-					</Tooltip>
-
-					<Tooltip title="Thêm icon">
-						<Button shape="circle" icon={<HiFaceSmile />} />
-					</Tooltip>
-
 					<Form.Item
 						name="text"
 						rules={[
@@ -283,6 +293,63 @@ export function ConversationMessage() {
 							ref={textInputRef}
 						/>
 					</Form.Item>
+
+					<Tooltip title="Thêm icon">
+						<Button shape="circle" icon={<HiFaceSmile />} />
+					</Tooltip>
+
+					<Popover
+						title={
+							<Space align="center" style={{ width: '100%' }}>
+								<Typography.Text strong>Đính kèm</Typography.Text>
+
+								<Tooltip title="Thêm file">
+									<Button
+										shape="circle"
+										size="small"
+										onClick={() => inputFilesRef.current?.click()}
+										icon={<HiPlus />}
+										style={{ marginLeft: 'auto' }}
+									/>
+								</Tooltip>
+							</Space>
+						}
+						content={
+							<List
+								className={styles.file_list}
+								size="small"
+								bordered
+								dataSource={files}
+								renderItem={(file: File) => (
+									<List.Item
+										extra={
+											<Button
+												shape="circle"
+												icon={<HiX />}
+												size="small"
+												onClick={() => {
+													const files = form.getFieldValue('files') as File[];
+													form.setFieldValue(
+														'files',
+														files.filter((f) => f !== file)
+													);
+												}}
+											/>
+										}
+									>
+										<List.Item.Meta title={file.name} />
+									</List.Item>
+								)}
+							/>
+						}
+						trigger={['click']}
+					>
+						<Tooltip title="Đính kèm">
+							<Badge count={files?.length}>
+								<Button shape="circle" icon={<HiPaperClip />} />
+							</Badge>
+						</Tooltip>
+					</Popover>
 
 					<Tooltip title="Gửi">
 						<Button shape="circle" icon={<HiPaperAirplane />} htmlType="submit" />
