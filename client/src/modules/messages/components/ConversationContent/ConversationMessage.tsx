@@ -1,10 +1,14 @@
+import { uploadFileApi } from '@common/api';
 import { useFetcher } from '@common/hooks';
+import { IFile } from '@common/types';
 import { randomUtil, stringUtil } from '@common/utils';
 import { useAuth } from '@modules/auth/hooks';
 import { sendMessageApi } from '@modules/messages/api';
+import { ConversationAvatar, MessageItem } from '@modules/messages/components';
+import { useConversationContext } from '@modules/messages/hooks';
 import { MessageFormType, MessageType } from '@modules/messages/types';
 import { conversationConfig } from '@modules/messages/utils';
-import { App, Button, Form, Input, List, Space, Spin, Tag, theme, Tooltip, Typography } from 'antd';
+import { App, Button, Form, Input, List, Space, Spin, Tag, Tooltip, Typography, theme } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import { useRouter } from 'next/router';
 import { useEffect, useRef } from 'react';
@@ -12,9 +16,6 @@ import { FileRejection, useDropzone } from 'react-dropzone';
 import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from './ConversationMessage.module.scss';
-import { MessageItem } from '@modules/messages/components';
-import { IFile } from '@common/types';
-import { uploadFileApi } from '@common/api';
 
 export function ConversationMessage() {
 	const { modal } = App.useApp();
@@ -22,6 +23,7 @@ export function ConversationMessage() {
 	const router = useRouter();
 	const { token } = theme.useToken();
 	const [form] = Form.useForm<MessageFormType>();
+	const { conversation, info } = useConversationContext();
 
 	const id = router.query.id as string;
 
@@ -157,9 +159,15 @@ export function ConversationMessage() {
 						inverse={true}
 						loader={<Spin style={{ margin: '8px auto' }} />}
 						endMessage={
-							<p style={{ textAlign: 'center' }}>
-								<b>Đã tải hết tin nhắn!</b>
-							</p>
+							<Space direction="vertical" style={{ width: 'fit-content', margin: 'auto' }} align="center">
+								<ConversationAvatar conversation={conversation} />
+
+								<Typography.Title level={4} style={{ margin: 0 }}>
+									{info?.name}
+								</Typography.Title>
+
+								<Typography.Text type="secondary">{info?.description}</Typography.Text>
+							</Space>
 						}
 					>
 						{/* Bottom ref */}
