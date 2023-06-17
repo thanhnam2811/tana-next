@@ -6,7 +6,7 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 import { MemberDropdown } from '../../MemberDropdown';
 
 export function MemberMenu() {
-	const { conversation, updateConversation } = useConversationContext()!;
+	const { conversation, updateConversation } = useConversationContext();
 	const { authUser } = useAuth();
 
 	return (

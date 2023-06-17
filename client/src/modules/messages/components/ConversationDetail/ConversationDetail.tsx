@@ -1,8 +1,8 @@
 import { uploadFileApi } from '@common/api';
+import { UploadImage } from '@common/components/Button';
 import { useFetcher } from '@common/hooks';
-import { useAuth } from '@modules/auth/hooks';
+import { leaveConversationApi } from '@modules/messages/api';
 import { useConversationContext } from '@modules/messages/hooks';
-import { getConversationInfo } from '@modules/messages/utils';
 import {
 	App,
 	Badge,
@@ -18,6 +18,7 @@ import {
 	Typography,
 } from 'antd';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
 import { HiLogout } from 'react-icons/hi';
 import {
@@ -36,19 +37,15 @@ import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
-import { leaveConversationApi } from '@modules/messages/api';
-import { useRouter } from 'next/router';
-import { UploadImage } from '@common/components/Button';
 
 export function ConversationDetail() {
 	const router = useRouter();
-	const { conversation, updateConversationForm } = useConversationContext()!;
+	const { conversation, updateConversationForm, info } = useConversationContext();
+	const { isDirect, name, description, receiver } = info;
 
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
-	const { authUser } = useAuth();
 
-	const { isDirect, name, description, receiver } = getConversationInfo(conversation, authUser!);
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
 
 	const [addMemberForm] = Form.useForm<{ members: string[] }>();
