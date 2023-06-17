@@ -3,7 +3,7 @@ const { populateUser, populateUserForOther } = require('../Populate/User');
 async function getUserWithPrivacy(req, res) {
 	try {
 		let user;
-		if (req.user && req.user_id.toString() === req.params.id.toString()) {
+		if (req.user && req.user._id.toString() === req.params.id.toString()) {
 			user = await populateUser(req.user_id);
 		} else {
 			user = await populateUserForOther(req.params.id);
