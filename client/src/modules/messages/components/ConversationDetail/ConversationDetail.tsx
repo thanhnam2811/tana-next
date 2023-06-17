@@ -1,7 +1,7 @@
 import { uploadFileApi } from '@common/api';
 import { UploadImage } from '@common/components/Button';
 import { useFetcher } from '@common/hooks';
-import { leaveConversationApi } from '@modules/messages/api';
+import { addMemberApi, leaveConversationApi } from '@modules/messages/api';
 import { useConversationContext } from '@modules/messages/hooks';
 import {
 	App,
@@ -37,10 +37,11 @@ import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { InfoMenu, MemberMenu } from './menu';
+import { UserType } from '@modules/user/types';
 
 export function ConversationDetail() {
 	const router = useRouter();
-	const { conversation, updateConversationForm, info } = useConversationContext();
+	const { conversation, updateConversationForm, updateConversation, info } = useConversationContext();
 	const { isDirect, name, description, receiver } = info;
 
 	const { token } = theme.useToken();
@@ -49,8 +50,17 @@ export function ConversationDetail() {
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
 
 	const [addMemberForm] = Form.useForm<{ members: string[] }>();
-	const handleAddMember = async (values: { members: string[] }) => {
-		console.log(values);
+	const handleAddMember = async ({ members }: { members: string[] }) => {
+		const toastId = toast.loading('Đang thêm thành viên...');
+
+		try {
+			const added = await addMemberApi({ conversationId: conversation._id, members });
+			updateConversation(added);
+
+			toast.success('Thêm thành viên thành công!', { id: toastId });
+		} catch (error) {
+			toast.error('Thêm thành viên thất bại!', { id: toastId });
+		}
 	};
 
 	const onAddMemberClick = () => {
@@ -58,8 +68,8 @@ export function ConversationDetail() {
 			title: 'Thêm thành viên',
 			content: (
 				<Form onFinish={handleAddMember} form={addMemberForm} initialValues={{ members: [] }}>
-					<Form.Item name="member">
-						<SelectApi
+					<Form.Item name="members">
+						<SelectApi<UserType>
 							fetcher={friendFetcher}
 							toOption={(user) => ({
 								value: user._id,
