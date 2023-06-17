@@ -1,10 +1,13 @@
-import { UserType } from '@modules/user/types';
-import { Card, List, Typography } from 'antd';
+import { PrivacyDropdown } from '@common/components/Button';
+import { useAuth } from '@modules/auth/hooks';
+import { genderOptions } from '@modules/user/data';
+import { useUserContext } from '@modules/user/hooks';
+import { IGender, UserType } from '@modules/user/types';
+import { Button, Card, Dropdown, List, Space, Typography } from 'antd';
 import { toast } from 'react-hot-toast';
 import { HiPencil } from 'react-icons/hi2';
 import { ContactList, EducationList, WorkList } from '../lists';
-import { useUserContext } from '@modules/user/hooks';
-import { useAuth } from '@modules/auth/hooks';
+import { capitalize } from 'lodash';
 
 export const InfoTab = () => {
 	const { user, isCurrentUser } = useUserContext();
@@ -17,6 +20,9 @@ export const InfoTab = () => {
 			.then(() => toast.success('Cập nhật thành công!'))
 			.catch(() => toast.error('Cập nhật thất bại!'));
 	};
+
+	const gender = genderOptions.find((item) => item.value === user.gender?.value);
+	const updateGender = (data: Partial<IGender>) => handleChangeField('gender')({ ...user.gender, ...data });
 
 	return (
 		<Card bodyStyle={{ padding: '1rem' }}>
@@ -40,6 +46,53 @@ export const InfoTab = () => {
 						}
 					/>
 				</List.Item>
+
+				{gender && (
+					<List.Item
+						actions={
+							isCurrentUser
+								? [
+										<PrivacyDropdown
+											key="privacy"
+											value={user.gender?.privacy}
+											onChange={(privacy) => updateGender({ privacy })}
+										/>,
+										<Dropdown
+											key="edit"
+											menu={{
+												items: genderOptions.map(({ Icon, label, value }) => ({
+													key: value,
+													label: (
+														<Space>
+															<Icon /> {capitalize(label)}
+														</Space>
+													),
+													value,
+													disabled: value === gender.value,
+													onClick: () => updateGender({ value }),
+												})),
+											}}
+											arrow
+											trigger={['click']}
+										>
+											<Button type="text" icon={<HiPencil />} />
+										</Dropdown>,
+								  ]
+								: []
+						}
+					>
+						<List.Item.Meta
+							title="Giới tính"
+							description={
+								<Space>
+									<gender.Icon />
+
+									<Typography.Text>{capitalize(gender.label)}</Typography.Text>
+								</Space>
+							}
+						/>
+					</List.Item>
+				)}
 
 				<List.Item>
 					<List.Item.Meta title="Email" description={<Typography.Text>{user.email}</Typography.Text>} />

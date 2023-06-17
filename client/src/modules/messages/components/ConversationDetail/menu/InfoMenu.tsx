@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { HiMagnifyingGlass, HiPencil } from 'react-icons/hi2';
 
 export function InfoMenu() {
-	const { conversation, updateConversationForm } = useConversationContext()!;
+	const { conversation, updateConversationForm } = useConversationContext();
 	const { modal } = App.useApp();
 
 	const inputNameRef = useRef<InputRef>(null);

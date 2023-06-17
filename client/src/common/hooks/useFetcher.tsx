@@ -102,7 +102,6 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 						items: page.items.map((item) => {
 							if (item._id === id) {
 								updated = true;
-								console.log({ item, newData });
 								return newData;
 							}
 							return item;

@@ -1,5 +1,3 @@
-// noinspection JSIgnoredPromiseFromCall
-
 import { withLayout } from '@layout/components';
 import { Avatar, Card, Spin } from 'antd';
 import { useRouter } from 'next/router';

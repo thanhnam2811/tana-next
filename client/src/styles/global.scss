@@ -271,3 +271,7 @@ button.ant-btn {
 .ant-space-item {
 	display: contents;
 }
+
+body {
+	scroll-snap-type: y mandatory;
+}

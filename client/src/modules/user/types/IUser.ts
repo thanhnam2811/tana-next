@@ -1,4 +1,5 @@
 import { IData, IMedia, IPrivacy } from '@common/types';
+import { IGender } from './IGender';
 
 export type ContactType =
 	| 'phone'
@@ -10,6 +11,7 @@ export type ContactType =
 	| 'linkedin'
 	| 'youtube'
 	| 'website';
+
 export interface IContact {
 	type: ContactType;
 	value: string;
@@ -44,6 +46,7 @@ export type RelationshipType = 'friend' | 'sent' | 'received' | 'none' | 'you';
 interface IUser extends IData {
 	fullname: string;
 	email: string;
+	gender?: IGender;
 
 	profilePicture: IMedia | string;
 	coverPicture: IMedia | string;

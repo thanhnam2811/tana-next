@@ -1,11 +1,11 @@
-import { Box } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
+import styles from './LandingPage.module.scss';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import NET from 'vanta/dist/vanta.net.min';
 
-export function Landing() {
+export default function LandingBanner() {
 	const [vanta, setVanta] = useState<any>(null);
 	const bannerRef = useRef(null);
 
@@ -16,7 +16,6 @@ export function Landing() {
 				mouseControls: true,
 				touchControls: true,
 				gyroControls: false,
-				minHeight: 600,
 				scale: 1.0,
 				scaleMobile: 1.0,
 				color: 0x3fe8ff,
@@ -29,5 +28,5 @@ export function Landing() {
 		};
 	}, []);
 
-	return <Box ref={bannerRef} width="100%" />;
+	return <div ref={bannerRef} className={styles.banner_bg} />;
 }

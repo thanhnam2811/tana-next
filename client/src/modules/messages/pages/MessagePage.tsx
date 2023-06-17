@@ -9,6 +9,7 @@ import { HiPencilSquare } from 'react-icons/hi2';
 import { createConversationApi } from '../api';
 import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
 import { ConversationCreateType, ConversationType } from '../types';
+import Head from 'next/head';
 
 export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
@@ -50,6 +51,10 @@ function MessagesPage() {
 
 	return (
 		<>
+			<Head>
+				<title>TaNa - Tin nhắn</title>
+			</Head>
+
 			<Layout.Sider align="left">
 				<Card
 					title={

@@ -7,7 +7,7 @@ import raw from './raw.svg';
 import ppt from './ppt.svg';
 
 const files: {
-	[key: string]: string;
+	[key: string]: any;
 } = {
 	doc,
 	docx: doc,

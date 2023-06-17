@@ -10,12 +10,9 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@emotion/react": "^11.10.6",
-		"@emotion/styled": "^11.10.6",
-		"@mui/icons-material": "^5.8.4",
-		"@mui/lab": "^5.0.0-alpha.106",
-		"@mui/material": "^5.11.13",
-		"@mui/x-date-pickers": "^5.0.9",
+		"@emotion/react": "^11.11.1",
+		"@emotion/styled": "^11.11.0",
+		"@mui/material": "^5.13.5",
 		"@types/lodash": "^4.14.195",
 		"@vercel/analytics": "^1.0.1",
 		"@videosdk.live/react-sdk": "^0.1.73",
@@ -43,6 +40,7 @@
 		"react-infinite-scroll-component": "^6.1.0",
 		"react-lottie-player": "^1.4.3",
 		"react-player": "^2.12.0",
+		"react-transition-group": "^4.4.5",
 		"sass": "^1.62.1",
 		"sharp": "^0.32.1",
 		"socket.io-client": "^4.5.4",

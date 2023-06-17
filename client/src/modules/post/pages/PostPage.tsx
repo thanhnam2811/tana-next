@@ -2,7 +2,7 @@ import { ListComment } from '@modules/comment/components';
 import { Card, Col, Row, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { PostCard } from '../components';
+import { PostCard, PostSEO } from '../components';
 import { PostType } from '../types';
 import Layout from '@layout/components';
 import useSWR from 'swr';
@@ -20,7 +20,7 @@ export default function PostPage({ post: serverPost }: Props) {
 	const post = data || serverPost;
 
 	if (!post) {
-		if (!isLoading)
+		if (isLoading)
 			return (
 				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 					<Spin size="large" />
@@ -29,7 +29,9 @@ export default function PostPage({ post: serverPost }: Props) {
 		else
 			return (
 				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-					<Typography.Text strong>Bài viết không tồn tại, hoặc đã bị xóa</Typography.Text>
+					<Typography.Text strong>
+						Bài viết không tồn tại, hoặc bạn không có quyền xem bài viết này
+					</Typography.Text>
 				</Layout.Container>
 			);
 	}
@@ -37,20 +39,24 @@ export default function PostPage({ post: serverPost }: Props) {
 	const handleDelete = () => router.push('/'); // Go to home page after deleting
 
 	return (
-		<Layout.Container>
-			<Row gutter={[16, 16]} style={{ padding: 16, width: '100%' }}>
-				{/* Post */}
-				<Col span={16}>
-					<PostCard post={post} onDelete={handleDelete} />
-				</Col>
+		<>
+			<PostSEO id={id} post={post} />
 
-				{/* Comment */}
-				<Col span={8}>
-					<Card title="Bình luận" headStyle={{ padding: 16 }} bodyStyle={{ padding: 16 }}>
-						<ListComment post={post!} />
-					</Card>
-				</Col>
-			</Row>
-		</Layout.Container>
+			<Layout.Container>
+				<Row gutter={[16, 16]} style={{ padding: 16, width: '100%' }}>
+					{/* Post */}
+					<Col span={16}>
+						<PostCard post={post} onDelete={handleDelete} />
+					</Col>
+
+					{/* Comment */}
+					<Col span={8}>
+						<Card title="Bình luận" headStyle={{ padding: 16 }} bodyStyle={{ padding: 16 }}>
+							<ListComment post={post!} />
+						</Card>
+					</Col>
+				</Row>
+			</Layout.Container>
+		</>
 	);
 }
