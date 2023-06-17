@@ -6,10 +6,12 @@ import { useAuth } from '@modules/auth/hooks';
 import { sendMessageApi } from '@modules/messages/api';
 import { ConversationAvatar, MessageItem } from '@modules/messages/components';
 import { useConversationContext } from '@modules/messages/hooks';
-import { MessageFormType, MessageType } from '@modules/messages/types';
+import { IMember, MessageFormType, MessageType } from '@modules/messages/types';
 import { conversationConfig } from '@modules/messages/utils';
+import { UserAvatar } from '@modules/user/components';
 import {
 	App,
+	Avatar,
 	Badge,
 	Button,
 	Form,
@@ -25,13 +27,14 @@ import {
 	theme,
 } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
+import classnames from 'classnames';
 import { useRouter } from 'next/router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileRejection, useDropzone } from 'react-dropzone';
+import { HiX } from 'react-icons/hi';
 import { HiArrowSmallDown, HiFaceSmile, HiPaperAirplane, HiPaperClip, HiPlus } from 'react-icons/hi2';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styles from './ConversationMessage.module.scss';
-import { HiX } from 'react-icons/hi';
 
 export function ConversationMessage() {
 	const { modal } = App.useApp();
@@ -113,6 +116,7 @@ export function ConversationMessage() {
 	const scrollToBottom = () => bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
 
 	useEffect(() => {
+		// Scroll
 		const msgHistoryEl = document.getElementById('messages-history');
 		const scrollDownBtnEl = document.getElementById('scroll-down-btn');
 
@@ -128,7 +132,6 @@ export function ConversationMessage() {
 				}
 			}
 		};
-
 		msgHistoryEl?.addEventListener('scroll', handleScroll);
 
 		return () => {
@@ -176,6 +179,54 @@ export function ConversationMessage() {
 	const dropzone = useDropzone({ onDropAccepted, onDropRejected, ...conversationConfig.dropzone });
 
 	const { getRootProps, getInputProps, isDragAccept, isDragReject } = dropzone;
+
+	const typingRef = useRef<any>(null);
+
+	const emitStopTyping = () => {
+		// emit stop typing event
+		window.socket.emit('stopTypingMessage', {
+			conversation: id,
+			senderId: authUser?._id,
+		});
+
+		// clear typingRef
+		typingRef.current = null;
+	};
+
+	const emitTyping = () => {
+		// if typingRef is null, emit typing event
+		if (!typingRef.current)
+			window.socket.emit('typingMessage', {
+				conversation: id,
+				senderId: authUser?._id,
+			});
+		// if typingRef is not null, clear timeout
+		else clearTimeout(typingRef.current);
+
+		// set timeout to emit stop typing event after 1s
+		typingRef.current = setTimeout(emitStopTyping, 1000);
+	};
+
+	// listen typing event from socket io
+	const [typingList, setTypingList] = useState<IMember[]>([]);
+
+	useEffect(() => {
+		if (id) {
+			window.socket.on('typingMessage', ({ senderId }: { senderId: string }) => {
+				const typer = conversation.members.find(({ user }: IMember) => user._id === senderId);
+				if (typer) setTypingList((prev) => [...prev, typer]);
+			});
+
+			window.socket.on('stopTypingMessage', ({ senderId }: any) => {
+				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
+			});
+		}
+
+		return () => {
+			window.socket.off('typingMessage');
+			window.socket.off('stopTypingMessage');
+		};
+	}, [id]);
 
 	return (
 		<Form className={styles.container} form={form} onFinish={sendMessage} initialValues={{ files: [], text: '' }}>
@@ -247,6 +298,24 @@ export function ConversationMessage() {
 					id="scroll-down-btn"
 				/>
 
+				<Space
+					className={classnames(styles.typing, { [styles.show]: typingList.length > 0 })}
+					style={{
+						backgroundColor: token.colorBgContainer,
+						borderColor: token.colorBorder,
+					}}
+				>
+					<Avatar.Group maxCount={3} size="small" className={styles.typing_list}>
+						{typingList.map(({ user, nickname }: IMember) => (
+							<UserAvatar key={user._id} user={user} nickname={nickname} avtSize={24} />
+						))}
+					</Avatar.Group>
+
+					<Typography.Text type="secondary" className={styles.typing_text}>
+						đang soạn tin...
+					</Typography.Text>
+				</Space>
+
 				<div
 					className={styles.dropzone}
 					style={{
@@ -255,13 +324,13 @@ export function ConversationMessage() {
 					}}
 				>
 					<Form.Item name="files" hidden />
-
 					<input {...getInputProps()} ref={inputFilesRef} />
 					<div className={styles.dropzone_content} style={{ borderColor: token.colorPrimary }}>
 						<Typography.Text strong>Gửi file</Typography.Text>
 
 						<Typography.Text type="secondary">Thả file vào đây để gửi</Typography.Text>
 					</div>
+					TS
 				</div>
 			</div>
 
@@ -291,6 +360,7 @@ export function ConversationMessage() {
 								form.submit();
 							}}
 							ref={textInputRef}
+							onKeyDown={emitTyping}
 						/>
 					</Form.Item>
 

@@ -6,11 +6,12 @@ import Link from 'next/link';
 
 interface Props {
 	user?: UserType;
+	nickname?: string;
 	badgeProps?: BadgeProps;
 	avtSize?: number; // Size of avatar
 }
 
-export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: Props & AvatarProps) {
+export function UserAvatar({ user, nickname, badgeProps, avtSize = 40, ...avatarProps }: Props & AvatarProps) {
 	const { token } = theme.useToken();
 
 	const badgeSize = avtSize / 4;
@@ -18,7 +19,7 @@ export function UserAvatar({ user, badgeProps, avtSize = 40, ...avatarProps }: P
 	if (!user) return <Skeleton.Avatar size={avtSize} shape="circle" active />;
 
 	return (
-		<Tooltip title={user?.fullname} placement="top">
+		<Tooltip title={nickname || user?.fullname} placement="top">
 			<Badge
 				className={styles.badge}
 				count={
