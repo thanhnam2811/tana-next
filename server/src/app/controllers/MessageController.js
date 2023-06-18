@@ -7,7 +7,10 @@ const Conversation = require('../models/Conversation');
 const { getListData } = require('../../utils/Response/listData');
 const { openai } = require('../../configs/chatgpt');
 const SocketManager = require('../../socket/SocketManager');
-const eventName = require('../../socket/constant');
+const { eventName } = require('../../socket/constant');
+
+const { responseError } = require('../../utils/Response/error');
+
 // set encryption algorithm
 const algorithm = 'aes-256-cbc';
 
@@ -116,13 +119,12 @@ class MessageController {
 	async delete(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
-			console.log(message.sender, req.user._id);
 			if (message.sender.toString() === req.user._id.toString()) {
 				// await Message.delete({ _id: req.params.id });
 				await message.delete();
 				res.status(200).json(message);
 			} else {
-				res.status(401).send('Bạn không có quyền xóa tin nhắn này');
+				return responseError(res, 401, 'Bạn không có quyền xóa tin nhắn này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -147,9 +149,7 @@ class MessageController {
 				getListData(res, data);
 			})
 			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
-				});
+				return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
 			});
 	}
 
@@ -203,12 +203,14 @@ class MessageController {
 						getListData(res, data);
 					})
 					.catch((err) => {
-						res.status(500).send({
-							message: err.message || 'Some error occurred while retrieving tutorials.',
-						});
+						return responseError(
+							res,
+							500,
+							err.message ?? 'Some error occurred while retrieving tutorials.'
+						);
 					});
 			} else {
-				res.status(403).send('Bạn không có trong cuộc hội thoại này!!!');
+				return responseError(res, 403, err.message ?? 'Bạn không có trong cuộc hội thoại này!!!');
 			}
 		} catch (error) {
 			console.log(error);
