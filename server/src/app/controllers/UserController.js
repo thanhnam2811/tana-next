@@ -1562,6 +1562,8 @@ class UserController {
 
 	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
+			//increase endDay 1
+			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalUserCreationsByDay = await User.aggregate([
 				{
 					$match: {
@@ -1586,7 +1588,7 @@ class UserController {
 			// Initialize the map with 0 for each day in the range
 			let currentDate = new Date(startDay);
 			const endDate = new Date(endDay);
-			while (currentDate <= endDate) {
+			while (currentDate <= endDate - 1) {
 				const dateString = currentDate.toISOString().split('T')[0];
 				totalUserCreationsMap[dateString] = 0;
 
