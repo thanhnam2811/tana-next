@@ -38,7 +38,7 @@ export function UserAvatar({ user, nickname, badgeProps, avtSize = 40, ...avatar
 				offset={[0 - badgeSize / 2, avtSize - badgeSize / 2]}
 				{...badgeProps}
 			>
-				<Link href={`/profile?id=${user?._id}`} passHref draggable>
+				<Link href={`/profile?id=${user?._id}`} passHref draggable onClick={(e) => e.stopPropagation()}>
 					<Avatar
 						shape="circle"
 						src={user?.profilePicture.link}
