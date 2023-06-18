@@ -720,6 +720,32 @@ class UserController {
 		}
 	}
 
+	//add hobbies for user
+	async addHobbies(req, res, next) {
+		try {
+			const { hobbies } = req.body;
+			const user = await User.findByIdAndUpdate(
+				req.user._id,
+				{
+					$set: { hobbies },
+				},
+				{ new: true }
+			);
+			return res.status(200).json(user);
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// search new friends by keyword
 	async searchNewFriends(req, res, next) {
 		try {

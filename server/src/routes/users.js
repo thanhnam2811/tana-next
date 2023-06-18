@@ -31,6 +31,7 @@ router.get('/', UserController.getUser);
 // router.get("/:id/information", getUserFromToken, UserController.getUserInformation);
 
 // PUT
+router.put('/hobbies', isAuth, UserController.addHobbies);
 router.put('/remove-notification', isAuth, NotificationController.removeNotification);
 router.put('/update-profile', isAuth, UserController.update);
 router.put('/password', isAuth, UserController.updatePassword);
