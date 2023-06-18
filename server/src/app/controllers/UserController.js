@@ -1,3 +1,5 @@
+/* eslint-disable no-lonely-if */
+/* eslint-disable import/order */
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
 const createError = require('http-errors');
@@ -9,6 +11,8 @@ const { getListUser, getListData, getListPost } = require('../../utils/Response/
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
 const moment = require('moment');
+const suggestFriend = require('../../utils/Suggest/friend');
+
 function querySearchAllUsers(req) {
 	try {
 		const query = [{ $match: { _id: { $ne: req.user._id } } }];
@@ -68,8 +72,8 @@ async function querySearchSuggestFriends(req, next) {
 									$or: [
 										{ city: { $regex: cityUser, $options: 'i' } },
 										{ from: { $regex: fromUser, $options: 'i' } },
-										{ 'education.school': { $regex: schoolUser, $options: 'i' } },
-										{ 'work.company': { $regex: companyUser, $options: 'i' } },
+										// { 'education.school': { $regex: schoolUser, $options: 'i' } },
+										// { 'work.company': { $regex: companyUser, $options: 'i' } },
 									],
 								},
 								{ _id: { $nin: friendsOfFriendsFilter } },
@@ -133,6 +137,25 @@ class UserController {
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [GET]
+	async suggestFriends(req, res, next) {
+		try {
+			const users = await suggestFriend(req.user._id);
+			res.status(200).json(users);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2

@@ -17,6 +17,7 @@ router.get('/profile', isAuth, async (req, res) => {
 router.delete('/:id', isAuth, RoleMiddleware.IsAdmin, UserController.delete);
 
 // GET
+router.get('/suggests', isAuth, UserController.suggestFriends);
 router.get('/friends', isAuth, UserController.getFriendsList);
 router.get('/notifications', isAuth, NotificationController.getNotifications);
 router.get('/activities', isAuth, ActivityController.getAllActivityOfUser);
