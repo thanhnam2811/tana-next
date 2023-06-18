@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const Notification = require('../models/Notification');
 const { getPagination } = require('../../utils/Pagination');
+const { responseError } = require('../../utils/Response/error');
 
 class NotificationController {
 	// get Notification by user ID
@@ -68,15 +69,25 @@ class NotificationController {
 				})
 				.catch((err) => {
 					console.log(err);
-					res.status(500).send({
-						message: err.message || 'Some error occurred while retrieving notifications.',
-					});
+					return next(
+						createError.InternalServerError(
+							`${err.message}\nin method: ${req.method} of ${
+								req.originalUrl
+							}\nwith body: ${JSON.stringify(req.body, null, 2)}`
+						)
+					);
 				});
 		} catch (err) {
 			console.log(err);
-			res.status(500).send({
-				message: err.message || 'Some error occurred while retrieving notifications.',
-			});
+			next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -101,7 +112,13 @@ class NotificationController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -110,21 +127,21 @@ class NotificationController {
 		try {
 			const notification = await Notification.findById(req.params.id);
 			if (!notification) {
-				return res.status(404).json({ message: 'Thông báo không được tìm thấy' });
+				return responseError(res, 404, 'Thông báo không được tìm thấy');
 			}
 			if (
 				!notification.receiver
 					.map((receiver) => receiver._id.toString())
 					.some((receiverId) => receiverId === req.user._id.toString())
 			) {
-				return res.status(403).json({ message: 'Bạn không phải là người nhận thông báo này' });
+				return responseError(res, 403, 'Bạn không phải là người nhận thông báo này');
 			}
 			if (
 				notification.readBy
 					.map((item) => item.readerId.toString())
 					.some((readerId) => readerId === req.user._id.toString())
 			) {
-				return res.status(403).json({ message: 'Bạn đã đọc thông báo này rồi' });
+				return responseError(res, 403, 'Bạn đã đọc thông báo này rồi');
 			}
 			await notification.updateOne({
 				$push: {
@@ -159,7 +176,7 @@ class NotificationController {
 				},
 			});
 			if (notifications.length === 0) {
-				return res.status(404).json({ message: 'Thông báo không được tìm thấy' });
+				return responseError(res, 404, 'Thông báo không được tìm thấy');
 			}
 			const notificationIds = notifications.map((notification) => notification._id);
 			await Notification.updateMany(
@@ -195,22 +212,18 @@ class NotificationController {
 		try {
 			const notification = await Notification.findById(req.params.notificationId);
 			if (!notification) {
-				res.status(404).send({
-					message: `Notification not found with id ${req.params.notificationId}`,
-				});
+				return responseError(res, 404, `Thông báo không được tìm thấy với id:${req.params.notificationId}`);
 			} else if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
 				const result = await Notification.findByIdAndUpdate(
 					req.params.notificationId,
 					{ $pull: { receiver: req.user._id } },
 					{ new: true }
 				);
-				res.status(200).send({
+				return res.status(200).send({
 					notification: result,
 				});
 			} else {
-				res.status(403).send({
-					message: "You don't have permission to delete this notification!",
-				});
+				return responseError(res, 403, `Bạn không có quyền xóa thông báo với id:${req.params.notificationId}`);
 			}
 		} catch (err) {
 			console.log(err);

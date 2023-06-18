@@ -7,6 +7,7 @@ const AccessController = require('./AccessController');
 const { User } = require('../models/User');
 const authMethod = require('../../auth/auth.method');
 const { populateUserByEmail } = require('../../utils/Populate/User');
+const { responseError } = require('../../utils/Response/error');
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
@@ -22,27 +23,33 @@ class AdminController {
 				password: Joi.string().min(6).max(1024).required(),
 			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await populateUserByEmail(req.body.email);
 			if (!user) {
-				return res.status(401).json('Email không tồn tại.');
+				return responseError(res, 401, 'Email không tồn tại.');
 			}
 
 			if (user.role.name != 'ADMIN') {
-				return res.status(401).json('Bạn không có quyền truy cập tính năng này.');
+				return responseError(res, 401, 'Bạn không có quyền truy cập tính năng này.');
 			}
 
 			if (user.password == null) {
-				return res
-					.status(401)
-					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+				return responseError(
+					res,
+					401,
+					'Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!'
+				);
 			}
 			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).fromNow()}`
+				);
 			}
 
 			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
@@ -53,18 +60,20 @@ class AdminController {
 					// lock account after 5 minutes
 					user.lockTime = Date.now() + 5 * 60 * 1000;
 					await user.save();
-					return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
+					return responseError(res, 401, 'Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
 				}
 				if (user.loginAttempts > 3) {
 					// lock account forever
 					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 					await user.save();
-					return res
-						.status(401)
-						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
+					return responseError(
+						res,
+						401,
+						'Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!'
+					);
 				}
 				await user.save();
-				return res.status(401).json('Mật khẩu không chính xác.');
+				return responseError(res, 401, 'Mật khẩu không chính xác.');
 			}
 			// reset login attempt
 			user.loginAttempts = 0;
@@ -78,7 +87,7 @@ class AdminController {
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			if (!accessToken) {
-				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
+				return responseError(res, 401, 'Đăng nhập không thành công, vui lòng thử lại.');
 			}
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 			// save refresh token to redis and set expire time

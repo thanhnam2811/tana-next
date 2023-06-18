@@ -11,6 +11,7 @@ const Message = require('../models/Message');
 const { populateConversation } = require('../../utils/Populate/Conversation');
 const File = require('../models/File');
 const mongoose = require('mongoose');
+const { responseError } = require('../../utils/Response/error');
 
 const { getListData } = require('../../utils/Response/listData');
 const getLocationByIPAddress = require('../../configs/location');
@@ -108,9 +109,7 @@ class ConversationController {
 					getListData(res, data);
 				})
 				.catch((err) => {
-					res.status(500).send({
-						message: err.message || 'Some error occurred while retrieving tutorials.',
-					});
+					return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
 				});
 		} catch (err) {
 			console.log(err);
@@ -130,10 +129,13 @@ class ConversationController {
 	async leaveConversation(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
-			if (!conversation) return res.status(404).send('Không tìm thấy cuộc trò chuyện');
+			if (!conversation) {
+				return responseError(res, 404, 'Không tìm thấy cuộc trò chuyện');
+			}
 
-			if (conversation.members.length === 2)
-				return res.status(400).send('Không thể rời khỏi cuộc trò chuyện 2 người');
+			if (conversation.members.length === 2) {
+				return responseError(res, 400, 'Không thể rời khỏi cuộc trò chuyện 2 người');
+			}
 
 			let index = -1;
 			index = conversation.members.findIndex((item) => item.user.toString() === req.user._id.toString());
@@ -150,9 +152,9 @@ class ConversationController {
 					});
 				}
 				await conversation.save();
-				res.status(200).send('Bạn đã rời khỏi cuộc trò chuyện này');
+				return res.status(200).send('Bạn đã rời khỏi cuộc trò chuyện này');
 			} else {
-				return res.status(404).send('Bạn không có cuộc hội thoại này');
+				return responseError(res, 404, 'Bạn không có cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -183,9 +185,9 @@ class ConversationController {
 					conversation.user_deleted.push({ userId: req.user._id });
 				}
 				await conversation.save();
-				res.status(200).send('Đã xóa cuộc hội thoại cho User');
+				return res.status(200).send('Đã xóa cuộc hội thoại cho User');
 			} else {
-				res.status(404).send('Bạn không có có cuộc hội thoại này');
+				return responseError(res, 404, 'Bạn không có cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -233,7 +235,7 @@ class ConversationController {
 
 		try {
 			if (req.body.members.length < 1) {
-				return res.status(400).send('Cuộc hội thoại phải có ít nhất 2 thành viên');
+				return responseError(res, 400, 'Cuộc hội thoại phải có ít nhất 2 thành viên');
 			}
 			if (req.body.members.length == 1) {
 				const conv = await Conversation.aggregate([
@@ -300,10 +302,10 @@ class ConversationController {
 
 					newConversation.lastest_message = messageSystem;
 
-					res.status(200).json(await populateConversation(savedConversation._id));
+					return res.status(200).json(await populateConversation(savedConversation._id));
 				} else {
 					const conversation = await populateConversation(conv[0]._id);
-					res.status(200).json(conversation);
+					return res.status(200).json(conversation);
 				}
 			} else {
 				await Promise.all(
@@ -345,7 +347,7 @@ class ConversationController {
 
 				newConversation.lastest_message = messageSystem;
 
-				res.status(200).json(await populateConversation(savedConversation._id));
+				return res.status(200).json(await populateConversation(savedConversation._id));
 			}
 		} catch (err) {
 			console.log(err);
@@ -449,9 +451,7 @@ class ConversationController {
 					getListData(res, data);
 				})
 				.catch((err) => {
-					res.status(500).send({
-						message: err.message || 'Some error occurred while retrieving tutorials.',
-					});
+					return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
 				});
 		} catch (err) {
 			console.log(err);
@@ -476,9 +476,7 @@ class ConversationController {
 				getListData(res, data);
 			})
 			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
-				});
+				return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
 			});
 	}
 
@@ -487,13 +485,13 @@ class ConversationController {
 		try {
 			const conversation = await populateConversation(req.params.id);
 			if (conversation.members.some((member) => member.user._id.toString() === req.user._id.toString())) {
-				res.status(200).json(conversation);
+				return res.status(200).json(conversation);
 			} else {
-				res.status(401).send('Bạn không có trong conversation này');
+				return responseError(res, 401, 'Bạn không có trong conversation này');
 			}
 		} catch (err) {
 			console.error(err);
-			res.status(404).json({ message: 'Không tìm thấy Conversation' });
+			return responseError(res, 404, 'Không tìm thấy Conversation');
 		}
 	}
 
@@ -503,7 +501,7 @@ class ConversationController {
 			// check user with params id is exist
 			const user = await User.findById(req.params.userId);
 			if (!user) {
-				return res.status(404).send('Không tìm thấy User');
+				return responseError(res, 404, 'Không tìm thấy User');
 			}
 			// const query = {
 			// 	members: {
@@ -622,7 +620,7 @@ class ConversationController {
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
-				return res.status(400).send(error.details[0].message);
+				return responseError(res, 400, error.details[0].message);
 			}
 
 			const conversation = await Conversation.findById(req.params.id);
@@ -661,9 +659,9 @@ class ConversationController {
 
 				// populate
 				const savedConversation = await populateConversation(conversation._id);
-				res.status(200).json(savedConversation);
+				return res.status(200).json(savedConversation);
 			} else {
-				res.status(403).send('Bạn không nằm trong cuộc hội thoại này');
+				return responseError(res, 403, 'Bạn không nằm trong cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -703,14 +701,14 @@ class ConversationController {
 					}).unknown();
 					const { error } = schema.validate(req.body);
 					if (error) {
-						return res.status(400).send(error.details[0].message);
+						return responseError(res, 400, error.details[0].message);
 					}
 					// check member is exist in conversation
 					const membersOfConversation = conversation.members.map((member) => member.user.toString());
 					const membersFromRequest = req.body.newMembers.map((member) => member.user.toString());
 					const sameMembers = membersOfConversation.filter((member) => membersFromRequest.includes(member));
 					if (sameMembers.length > 0) {
-						return res.status(403).send('Thành viên đã tồn tại trong cuộc hội thoại');
+						return responseError(res, 403, 'Thành viên đã tồn tại trong cuộc hội thoại');
 					}
 					// set addedBy for new members
 					req.body.newMembers.forEach((member) => {
@@ -755,17 +753,19 @@ class ConversationController {
 					// validate request
 					const schema = Joi.object({
 						userID: Joi.string().required(),
-					});
+					}).unknown();
 					const { error } = schema.validate(req.body);
 					if (error) {
-						return res.status(400).send(error.details[0].message);
+						return responseError(res, 400, error.details[0].message);
 					}
 
 					if (adminOfConversation.includes(req.user._id.toString())) {
 						if (conversation.members.length == 2 && conversation.type == 'direct') {
-							return res
-								.status(403)
-								.json('Bạn không thể xóa thành viên trong cuộc trò chuyện giữa 2 người');
+							return responseError(
+								res,
+								403,
+								'Bạn không thể xóa thành viên trong cuộc trò chuyện giữa 2 người'
+							);
 						}
 						// get nickname of user will be removed
 						let nickname = conversation.members
@@ -781,21 +781,21 @@ class ConversationController {
 							(member) => member.user.toString() !== req.body.userID.toString()
 						);
 					} else {
-						return res.status(403).send('Bạn không có quyền xóa thành viên');
+						return responseError(res, 403, 'Bạn không có quyền xóa thành viên');
 					}
 				} else if (req.params.type === 'changeRole') {
 					// validate request
 					const schema = Joi.object({
 						userID: Joi.string().required(),
 						role: Joi.string().valid('admin', 'member').required(),
-					});
+					}).unknown();
 					const { error } = schema.validate(req.body);
 					if (error) {
-						return res.status(400).send(error.details[0].message);
+						return responseError(res, 400, error.details[0].message);
 					}
 
 					if (conversation.members.length == 2 && conversation.type == 'direct') {
-						return res.status(400).json('Không thể thay đổi quyền trong cuộc trò chuyện giữa 2 người');
+						return responseError(res, 400, 'Không thể thay đổi quyền trong cuộc trò chuyện giữa 2 người');
 					}
 
 					if (adminOfConversation.includes(req.user._id.toString())) {
@@ -807,7 +807,7 @@ class ConversationController {
 
 						//user cannot update role for self
 						if (req.body.userID.toString() === req.user._id.toString()) {
-							return res.status(403).send('Bạn không thể thay đổi vai trò của chính mình');
+							return responseError(res, 403, 'Bạn không thể thay đổi vai trò của chính mình');
 						}
 
 						let { nickname } = conversation.members[index];
@@ -821,17 +821,17 @@ class ConversationController {
 							contentMessage = `đã thay đổi vai trò của <b>${nickname}</b> thành <b>${req.body.role}</b>`;
 						}
 					} else {
-						return res.status(403).send('Bạn không có quyền thay đổi vai trò thành viên');
+						return responseError(res, 403, 'Bạn không có quyền thay đổi vai trò thành viên');
 					}
 				} else if (req.params.type === 'changeNickname') {
 					// validate request
 					const schema = Joi.object({
 						userID: Joi.string().required(),
 						nickname: Joi.string().min(0).max(50),
-					});
+					}).unknown();
 					const { error } = schema.validate(req.body);
 					if (error) {
-						return res.status(400).send(error.details[0].message);
+						return responseError(res, 400, error.details[0].message);
 					}
 					// get nickname of user will be removed
 					const index = conversation.members.findIndex(
@@ -850,7 +850,7 @@ class ConversationController {
 						conversation.members[index].changedNicknameBy = req.user._id;
 					}
 				} else {
-					return res.status(404).send('Không tìm thấy phương thức');
+					return responseError(res, 404, 'Không tìm thấy phương thức');
 				}
 
 				if (contentMessage != '') {
@@ -875,7 +875,7 @@ class ConversationController {
 				const savedConversation = await populateConversation(conversation._id);
 				res.status(200).json(savedConversation);
 			} else {
-				return res.status(403).send('Bạn không năm trong cuộc hội thoại này');
+				return responseError(res, 404, 'Bạn không năm trong cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -905,9 +905,9 @@ class ConversationController {
 				await conversation.delete();
 				// delete all message in conversation
 				await Message.deleteMany({ conversation: req.params.id });
-				res.status(200).json(conversation);
+				return res.status(200).json(conversation);
 			} else {
-				res.status(403).send('Bạn không có quyền xóa cuộc hội thoại này');
+				return responseError(res, 403, 'Bạn không có quyền xóa cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.log(err);
@@ -927,7 +927,7 @@ class ConversationController {
 		try {
 			const conversations = await Conversation.findById(req.params.id);
 			if (!conversations) {
-				return res.status(404).json('Không tìm thấy cuộc hội thoại');
+				return responseError(res, 404, 'Không tìm thấy cuộc hội thoại');
 			}
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			const memberOfConversation = conversations.members.filter(
@@ -941,7 +941,7 @@ class ConversationController {
 				} else if (req.params.type === 'other') {
 					query.push({ type: { $nin: mimeTypeOfMedia } });
 				} else {
-					return res.status(404).json('Không tìm thấy');
+					return responseError(res, 404, 'Không tìm thấy');
 				}
 
 				File.paginate(
@@ -964,12 +964,14 @@ class ConversationController {
 						getListData(res, data);
 					})
 					.catch((err) => {
-						res.status(500).send({
-							message: err.message || 'Some error occurred while retrieving files.',
-						});
+						return responseError(
+							res,
+							500,
+							err.message ?? 'Some error occurred while retrieving tutorials.'
+						);
 					});
 			} else {
-				res.status(403).send('Bạn không nằmm trong cuộc hội thoại này');
+				return responseError(res, 403, err.message ?? 'Bạn không nằmm trong cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.log(err);

@@ -60,7 +60,7 @@ function route(app) {
 	// eslint-disable-next-line no-unused-vars
 	app.use((error, req, res, next) => {
 		logEvents(`idError: ${uuidv4()} - ${error.message}`);
-		bot.sendNotificationToBotty(error.message);
+		bot.sendNotificationToBotty(`Method: ${req.method} of ${req.originalUrl}  not found\n${error.message}`);
 		res.status(error.status || 500);
 		res.json({
 			error: {

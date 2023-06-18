@@ -8,7 +8,7 @@ const { getUserWithPrivacy } = require('../../utils/Privacy/inforUser');
 const { getListUser, getListData, getListPost } = require('../../utils/Response/listData');
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
-
+const moment = require('moment');
 function querySearchAllUsers(req) {
 	try {
 		const query = [{ $match: { _id: { $ne: req.user._id } } }];
@@ -720,6 +720,32 @@ class UserController {
 		}
 	}
 
+	//add hobbies for user
+	async addHobbies(req, res, next) {
+		try {
+			const { hobbies } = req.body;
+			const user = await User.findByIdAndUpdate(
+				req.user._id,
+				{
+					$set: { hobbies },
+				},
+				{ new: true }
+			);
+			return res.status(200).json(user);
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// search new friends by keyword
 	async searchNewFriends(req, res, next) {
 		try {
@@ -1224,11 +1250,22 @@ class UserController {
 			if (!req.user) {
 				userObj.relationship = 'none';
 			} else {
-				if (req.user.friends.includes(user._id)) {
+				if (
+					req.user.friends.some((friend) => friend.user && friend.user._id.toString() === user._id.toString())
+				) {
 					userObj.relationship = 'friend';
-				} else if (req.user.sentRequests.includes(user._id)) {
+				} else if (
+					req.user.sentRequests.some(
+						(sentRequest) => sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
+					)
+				) {
 					userObj.relationship = 'sent';
-				} else if (req.user.friendRequests.includes(user._id)) {
+				} else if (
+					req.user.friendRequests.some(
+						(friendRequest) =>
+							friendRequest.user && friendRequest.user._id.toString() === user._id.toString()
+					)
+				) {
 					userObj.relationship = 'received';
 				} else if (req.user._id.toString() === user._id.toString()) {
 					userObj.relationship = 'self';
@@ -1525,6 +1562,8 @@ class UserController {
 
 	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
+			//increase endDay 1
+			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalUserCreationsByDay = await User.aggregate([
 				{
 					$match: {
@@ -1549,7 +1588,7 @@ class UserController {
 			// Initialize the map with 0 for each day in the range
 			let currentDate = new Date(startDay);
 			const endDate = new Date(endDay);
-			while (currentDate <= endDate) {
+			while (currentDate <= endDate - 1) {
 				const dateString = currentDate.toISOString().split('T')[0];
 				totalUserCreationsMap[dateString] = 0;
 
