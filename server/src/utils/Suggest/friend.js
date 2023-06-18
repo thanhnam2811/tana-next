@@ -1,7 +1,6 @@
 /* eslint-disable no-useless-catch */
 /* eslint-disable import/order */
 const { User } = require('../../app/models/User');
-const similarity = require('compute-cosine-similarity');
 
 const calculateCosineSimilarity = (interests1, interests2) => {
 	const set1 = new Set(interests1);
