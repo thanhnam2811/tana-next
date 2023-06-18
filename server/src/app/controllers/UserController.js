@@ -8,7 +8,7 @@ const { getUserWithPrivacy } = require('../../utils/Privacy/inforUser');
 const { getListUser, getListData, getListPost } = require('../../utils/Response/listData');
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
-
+const moment = require('moment');
 function querySearchAllUsers(req) {
 	try {
 		const query = [{ $match: { _id: { $ne: req.user._id } } }];
