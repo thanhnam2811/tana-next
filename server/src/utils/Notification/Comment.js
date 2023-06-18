@@ -17,7 +17,7 @@ async function notificationCreateComment(post, comment, user) {
 	const popNotification = await populateNotification(notification);
 
 	// send socket
-	SocketManager.send(user._id, eventName.NOTIFICATION, {
+	SocketManager.sendToList(receiver, eventName.NOTIFICATION, {
 		type: notificationType.COMMENT_POST,
 		data: popNotification,
 	});
@@ -36,7 +36,7 @@ async function notificationReplyComment(commentSource, commentReply, user) {
 	const popNotification = await populateNotification(notification);
 
 	// send socket
-	SocketManager.send(user._id, eventName.NOTIFICATION, {
+	SocketManager.send(receiver, eventName.NOTIFICATION, {
 		type: notificationType.REPLY_COMMENT,
 		data: popNotification,
 	});
@@ -55,7 +55,7 @@ async function notificationReactComment(comment, user) {
 	const popNotification = await populateNotification(notification);
 
 	// send socket
-	SocketManager.send(user._id, eventName.NOTIFICATION, {
+	SocketManager.send(receiver, eventName.NOTIFICATION, {
 		type: notificationType.REACT_COMMENT,
 		data: popNotification,
 	});
