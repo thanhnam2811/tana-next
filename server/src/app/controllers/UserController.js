@@ -1224,11 +1224,22 @@ class UserController {
 			if (!req.user) {
 				userObj.relationship = 'none';
 			} else {
-				if (req.user.friends.includes(user._id)) {
+				if (
+					req.user.friends.some((friend) => friend.user && friend.user._id.toString() === user._id.toString())
+				) {
 					userObj.relationship = 'friend';
-				} else if (req.user.sentRequests.includes(user._id)) {
+				} else if (
+					req.user.sentRequests.some(
+						(sentRequest) => sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
+					)
+				) {
 					userObj.relationship = 'sent';
-				} else if (req.user.friendRequests.includes(user._id)) {
+				} else if (
+					req.user.friendRequests.some(
+						(friendRequest) =>
+							friendRequest.user && friendRequest.user._id.toString() === user._id.toString()
+					)
+				) {
 					userObj.relationship = 'received';
 				} else if (req.user._id.toString() === user._id.toString()) {
 					userObj.relationship = 'self';
