@@ -22,7 +22,9 @@ class MessageController {
 			const schema = Joi.object({
 				text: Joi.string().min(0),
 				media: Joi.array().items(Joi.string()),
-			}).or('text', 'media');
+			})
+				.or('text', 'media')
+				.unknown();
 
 			const { error } = schema.validate(req.body);
 			if (error) {
@@ -78,7 +80,13 @@ class MessageController {
 			}
 		} catch (err) {
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -93,7 +101,13 @@ class MessageController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -113,7 +127,13 @@ class MessageController {
 		} catch (err) {
 			console.error(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -193,7 +213,13 @@ class MessageController {
 		} catch (error) {
 			console.log(error);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -210,7 +236,13 @@ class MessageController {
 		} catch (error) {
 			console.log(error);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

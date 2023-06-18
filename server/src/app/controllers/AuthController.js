@@ -29,7 +29,7 @@ class AuthoController {
 				gender: Joi.object({
 					value: Joi.string().valid('male', 'female', 'other').required(),
 				}),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -77,7 +77,13 @@ class AuthoController {
 		} catch (err) {
 			if (err.code === 11000) return res.status(500).send('Email đã tồn tại!');
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -96,7 +102,13 @@ class AuthoController {
 			res.status(200).send('Xác nhận thành công!!!');
 		} catch (err) {
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -131,7 +143,13 @@ class AuthoController {
 			);
 		} catch (err) {
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -166,7 +184,13 @@ class AuthoController {
 			);
 		} catch (err) {
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -178,7 +202,7 @@ class AuthoController {
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -273,7 +297,13 @@ class AuthoController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -284,7 +314,7 @@ class AuthoController {
 			// validate token
 			const schema = Joi.object({
 				refreshToken: Joi.string().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -347,7 +377,13 @@ class AuthoController {
 		} catch (err) {
 			console.log(err.message);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -357,7 +393,7 @@ class AuthoController {
 		try {
 			const schema = Joi.object({
 				email: Joi.string().email().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -387,7 +423,7 @@ class AuthoController {
 
 	async resetPassword(req, res, next) {
 		try {
-			const schema = Joi.object({ password: Joi.string().required() });
+			const schema = Joi.object({ password: Joi.string().required() }).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -410,7 +446,13 @@ class AuthoController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -423,7 +465,13 @@ class AuthoController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

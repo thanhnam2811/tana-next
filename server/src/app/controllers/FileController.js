@@ -22,6 +22,7 @@ class FileController {
 						originalname: file.originalname,
 						type: file.mimetype,
 						link: newPath.url,
+						size: file.size, //bytes
 						public_id: newPath.id,
 						creator: req.user._id,
 					});
@@ -44,7 +45,13 @@ class FileController {
 			console.log(err);
 			//
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}
@@ -98,7 +105,13 @@ class FileController {
 		} catch (err) {
 			console.log(err);
 			return next(
-				createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
 			);
 		}
 	}

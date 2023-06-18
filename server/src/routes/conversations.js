@@ -23,12 +23,13 @@ router.get('/find/:userId', isAuth, ConversationController.getConversationByUser
 router.get('/:id/files/:type', isAuth, ConversationController.getAllMedia);
 
 // update conv
+
 router.patch('/:id/members/:type', isAuth, ConversationController.updateMembers);
 router.put('/:id/leave', isAuth, ConversationController.leaveConversation);
 router.put('/:id', isAuth, ConversationController.update);
-router.put('/user-deleted/:id', isAuth, ConversationController.userDeletedAllMessages);
 // update member of conv
 
+router.delete('/user-deleted/:id', isAuth, ConversationController.userDeletedAllMessages);
 // delete conv
 router.delete('/:id', isAuth, ConversationController.delete);
 

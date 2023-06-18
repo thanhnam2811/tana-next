@@ -20,7 +20,7 @@ class AdminController {
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) return res.status(400).send(error.details[0].message);
 
@@ -96,7 +96,15 @@ class AdminController {
 			});
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -115,7 +123,15 @@ class AdminController {
 			});
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -133,7 +149,15 @@ class AdminController {
 			return next(createError(400, 'Invalid statictisBy'));
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -173,7 +197,15 @@ class AdminController {
 			return res.status(200).json(mergedData);
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -182,7 +214,15 @@ class AdminController {
 			await UserController.searchUser(req, res);
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -191,7 +231,15 @@ class AdminController {
 			await UserController.searchAdmin(req, res);
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -214,7 +262,15 @@ class AdminController {
 			return res.status(200).json('Đổi mật khẩu thành công');
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 
@@ -225,7 +281,15 @@ class AdminController {
 			return res.status(200).json(users);
 		} catch (error) {
 			console.log(error);
-			return next(createError(400, error));
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 }
