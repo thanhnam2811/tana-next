@@ -21,7 +21,7 @@ export function RegisterForm() {
 
 			toast.success('Đăng ký thành công! Đang chuyển hướng...', { id: toastId });
 
-			router.push('/auth/login');
+			await router.push('/auth/login');
 		} catch (error) {
 			toast.error(`Đăng ký thất bại! Lỗi: ${error}`, { id: toastId });
 		}

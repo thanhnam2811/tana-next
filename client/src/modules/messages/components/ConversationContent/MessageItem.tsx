@@ -1,12 +1,13 @@
-import React from 'react';
-import { MessageType } from '@modules/messages/types';
-import classnames from 'classnames';
-import { UserAvatar } from '@modules/user/components';
-import { Avatar, Button, List, Space, Spin, theme, Typography } from 'antd';
-import styles from './MessageItem.module.scss';
-import { useAuth } from '@modules/auth/hooks';
 import { fileUtil } from '@common/utils';
-import { HiArrowSmallDown, HiDocument } from 'react-icons/hi2';
+import { useAuth } from '@modules/auth/hooks';
+import { MessageType } from '@modules/messages/types';
+import { UserAvatar } from '@modules/user/components';
+import { Button, Image, List, Space, Spin, theme, Tooltip, Typography } from 'antd';
+import classnames from 'classnames';
+import { HiDownload } from 'react-icons/hi';
+import { HiArrowPath, HiEye } from 'react-icons/hi2';
+import styles from './MessageItem.module.scss';
+import Link from 'next/link';
 
 interface Props {
 	message: MessageType;
@@ -53,36 +54,46 @@ export function MessageItem({ message, prevCombine, nextCombine, onRetry }: Prop
 						size="small"
 						dataSource={message.media}
 						renderItem={(item) => (
-							<List.Item>
-								<Space style={{ width: 'auto' }}>
-									<Avatar
-										shape="square"
-										src={fileUtil.getFilePreview(item)}
-										size="large"
-										icon={<HiDocument />}
-									/>
+							<List.Item
+								className={styles.file_item}
+								extra={
+									<Link href={item.link} target="_blank" download>
+										<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
+									</Link>
+								}
+							>
+								<Image
+									className={styles.file_icon}
+									preview={
+										!!fileUtil.isImage(item.name) && {
+											maskClassName: styles.file_icon,
+											mask: <HiEye />,
+										}
+									}
+									src={fileUtil.getFilePreview(item)}
+									alt={item.originalname}
+								/>
 
-									<Typography.Text strong>{item.originalname}</Typography.Text>
-								</Space>
+								<Typography.Text strong className={styles.file_name}>
+									{item.originalname}
+								</Typography.Text>
 							</List.Item>
 						)}
 					/>
 				)}
 
-				<Typography.Text>{message.text}</Typography.Text>
+				<Typography.Text className={styles.text}>{message.text}</Typography.Text>
 			</Space>
 
 			{message.sending && <Spin size="small" style={{ alignSelf: 'center' }} />}
 
 			{message.error && (
-				<Button type="text" shape="circle" icon={<HiArrowSmallDown />} onClick={onRetry} danger />
+				<Tooltip title="Thử lại">
+					<Button size="small" type="text" shape="circle" icon={<HiArrowPath />} onClick={onRetry} danger />
+				</Tooltip>
 			)}
 
-			{message.error && (
-				<Typography.Text type="danger" style={{ alignSelf: 'center' }}>
-					{message.error}
-				</Typography.Text>
-			)}
+			{message.error && <Typography.Text type="danger">{message.error}</Typography.Text>}
 		</Space>
 	);
 }

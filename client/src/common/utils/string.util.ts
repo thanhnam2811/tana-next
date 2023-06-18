@@ -45,4 +45,14 @@ export const stringUtil = {
 
 	/** URL generator */
 	generateUrl: (url: string, params: object) => `${url}?${queryString.stringify(params)}`,
+
+	/** Get plain text from HTML string */
+	htmlToPlainText: (html: string) => {
+		const plainText = sanitizeHtml(html, {
+			allowedTags: [],
+			allowedAttributes: {},
+		});
+
+		return plainText;
+	},
 };

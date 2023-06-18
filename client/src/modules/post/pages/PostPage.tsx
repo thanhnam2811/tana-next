@@ -1,12 +1,12 @@
-import { useAuth } from '@modules/auth/hooks';
 import { ListComment } from '@modules/comment/components';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Row, Spin, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
-import { getPostApi } from '../api';
-import { PostCard } from '../components';
+import React from 'react';
+import { PostCard, PostSEO } from '../components';
 import { PostType } from '../types';
 import Layout from '@layout/components';
+import useSWR from 'swr';
+import { swrFetcher } from '@common/api';
 
 interface Props {
 	post?: PostType;
@@ -14,47 +14,49 @@ interface Props {
 
 export default function PostPage({ post: serverPost }: Props) {
 	const router = useRouter();
-	const { authUser } = useAuth();
+	const { id } = router.query as { id: string };
 
-	const [post, setPost] = React.useState<PostType | undefined>(serverPost);
+	const { data, isLoading } = useSWR<PostType>(`/posts/${id}`, swrFetcher);
+	const post = data || serverPost;
 
-	useEffect(() => {
-		const fetchPost = async () => {
-			const id = router.query.id as string;
-			try {
-				const post = await getPostApi(id);
-				setPost(post);
-			} catch (error) {
-				console.log(error);
-			}
-		};
+	if (!post) {
+		if (isLoading)
+			return (
+				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+					<Spin size="large" />
+				</Layout.Container>
+			);
+		else
+			return (
+				<Layout.Container style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+					<Typography.Text strong>
+						Bài viết không tồn tại, hoặc bạn không có quyền xem bài viết này
+					</Typography.Text>
+				</Layout.Container>
+			);
+	}
 
-		if (router.isReady) {
-			if (!post || authUser) {
-				fetchPost();
-			}
-		}
-	}, [router.isReady]);
-
-	const handleDelete = () => {
-		router.push('/'); // Go to home page after deleting
-	};
+	const handleDelete = () => router.push('/'); // Go to home page after deleting
 
 	return (
-		<Layout.Container>
-			<Row gutter={[16, 16]} style={{ padding: 16, width: '100%' }}>
-				{/* Post */}
-				<Col span={16}>
-					<PostCard post={post} onDelete={handleDelete} />
-				</Col>
+		<>
+			<PostSEO id={id} post={post} />
 
-				{/* Comment */}
-				<Col span={8}>
-					<Card title="Bình luận" headStyle={{ padding: 16 }} bodyStyle={{ padding: 16 }}>
-						<ListComment post={post!} />
-					</Card>
-				</Col>
-			</Row>
-		</Layout.Container>
+			<Layout.Container>
+				<Row gutter={[16, 16]} style={{ padding: 16, width: '100%' }}>
+					{/* Post */}
+					<Col span={16}>
+						<PostCard post={post} onDelete={handleDelete} />
+					</Col>
+
+					{/* Comment */}
+					<Col span={8}>
+						<Card title="Bình luận" headStyle={{ padding: 16 }} bodyStyle={{ padding: 16 }}>
+							<ListComment post={post!} />
+						</Card>
+					</Col>
+				</Row>
+			</Layout.Container>
+		</>
 	);
 }

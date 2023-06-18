@@ -1,6 +1,7 @@
 import Layout from '@layout/components';
 import { NextComponentType } from 'next';
 import NavBar from './NavBar';
+import React from 'react';
 
 export function withLayout(Component: NextComponentType) {
 	const Container: NextComponentType = (props: React.ComponentProps<typeof Component>) => (

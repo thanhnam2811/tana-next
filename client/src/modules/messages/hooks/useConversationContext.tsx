@@ -1,5 +1,7 @@
 import { createContext, useContext } from 'react';
 import { ConversationFormType, ConversationType } from '../types';
+import { getConversationInfo } from '../utils';
+import { useAuth } from '@modules/auth/hooks';
 
 interface IConversationContext {
 	conversation: ConversationType;
@@ -10,5 +12,13 @@ interface IConversationContext {
 const ConversationContext = createContext<IConversationContext | null>(null);
 
 export const ConversationProvider = ConversationContext.Provider;
-export const ConversationConsumer = ConversationContext.Consumer;
-export const useConversationContext = () => useContext(ConversationContext);
+export const useConversationContext = () => {
+	const context = useContext(ConversationContext);
+	const { authUser } = useAuth();
+
+	if (!context) {
+		throw new Error('useConversationContext must be used within an ConversationProvider');
+	}
+
+	return { ...context, info: getConversationInfo(context.conversation, authUser!) };
+};

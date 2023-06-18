@@ -1,0 +1,75 @@
+.header {
+	position: relative;
+
+	.cover_container {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 16/9;
+		border-radius: 0.5rem;
+		overflow: hidden;
+
+		.cover {
+			width: 100%;
+			aspect-ratio: 16/9;
+			object-fit: cover;
+		}
+
+		.cover_action {
+			position: absolute;
+			right: 16px;
+			top: 16px;
+
+			display: flex;
+			height: fit-content;
+		}
+	}
+
+	.bottom {
+		position: relative;
+		display: flex;
+		gap: 1rem;
+		padding: 0.75rem;
+
+		.avatar_container {
+			position: relative;
+			min-width: 160px;
+			width: 160px;
+			margin-top: -60px;
+			aspect-ratio: 1;
+
+			.avatar_wrapper {
+				border-radius: 50%;
+				border: 4px solid;
+				object-fit: cover;
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+
+				img {
+					width: 100%;
+					height: 100%;
+					aspect-ratio: 1;
+					display: block;
+				}
+			}
+
+			.avatar_action {
+				position: absolute;
+				right: 12px;
+				bottom: 12px;
+			}
+		}
+
+		.content {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			flex: 1;
+
+			.actions {
+				display: flex;
+				gap: 1rem;
+			}
+		}
+	}
+}

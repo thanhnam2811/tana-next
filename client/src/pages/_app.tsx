@@ -1,7 +1,6 @@
-import { useSettingStore } from '@store';
 import NextProgress from 'next-progress';
 import type { AppProps } from 'next/app';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import { useAuth } from '@modules/auth/hooks';
@@ -23,20 +22,16 @@ dayjs.locale('vi');
 
 export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
-	const { getSetting } = useSettingStore();
 	const { mode, getTheme } = useTheme();
 	const { token } = theme.useToken();
 
 	// Fetch user data
 	useEffect(() => {
-		// fetch setting
-		getSetting();
-
 		// fetch theme
 		getTheme();
 
 		if (!authUser) {
-			// fetch user data if accessToken is exist
+			// fetch user data if accessToken exist
 			const accessToken = localStorage.getItem('accessToken');
 			if (accessToken) login();
 		}

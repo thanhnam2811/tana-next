@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
+import React, { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
 import styles from '../styles/Layout.module.scss';
 
 interface Props {

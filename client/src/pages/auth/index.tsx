@@ -1,13 +1,3 @@
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import AuthPage from '@modules/auth/pages/AuthPage';
 
-export default function Auth() {
-	const router = useRouter();
-
-	// Redirect to login page
-	useEffect(() => {
-		router.push('/auth/login');
-	}, [router]);
-
-	return null;
-}
+export default AuthPage;

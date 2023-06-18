@@ -1,4 +1,4 @@
-import { UserType } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 export interface ILoginResponse {
 	accessToken: string;

@@ -176,7 +176,6 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 					<Button
 						icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
 						type="text"
-						style={{ color: reaction?.color }}
 						disabled={!authUser} // Disable if user is not logged in
 					>
 						{reaction?.label || 'Thích'}
