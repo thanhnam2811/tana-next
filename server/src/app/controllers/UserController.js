@@ -55,8 +55,9 @@ async function querySearchSuggestFriends(req, next) {
 				)
 		);
 
-		const cityUser = req.user.city ? req.user.city : '';
-		const fromUser = req.user.from ? req.user.from : '';
+		const cityUser = req.user.city ? req.user.city.province : '';
+		const fromUser = req.user.from ? req.user.from.province : '';
+
 		// TODO: education and work is array
 		const schoolUser = req.user.education.school ? req.user.education.school : '';
 		const companyUser = req.user.work.company ? req.user.work.company : '';
@@ -70,10 +71,10 @@ async function querySearchSuggestFriends(req, next) {
 							$and: [
 								{
 									$or: [
-										{ city: { $regex: cityUser, $options: 'i' } },
-										{ from: { $regex: fromUser, $options: 'i' } },
-										// { 'education.school': { $regex: schoolUser, $options: 'i' } },
-										// { 'work.company': { $regex: companyUser, $options: 'i' } },
+										{ 'city.province': { $regex: cityUser, $options: 'i' } },
+										{ 'from.province': { $regex: fromUser, $options: 'i' } },
+										// 		{ 'education.school': { $regex: schoolUser, $options: 'i' } },
+										// 		{ 'work.company': { $regex: companyUser, $options: 'i' } },
 									],
 								},
 								{ _id: { $nin: friendsOfFriendsFilter } },
