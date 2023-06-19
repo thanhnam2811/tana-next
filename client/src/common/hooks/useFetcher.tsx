@@ -1,6 +1,6 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
 import { KeyedMutator } from 'swr';
@@ -16,10 +16,7 @@ export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPag
 	validating: boolean;
 	hasMore: boolean;
 	params: IPaginationParams;
-	fetch: (params: any) => void;
 	loadMore: () => void;
-	filter: (filter: any) => void;
-	reload: () => void;
 	api: string;
 	mutate: KeyedMutator<U[]>;
 };
@@ -57,98 +54,24 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		size: page,
 		setSize: setPage,
 	} = useSWRInfinite<U>(getKey, swrFetcher);
+	const lastRes = listRes?.[listRes.length - 1];
+	const hasMore = !!lastRes && page < lastRes.totalPages;
 
-	const { data, hasMore } = useMemo(() => {
-		const memo = { data: [], hasMore: true };
+	const resData = listRes?.flatMap((res) => res.items) || [];
+	const [data, setData] = useState<T[]>(resData);
+	useEffect(() => {
+		const isSame = resData.every((item, index) => item._id === data[index]?._id);
+		if (!isSame) setData(resData);
+	}, [resData]);
 
-		if (!listRes?.length) return memo;
+	const addData = (newData: T) => setData((prevData) => [newData, ...prevData]);
 
-		const lastPage = listRes[listRes.length - 1];
-		const data = listRes.reduce<T[]>((acc, res) => [...acc, ...res.items], []);
-		const hasMore = lastPage.totalItems > data.length;
+	const updateData = (id: string, newData: T) =>
+		setData((prevData) => prevData.map((item) => (item._id === id ? newData : item)));
 
-		return { data, hasMore };
-	}, [listRes]);
+	const removeData = (id: string) => setData((prevData) => prevData.filter((item) => item._id !== id));
 
-	const addData = (newData: T, validate?: boolean) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = [newData, ...data];
-
-		// Update the cache with the new data (don't mutate the existing cache)
-		mutate(
-			(prevData) =>
-				prevData?.map((page, index) => {
-					const startIndex = index * limit,
-						endIndex = (index + 1) * limit;
-					return {
-						...page,
-						items: newItems.slice(startIndex, endIndex),
-						totalItems: page.totalItems + 1,
-					};
-				}),
-			!!validate
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const updateData = (id: string, newData: T) => {
-		let updated = false;
-
-		// Update the cache with the new data
-		mutate(
-			(prevData) =>
-				prevData?.map((page) => {
-					if (updated) return page;
-
-					return {
-						...page,
-						items: page.items.map((item) => {
-							if (item._id === id) {
-								updated = true;
-								return newData;
-							}
-							return item;
-						}),
-					};
-				}),
-			false
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const removeData = (id: string) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.filter((item) => item._id !== id);
-
-		// Update the cache with the new data
-		mutate(
-			(prevData) =>
-				prevData?.map((page, index) => {
-					const startIndex = index * limit,
-						endIndex = (index + 1) * limit;
-					return {
-						...page,
-						items: newItems.slice(startIndex, endIndex),
-						totalItems: page.totalItems - 1,
-					};
-				}),
-			false
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const fetch = (params: object) => {
-		console.log({ params });
-	};
-
-	const loadMore = () => {
-		console.log('loadMore');
-
-		setPage(page + 1);
-	};
-
-	const reload = () => mutate();
-
-	const filter = (filter: object) => {
-		console.log({ filter });
-	};
+	const loadMore = () => setPage(page + 1);
 
 	const fetcher = useMemo(
 		() => ({
@@ -158,17 +81,14 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 			fetching,
 			validating,
 			hasMore,
-			fetch,
 			loadMore,
-			filter,
-			reload,
 			addData,
 			updateData,
 			removeData,
 			api,
 			mutate,
 		}),
-		[data, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
+		[data, fetching, hasMore, loadMore, addData, updateData, removeData, api, mutate]
 	);
 
 	return fetcher;

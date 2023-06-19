@@ -22,9 +22,9 @@ import {
 	Space,
 	Spin,
 	Tag,
+	theme,
 	Tooltip,
 	Typography,
-	theme,
 } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import classnames from 'classnames';
@@ -210,6 +210,14 @@ export function ConversationMessage() {
 	// listen typing event from socket io
 	const [typingList, setTypingList] = useState<IMember[]>([]);
 
+	const handleReceiveMessage = (msg: MessageType) => {
+		if (msg.conversation === id) {
+			if (authUser?._id !== msg.sender._id) {
+				msgFetcher.addData(msg);
+			}
+		}
+	};
+
 	useEffect(() => {
 		if (id) {
 			window.socket.on('typingMessage', ({ senderId }: { senderId: string }) => {
@@ -221,13 +229,7 @@ export function ConversationMessage() {
 				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
 			});
 
-			window.socket.on('sendMessage', (msg: MessageType) => {
-				if (msg.conversation === id) {
-					if (authUser?._id !== msg.sender._id) {
-						msgFetcher.addData(msg);
-					}
-				}
-			});
+			window.socket.on('sendMessage', handleReceiveMessage);
 		}
 
 		return () => {
