@@ -14,6 +14,7 @@ const { User, labelOfGender } = require('../models/User');
 const { responseError } = require('../../utils/Response/error');
 
 const hostClient = process.env.HOST_CLIENT;
+const hostServer = process.env.HOST_SERVER;
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
@@ -67,7 +68,7 @@ class AuthoController {
 				token: crypto.randomBytes(16).toString('hex'),
 			}).save();
 
-			const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
+			const link = `${hostServer}/auth/verify/${user._id}/${token.token}`;
 			const status = await sendEmailVerify(user.email, 'Verify account', link, user);
 			// check status
 			if (!status) {
@@ -109,6 +110,8 @@ class AuthoController {
 			await user.save();
 			await tokenVerify.deleteOne();
 			res.status(200).json('Xác nhận thành công!!!');
+			// forward to login page
+			return res.redirect(`${hostClient}/auth/login`);
 		} catch (err) {
 			return next(
 				createError.InternalServerError(
@@ -577,7 +580,7 @@ class AuthoController {
 				token: crypto.randomBytes(16).toString('hex'),
 			}).save();
 
-			const link = `${hostClient}/auth/comfirm-set-password/${user._id}/${token.token}`;
+			const link = `${hostServer}/auth/comfirm-set-password/${user._id}/${token.token}`;
 			const status = await sendMailComfirmSetPassword(user.email, 'Comfirm set password', link, user);
 			// check status
 			if (!status) {
@@ -626,7 +629,7 @@ class AuthoController {
 			await user.save();
 			redisClient.del(`${user._id}:tokens`); // delete all tokens for this account
 			await tokenVerify.deleteOne();
-			return res.status(200).json('Đặt mật khẩu thành công!!!');
+			return res.redirect(`${hostClient}/auth/login`);
 		} catch (error) {
 			console.log(error.message);
 			return next(
