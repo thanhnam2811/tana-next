@@ -2,12 +2,14 @@ import { contactOptions, privacyOptions } from '@assets/data';
 import { PrivacyDropdown } from 'src/common/components/Button';
 import { IPrivacy } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
-import { Button, Form, Input, List, Modal, Select, Space } from 'antd';
+import { Button, Form, Input, List, Modal, Select } from 'antd';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencil, HiPlus, HiTrash } from 'react-icons/hi2';
-import { IContact } from '@modules/user/types';
+import { IContact, UserType } from '@modules/user/types';
 import { useUserContext } from '@modules/user/hooks';
+import { SelectApi } from '@common/components/Input';
+import { useFetcher } from '@common/hooks';
 
 interface ContactModalData {
 	data: IContact;
@@ -158,19 +160,17 @@ function ContactModal({ open, onClose, data, onSubmit }: ModalProps) {
 		}
 	}, [open, data]);
 
+	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/friends` });
+	const privacyValue = Form.useWatch(['privacy', 'value'], form);
+
 	return (
 		<Modal
 			open={open}
 			onCancel={onClose}
 			title={data ? 'Chỉnh sửa thông tin liên hệ' : 'Thêm thông tin liên hệ'}
-			footer={
-				<Space>
-					<Button onClick={onClose}>Hủy</Button>
-					<Button type="primary" onClick={() => form.submit()}>
-						{data ? 'Lưu' : 'Thêm'}
-					</Button>
-				</Space>
-			}
+			okText={data ? 'Lưu' : 'Thêm'}
+			onOk={form.submit}
+			cancelText="Hủy"
 		>
 			<Form form={form} onFinish={onSubmit} layout="vertical">
 				<Form.Item
@@ -234,6 +234,52 @@ function ContactModal({ open, onClose, data, onSubmit }: ModalProps) {
 				>
 					<Select options={privacyOptions} />
 				</Form.Item>
+
+				{privacyValue === 'includes' && (
+					<Form.Item
+						name={['privacy', 'includes']}
+						label="Bao gồm"
+						rules={[
+							({ getFieldValue }) => ({
+								validator(_, value) {
+									if (getFieldValue('value') === 'includes' && value?.length === 0) {
+										return Promise.reject(new Error('Vui lòng chọn người dùng'));
+									}
+									return Promise.resolve();
+								},
+							}),
+						]}
+					>
+						<SelectApi
+							mode="multiple"
+							fetcher={friendFetcher}
+							toOption={(u) => ({ label: u.fullname, value: u._id })}
+						/>
+					</Form.Item>
+				)}
+
+				{privacyValue === 'excludes' && (
+					<Form.Item
+						name={['privacy', 'excludes']}
+						label="Trừ ra"
+						rules={[
+							({ getFieldValue }) => ({
+								validator(_, value) {
+									if (getFieldValue('value') === 'excludes' && value?.length === 0) {
+										return Promise.reject(new Error('Vui lòng chọn người dùng'));
+									}
+									return Promise.resolve();
+								},
+							}),
+						]}
+					>
+						<SelectApi
+							mode="multiple"
+							fetcher={friendFetcher}
+							toOption={(u) => ({ label: u.fullname, value: u._id })}
+						/>
+					</Form.Item>
+				)}
 			</Form>
 		</Modal>
 	);
