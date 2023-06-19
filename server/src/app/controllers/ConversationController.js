@@ -153,6 +153,15 @@ class ConversationController {
 						member.role = 'admin';
 					});
 				}
+				// create message system
+				const messageSystem = new Message({
+					conversation: conversation._id,
+					text: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại này`,
+					isSystem: true,
+				}).save();
+
+				// set lastest message
+				conversation.lastest_message = messageSystem._id;
 				await conversation.save();
 				return res.status(200).send('Bạn đã rời khỏi cuộc trò chuyện này');
 			} else {
