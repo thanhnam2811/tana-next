@@ -6,6 +6,8 @@ import { Button, Image, List } from 'antd';
 import { fileUtil } from '@common/utils';
 import styles from '../ConversationDetail.module.scss';
 import { HiEye } from 'react-icons/hi2';
+import { HiDownload } from 'react-icons/hi';
+import Link from 'next/link';
 
 export function MediaMenu() {
 	const { conversation } = useConversationContext();
@@ -16,7 +18,14 @@ export function MediaMenu() {
 			<List
 				dataSource={mediaFetcher.data}
 				renderItem={(file) => (
-					<List.Item className={styles.file_item}>
+					<List.Item
+						className={styles.file_item}
+						extra={
+							<Link href={file.link} target="_blank" download>
+								<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
+							</Link>
+						}
+					>
 						<List.Item.Meta
 							avatar={
 								<Image
