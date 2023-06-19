@@ -6,14 +6,12 @@ const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.respon
 
 // Handle error
 const handleError = (error: any) => {
-	// eslint-disable-next-line no-console
-	console.error('Call API error: ', error);
-
 	let message = 'Lỗi kết nối đến máy chủ!';
 
 	if (axios.isAxiosError(error)) {
 		const { response } = error;
-		if (response?.data?.message) message = response.data.message;
+		if (response?.data?.error?.message) message = response.data.error.message;
+		else if (response?.data?.message) message = response.data.message;
 		else if (response?.data) message = response.data;
 		else if (response?.statusText) message = response.statusText;
 	} else if (error?.message) message = error.message;
@@ -99,7 +97,10 @@ apiClient.interceptors.response.use(
 );
 
 export function swrFetcher<T>(url: string) {
-	return apiClient.get<T>(url).then((res) => res.data);
+	return apiClient
+		.get<T>(url)
+		.then((res) => res.data)
+		.catch(handleError);
 }
 
 export { apiClient };

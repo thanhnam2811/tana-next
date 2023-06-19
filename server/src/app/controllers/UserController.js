@@ -1,3 +1,5 @@
+/* eslint-disable no-lonely-if */
+/* eslint-disable import/order */
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
 const createError = require('http-errors');
@@ -8,6 +10,8 @@ const { getUserWithPrivacy } = require('../../utils/Privacy/inforUser');
 const { getListUser, getListData, getListPost } = require('../../utils/Response/listData');
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
+const moment = require('moment');
+const suggestFriend = require('../../utils/Suggest/friend');
 
 function querySearchAllUsers(req) {
 	try {
@@ -51,8 +55,9 @@ async function querySearchSuggestFriends(req, next) {
 				)
 		);
 
-		const cityUser = req.user.city ? req.user.city : '';
-		const fromUser = req.user.from ? req.user.from : '';
+		const cityUser = req.user.city ? req.user.city.province : '';
+		const fromUser = req.user.from ? req.user.from.province : '';
+
 		// TODO: education and work is array
 		const schoolUser = req.user.education.school ? req.user.education.school : '';
 		const companyUser = req.user.work.company ? req.user.work.company : '';
@@ -66,10 +71,10 @@ async function querySearchSuggestFriends(req, next) {
 							$and: [
 								{
 									$or: [
-										{ city: { $regex: cityUser, $options: 'i' } },
-										{ from: { $regex: fromUser, $options: 'i' } },
-										{ 'education.school': { $regex: schoolUser, $options: 'i' } },
-										{ 'work.company': { $regex: companyUser, $options: 'i' } },
+										{ 'city.province': { $regex: cityUser, $options: 'i' } },
+										{ 'from.province': { $regex: fromUser, $options: 'i' } },
+										// 		{ 'education.school': { $regex: schoolUser, $options: 'i' } },
+										// 		{ 'work.company': { $regex: companyUser, $options: 'i' } },
 									],
 								},
 								{ _id: { $nin: friendsOfFriendsFilter } },
@@ -133,6 +138,25 @@ class UserController {
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [GET]
+	async suggestFriends(req, res, next) {
+		try {
+			const users = await suggestFriend(req.user._id);
+			res.status(200).json(users);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -720,6 +744,32 @@ class UserController {
 		}
 	}
 
+	//add hobbies for user
+	async addHobbies(req, res, next) {
+		try {
+			const { hobbies } = req.body;
+			const user = await User.findByIdAndUpdate(
+				req.user._id,
+				{
+					$set: { hobbies },
+				},
+				{ new: true }
+			);
+			return res.status(200).json(user);
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// search new friends by keyword
 	async searchNewFriends(req, res, next) {
 		try {
@@ -1216,11 +1266,39 @@ class UserController {
 	// get information of user: education, work, contact,... with privacy setting of user
 	async getUserInfo(req, res, next) {
 		try {
-			const user = await getUserWithPrivacy(req);
+			const user = await getUserWithPrivacy(req, res);
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			res.status(200).json(user);
+			const userObj = user.toObject();
+			if (!req.user) {
+				userObj.relationship = 'none';
+			} else {
+				if (
+					req.user.friends.some((friend) => friend.user && friend.user._id.toString() === user._id.toString())
+				) {
+					userObj.relationship = 'friend';
+				} else if (
+					req.user.sentRequests.some(
+						(sentRequest) => sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
+					)
+				) {
+					userObj.relationship = 'sent';
+				} else if (
+					req.user.friendRequests.some(
+						(friendRequest) =>
+							friendRequest.user && friendRequest.user._id.toString() === user._id.toString()
+					)
+				) {
+					userObj.relationship = 'received';
+				} else if (req.user._id.toString() === user._id.toString()) {
+					userObj.relationship = 'self';
+				} else {
+					userObj.relationship = 'none';
+				}
+			}
+
+			return res.status(200).json(userObj);
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -1508,6 +1586,8 @@ class UserController {
 
 	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
+			//increase endDay 1
+			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalUserCreationsByDay = await User.aggregate([
 				{
 					$match: {
@@ -1532,7 +1612,7 @@ class UserController {
 			// Initialize the map with 0 for each day in the range
 			let currentDate = new Date(startDay);
 			const endDate = new Date(endDay);
-			while (currentDate <= endDate) {
+			while (currentDate <= endDate - 1) {
 				const dateString = currentDate.toISOString().split('T')[0];
 				totalUserCreationsMap[dateString] = 0;
 

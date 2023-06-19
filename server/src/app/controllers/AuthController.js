@@ -11,6 +11,7 @@ const { populateUserByEmail } = require('../../utils/Populate/User');
 const { sendEmail, sendEmailVerify } = require('../../utils/Mail/sendMail');
 const Token = require('../models/Token');
 const { User, labelOfGender } = require('../models/User');
+const { responseError } = require('../../utils/Response/error');
 
 const hostClient = process.env.HOST_CLIENT;
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -29,9 +30,11 @@ class AuthoController {
 				gender: Joi.object({
 					value: Joi.string().valid('male', 'female', 'other').required(),
 				}),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			// const { valid, reason, validators } = await isEmailValid(req.body.email);
 
@@ -71,11 +74,13 @@ class AuthoController {
 				// delete user and token
 				await user.deleteOne();
 				await token.deleteOne();
-				return res.status(400).send('Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
+				return responseError(res, 400, 'Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
 			}
 			res.status(200).json(user);
 		} catch (err) {
-			if (err.code === 11000) return res.status(500).send('Email đã tồn tại!');
+			if (err.code === 11000) {
+				return responseError(res, 400, 'Email đã tồn tại!');
+			}
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
@@ -93,13 +98,17 @@ class AuthoController {
 		try {
 			const { userId, token } = req.params;
 			const user = await User.findById(userId);
-			if (!user) return res.status(400).send('User không tồn tại!!!');
+			if (!user) {
+				return responseError(res, 400, 'User không tồn tại!!!');
+			}
 			const tokenVerify = await Token.findOne({ userId: user._id, token });
-			if (!tokenVerify) return res.status(400).send('Link xác nhận không hợp lệ!!!');
+			if (!tokenVerify) {
+				return responseError(res, 400, 'Link xác nhận không hợp lệ!!!');
+			}
 			user.isVerified = true;
 			await user.save();
 			await tokenVerify.deleteOne();
-			res.status(200).send('Xác nhận thành công!!!');
+			res.status(200).json('Xác nhận thành công!!!');
 		} catch (err) {
 			return next(
 				createError.InternalServerError(
@@ -130,9 +139,11 @@ class AuthoController {
 			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 			const userSave = await User.findById(user._id);
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 			userSave.refreshToken = refreshToken;
 			userSave.isVerified = true;
@@ -171,9 +182,11 @@ class AuthoController {
 			const userSave = await User.findById(user._id);
 
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 			userSave.refreshToken = refreshToken;
 			userSave.isVerified = true;
@@ -202,48 +215,54 @@ class AuthoController {
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await populateUserByEmail(req.body.email);
 			if (!user) {
-				return res.status(401).json('Email không tồn tại.');
+				return responseError(res, 401, 'Email không tồn tại.');
 			}
 
 			if (user.password == null) {
-				return res
-					.status(401)
-					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+				return responseError(
+					res,
+					401,
+					'Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!'
+				);
 			}
 
 			//check isVerify
-			if (!user.isVerified) {
-				const exsitToken = await Token.findOne({
-					userId: user._id,
-				});
+			// if (!user.isVerified) {
+			// 	const exsitToken = await Token.findOne({
+			// 		userId: user._id,
+			// 	});
 
-				if (exsitToken) {
-					await exsitToken.deleteOne();
-				}
+			// 	if (exsitToken) {
+			// 		await exsitToken.deleteOne();
+			// 	}
 
-				// send email verify
-				const token = await new Token({
-					userId: user._id,
-					token: crypto.randomBytes(16).toString('hex'),
-				}).save();
+			// 	// send email verify
+			// 	const token = await new Token({
+			// 		userId: user._id,
+			// 		token: crypto.randomBytes(16).toString('hex'),
+			// 	}).save();
 
-				const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
-				const status = await sendEmailVerify(user.email, 'Verify account', link, user);
-				if (!status) return res.status(500).json('Gửi email xác nhận thất bại. Vui lòng thử lại!!!');
+			// 	const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
+			// 	const status = await sendEmailVerify(user.email, 'Verify account', link, user);
+			// 	if (!status) return res.status(500).json('Gửi email xác nhận thất bại. Vui lòng thử lại!!!');
 
-				return res.status(401).json('Tài khoản chưa được xác nhận. Vui lòng kiểm tra email!!!');
-			}
+			// 	return responseError(res, 401, 'Tài khoản chưa được xác nhận. Vui lòng kiểm tra email!!!');
+			// }
 			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 
 			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
@@ -254,18 +273,20 @@ class AuthoController {
 					// lock account after 5 minutes
 					user.lockTime = Date.now() + 5 * 60 * 1000;
 					await user.save();
-					return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
+					return responseError(res, 401, 'Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
 				}
 				if (user.loginAttempts > 3) {
 					// lock account forever
 					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 					await user.save();
-					return res
-						.status(401)
-						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
+					return responseError(
+						res,
+						401,
+						'Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!'
+					);
 				}
 				await user.save();
-				return res.status(401).json('Mật khẩu không chính xác.');
+				return responseError(res, 401, 'Mật khẩu không chính xác.');
 			}
 			// reset login attempt
 			user.loginAttempts = 0;
@@ -278,7 +299,7 @@ class AuthoController {
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			if (!accessToken) {
-				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
+				return responseError(res, 401, 'Đăng nhập không thành công, vui lòng thử lại.');
 			}
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 			user.refreshToken = refreshToken;
@@ -314,9 +335,11 @@ class AuthoController {
 			// validate token
 			const schema = Joi.object({
 				refreshToken: Joi.string().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			// get access token from header
 			// const accessTokenFromHeader = req.headers.authorization;
@@ -327,14 +350,14 @@ class AuthoController {
 			// get refresh token from body
 			const refreshTokenFromBody = req.body.refreshToken;
 			if (!refreshTokenFromBody) {
-				return res.status(400).send('Không tìm thấy refresh token.');
+				return responseError(res, 400, 'Không tìm thấy refresh token.');
 			}
 
 			// const accessToken_ = accessTokenFromHeader?.replace('Bearer ', '');
 			// Decode access token đó
 			const decoded = await authMethod.decodeToken(refreshTokenFromBody, refreshTokenSecret);
 			if (!decoded) {
-				return res.status(400).send('Refresh token không hợp lệ.');
+				return responseError(res, 400, 'Refresh token không hợp lệ.');
 			}
 			const { userId } = decoded.payload;
 			// Check refreshToken with redis
@@ -348,17 +371,19 @@ class AuthoController {
 			// Check refreshToken with database
 			const user = await User.findById(mongoose.Types.ObjectId(userId));
 			if (!user) {
-				return res.status(400).send('Không tìm thấy người dùng.');
+				return responseError(res, 400, 'Không tìm thấy người dùng.');
 			}
 
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa.Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()} `
+				);
 			}
 
 			if (user.refreshToken !== refreshTokenFromBody) {
-				return res.status(401).send('Refresh token không hợp lệ hoặc đã hết hạn.');
+				return responseError(res, 401, 'Refresh token không hợp lệ hoặc đã hết hạn');
 			}
 
 			// Generate new access token
@@ -368,7 +393,7 @@ class AuthoController {
 			};
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 			if (!accessToken) {
-				return res.status(400).send('Tạo access token không thành công, vui lòng thử lại.');
+				return responseError(res, 400, 'Tạo access token không thành công, vui lòng thử lại.');
 			}
 
 			return res.json({
@@ -378,11 +403,11 @@ class AuthoController {
 			console.log(err.message);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
 				)
 			);
 		}
@@ -393,12 +418,16 @@ class AuthoController {
 		try {
 			const schema = Joi.object({
 				email: Joi.string().email().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await User.findOne({ email: req.body.email });
-			if (!user) return res.status(400).send('Email không tồn tại!!!');
+			if (!user) {
+				return responseError(res, 400, 'Email không tồn tại!!!');
+			}
 
 			let token = await Token.findOne({ userId: user._id });
 			if (!token) {
@@ -408,33 +437,41 @@ class AuthoController {
 				}).save();
 			}
 
-			const link = `${process.env.BASE_URL}/${user._id}/${token.token}`;
+			const link = `${process.env.BASE_URL} /${user._id}/${token.token} `;
 			const status = await sendEmail(user.email, 'Password reset', link, user);
 			// check status
-			if (!status) return res.status(400).send('Gửi email không thành công!!!');
+			if (!status) {
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
 			res.send('Link reset mật khẩu đã được gửi qua email của bạn');
 		} catch (error) {
 			console.log(error);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
 			);
 		}
 	}
 
 	async resetPassword(req, res, next) {
 		try {
-			const schema = Joi.object({ password: Joi.string().required() });
+			const schema = Joi.object({ password: Joi.string().required() }).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await User.findById(req.params.userId);
-			if (!user) return res.status(400).send('Không tìm thấy người dùng!!!');
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
 
 			const token = await Token.findOne({
 				userId: user._id,
 				token: req.params.token,
 			});
-			if (!token) return res.status(400).send('Link không đúng hoặc đã hết hạn');
+			if (!token) {
+				return responseError(res, 400, 'Link không đúng hoặc đã hết hạn');
+			}
 
 			// hash password
 			const salt = await bcrypt.genSalt(10);
@@ -447,11 +484,11 @@ class AuthoController {
 			console.log(err);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
 				)
 			);
 		}
@@ -466,11 +503,11 @@ class AuthoController {
 			console.log(err);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
 				)
 			);
 		}

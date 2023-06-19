@@ -17,6 +17,7 @@ router.get('/profile', isAuth, async (req, res) => {
 router.delete('/:id', isAuth, RoleMiddleware.IsAdmin, UserController.delete);
 
 // GET
+router.get('/suggests', isAuth, UserController.suggestFriends);
 router.get('/friends', isAuth, UserController.getFriendsList);
 router.get('/notifications', isAuth, NotificationController.getNotifications);
 router.get('/activities', isAuth, ActivityController.getAllActivityOfUser);
@@ -31,6 +32,7 @@ router.get('/', UserController.getUser);
 // router.get("/:id/information", getUserFromToken, UserController.getUserInformation);
 
 // PUT
+router.put('/hobbies', isAuth, UserController.addHobbies);
 router.put('/remove-notification', isAuth, NotificationController.removeNotification);
 router.put('/update-profile', isAuth, UserController.update);
 router.put('/password', isAuth, UserController.updatePassword);

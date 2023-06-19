@@ -13,20 +13,20 @@ function RoomMagager(socket, io) {
 	// });
 
 	// Listen for chatMessage
-	socket.on(eventName.SEND_MESSAGE, async (msg) => {
-		try {
-			console.log('sendMessage', msg.conversation);
-			const conversation = await Conversation.findById(msg.conversation);
-			if (!conversation) return;
-			const userIds = conversation.members
-				.filter((member) => member.user.toString() !== msg.sender._id.toString())
-				.map((menber) => menber.user.toString());
+	// socket.on(eventName.SEND_MESSAGE, async (msg) => {
+	// 	try {
+	// 		console.log('sendMessage', msg.conversation);
+	// 		const conversation = await Conversation.findById(msg.conversation);
+	// 		if (!conversation) return;
+	// 		const userIds = conversation.members
+	// 			.filter((member) => member.user.toString() !== msg.sender._id.toString())
+	// 			.map((menber) => menber.user.toString());
 
-			SocketManager.sendToList(userIds, eventName.RECEIVE_MESSAGE, msg);
-		} catch (error) {
-			console.log(error);
-		}
-	});
+	// 		SocketManager.sendToList(userIds, eventName.RECEIVE_MESSAGE, msg);
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	}
+	// });
 
 	// socket.on('leaveRoom', (conversationId) => {
 	// 	console.log('leaveRoom', conversationId);

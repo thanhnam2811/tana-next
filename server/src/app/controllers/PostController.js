@@ -20,6 +20,7 @@ const {
 	createActivityWithReactPost,
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
+const { responseError } = require('../../utils/Response/error');
 
 class PostController {
 	// search post by content
@@ -161,7 +162,7 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
 				privacy: validatePrivacy,
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -240,7 +241,7 @@ class PostController {
 						otherwise: Joi.array().items(Joi.string()),
 					}),
 				}),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -282,9 +283,9 @@ class PostController {
 						select: '_id link',
 					});
 
-				res.status(200).send(postUpdated);
+				return res.status(200).send(postUpdated);
 			} else {
-				res.status(401).send('Bạn không có quyền cập nhật bài viết này');
+				return responseError(res, 401, 'Bạn không có quyền cập nhật bài viết này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -315,12 +316,12 @@ class PostController {
 				if (sharedPost) {
 					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
 				}
-				res.status(200).send({
+				return res.status(200).json({
 					message: 'Xóa bài viết thành công',
 					Post: post,
 				});
 			} else {
-				res.status(401).send('Bạn không có quyền xóa bài viết này');
+				return responseError(res, 401, 'Bạn không có quyền xóa bài viết này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -535,7 +536,7 @@ class PostController {
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = 'none';
-				res.status(200).json(postReturn);
+				return res.status(200).json(postReturn);
 			} else if (userReacted && userReacted.type.toString() !== req.body.type.toString()) {
 				// if user has reacted but change the type of reaction
 				userReacted.type = req.body.type;
@@ -590,7 +591,7 @@ class PostController {
 
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = req.body.type;
-				res.status(200).json(postReturn);
+				return res.status(200).json(postReturn);
 			} else {
 				// if user has not reacted, add a new reaction
 				const newReact = new React({
@@ -659,7 +660,7 @@ class PostController {
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = newReact.type;
-				res.status(200).send(postReturn);
+				return res.status(200).send(postReturn);
 			}
 		} catch (err) {
 			console.error(err);
@@ -682,7 +683,7 @@ class PostController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -828,15 +829,19 @@ class PostController {
 					reactOfUser = react.type;
 				}
 			} else {
-				if (post.privacy.value != 'public') return res.status(401).json('Bạn không có quyền xem bài viết này');
+				if (post.privacy.value != 'public') {
+					return responseError(res, 401, 'Bạn không có quyền xem bài viết này');
+				}
 			}
 
 			const postObject = post.toObject();
 			postObject.reactOfUser = reactOfUser;
 			//
-			res.status(200).json(postObject);
+			return res.status(200).json(postObject);
 		} catch (err) {
 			console.error(err);
+			if (err.kind.toString() == 'ObjectId')
+				return next(createError.NotFound(`Post not found with ${req.params.id}`));
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(

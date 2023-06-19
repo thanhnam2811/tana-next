@@ -3,13 +3,14 @@ import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
 import { useCallback, useMemo } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
+import { KeyedMutator } from 'swr';
 
 // T: Data type,
 export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
 	data: T[];
 	listRes?: U[];
 	updateData: (id: string, newData: T) => void;
-	addData: (newData: T) => void;
+	addData: (newData: T, validate?: boolean) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
 	validating: boolean;
@@ -20,6 +21,7 @@ export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPag
 	filter: (filter: any) => void;
 	reload: () => void;
 	api: string;
+	mutate: KeyedMutator<U[]>;
 };
 
 export interface FetcherProps {
@@ -68,7 +70,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		return { data, hasMore };
 	}, [listRes]);
 
-	const addData = (newData: T) => {
+	const addData = (newData: T, validate?: boolean) => {
 		// Make a shallow copy of the existing data array and add the new data to the beginning
 		const newItems = [newData, ...data];
 
@@ -84,7 +86,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 						totalItems: page.totalItems + 1,
 					};
 				}),
-			false
+			!!validate
 		); // Optimistically update the data to add the new item to the beginning of the list
 	};
 
@@ -102,7 +104,6 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 						items: page.items.map((item) => {
 							if (item._id === id) {
 								updated = true;
-								console.log({ item, newData });
 								return newData;
 							}
 							return item;
@@ -143,9 +144,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		setPage(page + 1);
 	};
 
-	const reload = () => {
-		mutate();
-	};
+	const reload = () => mutate();
 
 	const filter = (filter: object) => {
 		console.log({ filter });
@@ -167,6 +166,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 			updateData,
 			removeData,
 			api,
+			mutate,
 		}),
 		[data, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
 	);
