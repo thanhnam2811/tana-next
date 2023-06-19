@@ -17,6 +17,8 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useTheme } from 'src/layout/hooks';
 import { SERVER_URL } from '@common/config';
+import { MessageType } from '@modules/messages/types';
+import { useRouter } from 'next/router';
 
 dayjs.locale('vi');
 
@@ -24,6 +26,8 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 	const { authUser, login } = useAuth();
 	const { mode, getTheme } = useTheme();
 	const { token } = theme.useToken();
+	const { notification } = App.useApp();
+	const router = useRouter();
 
 	// Fetch user data
 	useEffect(() => {
@@ -45,12 +49,25 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 			window.socket.on('connect', () => {
 				const accessToken = localStorage.getItem('accessToken');
 				window.socket.emit('login', accessToken); // login to socket
-				console.log('connected to socket');
+
+				window.socket.on('sendMessage', (data: MessageType) =>
+					notification.open({
+						message: 'Tin nhắn mới!',
+						description: data.text,
+						placement: 'bottomRight',
+						onClick: () =>
+							router.push({
+								pathname: '/messages',
+								query: { id: data.conversation },
+							}),
+					})
+				);
 			});
 		}
 		return () => {
 			if (authUser) {
 				window.socket.off('connect');
+				window.socket.off('sendMessage');
 				window.socket.disconnect(); // disconnect to socket
 				console.log('disconnected to socket');
 			}
