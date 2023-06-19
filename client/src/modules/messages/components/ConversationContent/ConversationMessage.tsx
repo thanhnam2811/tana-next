@@ -87,7 +87,7 @@ export function ConversationMessage() {
 		try {
 			// Upload file
 			if (data.files?.length) {
-				const uploaded = await uploadFileApi(data.files);
+				const uploaded = await uploadFileApi(data.files, { conversation: id });
 				data.media = uploaded.files.map(({ _id }) => _id);
 			}
 			delete data.files;
