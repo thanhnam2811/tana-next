@@ -566,7 +566,7 @@ class AuthoController {
 
 			// generate new password
 			const salt = await bcrypt.genSalt(10);
-			const hashedPassword = await bcrypt.hash(req.body.password, salt);
+			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
 			// save hashedPassword to redis set time expire 5m
 			await redisClient.set(`password:${user._id}`, hashedPassword, 'EX', 60 * 5);
