@@ -12,9 +12,11 @@ export function SetPasswordForm() {
 		try {
 			await setPasswordApi(values);
 
+			form.resetFields();
+
 			toast.success('Đặt mật khẩu thành công! Vui lòng kiểm tra email để xác nhận yêu cầu.', { id: toastId });
-		} catch (error) {
-			toast.error('Đặt mật khẩu thất bại!', { id: toastId });
+		} catch (error: any) {
+			toast.error(`Đặt mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });
 		}
 	};
 
@@ -50,6 +52,15 @@ export function SetPasswordForm() {
 							{
 								min: 6,
 								message: 'Mật khẩu phải có ít nhất 6 ký tự!',
+							},
+							{
+								validator: (_, value) => {
+									if (value === form.getFieldValue('newPassword')) {
+										return Promise.resolve();
+									}
+
+									return Promise.reject(new Error('Mật khẩu không khớp!'));
+								},
 							},
 						]}
 					>
