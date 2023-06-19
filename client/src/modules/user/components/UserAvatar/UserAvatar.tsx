@@ -1,11 +1,8 @@
-import { Avatar, AvatarProps, Badge, BadgeProps, Skeleton, Tooltip, theme } from 'antd';
+import { Avatar, AvatarProps, Badge, BadgeProps, Skeleton, theme, Tooltip } from 'antd';
 import { HiUser } from 'react-icons/hi2';
 import styles from './UserAvatar.module.scss';
 import { UserType } from '@modules/user/types';
 import Link from 'next/link';
-import useSWR from 'swr';
-import { IFile } from '@common/types';
-import { swrFetcher } from '@common/api';
 
 interface Props {
 	user?: UserType;
@@ -19,8 +16,8 @@ export function UserAvatar({ user, nickname, badgeProps, avtSize = 40, ...avatar
 
 	const badgeSize = avtSize / 4;
 
-	const pId = user?.profilePicture?._id;
-	const { data: profilePic } = useSWR<IFile>(`/files/${pId}?width=${avtSize}&height=${avtSize}`, swrFetcher);
+	const profilePic = user?.profilePicture;
+	// const { data: profilePic } = useSWR<IFile>(`/files/${pId}?width=${avtSize}&height=${avtSize}`, swrFetcher);
 
 	if (!user) return <Skeleton.Avatar size={avtSize} shape="circle" active />;
 
