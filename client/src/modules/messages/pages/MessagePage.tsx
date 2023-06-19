@@ -3,12 +3,12 @@ import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
 import { Button, Card, Divider, Input, List, Space, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencilSquare } from 'react-icons/hi2';
 import { createConversationApi } from '../api';
 import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
-import { ConversationCreateType, ConversationType } from '../types';
+import { ConversationCreateType, ConversationType, MessageType } from '../types';
 import Head from 'next/head';
 
 export const MessageContext = React.createContext<{
@@ -48,6 +48,21 @@ function MessagesPage() {
 			toast.error(error.message || error.toString(), { id: toastId });
 		}
 	};
+
+	useEffect(() => {
+		if (id) {
+			window.socket.on('sendMessage', (msg: MessageType) => {
+				const conv = convFetcher.data?.find((conv) => conv._id === msg.conversation);
+				if (conv) {
+					convFetcher.updateData(conv._id, { ...conv, lastest_message: msg });
+				}
+			});
+		}
+
+		return () => {
+			window.socket.off('sendMessage');
+		};
+	}, [id]);
 
 	return (
 		<>

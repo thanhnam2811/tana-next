@@ -220,11 +220,20 @@ export function ConversationMessage() {
 			window.socket.on('stopTypingMessage', ({ senderId }: any) => {
 				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
 			});
+
+			window.socket.on('sendMessage', (msg: MessageType) => {
+				if (msg.conversation === id) {
+					if (authUser?._id !== msg.sender._id) {
+						msgFetcher.addData(msg);
+					}
+				}
+			});
 		}
 
 		return () => {
 			window.socket.off('typingMessage');
 			window.socket.off('stopTypingMessage');
+			window.socket.off('sendMessage');
 		};
 	}, [id]);
 
