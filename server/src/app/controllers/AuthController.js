@@ -8,7 +8,7 @@ const authMethod = require('../../auth/auth.method');
 const redisClient = require('../../configs/redis/index');
 // const randToken = require('rand-Token');
 const { populateUserByEmail } = require('../../utils/Populate/User');
-const { sendEmail, sendEmailVerify } = require('../../utils/Mail/sendMail');
+const { sendEmail, sendEmailVerify, sendMailComfirmSetPassword } = require('../../utils/Mail/sendMail');
 const Token = require('../models/Token');
 const { User, labelOfGender } = require('../models/User');
 const { responseError } = require('../../utils/Response/error');
@@ -578,7 +578,7 @@ class AuthoController {
 			}).save();
 
 			const link = `${hostClient}/auth/comfirm-set-password/${user._id}/${token.token}`;
-			const status = await sendEmailVerify(user.email, 'Comfirm set password', link, user);
+			const status = await sendMailComfirmSetPassword(user.email, 'Comfirm set password', link, user);
 			// check status
 			if (!status) {
 				// delete user and token
