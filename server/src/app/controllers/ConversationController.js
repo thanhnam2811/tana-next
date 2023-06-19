@@ -144,7 +144,6 @@ class ConversationController {
 			if (index !== -1) {
 				const adminOfConversation = conversation.members.filter((member) => member.role === 'admin');
 				conversation.members.splice(index, 1);
-				console.log(adminOfConversation);
 				if (
 					adminOfConversation.length === 1 &&
 					adminOfConversation[0].user.toString() === req.user._id.toString()
