@@ -314,6 +314,7 @@ export function ConversationMessage() {
 					style={{
 						backgroundColor: token.colorBgContainer,
 						borderColor: token.colorBorder,
+						boxShadow: token.boxShadow,
 					}}
 				>
 					<Avatar.Group maxCount={3} size="small" className={styles.typing_list}>
