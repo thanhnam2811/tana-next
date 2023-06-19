@@ -13,6 +13,8 @@ export function ChangePasswordForm() {
 		try {
 			await changePasswordApi(values);
 
+			form.resetFields();
+
 			toast.success('Đổi mật khẩu thành công!', { id: toastId });
 		} catch (error: any) {
 			toast.error(`Đặt mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });

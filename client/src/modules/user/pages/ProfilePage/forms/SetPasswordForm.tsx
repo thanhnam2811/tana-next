@@ -12,6 +12,8 @@ export function SetPasswordForm() {
 		try {
 			await setPasswordApi(values);
 
+			form.resetFields();
+
 			toast.success('Đặt mật khẩu thành công! Vui lòng kiểm tra email để xác nhận yêu cầu.', { id: toastId });
 		} catch (error: any) {
 			toast.error(`Đặt mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });
