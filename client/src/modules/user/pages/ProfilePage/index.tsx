@@ -7,41 +7,51 @@ import { UserType } from '@modules/user/types';
 import { Card, Menu, Spin } from 'antd';
 import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
-import { HiInformationCircle, HiUsers, HiViewGrid } from 'react-icons/hi';
+import { HiInformationCircle, HiShieldExclamation, HiUsers, HiViewGrid } from 'react-icons/hi';
 import { IconType } from 'react-icons/lib';
 import useSWR from 'swr';
-import { FriendTab, InfoTab, PostTab } from './tabs';
+import { FriendTab, InfoTab, PostTab, SecurityTab } from './tabs';
 
-type TabType = 'posts' | 'friends' | 'media' | 'about';
-const tabList: { label: string; Icon: IconType; tab: TabType; component: ReactNode }[] = [
-	{
-		label: 'Bài viết',
-		Icon: HiViewGrid,
-		tab: 'posts',
-		component: <PostTab />,
-	},
-	{
-		label: 'Bạn bè',
-		Icon: HiUsers,
-		tab: 'friends',
-		component: <FriendTab />,
-	},
-	{
-		label: 'Thông tin',
-		Icon: HiInformationCircle,
-		tab: 'about',
-		component: <InfoTab />,
-	},
-];
+type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security';
 
 function Index() {
 	const { authUser } = useAuth();
 	const router = useRouter();
 	const { id = authUser?._id, tab = 'posts' } = router.query as { id: string; tab: TabType };
-	const tabItem = tabList.find((item) => item.tab === tab);
 
 	const { isLoading, data: user } = useSWR<UserType>(`/users/${id}`, swrFetcher);
 
+	const tabList: { label: string; Icon: IconType; tab: TabType; component: ReactNode }[] = [
+		{
+			label: 'Bài viết',
+			Icon: HiViewGrid,
+			tab: 'posts',
+			component: <PostTab />,
+		},
+		{
+			label: 'Bạn bè',
+			Icon: HiUsers,
+			tab: 'friends',
+			component: <FriendTab />,
+		},
+		{
+			label: 'Thông tin',
+			Icon: HiInformationCircle,
+			tab: 'about',
+			component: <InfoTab />,
+		},
+	];
+	const isAuthUser = authUser?._id === id;
+	if (isAuthUser) {
+		tabList.push({
+			label: 'Bảo mật',
+			Icon: HiShieldExclamation,
+			tab: 'security',
+			component: <SecurityTab />,
+		});
+	}
+
+	const tabItem = tabList.find((item) => item.tab === tab);
 	const changeTab = async (tab: string) => {
 		const query = router.query;
 		query.tab = tab;

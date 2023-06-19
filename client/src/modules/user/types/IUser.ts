@@ -53,6 +53,7 @@ interface IUser extends IData {
 
 	isOnline: boolean;
 	lastAccess?: string;
+	shouldSetPassword?: boolean; // For login with 3rd party
 
 	relationship?: RelationshipType;
 
