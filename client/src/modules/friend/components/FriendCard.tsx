@@ -14,17 +14,17 @@ import {
 	HiXMark,
 } from 'react-icons/hi2';
 import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../data';
-import { FriendType } from '../types';
+import { FriendType, RelationshipType } from '../types';
 import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 interface Props {
 	user: UserType;
-	reload?: () => void;
+	onUpdateRelationship?: (relationship: RelationshipType) => void;
 }
 
-export function FriendCard({ user, reload }: Props) {
+export function FriendCard({ user, onUpdateRelationship }: Props) {
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
 
@@ -59,7 +59,7 @@ export function FriendCard({ user, reload }: Props) {
 			onOk: async () => {
 				await unFriendApi(user._id);
 				toast.success('Hủy kết bạn thành công');
-				reload?.();
+				onUpdateRelationship?.('none');
 			},
 		});
 
@@ -82,14 +82,14 @@ export function FriendCard({ user, reload }: Props) {
 			onOk: async () => {
 				await requestFriendApi(user._id);
 				toast.success('Hủy lời mời kết bạn thành công');
-				reload?.();
+				onUpdateRelationship?.('none');
 			},
 		});
 
 	const handleAcceptRequest = async () => {
 		await acceptFriendApi(user._id);
 		toast.success('Chấp nhận lời mời kết bạn thành công');
-		reload?.();
+		onUpdateRelationship?.('friend');
 	};
 
 	const handleRejectRequest = () =>
@@ -110,14 +110,14 @@ export function FriendCard({ user, reload }: Props) {
 			onOk: async () => {
 				await rejectFriendApi(user._id);
 				toast.success('Từ chối lời mời kết bạn thành công');
-				reload?.();
+				onUpdateRelationship?.('none');
 			},
 		});
 
 	const handleSendRequest = async () => {
 		await requestFriendApi(user._id);
 		toast.success('Gửi lời mời kết bạn thành công');
-		reload?.();
+		onUpdateRelationship?.('sent');
 	};
 
 	switch (relationship) {

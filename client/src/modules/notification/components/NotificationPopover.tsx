@@ -3,7 +3,7 @@ import { useAuth } from '@modules/auth/hooks';
 import { readAllNotificationApi, readNotificationApi } from '@modules/notification/api';
 import { INotiPaginationRespone, NotificationType } from '@modules/notification/types';
 import { App, Button, List, Popover, PopoverProps, Space, Typography } from 'antd';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import NotificationItem from './NotificationItem';
 import styles from './NotificationPopover.module.scss';
 
@@ -13,29 +13,32 @@ interface Props {
 
 export function NotificationPopover({ renderChildren, ...props }: Props & PopoverProps) {
 	const notiFetcher = useFetcher<NotificationType, INotiPaginationRespone>({ api: `/users/notifications` });
-	const numberUnread = notiFetcher.listRes?.[0].numberUnread || 0;
+	const _numberUnread = notiFetcher.listRes?.[0].numberUnread || 0;
+	const [numberUnread, setNumberUnread] = useState(_numberUnread);
+	useEffect(() => {
+		setNumberUnread(_numberUnread);
+	}, [_numberUnread]);
 
 	const handleReadNotification = (noti: NotificationType) => {
 		if (noti.isRead) return;
 
 		readNotificationApi(noti._id);
 		notiFetcher.updateData(noti._id, { ...noti, isRead: true });
+		setNumberUnread((prev) => prev - 1);
 	};
 
 	const handleReadAllNotification = () => {
 		if (numberUnread === 0) return;
 
-		notiFetcher.mutate(
-			(prev) =>
-				prev?.map((page) => ({
-					...page,
-					numberUnread: 0,
-					items: page.items.map((noti) => ({ ...noti, isRead: true })),
-				})),
-			false
-		);
-
 		readAllNotificationApi();
+		notiFetcher.data.forEach((noti) => {
+			if (!noti.isRead) {
+				notiFetcher.updateData(noti._id, { ...noti, isRead: true });
+				setNumberUnread((prev) => prev - 1);
+			}
+		});
+
+		setNumberUnread(0);
 	};
 
 	const { authUser } = useAuth();
@@ -44,6 +47,7 @@ export function NotificationPopover({ renderChildren, ...props }: Props & Popove
 		if (authUser?._id) {
 			window.socket.on('notification', ({ data: noti }: { data: NotificationType }) => {
 				notiFetcher.addData(noti, true);
+				setNumberUnread((prev) => prev + 1);
 
 				notification.open({
 					message: <NotificationItem noti={noti} onClick={() => handleReadNotification(noti)} />,

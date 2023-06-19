@@ -28,7 +28,7 @@ export function PostSEO({ post, id }: Props) {
 
 	return (
 		<Head>
-			<meta name="description" content={post?.content} />
+			<meta name="description" content={description} />
 			<link rel="canonical" href={`/post/${post?._id}`} />
 
 			{/* Social media meta tags */}

@@ -4,7 +4,7 @@ import { Button, Card, Form, Input, List, Select, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FriendCard } from '../components';
 import { friendTypeList } from '../data';
-import { FriendType, IFriendFilter } from '../types';
+import { FriendType, IFriendFilter, RelationshipType } from '../types';
 
 interface Props {
 	type: FriendType;
@@ -23,6 +23,7 @@ export function ListFriend({ type }: Props) {
 			setFilter({ ...filter, key: value });
 		}, 300);
 	};
+
 	return (
 		<Card
 			title={friendTypeList.find((item) => item.type === type)?.title}
@@ -77,11 +78,15 @@ export function ListFriend({ type }: Props) {
 						)
 					}
 					grid={{ gutter: 16, column: 3 }}
-					renderItem={(item) => (
-						<List.Item>
-							<FriendCard user={item} reload={friendFetcher.reload} />
-						</List.Item>
-					)}
+					renderItem={(user) => {
+						const handleUpdateRelationship = (relationship: RelationshipType) =>
+							friendFetcher.updateData(user._id, { ...user, relationship });
+						return (
+							<List.Item>
+								<FriendCard user={user} onUpdateRelationship={handleUpdateRelationship} />
+							</List.Item>
+						);
+					}}
 				/>
 			</Space>
 		</Card>
