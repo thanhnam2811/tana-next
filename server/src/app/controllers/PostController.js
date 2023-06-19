@@ -1,3 +1,4 @@
+/* eslint-disable no-else-return */
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
@@ -6,7 +7,7 @@ const { User } = require('../models/User');
 const Comment = require('../models/Comment');
 const React = require('../models/React');
 const { getListPost, getListData } = require('../../utils/Response/listData');
-const { getAllPostWithPrivacy } = require('../../utils/Privacy/Post');
+const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 const {
 	notificationForFriends,
 	notificationForTags,
@@ -478,6 +479,12 @@ class PostController {
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
+
+			const checkPrivacy = await getPostWithPrivacy(post, req);
+			if (!checkPrivacy) {
+				return next(createError.Forbidden('Bạn không có quyền xem bài viết này'));
+			}
+
 			// check if the user has reacted this post before
 			const listReactOfPost = await React.find({ post: req.params.id });
 			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user._id.toString());
