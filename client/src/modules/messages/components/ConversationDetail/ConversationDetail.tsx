@@ -36,7 +36,7 @@ import { TiInfoLarge } from 'react-icons/ti';
 import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
-import { InfoMenu, MemberMenu } from './menu';
+import { FileMenu, InfoMenu, MediaMenu, MemberMenu } from './menu';
 import { UserType } from '@modules/user/types';
 
 export function ConversationDetail() {
@@ -140,7 +140,7 @@ export function ConversationDetail() {
 					<Typography.Text strong>Hình ảnh & Video</Typography.Text>
 				</Space>
 			),
-			children: <div>Hình ảnh & Video</div>,
+			children: <MediaMenu />,
 		},
 		{
 			key: 'files',
@@ -151,7 +151,7 @@ export function ConversationDetail() {
 					<Typography.Text strong>Tệp</Typography.Text>
 				</Space>
 			),
-			children: <div>Tệp</div>,
+			children: <FileMenu />,
 		}
 	);
 
