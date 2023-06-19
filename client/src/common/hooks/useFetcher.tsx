@@ -88,6 +88,6 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 			api,
 			mutate,
 		}),
-		[data, fetching, hasMore, loadMore, addData, updateData, removeData, api, mutate]
+		[data, api, listRes]
 	);
 };
