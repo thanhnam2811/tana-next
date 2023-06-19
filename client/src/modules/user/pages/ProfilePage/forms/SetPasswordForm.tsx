@@ -13,8 +13,8 @@ export function SetPasswordForm() {
 			await setPasswordApi(values);
 
 			toast.success('Đặt mật khẩu thành công! Vui lòng kiểm tra email để xác nhận yêu cầu.', { id: toastId });
-		} catch (error) {
-			toast.error('Đặt mật khẩu thất bại!', { id: toastId });
+		} catch (error: any) {
+			toast.error(`Đặt mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });
 		}
 	};
 
