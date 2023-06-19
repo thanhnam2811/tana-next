@@ -18,7 +18,16 @@ exports.isAuth = async (req, res, next) => {
 			return res.status(401).json('Bạn không có quyền truy cập vào tính năng này!');
 		}
 		const user = await populateUser(verified.payload.userId);
-		req.user = user;
+
+		const userObj = user.toObject();
+		// check user has password ?
+		if (!user.password) {
+			// add filed shouldSetPassword to user
+			userObj.shouldSetPassword = true;
+		}
+		userObj.shouldSetPassword = false;
+
+		req.user = userObj;
 
 		return next();
 	} catch (error) {
