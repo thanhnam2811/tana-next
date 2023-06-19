@@ -1,3 +1,3 @@
 export * from './apiClient';
 export * from './apiServer';
-export * from './uploadFileApi';
+export * from './uploadFile.api';
