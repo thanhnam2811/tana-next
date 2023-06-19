@@ -53,6 +53,15 @@ export function SetPasswordForm() {
 								min: 6,
 								message: 'Mật khẩu phải có ít nhất 6 ký tự!',
 							},
+							{
+								validator: (_, value) => {
+									if (value === form.getFieldValue('newPassword')) {
+										return Promise.resolve();
+									}
+
+									return Promise.reject(new Error('Mật khẩu không khớp!'));
+								},
+							},
 						]}
 					>
 						<Input.Password />
