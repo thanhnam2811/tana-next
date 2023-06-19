@@ -8,7 +8,7 @@ async function notificationRequestFriend(currentUser, user) {
 	const notification = await new Notification({
 		type: 'friend',
 		content: `${currentUser.fullname} đã gửi lời mời kết bạn`,
-		link: `/profile/${user._id}`,
+		link: `/profile/${currentUser._id}`,
 		sender: currentUser._id,
 		receiver: friend,
 	}).save();
@@ -28,7 +28,7 @@ async function notificationAcceptFriend(currentUser, user) {
 	const notification = await new Notification({
 		type: 'friend',
 		content: `${currentUser.fullname} đã chấp nhận lời mời kết bạn`,
-		link: `/profile/${user._id}`,
+		link: `/profile/${currentUser._id}`,
 		sender: currentUser._id,
 		receiver: friend,
 	}).save();
