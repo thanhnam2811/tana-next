@@ -17,7 +17,7 @@ export function ChangePasswordForm() {
 
 			toast.success('Đổi mật khẩu thành công!', { id: toastId });
 		} catch (error: any) {
-			toast.error(`Đặt mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });
+			toast.error(`Đổi mật khẩu thất bại! Lỗi: ${error.message || error.toString()}`, { id: toastId });
 		}
 	};
 
