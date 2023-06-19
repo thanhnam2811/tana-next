@@ -73,7 +73,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 
 	const loadMore = () => setPage(page + 1);
 
-	const fetcher = useMemo(
+	return useMemo(
 		() => ({
 			data,
 			listRes,
@@ -90,6 +90,4 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		}),
 		[data, fetching, hasMore, loadMore, addData, updateData, removeData, api, mutate]
 	);
-
-	return fetcher;
 };
