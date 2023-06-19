@@ -20,12 +20,13 @@ exports.isAuth = async (req, res, next) => {
 		const user = await populateUser(verified.payload.userId);
 
 		const userObj = user.toObject();
+		userObj.shouldSetPassword = false;
+
 		// check user has password ?
 		if (!user.password) {
 			// add filed shouldSetPassword to user
 			userObj.shouldSetPassword = true;
 		}
-		userObj.shouldSetPassword = false;
 
 		req.user = userObj;
 
