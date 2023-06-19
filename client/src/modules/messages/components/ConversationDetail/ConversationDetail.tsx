@@ -249,7 +249,7 @@ export function ConversationDetail() {
 						{...panel}
 						key={panel.key}
 						className={styles.collapse_panel}
-						style={{ borderColor: token.colorBorder }}
+						style={{ borderColor: token.colorBorder, backgroundColor: token.colorBgContainer }}
 					/>
 				))}
 			</Collapse>

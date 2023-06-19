@@ -1,5 +1,6 @@
 .container {
 	height: 100%;
+	overflow: hidden auto;
 
 	.header {
 		width: 100%;
@@ -25,6 +26,15 @@
 
 			> div:first-child {
 				height: 42px;
+			}
+
+			.file_item {
+				.file_icon {
+					width: 60px;
+					height: 60px;
+					object-fit: cover;
+					border-radius: 8px;
+				}
 			}
 		}
 	}

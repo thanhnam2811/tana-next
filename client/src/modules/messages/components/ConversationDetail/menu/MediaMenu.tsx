@@ -4,6 +4,8 @@ import { useFetcher } from '@common/hooks';
 import { IFile } from '@common/types';
 import { Button, Image, List } from 'antd';
 import { fileUtil } from '@common/utils';
+import styles from '../ConversationDetail.module.scss';
+import { HiEye } from 'react-icons/hi2';
 
 export function MediaMenu() {
 	const { conversation } = useConversationContext();
@@ -14,9 +16,19 @@ export function MediaMenu() {
 			<List
 				dataSource={mediaFetcher.data}
 				renderItem={(file) => (
-					<List.Item>
+					<List.Item className={styles.file_item}>
 						<List.Item.Meta
-							avatar={<Image src={file.link} alt={file.originalname} />}
+							avatar={
+								<Image
+									src={file.link}
+									alt={file.originalname}
+									className={styles.file_icon}
+									preview={{
+										maskClassName: styles.file_icon,
+										mask: <HiEye />,
+									}}
+								/>
+							}
 							title={file.originalname}
 							description={fileUtil.formatSize(file.size)}
 						/>
