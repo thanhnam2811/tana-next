@@ -17,8 +17,7 @@ export function PostSEO({ post, id }: Props) {
 		const author = post.author.fullname;
 		title = `Bài viết của ${author}`;
 
-		const text = stringUtil.htmlToPlainText(post.content);
-		description = text;
+		description = stringUtil.htmlToPlainText(post.content);
 	}
 
 	let pictureUrl = urlUtil.getFullUrl('/logo.png');
