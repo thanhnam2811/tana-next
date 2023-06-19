@@ -1,6 +1,6 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
 import { KeyedMutator } from 'swr';
@@ -60,9 +60,11 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 	const resData = listRes?.flatMap((res) => res.items) || [];
 	const [data, setData] = useState<T[]>(resData);
 	useEffect(() => {
-		const isSame = resData.every((item, index) => item._id === data[index]?._id);
-		if (!isSame) setData(resData);
-	}, [resData]);
+		if (!validating) {
+			const isSame = resData.every((item, index) => item._id === data[index]?._id);
+			if (!isSame) setData(resData);
+		}
+	}, [validating]);
 
 	const addData = (newData: T) => setData((prevData) => [newData, ...prevData]);
 
@@ -73,21 +75,18 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 
 	const loadMore = () => setPage(page + 1);
 
-	return useMemo(
-		() => ({
-			data,
-			listRes,
-			params,
-			fetching,
-			validating,
-			hasMore,
-			loadMore,
-			addData,
-			updateData,
-			removeData,
-			api,
-			mutate,
-		}),
-		[data, api, listRes]
-	);
+	return {
+		data,
+		listRes,
+		params,
+		fetching,
+		validating,
+		hasMore,
+		loadMore,
+		addData,
+		updateData,
+		removeData,
+		api,
+		mutate,
+	};
 };
