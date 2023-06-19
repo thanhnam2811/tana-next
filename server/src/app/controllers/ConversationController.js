@@ -1,3 +1,5 @@
+/* eslint-disable no-else-return */
+/* eslint-disable arrow-body-style */
 const axios = require('axios');
 const createError = require('http-errors');
 const Joi = require('joi');
@@ -805,7 +807,7 @@ class ConversationController {
 							(member) => member.user.toString() === req.body.userID.toString()
 						);
 
-						//user cannot update role for self
+						// user cannot update role for self
 						if (req.body.userID.toString() === req.user._id.toString()) {
 							return responseError(res, 403, 'Bạn không thể thay đổi vai trò của chính mình');
 						}
@@ -971,7 +973,7 @@ class ConversationController {
 						);
 					});
 			} else {
-				return responseError(res, 403, err.message ?? 'Bạn không nằmm trong cuộc hội thoại này');
+				return responseError(res, 403, 'Bạn không nằmm trong cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.log(err);

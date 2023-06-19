@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const passport = require('passport');
 const AuthoController = require('../app/controllers/AuthController');
+const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 
 // Login by Google
 router.get(
@@ -23,6 +24,7 @@ router.get(
 );
 
 router.get('/verify/:userId/:token', AuthoController.verify);
+router.get('/comfirm-set-password/:userId/:token', AuthoController.confirmSetPassword);
 
 // REFRESH ACCESS_TOKEN
 router.post('/refresh', AuthoController.refreshToken);
@@ -38,5 +40,10 @@ router.post('/password-reset', AuthoController.sendLinkForgottenPassword);
 
 // Reset password from link
 router.post('/password-reset/:userId/:token', AuthoController.resetPassword);
+
+// Change password
+router.put('/change-password', AuthoMiddleware.isAuth, AuthoController.changePassword);
+// set password
+router.put('/set-password', AuthoMiddleware.isAuth, AuthoController.setPassword);
 
 module.exports = router;

@@ -494,6 +494,153 @@ class AuthoController {
 		}
 	}
 
+	// change password
+	async changePassword(req, res, next) {
+		try {
+			const schema = Joi.object({
+				oldPassword: Joi.string().required(),
+				newPassword: Joi.string().required(),
+				confirmPassword: Joi.string().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			const user = await User.findById(req.user._id);
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
+
+			const isPasswordValid = bcrypt.compareSync(req.body.oldPassword, user.password);
+			if (!isPasswordValid) {
+				return responseError(res, 400, 'Mật khẩu cũ không đúng');
+			}
+
+			// check newPassword and confirmPassword
+			if (req.body.newPassword !== req.body.confirmPassword) {
+				return responseError(res, 400, 'Mật khẩu mới và xác nhận mật khẩu không khớp');
+			}
+
+			// generate new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
+			user.password = hashedPassword;
+			await user.save();
+			return res.status(200).json('Thay đổi mật khẩu thành công!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)} `
+				)
+			);
+		}
+	}
+
+	// set password
+	async setPassword(req, res, next) {
+		try {
+			const schema = Joi.object({
+				newPassword: Joi.string().required(),
+				confirmPassword: Joi.string().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			const user = await User.findById(req.user._id);
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
+
+			// check newPassword and confirmPassword
+			if (req.body.newPassword !== req.body.confirmPassword) {
+				return responseError(res, 400, 'Mật khẩu mới và xác nhận mật khẩu không khớp');
+			}
+
+			// generate new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+			// save hashedPassword to redis set time expire 5m
+			await redisClient.set(`password:${user._id}`, hashedPassword, 'EX', 60 * 5);
+
+			// send email verify
+			const token = await new Token({
+				userId: user._id,
+				token: crypto.randomBytes(16).toString('hex'),
+			}).save();
+
+			const link = `${hostClient}/auth/comfirm-set-password/${user._id}/${token.token}`;
+			const status = await sendEmailVerify(user.email, 'Comfirm set password', link, user);
+			// check status
+			if (!status) {
+				// delete user and token
+				await user.deleteOne();
+				await token.deleteOne();
+				return responseError(res, 400, 'Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
+			}
+
+			return res.status(200).json('Vuii lòng xác nhận đặt mật khẩu qua mail.');
+		} catch (error) {
+			console.log(error.message);
+			return next(
+				createError.InternalServerError(
+					`${error.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)} `
+				)
+			);
+		}
+	}
+
+	// confirm set password
+	async confirmSetPassword(req, res, next) {
+		try {
+			const { userId, token } = req.params;
+			const user = await User.findById(userId);
+			if (!user) {
+				return responseError(res, 400, 'User không tồn tại!!!');
+			}
+			const tokenVerify = await Token.findOne({ userId: user._id, token });
+			if (!tokenVerify) {
+				return responseError(res, 400, 'Link xác nhận không hợp lệ!!!');
+			}
+
+			// get hashedPassword from redis
+			const hashedPassword = await redisClient.get(`password:${user._id}`);
+			if (!hashedPassword) {
+				return responseError(res, 400, 'Link xác nhận đã hết hạn!!!');
+			}
+
+			// update password
+			user.password = hashedPassword;
+			await user.save();
+			redisClient.del(`${user._id}:tokens`); // delete all tokens for this account
+			await tokenVerify.deleteOne();
+			return res.status(200).json('Đặt mật khẩu thành công!!!');
+		} catch (error) {
+			console.log(error.message);
+			return next(
+				createError.InternalServerError(
+					`${error.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)} `
+				)
+			);
+		}
+	}
+
 	async logout(req, res, next) {
 		try {
 			const userId = req.user._id;
