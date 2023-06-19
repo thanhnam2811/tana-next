@@ -30,7 +30,7 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
-	const relationship = friendRelationshipMap[type] || user.relationship || 'none';
+	const relationship = user.relationship || friendRelationshipMap[type] || 'none';
 
 	const dropdownItems: MenuProps['items'] = [
 		{
