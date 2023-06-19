@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /* eslint-disable no-else-return */
 const createError = require('http-errors');
 const Joi = require('joi');
@@ -776,7 +777,7 @@ class PostController {
 					path: 'lastestFiveComments',
 					populate: {
 						path: 'author',
-						select: '_id fullname profilePicture isOnline',
+						select: '_id fullname profilePicture isOnline friends',
 						populate: {
 							path: 'profilePicture',
 							select: '_id link',
@@ -785,7 +786,7 @@ class PostController {
 				})
 				.populate({
 					path: 'author',
-					select: '_id fullname profilePicture isOnline',
+					select: '_id fullname profilePicture isOnline friends',
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
@@ -825,8 +826,8 @@ class PostController {
 			let reactOfUser = 'none';
 
 			if (req.user) {
-				const posts = await getAllPostWithPrivacy([post], req);
-				if (posts.length === 0) {
+				const postPrivacy = await getPostWithPrivacy(post, req);
+				if (!postPrivacy) {
 					return res.status(403).json('Bạn không có quyền xem bài viết này');
 				}
 
@@ -847,8 +848,8 @@ class PostController {
 			return res.status(200).json(postObject);
 		} catch (err) {
 			console.error(err);
-			if (err.kind.toString() == 'ObjectId')
-				return next(createError.NotFound(`Post not found with ${req.params.id}`));
+			// if (err.kind.toString() == 'ObjectId')
+			// 	return next(createError.NotFound(`Post not found with ${req.params.id}`));
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(

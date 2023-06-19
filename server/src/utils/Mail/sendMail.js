@@ -22,7 +22,7 @@ const emailTemplateVerify = (link, name) => `
         </div>
     </div>
     `;
-const emailTemplateComfirmSetPassword = (link, name) =>
+const emailTemplateSendOTP = (otp, name) =>
 	`
     <div style="background-color: #f5f5f5; padding: 20px 0;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px;">
@@ -32,10 +32,10 @@ const emailTemplateComfirmSetPassword = (link, name) =>
             <div style="text-align: center; margin-bottom: 20px;">
                 <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">Xin chào ${name}</h1>
                 <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Cảm ơn bạn đã đăng ký tài khoản của TaNa social netwrok.</p>
-                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Vui lòng nhấn vào nút bên dưới để xác nhận đặt mật khẩu của bạn.</p>
+                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Đây là mã OTP của bạn.</p>
             </div>
             <div style="text-align: center; margin-bottom: 20px;">
-                <a href="${link}" style="background-color: #2e6da4; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Xác nhận đặt mật khẩu</a>
+                <h4 style="background-color: #2e6da4; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">${otp}</h4>
             </div>
             <div style="text-align: center; margin-bottom: 20px;">
                 <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Trân trọng,</p>
@@ -280,7 +280,7 @@ const sendEmailVerify = async (email, subject, link, user) => {
 	}
 };
 
-const sendMailComfirmSetPassword = async (email, subject, link, user) => {
+const sendMailOTP = async (email, subject, otp, user) => {
 	try {
 		const transporter = nodemailer.createTransport({
 			host: process.env.HOST,
@@ -297,8 +297,8 @@ const sendMailComfirmSetPassword = async (email, subject, link, user) => {
 			from: process.env.FROM,
 			to: email,
 			subject,
-			text: link,
-			html: emailTemplateComfirmSetPassword(link, user.fullname),
+			text: otp,
+			html: emailTemplateSendOTP(otp, user.fullname),
 		});
 		// return true if email sent successfully
 		console.log('email sent sucessfully');
@@ -314,5 +314,5 @@ module.exports = {
 	sendEmail,
 	sendEmailVerify,
 	isEmailValid,
-	sendMailComfirmSetPassword,
+	sendMailOTP,
 };

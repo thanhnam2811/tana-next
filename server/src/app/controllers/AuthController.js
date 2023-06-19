@@ -1,3 +1,5 @@
+/* eslint-disable import/order */
+/* eslint-disable import/no-extraneous-dependencies */
 const crypto = require('crypto');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
@@ -8,10 +10,11 @@ const authMethod = require('../../auth/auth.method');
 const redisClient = require('../../configs/redis/index');
 // const randToken = require('rand-Token');
 const { populateUserByEmail } = require('../../utils/Populate/User');
-const { sendEmail, sendEmailVerify, sendMailComfirmSetPassword } = require('../../utils/Mail/sendMail');
+const { sendEmail, sendEmailVerify, sendMailOTP } = require('../../utils/Mail/sendMail');
 const Token = require('../models/Token');
 const { User, labelOfGender } = require('../models/User');
 const { responseError } = require('../../utils/Response/error');
+const speakeasy = require('speakeasy');
 
 const hostClient = process.env.HOST_CLIENT;
 const hostServer = process.env.HOST_SERVER;
@@ -57,27 +60,9 @@ class AuthoController {
 					value: req.body.gender.value,
 					label: labelOfGender[req.body.gender.value],
 				},
-			});
-
-			// save user and respond
-			const user = await newUser.save();
-
-			// send email verify
-			const token = await new Token({
-				userId: user._id,
-				token: crypto.randomBytes(16).toString('hex'),
 			}).save();
 
-			const link = `${hostServer}/auth/verify/${user._id}/${token.token}`;
-			const status = await sendEmailVerify(user.email, 'Verify account', link, user);
-			// check status
-			if (!status) {
-				// delete user and token
-				await user.deleteOne();
-				await token.deleteOne();
-				return responseError(res, 400, 'Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
-			}
-			res.status(200).json(user);
+			res.status(200).json(newUser);
 		} catch (err) {
 			if (err.code === 11000) {
 				return responseError(res, 400, 'Email đã tồn tại!');
@@ -97,21 +82,47 @@ class AuthoController {
 	// VERIFY
 	async verify(req, res, next) {
 		try {
-			const { userId, token } = req.params;
-			const user = await User.findById(userId);
+			const schema = Joi.object({
+				userId: Joi.string().required(),
+				otp: Joi.number().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			const user = await User.findById(req.body.userId);
 			if (!user) {
 				return responseError(res, 400, 'User không tồn tại!!!');
 			}
-			const tokenVerify = await Token.findOne({ userId: user._id, token });
-			if (!tokenVerify) {
-				return responseError(res, 400, 'Link xác nhận không hợp lệ!!!');
+
+			// check OTP
+
+			// genereate Token
+			const dataToken = {
+				userId: user._id,
+				role: user.role.name,
+			};
+
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
+
+			if (!accessToken) {
+				return responseError(res, 401, 'Đăng nhập không thành công, vui lòng thử lại.');
 			}
-			user.isVerified = true;
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
+			user.refreshToken = refreshToken;
 			await user.save();
-			await tokenVerify.deleteOne();
-			res.status(200).json('Xác nhận thành công!!!');
-			// forward to login page
-			return res.redirect(`${hostClient}/auth/login`);
+
+			// save refresh token to redis and set expire time
+			// await redisClient.set(user._id, refreshToken);
+			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
+
+			return res.status(200).json({
+				msg: 'Đăng nhập thành công.',
+				accessToken,
+				refreshToken,
+				user,
+			});
 		} catch (err) {
 			return next(
 				createError.InternalServerError(
@@ -237,28 +248,6 @@ class AuthoController {
 				);
 			}
 
-			//check isVerify
-			// if (!user.isVerified) {
-			// 	const exsitToken = await Token.findOne({
-			// 		userId: user._id,
-			// 	});
-
-			// 	if (exsitToken) {
-			// 		await exsitToken.deleteOne();
-			// 	}
-
-			// 	// send email verify
-			// 	const token = await new Token({
-			// 		userId: user._id,
-			// 		token: crypto.randomBytes(16).toString('hex'),
-			// 	}).save();
-
-			// 	const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
-			// 	const status = await sendEmailVerify(user.email, 'Verify account', link, user);
-			// 	if (!status) return res.status(500).json('Gửi email xác nhận thất bại. Vui lòng thử lại!!!');
-
-			// 	return responseError(res, 401, 'Tài khoản chưa được xác nhận. Vui lòng kiểm tra email!!!');
-			// }
 			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
 				return responseError(
@@ -545,12 +534,79 @@ class AuthoController {
 		}
 	}
 
+	// send OPT comfirm
+	async sendOTP(req, res, next) {
+		try {
+			// Tạo một bí mật ngẫu nhiên
+			const secret = speakeasy.generateSecret({ length: 20 });
+
+			// Tạo mã OTP
+			const otp = speakeasy.totp({
+				secret: secret.base32,
+				encoding: 'base32',
+			});
+
+			// save otp to redis set time expire 5m
+			await redisClient.set(`comfirm:${req.user._id}`, otp, 'EX', 60 * 5);
+
+			// Gửi mã OTP đến email
+			const status = await sendMailOTP(req.user.email, 'OTP Comfirm Set Password', otp, req.user);
+			// check status
+			if (!status) {
+				// delete in redis
+				await redisClient.del(`comfirm:${req.user._id}`);
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
+
+			res.json('Mã OTP đã được gửi qua email của bạn');
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
+			);
+		}
+	}
+
+	// send OTP verify
+	async sendOTPverify(req, res, next) {
+		try {
+			// Tạo một bí mật ngẫu nhiên
+			const secret = speakeasy.generateSecret({ length: 20 });
+
+			// Tạo mã OTP
+			const otp = speakeasy.totp({
+				secret: secret.base32,
+				encoding: 'base32',
+			});
+
+			// save otp to redis set time expire 5m
+			await redisClient.set(`verify:${req.user._id}`, otp, 'EX', 60 * 5);
+
+			// Gửi mã OTP đến email
+			const status = await sendMailOTP(req.user.email, 'OTP Verify Account', otp, req.user);
+			// check status
+			if (!status) {
+				// delete in redis
+				await redisClient.del(`verify:${req.user._id}`);
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
+
+			res.json('Mã OTP đã được gửi qua email của bạn');
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
+			);
+		}
+	}
+
 	// set password
 	async setPassword(req, res, next) {
 		try {
 			const schema = Joi.object({
 				newPassword: Joi.string().required(),
 				confirmPassword: Joi.string().required(),
+				otp: Joi.number().required(),
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
@@ -571,65 +627,24 @@ class AuthoController {
 			const salt = await bcrypt.genSalt(10);
 			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
-			// save hashedPassword to redis set time expire 5m
-			await redisClient.set(`password:${user._id}`, hashedPassword, 'EX', 60 * 5);
-
-			// send email verify
-			const token = await new Token({
-				userId: user._id,
-				token: crypto.randomBytes(16).toString('hex'),
-			}).save();
-
-			const link = `${hostServer}/auth/comfirm-set-password/${user._id}/${token.token}`;
-			const status = await sendMailComfirmSetPassword(user.email, 'Comfirm set password', link, user);
-			// check status
-			if (!status) {
-				// delete user and token
-				await user.deleteOne();
-				await token.deleteOne();
-				return responseError(res, 400, 'Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
+			// get opt from redis
+			const otp = await redisClient.get(`comfirm:${req.user._id}`);
+			if (!otp) {
+				return responseError(res, 400, 'Mã OTP đã hết hạn');
 			}
 
-			return res.status(200).json('Vuii lòng xác nhận đặt mật khẩu qua mail.');
-		} catch (error) {
-			console.log(error.message);
-			return next(
-				createError.InternalServerError(
-					`${error.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
-						req.body,
-						null,
-						2
-					)} `
-				)
-			);
-		}
-	}
-
-	// confirm set password
-	async confirmSetPassword(req, res, next) {
-		try {
-			const { userId, token } = req.params;
-			const user = await User.findById(userId);
-			if (!user) {
-				return responseError(res, 400, 'User không tồn tại!!!');
-			}
-			const tokenVerify = await Token.findOne({ userId: user._id, token });
-			if (!tokenVerify) {
-				return responseError(res, 400, 'Link xác nhận không hợp lệ!!!');
+			// verify opt
+			const isVerify = otp.toString() === req.body.otp.toString();
+			if (!isVerify) {
+				return responseError(res, 400, 'Mã OTP không đúng');
 			}
 
-			// get hashedPassword from redis
-			const hashedPassword = await redisClient.get(`password:${user._id}`);
-			if (!hashedPassword) {
-				return responseError(res, 400, 'Link xác nhận đã hết hạn!!!');
-			}
-
-			// update password
+			// save new password
 			user.password = hashedPassword;
 			await user.save();
-			redisClient.del(`${user._id}:tokens`); // delete all tokens for this account
-			await tokenVerify.deleteOne();
-			return res.redirect(`${hostClient}/auth/login`);
+			redisClient.del(`comfirm:${req.user._id}`); // delete otp
+
+			return res.status(200).json('Đặt mật khẩu thành công!!!');
 		} catch (error) {
 			console.log(error.message);
 			return next(

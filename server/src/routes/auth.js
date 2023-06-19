@@ -24,7 +24,8 @@ router.get(
 );
 
 router.get('/verify/:userId/:token', AuthoController.verify);
-router.get('/comfirm-set-password/:userId/:token', AuthoController.confirmSetPassword);
+router.get('/sendOTP-confirm', AuthoMiddleware.isAuth, AuthoController.sendOTP);
+router.get('/sendOTP-verify', AuthoMiddleware.isAuth, AuthoController.sendOTP);
 
 // REFRESH ACCESS_TOKEN
 router.post('/refresh', AuthoController.refreshToken);

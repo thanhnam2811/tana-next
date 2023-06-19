@@ -20,14 +20,17 @@ async function getAllPostWithPrivacy(listPosts, req) {
 						posts.push(post);
 					}
 				} else if (post.privacy.value === 'includes') {
-					if (!post.privacy.includes.some((user) => user._id == req.user._id)) {
+					if (
+						!post.privacy.includes.some((user) => user._id == req.user._id) &&
+						post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+					) {
 						post = null;
 						return;
 					}
 					posts.push(post);
 				} else if (post.privacy.value === 'excludes') {
 					if (
-						!post.privacy.excludes.some((user) => user._id == req.user._id) &&
+						!post.privacy.excludes.some((user) => user._id.toString() == req.user._id.toString()) &&
 						post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
 					) {
 						posts.push(post);
@@ -66,13 +69,16 @@ async function getPostWithPrivacy(post, req) {
 					return post;
 				}
 			} else if (post.privacy.value === 'includes') {
-				if (!post.privacy.includes.some((user) => user._id == req.user._id)) {
+				if (
+					!post.privacy.includes.some((user) => user._id.toString() == req.user._id.toString()) &&
+					post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+				) {
 					post = null;
 					return post;
 				}
 			} else if (post.privacy.value === 'excludes') {
 				if (
-					!post.privacy.excludes.some((user) => user._id == req.user._id) &&
+					!post.privacy.excludes.some((user) => user._id.toString() == req.user._id.toString()) &&
 					post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
 				) {
 					return post;
