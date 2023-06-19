@@ -39,7 +39,7 @@ router.put('/password', isAuth, UserController.updatePassword);
 router.put('/set-password', isAuth, UserController.setPassword);
 router.put('/:id/friend-request', isAuth, UserController.sendFriendRequest);
 router.put('/:id/accept-friend', isAuth, UserController.acceptFriendRequest);
-router.put('/:id/reject-friend', isAuth, UserController.rejectFriendRequest);
+router.put('/:id/reject-request', isAuth, UserController.rejectFriendRequest);
 router.put('/:id/unfriend', isAuth, UserController.unfriend);
 
 // DELETE

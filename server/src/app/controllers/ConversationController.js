@@ -280,7 +280,7 @@ class ConversationController {
 					newConversation.members.push({
 						user: req.user._id,
 						nickname: req.user.fullname,
-						role: 'admin',
+						role: 'member',
 						addedBy: req.user._id,
 					});
 					newConversation.creator = req.user._id;

@@ -4,7 +4,7 @@ const { eventName, notificationType } = require('../../socket/constant');
 const { populateNotification } = require('../Populate/Notification');
 
 async function notificationForFriends(post, user) {
-	const friendsOfAuthor = user.friends.map((friend) => friend.user);
+	const friendsOfAuthor = user.friends.map((friend) => friend.user._id);
 
 	const notification = await new Notification({
 		type: 'post',
