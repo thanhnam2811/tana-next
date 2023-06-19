@@ -43,7 +43,8 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {
-				window.socket.emit('login', authUser?._id); // login to socket
+				const accessToken = localStorage.getItem('accessToken');
+				window.socket.emit('login', accessToken); // login to socket
 			});
 			console.log('connected to socket');
 		}
