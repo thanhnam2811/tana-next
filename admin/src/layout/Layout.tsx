@@ -1,15 +1,15 @@
 import Icon, { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import {
-	Layout as AntdLayout,
 	Badge,
 	Breadcrumb,
 	Button,
 	Dropdown,
+	Layout as AntdLayout,
 	Menu,
 	MenuProps,
+	message,
 	Space,
 	Switch,
-	message,
 	theme,
 } from 'antd';
 import { useState } from 'react';
@@ -24,15 +24,15 @@ import {
 import { RiMoonFill, RiSunFill } from 'react-icons/ri';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styles from './styles/Layout.module.scss';
-import { useThemeStore } from '@theme/hooks';
+import { useTheme } from '@layout/hooks';
 import { getBreadcrumbItems, getLayoutMenuItems } from './utils';
-import { useAuthStore } from '@modules/auth/hooks';
+import { useAuth } from '@modules/auth/hooks';
 
 const { Sider, Header, Content } = AntdLayout;
 const menuItems = getLayoutMenuItems();
 
 export default function Layout() {
-	const { user, logout } = useAuthStore();
+	const { user, logout } = useAuth();
 	const isAuth = !!user;
 
 	const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function Layout() {
 	const [collapsed, setCollapsed] = useState(true);
 	const { token } = theme.useToken();
 	const { colorBgBase } = token;
-	const { mode, toggleTheme } = useThemeStore();
+	const { mode, toggleTheme } = useTheme();
 
 	if (!isAuth) return <Navigate to="/login" replace state={{ from: pathname }} />;
 

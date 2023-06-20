@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface ILayoutData {
 	path: string;
 	title: string;

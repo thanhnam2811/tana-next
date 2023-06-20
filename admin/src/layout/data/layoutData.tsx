@@ -3,8 +3,8 @@ import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/i
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { ILayoutData } from '@layout/types';
 
-import UserPage from '@modules/account/user/pages/UserPage';
-import AdminPage from '@modules/account/admin/pages/AdminPage';
+import UserPage from '@modules/user/pages/UserPage';
+import AdminPage from '@modules/admin/pages/AdminPage';
 import DashboardPage from '@modules/dashboard/pages/Dashboard';
 
 export const layoutData: ILayoutData[] = [

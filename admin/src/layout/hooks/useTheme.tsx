@@ -1,17 +1,14 @@
 import { create } from 'zustand';
-import { darkTheme, lightTheme } from '../data/theme.data';
-import { IThemeStore } from '../types/IThemeStore';
+import { ITheme } from '@layout/types';
 
-export const useThemeStore = create<IThemeStore>()((set) => ({
+export const useTheme = create<ITheme>()((set) => ({
 	mode: localStorage.getItem('theme') === 'dark' ? 'dark' : 'light',
-	theme: lightTheme,
 	toggleTheme: () => {
 		set((state) => {
 			localStorage.setItem('theme', state.mode === 'light' ? 'dark' : 'light');
 
 			return {
 				mode: state.mode === 'light' ? 'dark' : 'light',
-				theme: state.theme === lightTheme ? darkTheme : lightTheme,
 			};
 		});
 	},

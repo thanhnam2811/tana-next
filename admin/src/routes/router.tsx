@@ -1,7 +1,9 @@
 import Layout from '@layout/Layout';
 import { layoutData, layoutRoutes } from '@layout/data';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+
 import LoginPage from '@modules/auth/pages/LoginPage';
-import { Navigate, createBrowserRouter } from 'react-router-dom';
+import UserDetail from '@modules/user/pages/UserDetail.tsx';
 
 export const router = createBrowserRouter([
 	{
@@ -13,6 +15,20 @@ export const router = createBrowserRouter([
 				element: <Navigate to={layoutData[0].path} replace />,
 			},
 			...layoutRoutes,
+			{
+				path: 'account',
+				children: [
+					{
+						path: 'user',
+						children: [
+							{
+								path: ':id',
+								element: <UserDetail />,
+							},
+						],
+					},
+				],
+			},
 		],
 	},
 	{

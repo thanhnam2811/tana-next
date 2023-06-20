@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { ILoginParams, getProfileApi, loginApi } from '../api';
+import { getProfileApi, ILoginParams, loginApi } from '../api';
 import { IAuthStore } from '../types/IAuthStore';
 
-export const useAuthStore = create<IAuthStore>()((set) => ({
+export const useAuth = create<IAuthStore>()((set) => ({
 	user: null,
 
 	login: async (params: ILoginParams) => {

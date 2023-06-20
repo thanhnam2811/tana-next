@@ -1,10 +1,10 @@
 import { swrFetcher } from '@common/api';
-import { IPaginationResponse } from '@common/types/api.type';
 import { Button, Table, TableProps, Tooltip } from 'antd';
 import { useState } from 'react';
 import { IoRefresh } from 'react-icons/io5';
 import useSWR from 'swr';
 import styles from './Table.module.scss';
+import { IPaginationResponse } from '@common/types';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;

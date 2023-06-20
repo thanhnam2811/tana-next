@@ -1,5 +1,5 @@
-import { TableBase } from '@common/components/Table';
-import { Avatar, Button, Card } from 'antd';
+import { PageTableBase } from '@common/components/PageTableBase';
+import { Avatar } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { IMedia } from '@common/types';
@@ -28,20 +28,20 @@ const columns: ColumnType<UserType>[] = [
 	},
 ];
 
-export function UserTable() {
+export default function UserPage() {
 	const navigate = useNavigate();
 
-	const viewAll = () => {
-		navigate('/account/user');
-	};
-
 	return (
-		<Card title="Người dùng mới" extra={<Button onClick={viewAll}>Xem tất cả</Button>} bodyStyle={{ padding: 12 }}>
-			<TableBase<UserType>
-				endpoint="/admin/searchUser"
-				columns={columns}
-				pagination={{ position: [] }} // hide pagination
-			/>
-		</Card>
+		<PageTableBase<UserType>
+			header="Người dùng"
+			endpoint="/admin/searchUser"
+			columns={columns}
+			onRow={(record) => {
+				return {
+					style: { cursor: 'pointer' },
+					onClick: () => navigate(`/account/user/${record._id}`),
+				};
+			}}
+		/>
 	);
 }
