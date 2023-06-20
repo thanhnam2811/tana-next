@@ -3,16 +3,16 @@ import { UserType } from '@modules/user/types';
 import { Button, Card, Form, Input, List, Select, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FriendCard } from '../components';
-import { friendTypeList } from '../data';
-import { FriendType, IFriendFilter, RelationshipType } from '../types';
+import { IFriendFilter, RelationshipType } from '../types';
 
 interface Props {
-	type: FriendType;
+	api: string;
+	title?: string;
 }
 
-export function ListFriend({ type }: Props) {
+export function ListFriend({ api, title = 'Danh sách bạn bè' }: Props) {
 	const [filter, setFilter] = useState<IFriendFilter>({ sort: 'desc', gender: '' });
-	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/${type}`, params: filter, limit: 12 });
+	const friendFetcher = useFetcher<UserType>({ api, params: filter, limit: 12 });
 
 	const typingRef = useRef<null | ReturnType<typeof setTimeout>>(null);
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,11 +25,7 @@ export function ListFriend({ type }: Props) {
 	};
 
 	return (
-		<Card
-			title={friendTypeList.find((item) => item.type === type)?.title}
-			headStyle={{ padding: '0 16px' }}
-			bodyStyle={{ padding: 8 }}
-		>
+		<Card title={title} headStyle={{ padding: '0 16px' }} bodyStyle={{ padding: 8 }}>
 			<Space direction="vertical" style={{ width: '100%' }}>
 				<Input.Search placeholder="Tìm kiếm bạn bè" onChange={handleSearch} />
 

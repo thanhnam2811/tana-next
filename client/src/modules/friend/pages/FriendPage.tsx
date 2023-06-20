@@ -30,7 +30,10 @@ function FriendPage() {
 			</Layout.Sider>
 
 			<Layout.Content>
-				<ListFriend type={type} />
+				<ListFriend
+					title={friendTypeList.find((item) => item.type === type)?.title}
+					api={`users/searchUser/${type}`}
+				/>
 			</Layout.Content>
 		</>
 	);
