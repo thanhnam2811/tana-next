@@ -15,7 +15,6 @@ import { ConversationMessage } from './ConversationMessage';
 import { toast } from 'react-hot-toast';
 import { updateConversationApi } from '@modules/messages/api';
 import { ConversationProvider } from '@modules/messages/hooks';
-import Head from 'next/head';
 import SEO from '@common/components/SEO';
 
 interface Props {

@@ -4,7 +4,6 @@ import { withAuth } from '@modules/auth/components';
 import { CreatePost, ListPost } from '@modules/post/components';
 import { PostType } from '@modules/post/types';
 import { QuickContact, ShortCut } from '../components';
-import Head from 'next/head';
 import SEO from '@common/components/SEO';
 
 function HomePage() {

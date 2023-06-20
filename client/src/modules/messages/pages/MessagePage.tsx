@@ -9,7 +9,6 @@ import { HiPencilSquare } from 'react-icons/hi2';
 import { createConversationApi } from '../api';
 import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
 import { ConversationCreateType, ConversationType, MessageType } from '../types';
-import Head from 'next/head';
 import SEO from '@common/components/SEO';
 
 export const MessageContext = React.createContext<{

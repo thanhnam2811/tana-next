@@ -8,7 +8,6 @@ import Layout from '@layout/components';
 import useSWR from 'swr';
 import { ApiError, swrFetcher } from '@common/api';
 import { stringUtil, urlUtil } from '@common/utils';
-import Head from 'next/head';
 import SEO from '@common/components/SEO';
 
 interface Props {
