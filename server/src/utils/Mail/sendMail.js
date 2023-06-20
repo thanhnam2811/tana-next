@@ -22,7 +22,28 @@ const emailTemplateVerify = (link, name) => `
         </div>
     </div>
     `;
-
+const emailTemplateSendOTP = (otp, name) =>
+	`
+    <div style="background-color: #f5f5f5; padding: 20px 0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="./LogoTana.png" alt="logo" style="width: 100px; height: 100px;">
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">Xin chào ${name}</h1>
+                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Cảm ơn bạn đã đăng ký tài khoản của TaNa social netwrok.</p>
+                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Đây là mã OTP của bạn.</p>
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h4 style="background-color: #2e6da4; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">${otp}</h4>
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">Trân trọng,</p>
+                <p style="color: #333; font-size: 16px; margin-bottom: 10px;">&nbsp;TaNa social netwrok</p>
+            </div>
+        </div>
+    </div>
+    `;
 const emailTemplate = (link, name) => `<body
     marginheight="0"
     topmargin="0"
@@ -259,8 +280,39 @@ const sendEmailVerify = async (email, subject, link, user) => {
 	}
 };
 
+const sendMailOTP = async (email, subject, otp, user) => {
+	try {
+		const transporter = nodemailer.createTransport({
+			host: process.env.HOST,
+			service: process.env.SERVICE,
+			port: 587,
+			secure: true,
+			auth: {
+				user: process.env.USER,
+				pass: process.env.PASS,
+			},
+		});
+
+		await transporter.sendMail({
+			from: process.env.FROM,
+			to: email,
+			subject,
+			text: otp,
+			html: emailTemplateSendOTP(otp, user.fullname),
+		});
+		// return true if email sent successfully
+		console.log('email sent sucessfully');
+		return true;
+	} catch (error) {
+		// return false if email sent failed
+		console.log(error, 'email not sent');
+		return false;
+	}
+};
+
 module.exports = {
 	sendEmail,
 	sendEmailVerify,
 	isEmailValid,
+	sendMailOTP,
 };

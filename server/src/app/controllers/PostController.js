@@ -1,3 +1,5 @@
+/* eslint-disable no-lonely-if */
+/* eslint-disable no-else-return */
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
@@ -6,7 +8,7 @@ const { User } = require('../models/User');
 const Comment = require('../models/Comment');
 const React = require('../models/React');
 const { getListPost, getListData } = require('../../utils/Response/listData');
-const { getAllPostWithPrivacy } = require('../../utils/Privacy/Post');
+const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 const {
 	notificationForFriends,
 	notificationForTags,
@@ -478,6 +480,12 @@ class PostController {
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
+
+			const checkPrivacy = await getPostWithPrivacy(post, req);
+			if (!checkPrivacy) {
+				return next(createError.Forbidden('Bạn không có quyền xem bài viết này'));
+			}
+
 			// check if the user has reacted this post before
 			const listReactOfPost = await React.find({ post: req.params.id });
 			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user._id.toString());
@@ -769,7 +777,7 @@ class PostController {
 					path: 'lastestFiveComments',
 					populate: {
 						path: 'author',
-						select: '_id fullname profilePicture isOnline',
+						select: '_id fullname profilePicture isOnline friends',
 						populate: {
 							path: 'profilePicture',
 							select: '_id link',
@@ -778,7 +786,7 @@ class PostController {
 				})
 				.populate({
 					path: 'author',
-					select: '_id fullname profilePicture isOnline',
+					select: '_id fullname profilePicture isOnline friends',
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
@@ -818,8 +826,8 @@ class PostController {
 			let reactOfUser = 'none';
 
 			if (req.user) {
-				const posts = await getAllPostWithPrivacy([post], req);
-				if (posts.length === 0) {
+				const postPrivacy = await getPostWithPrivacy(post, req);
+				if (!postPrivacy) {
 					return res.status(403).json('Bạn không có quyền xem bài viết này');
 				}
 
@@ -840,8 +848,8 @@ class PostController {
 			return res.status(200).json(postObject);
 		} catch (err) {
 			console.error(err);
-			if (err.kind.toString() == 'ObjectId')
-				return next(createError.NotFound(`Post not found with ${req.params.id}`));
+			// if (err.kind.toString() == 'ObjectId')
+			// 	return next(createError.NotFound(`Post not found with ${req.params.id}`));
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(

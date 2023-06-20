@@ -61,11 +61,14 @@ class FileController {
 		try {
 			const file = await File.findById(req.params.id);
 			if (req.query.width && req.query.height) {
-				file.link = cloudinaryV2.url(file.public_id, {
+				const linkResize = cloudinaryV2.url(file.public_id, {
 					width: req.query.width,
 					height: req.query.height,
 					crop: 'scale',
 				});
+				if (linkResize) {
+					file.link = linkResize;
+				}
 			}
 			res.status(200).send(file);
 		} catch (error) {

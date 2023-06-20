@@ -1,3 +1,6 @@
+/* eslint-disable import/order */
+/* eslint-disable no-else-return */
+/* eslint-disable arrow-body-style */
 const axios = require('axios');
 const createError = require('http-errors');
 const Joi = require('joi');
@@ -144,13 +147,22 @@ class ConversationController {
 				conversation.members.splice(index, 1);
 				if (
 					adminOfConversation.length === 1 &&
-					adminOfConversation.user.toString() === req.user._id.toString()
+					adminOfConversation[0].user.toString() === req.user._id.toString()
 				) {
 					// set all members to admin
 					conversation.members.forEach((member) => {
 						member.role = 'admin';
 					});
 				}
+				// create message system
+				const messageSystem = new Message({
+					conversation: conversation._id,
+					text: `<b>${req.user.fullname}</b> đã rời khỏi cuộc hội thoại này`,
+					isSystem: true,
+				}).save();
+
+				// set lastest message
+				conversation.lastest_message = messageSystem._id;
 				await conversation.save();
 				return res.status(200).send('Bạn đã rời khỏi cuộc trò chuyện này');
 			} else {
@@ -805,7 +817,7 @@ class ConversationController {
 							(member) => member.user.toString() === req.body.userID.toString()
 						);
 
-						//user cannot update role for self
+						// user cannot update role for self
 						if (req.body.userID.toString() === req.user._id.toString()) {
 							return responseError(res, 403, 'Bạn không thể thay đổi vai trò của chính mình');
 						}
@@ -971,7 +983,7 @@ class ConversationController {
 						);
 					});
 			} else {
-				return responseError(res, 403, err.message ?? 'Bạn không nằmm trong cuộc hội thoại này');
+				return responseError(res, 403, 'Bạn không nằmm trong cuộc hội thoại này');
 			}
 		} catch (err) {
 			console.log(err);
