@@ -8,4 +8,7 @@ router.post('/', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleController.
 // update a role
 router.put('/:id', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleController.update);
 
+// get all roles
+router.get('/', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleController.getAll);
+
 module.exports = router;
