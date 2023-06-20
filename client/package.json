@@ -7,7 +7,8 @@
 		"prebuild": "npx eslint --ext .js,.jsx,.ts,.tsx,.json --fix .",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"analyze": "cross-env ANALYZE=true next build"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.1",
@@ -52,6 +53,7 @@
 		"zustand": "^4.3.8"
 	},
 	"devDependencies": {
+		"@next/bundle-analyzer": "^13.4.6",
 		"@testing-library/jest-dom": "^5.16.5",
 		"@testing-library/react": "^13.3.0",
 		"@testing-library/user-event": "^13.5.0",
@@ -64,6 +66,7 @@
 		"@types/sanitize-html": "^2.9.0",
 		"@typescript-eslint/eslint-plugin": "^5.54.1",
 		"@typescript-eslint/parser": "^5.54.1",
+		"cross-env": "^7.0.3",
 		"eslint": "^8.36.0",
 		"eslint-config-next": "13.2.4",
 		"eslint-config-prettier": "^8.7.0",

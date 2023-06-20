@@ -1,10 +1,17 @@
 import { useFetcher } from '@common/hooks';
 import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
-import { CreatePost, ListPost } from '@modules/post/components';
 import { PostType } from '@modules/post/types';
-import { QuickContact, ShortCut } from '../components';
 import SEO from '@common/components/SEO';
+import dynamic from 'next/dynamic';
+
+// import { CreatePost, ListPost } from '@modules/post/components';
+const CreatePost = dynamic(() => import('@modules/post/components').then((mod) => mod.CreatePost));
+const ListPost = dynamic(() => import('@modules/post/components').then((mod) => mod.ListPost));
+
+// import { QuickContact, ShortCut } from '@modules/home/components';
+const QuickContact = dynamic(() => import('@modules/home/components').then((mod) => mod.QuickContact));
+const ShortCut = dynamic(() => import('@modules/home/components').then((mod) => mod.ShortCut));
 
 function HomePage() {
 	const postFetch = useFetcher<PostType>({ api: 'posts/home' });
