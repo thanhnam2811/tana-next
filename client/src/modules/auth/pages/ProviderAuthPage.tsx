@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks';
 import { authProviders } from '@modules/auth/data';
+import SEO from '@common/components/SEO';
 
 const ProviderAuthPage = () => {
 	const router = useRouter();
@@ -51,15 +52,19 @@ const ProviderAuthPage = () => {
 	}, [router.isReady]);
 
 	return (
-		<div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-			<Card>
-				<Card.Meta
-					description={<Spin />}
-					title={`Đang đăng nhập với ${provider?.name}`}
-					avatar={<Avatar src={provider?.icon} />}
-				/>
-			</Card>
-		</div>
+		<>
+			<SEO title={`Đăng nhập với ${provider?.name}`} robot />
+
+			<div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				<Card>
+					<Card.Meta
+						description={<Spin />}
+						title={`Đang đăng nhập với ${provider?.name}`}
+						avatar={<Avatar src={provider?.icon} />}
+					/>
+				</Card>
+			</div>
+		</>
 	);
 };
 

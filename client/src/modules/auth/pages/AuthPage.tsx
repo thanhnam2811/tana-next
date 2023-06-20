@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import Lottie from 'react-lottie-player';
 import { LoginForm, RegisterForm } from '../components';
 import { useAuth } from '../hooks';
+import SEO from '@common/components/SEO';
 
 function AuthPage() {
 	const router = useRouter();
@@ -21,21 +22,25 @@ function AuthPage() {
 	}, [router.isReady, authUser]);
 
 	return (
-		<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
-			<Col span={12} style={{ height: 'fit-content' }}>
-				<Lottie
-					path="https://assets6.lottiefiles.com/packages/lf20_xd8pnngo.json"
-					speed={1}
-					loop
-					play
-					style={{ width: '100%', height: '100%' }}
-				/>
-			</Col>
+		<>
+			<SEO title={isLogin ? 'Đăng nhập' : 'Đăng ký'} robot />
 
-			<Col span={12} style={{ height: 'fit-content' }}>
-				{isLogin ? <LoginForm /> : <RegisterForm />}
-			</Col>
-		</Row>
+			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
+				<Col span={12} style={{ height: 'fit-content' }}>
+					<Lottie
+						path="https://assets6.lottiefiles.com/packages/lf20_xd8pnngo.json"
+						speed={1}
+						loop
+						play
+						style={{ width: '100%', height: '100%' }}
+					/>
+				</Col>
+
+				<Col span={12} style={{ height: 'fit-content' }}>
+					{isLogin ? <LoginForm /> : <RegisterForm />}
+				</Col>
+			</Row>
+		</>
 	);
 }
 

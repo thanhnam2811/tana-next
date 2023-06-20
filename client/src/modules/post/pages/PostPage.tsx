@@ -9,6 +9,7 @@ import useSWR from 'swr';
 import { ApiError, swrFetcher } from '@common/api';
 import { stringUtil, urlUtil } from '@common/utils';
 import Head from 'next/head';
+import SEO from '@common/components/SEO';
 
 interface Props {
 	post?: PostType;
@@ -96,25 +97,15 @@ export function PostSEO({ post, id, error }: SEOProps) {
 		}
 	}
 
-	let pictureUrl = urlUtil.getFullUrl('/logo.png');
-	if (post?.media[0]?.link) {
-		pictureUrl = post?.media[0]?.link;
-	}
-
 	return (
-		<Head>
-			<meta name="description" content={description} />
-			<link rel="canonical" href={`/post/${post?._id}`} />
-
-			{/* Social media meta tags */}
-			<meta property="og:type" content="website" />
-			<meta property="og:title" content={title} />
-			<meta property="og:description" content={description} />
-			<meta property="og:url" content={link} />
-			<meta property="og:image" content={pictureUrl} />
-
-			{/* Title */}
-			<title>{title}</title>
-		</Head>
+		<SEO
+			title={title}
+			description={description}
+			url={link}
+			images={post?.media.map((media) => ({
+				url: media.link,
+			}))}
+			robot={post?.privacy.value === 'public'}
+		/>
 	);
 }

@@ -5,14 +5,19 @@ import { useRouter } from 'next/router';
 import { ListFriend } from '../components';
 import { friendTypeList } from '../data';
 import { FriendType } from '../types';
+import SEO from '@common/components/SEO';
 
 function FriendPage() {
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
+	const title = friendTypeList.find((item) => item.type === type)?.title;
+
 	const changeType = (type: FriendType) => router.push({ pathname: router.pathname, query: { type } });
 
 	return (
 		<>
+			<SEO title={title} />
+
 			<Layout.Sider align="left">
 				<Card title="Danh sách" headStyle={{ padding: '0 16px' }} bodyStyle={{ padding: 8 }}>
 					<Menu
@@ -30,10 +35,7 @@ function FriendPage() {
 			</Layout.Sider>
 
 			<Layout.Content>
-				<ListFriend
-					title={friendTypeList.find((item) => item.type === type)?.title}
-					api={`users/searchUser/${type}`}
-				/>
+				<ListFriend title={title} api={`users/searchUser/${type}`} />
 			</Layout.Content>
 		</>
 	);

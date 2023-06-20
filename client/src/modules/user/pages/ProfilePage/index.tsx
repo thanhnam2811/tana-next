@@ -6,11 +6,12 @@ import { UserProvider } from '@modules/user/hooks';
 import { UserType } from '@modules/user/types';
 import { Card, Menu, Spin } from 'antd';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { HiInformationCircle, HiShieldExclamation, HiUsers, HiViewGrid } from 'react-icons/hi';
 import { IconType } from 'react-icons/lib';
 import useSWR from 'swr';
 import { FriendTab, InfoTab, PostTab, SecurityTab } from './tabs';
+import SEO from '@common/components/SEO';
 
 type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security';
 
@@ -60,19 +61,25 @@ function Index() {
 
 	if (!user)
 		return (
-			<Layout.Content
-				style={{
-					display: 'flex',
-					justifyContent: 'center',
-					alignItems: 'center',
-				}}
-			>
-				{isLoading ? <Spin size="large" /> : 'Không tìm thấy người dùng'}
-			</Layout.Content>
+			<>
+				<SEO title="Không tìm thấy người dùng" />
+
+				<Layout.Content
+					style={{
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					{isLoading ? <Spin size="large" /> : 'Không tìm thấy người dùng'}
+				</Layout.Content>
+			</>
 		);
 
 	return (
 		<UserProvider value={{ user }}>
+			<SEO title={[user.fullname, tabItem?.label].filter(Boolean).join(' - ')} />
+
 			<Layout.Sider align="left">
 				<Card bodyStyle={{ padding: 8 }}>
 					<Menu

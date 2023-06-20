@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Lottie from 'react-lottie-player';
 import { resetPasswordApi } from '../api';
+import SEO from '@common/components/SEO';
 
 const ResetPasswordPage = () => {
 	const router = useRouter();
@@ -32,83 +33,90 @@ const ResetPasswordPage = () => {
 		setLoading(false);
 	};
 	return (
-		<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
-			<Col span={12} style={{ height: 'fit-content' }}>
-				<Lottie
-					path="https://assets3.lottiefiles.com/private_files/lf30_GjhcdO.json"
-					speed={1}
-					loop
-					play
-					style={{ width: '100%', height: '100%' }}
-				/>
-			</Col>
+		<>
+			<SEO title="Đặt lại mật khẩu" robot />
 
-			<Card
-				title={
-					<Typography.Title level={2} style={{ color: token.colorPrimary, margin: 0, textAlign: 'center' }}>
-						Đặt lại mật khẩu
-					</Typography.Title>
-				}
-				style={{ width: 480, margin: 'auto' }}
-			>
-				<Form layout="vertical" form={form} onFinish={onFinish}>
-					<Form.Item
-						label="Mật khẩu"
-						name="password"
-						rules={[
-							{
-								required: true,
-								message: 'Vui lòng nhập mật khẩu!',
-							},
-							{
-								min: 6,
-								message: 'Mật khẩu phải có ít nhất 6 ký tự!',
-							},
-						]}
-					>
-						<Input.Password />
-					</Form.Item>
+			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
+				<Col span={12} style={{ height: 'fit-content' }}>
+					<Lottie
+						path="https://assets3.lottiefiles.com/private_files/lf30_GjhcdO.json"
+						speed={1}
+						loop
+						play
+						style={{ width: '100%', height: '100%' }}
+					/>
+				</Col>
 
-					<Form.Item
-						label="Nhập lại mật khẩu"
-						name="confirmPassword"
-						rules={[
-							{
-								required: true,
-								message: 'Vui lòng nhập lại mật khẩu!',
-							},
-							{
-								validator: (_, value) => {
-									if (value === form.getFieldValue('password')) {
-										return Promise.resolve();
-									}
-
-									return Promise.reject(new Error('Mật khẩu không khớp!'));
-								},
-							},
-						]}
-					>
-						<Input.Password />
-					</Form.Item>
-
-					<Form.Item>
-						<Button type="primary" block loading={loading}>
+				<Card
+					title={
+						<Typography.Title
+							level={2}
+							style={{ color: token.colorPrimary, margin: 0, textAlign: 'center' }}
+						>
 							Đặt lại mật khẩu
-						</Button>
-					</Form.Item>
+						</Typography.Title>
+					}
+					style={{ width: 480, margin: 'auto' }}
+				>
+					<Form layout="vertical" form={form} onFinish={onFinish}>
+						<Form.Item
+							label="Mật khẩu"
+							name="password"
+							rules={[
+								{
+									required: true,
+									message: 'Vui lòng nhập mật khẩu!',
+								},
+								{
+									min: 6,
+									message: 'Mật khẩu phải có ít nhất 6 ký tự!',
+								},
+							]}
+						>
+							<Input.Password />
+						</Form.Item>
 
-					<Divider>Hoặc</Divider>
+						<Form.Item
+							label="Nhập lại mật khẩu"
+							name="confirmPassword"
+							rules={[
+								{
+									required: true,
+									message: 'Vui lòng nhập lại mật khẩu!',
+								},
+								{
+									validator: (_, value) => {
+										if (value === form.getFieldValue('password')) {
+											return Promise.resolve();
+										}
 
-					<Link href={`/auth/login`} style={{ float: 'right' }}>
-						<Button type="primary">Đăng nhập</Button>
-					</Link>
+										return Promise.reject(new Error('Mật khẩu không khớp!'));
+									},
+								},
+							]}
+						>
+							<Input.Password />
+						</Form.Item>
 
-					<Link href={`/auth/register`} style={{ float: 'left' }}>
-						<Button>Đăng ký</Button>
-					</Link>
-				</Form>
-			</Card>
-		</Row>
+						<Form.Item>
+							<Button type="primary" block loading={loading}>
+								Đặt lại mật khẩu
+							</Button>
+						</Form.Item>
+
+						<Divider>Hoặc</Divider>
+
+						<Link href={`/auth/login`} style={{ float: 'right' }}>
+							<Button type="primary">Đăng nhập</Button>
+						</Link>
+
+						<Link href={`/auth/register`} style={{ float: 'left' }}>
+							<Button>Đăng ký</Button>
+						</Link>
+					</Form>
+				</Card>
+			</Row>
+		</>
 	);
 };
 

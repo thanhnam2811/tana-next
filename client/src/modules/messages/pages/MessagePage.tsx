@@ -10,6 +10,7 @@ import { createConversationApi } from '../api';
 import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
 import { ConversationCreateType, ConversationType, MessageType } from '../types';
 import Head from 'next/head';
+import SEO from '@common/components/SEO';
 
 export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
@@ -66,9 +67,7 @@ function MessagesPage() {
 
 	return (
 		<>
-			<Head>
-				<title>TaNa - Tin nhắn</title>
-			</Head>
+			<SEO title="Tin nhắn" />
 
 			<Layout.Sider align="left">
 				<Card

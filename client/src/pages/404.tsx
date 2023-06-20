@@ -3,15 +3,13 @@ import { Button, Card } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Lottie from 'react-lottie-player';
-import Head from 'next/head';
+import SEO from '@common/components/SEO';
 
 function NotFoundPage() {
 	const router = useRouter();
 	return (
 		<>
-			<Head>
-				<title>404 - Không tìm thấy trang</title>
-			</Head>
+			<SEO title="404 - Không tìm thấy trang" />
 
 			<div
 				style={{

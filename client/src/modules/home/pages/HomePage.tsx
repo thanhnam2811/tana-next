@@ -4,12 +4,16 @@ import { withAuth } from '@modules/auth/components';
 import { CreatePost, ListPost } from '@modules/post/components';
 import { PostType } from '@modules/post/types';
 import { QuickContact, ShortCut } from '../components';
+import Head from 'next/head';
+import SEO from '@common/components/SEO';
 
 function HomePage() {
 	const postFetch = useFetcher<PostType>({ api: 'posts/home' });
 
 	return (
 		<>
+			<SEO title="Trang chủ" />
+
 			<Layout.Sider align="left">
 				<ShortCut />
 			</Layout.Sider>
