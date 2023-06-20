@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
-import { App, Button, Card, Dropdown, MenuProps, Popconfirm, theme, Tooltip, Typography } from 'antd';
+import { Button, Card, Dropdown, MenuProps, Popconfirm, theme, Tooltip, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { HiDotsHorizontal } from 'react-icons/hi';
@@ -14,8 +14,8 @@ import {
 	HiXMark,
 } from 'react-icons/hi2';
 import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../data';
-import { FriendType, RelationshipType } from '../types';
-import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
+import { FriendType } from '../types';
+import { requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { createConversationApi } from '@modules/messages/api';
@@ -28,7 +28,6 @@ interface Props {
 
 export function FriendCard({ user }: Props) {
 	const { token } = theme.useToken();
-	const { modal } = App.useApp();
 
 	const { authUser } = useAuth();
 	const isAuthUser = authUser?._id === user._id;
