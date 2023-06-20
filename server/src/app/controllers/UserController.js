@@ -902,8 +902,6 @@ class UserController {
 						$or: [
 							{ fullname: { $regex: req.query.key, $options: 'i' } },
 							{ email: { $regex: req.query.key, $options: 'i' } },
-							{ city: { $regex: req.query.key, $options: 'i' } },
-							{ from: { $regex: req.query.key, $options: 'i' } },
 						],
 					},
 				});

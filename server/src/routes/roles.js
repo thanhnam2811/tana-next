@@ -11,4 +11,7 @@ router.put('/:id', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleControlle
 // get all roles
 router.get('/', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleController.getAll);
 
+// delete a role
+router.delete('/:id', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, RoleController.delete);
+
 module.exports = router;
