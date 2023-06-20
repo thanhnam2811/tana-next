@@ -7,7 +7,7 @@ import { PostType } from '../types';
 import Layout from '@layout/components';
 import useSWR from 'swr';
 import { ApiError, swrFetcher } from '@common/api';
-import { stringUtil, urlUtil } from '@common/utils';
+import { dateUtil, stringUtil, urlUtil } from '@common/utils';
 import SEO from '@common/components/SEO';
 
 interface Props {
@@ -105,6 +105,32 @@ export function PostSEO({ post, id, error }: SEOProps) {
 				url: media.link,
 			}))}
 			robot={post?.privacy.value === 'public'}
-		/>
+		>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify({
+						'@context': 'https://schema.org',
+						'@type': 'Article',
+						headline: title,
+						image: post?.media.map((media) => media.link),
+						author: {
+							'@type': 'Person',
+							name: post?.author.fullname,
+						},
+						publisher: {
+							'@type': 'Organization',
+							name: 'TaNa - Kết nối và sáng tạo',
+							logo: {
+								'@type': 'ImageObject',
+								url: '/logo.png',
+							},
+						},
+						datePublished: dateUtil.formatDate(post?.createdAt, 'YYYY-MM-DD'),
+						dateModified: dateUtil.formatDate(post?.updatedAt, 'YYYY-MM-DD'),
+					}),
+				}}
+			/>
+		</SEO>
 	);
 }
