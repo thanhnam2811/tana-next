@@ -61,7 +61,7 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 	const [data, setData] = useState<T[]>(resData);
 	useEffect(() => {
 		if (!validating) {
-			const isSame = resData.every((item, index) => item._id === data[index]?._id);
+			const isSame = resData.every((item, index) => JSON.stringify(item) === JSON.stringify(data[index]));
 			if (!isSame) setData(resData);
 		}
 	}, [validating]);
