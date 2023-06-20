@@ -1,5 +1,7 @@
 import { Head, Html, Main, NextScript } from 'next/document';
 import SEO from '@common/components/SEO';
+import Script from 'next/script';
+import React from 'react';
 
 export default function Document() {
 	return (
@@ -10,7 +12,7 @@ export default function Document() {
 				href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap"
 				rel="stylesheet"
 			/>
-			<script async src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" />
+			<Script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" />
 
 			<SEO />
 
