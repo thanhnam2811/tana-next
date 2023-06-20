@@ -66,7 +66,26 @@ class AuthoController {
 				},
 			}).save();
 
-			res.status(200).json(newUser);
+			const dataToken = {
+				userId: newUser._id,
+				role: newUser.role.name,
+			};
+
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
+
+			if (!accessToken) {
+				return responseError(res, 401, 'Đăng ký không thành công, vui lòng thử lại.');
+			}
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
+			newUser.refreshToken = refreshToken;
+			await newUser.save();
+
+			res.status(200).json({
+				msg: 'Đăng ký thành công.',
+				accessToken,
+				refreshToken,
+				newUser,
+			});
 		} catch (err) {
 			if (err.code === 11000) {
 				return responseError(res, 400, 'Email đã tồn tại!');
