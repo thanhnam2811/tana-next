@@ -3,7 +3,7 @@ import { UserType } from '@modules/user/types';
 import { Button, Card, Form, Input, List, Select, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FriendCard } from '../components';
-import { IFriendFilter, RelationshipType } from '../types';
+import { IFriendFilter } from '../types';
 
 interface Props {
 	api: string;
