@@ -1,5 +1,7 @@
+/* eslint-disable camelcase */
 const axios = require('axios');
 const webhook_url = process.env.WEBHOOK_URL;
+
 exports.sendNotificationToBotty = async (error, log) => {
 	try {
 		let slackbody;
