@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
-import { App, Button, Card, Dropdown, MenuProps, theme, Tooltip, Typography } from 'antd';
+import { App, Button, Card, Dropdown, MenuProps, Popconfirm, theme, Tooltip, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { HiDotsHorizontal } from 'react-icons/hi';
@@ -20,13 +20,13 @@ import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { createConversationApi } from '@modules/messages/api';
 import { useAuth } from '@modules/auth/hooks';
+import { useState } from 'react';
 
 interface Props {
 	user: UserType;
-	onUpdateRelationship?: (relationship: RelationshipType) => void;
 }
 
-export function FriendCard({ user, onUpdateRelationship }: Props) {
+export function FriendCard({ user }: Props) {
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
 
@@ -35,7 +35,101 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
-	const relationship = user.relationship || friendRelationshipMap[type] || 'none';
+	const _relationship = user.relationship || friendRelationshipMap[type] || 'none';
+	const [relationship, setRelationship] = useState(_relationship);
+	const [loading, setLoadingState] = useState<{ [key: string]: boolean }>({});
+	const setLoading = (key: string, value: boolean) => setLoadingState((prev) => ({ ...prev, [key]: value }));
+
+	const handleRequestFriend = async () => {
+		const toastId = toast.loading('Đang gửi lời mời kết bạn...');
+		setLoading('request', true);
+
+		try {
+			await requestFriendApi(user._id);
+			toast.success('Gửi lời mời kết bạn thành công!', { id: toastId });
+			setRelationship('sent');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+
+		setLoading('request', false);
+	};
+
+	const handleUnfriend = async () => {
+		const toastId = toast.loading('Đang hủy kết bạn...');
+		setLoading('unfriend', true);
+
+		try {
+			await unFriendApi(user._id);
+			toast.success('Hủy kết bạn thành công!', { id: toastId });
+			setRelationship('none');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+
+		setLoading('unfriend', false);
+	};
+
+	const handleChat = async () => {
+		const toastId = toast.loading('Đang chuyển hướng đến trang nhắn tin...');
+		setLoading('chat', true);
+
+		try {
+			const created = await createConversationApi({ members: [{ user: user._id }] });
+			await router.push(`/messages?id=${created._id}`);
+
+			toast.dismiss(toastId);
+		} catch (error) {
+			toast('Có lỗi xảy ra, vui lòng thử lại sau', { id: toastId });
+		}
+
+		setLoading('chat', false);
+	};
+
+	const handleAcceptFriend = async () => {
+		const toastId = toast.loading('Đang xác nhận lời mời kết bạn...');
+		setLoading('accept', true);
+
+		try {
+			await requestFriendApi(user._id);
+			toast.success('Xác nhận lời mời kết bạn thành công! Bạn bè với nhau rồi đó!', { id: toastId });
+			setRelationship('friend');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+
+		setLoading('accept', false);
+	};
+
+	const handleRejectFriend = async () => {
+		const toastId = toast.loading('Đang từ chối lời mời kết bạn...');
+		setLoading('reject', true);
+
+		try {
+			await requestFriendApi(user._id);
+			toast.success('Từ chối lời mời kết bạn thành công!', { id: toastId });
+			setRelationship('none');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+
+		setLoading('reject', false);
+	};
+
+	const handleCancelRequestFriend = async () => {
+		const toastId = toast.loading('Đang hủy lời mời kết bạn...');
+		setLoading('cancel', true);
+
+		try {
+			await requestFriendApi(user._id); // Request friend again to cancel
+			toast.success('Hủy lời mời kết bạn thành công!', { id: toastId });
+			setRelationship('none');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+
+		setLoading('cancel', false);
+	};
 
 	const dropdownItems: MenuProps['items'] = [
 		{
@@ -45,119 +139,63 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 		},
 	];
 
-	const handleUnfriend = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Hủy kết bạn với <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Sau khi hủy kết bạn, nếu muốn kết bạn lại, bạn cần phải chờ <strong>{user.fullname}</strong> chấp
-					nhận lời mời kết bạn của bạn.
-				</span>
-			),
-			okText: 'Hủy kết bạn',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await unFriendApi(user._id);
-				toast.success('Hủy kết bạn thành công');
-				onUpdateRelationship?.('none');
-			},
-		});
-
-	const handleCancelRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Hủy lời mời kết bạn với <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Sau khi hủy lời mời kết bạn, bạn có thể gửi lại lời mời kết bạn cho <strong>{user.fullname}</strong>
-					.
-				</span>
-			),
-			okText: 'Hủy lời mời',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await requestFriendApi(user._id);
-				toast.success('Hủy lời mời kết bạn thành công');
-				onUpdateRelationship?.('none');
-			},
-		});
-
-	const handleAcceptRequest = async () => {
-		await acceptFriendApi(user._id);
-		toast.success('Chấp nhận lời mời kết bạn thành công');
-		onUpdateRelationship?.('friend');
-	};
-
-	const handleRejectRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Từ chối lời mời kết bạn từ <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Nếu muốn kết bạn với <strong>{user.fullname}</strong> sau này, bạn cần gửi lại lời mời kết bạn.
-				</span>
-			),
-			okText: 'Từ chối',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await rejectFriendApi(user._id);
-				toast.success('Từ chối lời mời kết bạn thành công');
-				onUpdateRelationship?.('none');
-			},
-		});
-
-	const handleSendRequest = async () => {
-		await requestFriendApi(user._id);
-		toast.success('Gửi lời mời kết bạn thành công');
-		onUpdateRelationship?.('sent');
-	};
-
 	switch (relationship) {
 		case 'friend':
 			dropdownItems.unshift({
 				key: 'unfriend',
 				icon: <HiUserMinus />,
-				label: 'Hủy kết bạn',
 				danger: true,
-				onClick: handleUnfriend,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn hủy kết bạn?"
+						okText="Hủy kết bạn"
+						cancelText="Thoát"
+						onConfirm={handleUnfriend}
+					>
+						Hủy kết bạn
+					</Popconfirm>
+				),
 			});
 			break;
 		case 'sent':
 			dropdownItems.unshift({
 				key: 'cancel',
 				icon: <HiXMark />,
-				label: 'Hủy lời mời',
 				danger: true,
-				onClick: handleCancelRequest,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn hủy lời mời kết bạn?"
+						okText="Hủy lời mời"
+						cancelText="Thoát"
+						onConfirm={handleCancelRequestFriend}
+					>
+						Hủy lời mời
+					</Popconfirm>
+				),
 			});
 			break;
 		case 'received':
 			dropdownItems.unshift({
 				key: 'decline',
 				icon: <HiXMark />,
-				label: 'Từ chối lời mời',
 				danger: true,
-				onClick: handleRejectRequest,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn từ chối lời mời kết bạn?"
+						okText="Từ chối"
+						cancelText="Thoát"
+						onConfirm={handleRejectFriend}
+					>
+						Từ chối
+					</Popconfirm>
+				),
 			});
 
 			dropdownItems.unshift({
 				key: 'accept',
 				icon: <HiArrowDownOnSquareStack />,
 				label: 'Chấp nhận lời mời',
-				onClick: handleAcceptRequest,
+				onClick: handleAcceptFriend,
 			});
 			break;
 		case 'none':
@@ -165,19 +203,10 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 				key: 'add',
 				icon: <HiUserPlus />,
 				label: 'Kết bạn',
-				onClick: handleSendRequest,
+				onClick: handleRequestFriend,
 			});
 			break;
 	}
-
-	const handleSendMsg = async () => {
-		try {
-			const created = await createConversationApi({ members: [{ user: user._id }] });
-			await router.push(`/messages?id=${created._id}`);
-		} catch (error) {
-			toast('Có lỗi xảy ra, vui lòng thử lại sau');
-		}
-	};
 
 	return (
 		<Card
@@ -198,10 +227,19 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 					</Link>
 				</Tooltip>,
 				<Tooltip key="message" title="Nhắn tin">
-					<Button icon={<HiChatBubbleOvalLeft />} onClick={handleSendMsg} disabled={isAuthUser} />
+					<Button
+						icon={<HiChatBubbleOvalLeft />}
+						onClick={handleChat}
+						disabled={isAuthUser}
+						loading={loading.chat}
+					/>
 				</Tooltip>,
-				<Dropdown key="more" menu={{ items: dropdownItems }} arrow disabled={isAuthUser}>
-					<Button icon={<HiDotsHorizontal />} disabled={isAuthUser} />
+				<Dropdown key="more" menu={{ items: dropdownItems }} arrow disabled={isAuthUser} trigger={['click']}>
+					<Button
+						icon={<HiDotsHorizontal />}
+						disabled={isAuthUser}
+						loading={Object.keys(loading).some((item) => item !== 'chat' && loading[item])} // loading not include chat
+					/>
 				</Dropdown>,
 			]}
 			bodyStyle={{ padding: 12 }}

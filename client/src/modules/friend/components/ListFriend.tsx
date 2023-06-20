@@ -74,15 +74,11 @@ export function ListFriend({ api, title = 'Danh sách bạn bè' }: Props) {
 						)
 					}
 					grid={{ gutter: 16, column: 3 }}
-					renderItem={(user) => {
-						const handleUpdateRelationship = (relationship: RelationshipType) =>
-							friendFetcher.updateData(user._id, { ...user, relationship });
-						return (
-							<List.Item>
-								<FriendCard user={user} onUpdateRelationship={handleUpdateRelationship} />
-							</List.Item>
-						);
-					}}
+					renderItem={(user) => (
+						<List.Item>
+							<FriendCard user={user} />
+						</List.Item>
+					)}
 				/>
 			</Space>
 		</Card>
