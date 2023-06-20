@@ -5,6 +5,8 @@ import { IUseAuth } from '../types';
 export const useAuth = create<IUseAuth>()((set, get) => ({
 	authUser: null,
 
+	setAuthUser: (user) => set({ authUser: user }),
+
 	login: async (data) => {
 		// Login by token
 		if (!data) {

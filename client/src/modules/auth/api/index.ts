@@ -6,3 +6,4 @@ export * from './resetPassword.api';
 export * from './updateProfile.api';
 export * from './changePassword.api';
 export * from './setPassword.api';
+export * from './sendOtpSetPassword.api';
