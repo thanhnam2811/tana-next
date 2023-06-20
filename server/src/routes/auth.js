@@ -23,7 +23,6 @@ router.get(
 	AuthoController.loginGithub
 );
 
-router.get('/verify/:userId/:token', AuthoController.verify);
 router.get('/sendOTP-confirm', AuthoMiddleware.isAuth, AuthoController.sendOTP);
 router.get('/sendOTP-verify', AuthoMiddleware.isAuth, AuthoController.sendOTP);
 

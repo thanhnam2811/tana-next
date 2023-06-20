@@ -280,7 +280,7 @@ const sendEmailVerify = async (email, subject, link, user) => {
 	}
 };
 
-const sendMailOTP = async (email, subject, otp, user) => {
+const sendMailOTP = async (email, subject, otp, name) => {
 	try {
 		const transporter = nodemailer.createTransport({
 			host: process.env.HOST,
@@ -298,7 +298,7 @@ const sendMailOTP = async (email, subject, otp, user) => {
 			to: email,
 			subject,
 			text: otp,
-			html: emailTemplateSendOTP(otp, user.fullname),
+			html: emailTemplateSendOTP(otp, name),
 		});
 		// return true if email sent successfully
 		console.log('email sent sucessfully');

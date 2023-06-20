@@ -17,7 +17,6 @@ const { responseError } = require('../../utils/Response/error');
 const speakeasy = require('speakeasy');
 
 const hostClient = process.env.HOST_CLIENT;
-const hostServer = process.env.HOST_SERVER;
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
 const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE;
@@ -34,18 +33,23 @@ class AuthoController {
 				gender: Joi.object({
 					value: Joi.string().valid('male', 'female', 'other').required(),
 				}),
+				otp: Joi.number().required(),
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return responseError(res, 400, error.details[0].message);
 			}
 
-			// const { valid, reason, validators } = await isEmailValid(req.body.email);
+			// get OTP from redis
+			const otp = await redisClient.get(`verify:${req.body.email}`);
+			if (!otp) {
+				return responseError(res, 400, 'OTP không tồn tại!');
+			}
 
-			// if (!valid) return res.status(400).send({
-			// 	message: "Vui lòng kiểm tra lại email của bạn!!! Email không hợp lệ",
-			// 	reason: validators[reason].reason
-			// })
+			// check OTP
+			if (req.body.otp !== otp) {
+				return responseError(res, 400, 'OTP không chính xác!');
+			}
 
 			// generate new password
 			const salt = await bcrypt.genSalt(10);
@@ -67,63 +71,6 @@ class AuthoController {
 			if (err.code === 11000) {
 				return responseError(res, 400, 'Email đã tồn tại!');
 			}
-			return next(
-				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
-						req.body,
-						null,
-						2
-					)}`
-				)
-			);
-		}
-	}
-
-	// VERIFY
-	async verify(req, res, next) {
-		try {
-			const schema = Joi.object({
-				userId: Joi.string().required(),
-				otp: Joi.number().required(),
-			}).unknown();
-			const { error } = schema.validate(req.body);
-			if (error) {
-				return responseError(res, 400, error.details[0].message);
-			}
-
-			const user = await User.findById(req.body.userId);
-			if (!user) {
-				return responseError(res, 400, 'User không tồn tại!!!');
-			}
-
-			// check OTP
-
-			// genereate Token
-			const dataToken = {
-				userId: user._id,
-				role: user.role.name,
-			};
-
-			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
-
-			if (!accessToken) {
-				return responseError(res, 401, 'Đăng nhập không thành công, vui lòng thử lại.');
-			}
-			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
-			user.refreshToken = refreshToken;
-			await user.save();
-
-			// save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
-
-			return res.status(200).json({
-				msg: 'Đăng nhập thành công.',
-				accessToken,
-				refreshToken,
-				user,
-			});
-		} catch (err) {
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
@@ -550,7 +497,7 @@ class AuthoController {
 			await redisClient.set(`comfirm:${req.user._id}`, otp, 'EX', 60 * 5);
 
 			// Gửi mã OTP đến email
-			const status = await sendMailOTP(req.user.email, 'OTP Comfirm Set Password', otp, req.user);
+			const status = await sendMailOTP(req.user.email, 'OTP Comfirm Set Password', otp, req.user.fullname);
 			// check status
 			if (!status) {
 				// delete in redis
@@ -570,6 +517,19 @@ class AuthoController {
 	// send OTP verify
 	async sendOTPverify(req, res, next) {
 		try {
+			const schema = Joi.object({
+				email: Joi.string().email().required(),
+				fullname: Joi.string().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			// check email exsit
+			const user = await User.findOne({ email: req.body.email });
+			if (user) return responseError(res, 400, 'Email đã tồn tại');
+
 			// Tạo một bí mật ngẫu nhiên
 			const secret = speakeasy.generateSecret({ length: 20 });
 
@@ -580,14 +540,14 @@ class AuthoController {
 			});
 
 			// save otp to redis set time expire 5m
-			await redisClient.set(`verify:${req.user._id}`, otp, 'EX', 60 * 5);
+			await redisClient.set(`verify:${req.body.email}`, otp, 'EX', 60 * 5);
 
 			// Gửi mã OTP đến email
-			const status = await sendMailOTP(req.user.email, 'OTP Verify Account', otp, req.user);
+			const status = await sendMailOTP(req.body.email, 'OTP Verify Account', otp, req.body.fullname);
 			// check status
 			if (!status) {
 				// delete in redis
-				await redisClient.del(`verify:${req.user._id}`);
+				await redisClient.del(`verify:${req.body.email}`);
 				return responseError(res, 400, 'Gửi email thất bại!!!');
 			}
 
