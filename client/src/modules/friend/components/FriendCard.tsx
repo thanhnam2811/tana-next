@@ -18,6 +18,8 @@ import { FriendType, RelationshipType } from '../types';
 import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { createConversationApi } from '@modules/messages/api';
+import { useAuth } from '@modules/auth/hooks';
 
 interface Props {
 	user: UserType;
@@ -27,6 +29,9 @@ interface Props {
 export function FriendCard({ user, onUpdateRelationship }: Props) {
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
+
+	const { authUser } = useAuth();
+	const isAuthUser = authUser?._id === user._id;
 
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
@@ -165,6 +170,15 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 			break;
 	}
 
+	const handleSendMsg = async () => {
+		try {
+			const created = await createConversationApi({ members: [{ user: user._id }] });
+			await router.push(`/messages?id=${created._id}`);
+		} catch (error) {
+			toast('Có lỗi xảy ra, vui lòng thử lại sau');
+		}
+	};
+
 	return (
 		<Card
 			hoverable
@@ -184,10 +198,10 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 					</Link>
 				</Tooltip>,
 				<Tooltip key="message" title="Nhắn tin">
-					<Button icon={<HiChatBubbleOvalLeft />} />
+					<Button icon={<HiChatBubbleOvalLeft />} onClick={handleSendMsg} disabled={isAuthUser} />
 				</Tooltip>,
-				<Dropdown key="more" menu={{ items: dropdownItems }} arrow>
-					<Button icon={<HiDotsHorizontal />} />
+				<Dropdown key="more" menu={{ items: dropdownItems }} arrow disabled={isAuthUser}>
+					<Button icon={<HiDotsHorizontal />} disabled={isAuthUser} />
 				</Dropdown>,
 			]}
 			bodyStyle={{ padding: 12 }}
@@ -196,9 +210,13 @@ export function FriendCard({ user, onUpdateRelationship }: Props) {
 				avatar={<UserAvatar user={user} />}
 				title={user.fullname}
 				description={
-					<Typography.Text strong type={relationshipColor[relationship]}>
-						{relationshipLabel[relationship]}
-					</Typography.Text>
+					isAuthUser ? (
+						'Bạn'
+					) : (
+						<Typography.Text strong type={relationshipColor[relationship]}>
+							{relationshipLabel[relationship]}
+						</Typography.Text>
+					)
 				}
 			/>
 		</Card>
