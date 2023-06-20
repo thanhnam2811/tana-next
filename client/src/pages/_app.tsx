@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useTheme } from 'src/layout/hooks';
 import { SERVER_URL } from '@common/config';
+import SEO from '@common/components/SEO';
 
 dayjs.locale('vi');
 
@@ -66,24 +67,28 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 	};
 
 	return (
-		<ConfigProvider
-			locale={viVn}
-			theme={{
-				token: {},
-				algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
-			}}
-			input={{ autoComplete: 'off' }}
-			select={{ showSearch: true }}
-		>
-			<Toaster position="bottom-right" />
+		<>
+			<SEO />
 
-			<NextProgress color={token.colorPrimary} delay={300} height={2} />
+			<ConfigProvider
+				locale={viVn}
+				theme={{
+					token: {},
+					algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+				}}
+				input={{ autoComplete: 'off' }}
+				select={{ showSearch: true }}
+			>
+				<Toaster position="bottom-right" />
 
-			<AppContainer>
-				<Component {...pageProps} />
-			</AppContainer>
+				<NextProgress color={token.colorPrimary} delay={300} height={2} />
 
-			<Analytics />
-		</ConfigProvider>
+				<AppContainer>
+					<Component {...pageProps} />
+				</AppContainer>
+
+				<Analytics />
+			</ConfigProvider>
+		</>
 	);
 }
