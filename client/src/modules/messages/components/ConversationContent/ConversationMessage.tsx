@@ -49,7 +49,6 @@ export function ConversationMessage() {
 	const msgFetcher = useFetcher<MessageType>({ api: `conversations/${id}/messages` });
 
 	const { data: listMessage } = msgFetcher;
-	console.log('listMessage', listMessage);
 
 	const textInputRef = useRef<TextAreaRef>(null);
 	const sendMessage = async (data: MessageFormType) => {

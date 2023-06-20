@@ -45,13 +45,16 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 			window.socket.on('connect', () => {
 				const accessToken = localStorage.getItem('accessToken');
 				window.socket.emit('login', accessToken); // login to socket
+
+				console.log('✔ Connected to socket!');
 			});
 		}
 		return () => {
 			if (authUser) {
 				window.socket.off('connect');
 				window.socket.disconnect(); // disconnect to socket
-				console.log('disconnected to socket');
+
+				console.log('✖ Disconnected to socket!');
 			}
 		};
 	}, [authUser?._id]);
