@@ -15,7 +15,7 @@ import {
 } from 'react-icons/hi2';
 import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../data';
 import { FriendType } from '../types';
-import { requestFriendApi, unFriendApi } from '../api';
+import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { createConversationApi } from '@modules/messages/api';
@@ -90,7 +90,7 @@ export function FriendCard({ user }: Props) {
 		setLoading('accept', true);
 
 		try {
-			await requestFriendApi(user._id);
+			await acceptFriendApi(user._id);
 			toast.success('Xác nhận lời mời kết bạn thành công! Bạn bè với nhau rồi đó!', { id: toastId });
 			setRelationship('friend');
 		} catch (error: any) {
@@ -105,7 +105,7 @@ export function FriendCard({ user }: Props) {
 		setLoading('reject', true);
 
 		try {
-			await requestFriendApi(user._id);
+			await rejectFriendApi(user._id);
 			toast.success('Từ chối lời mời kết bạn thành công!', { id: toastId });
 			setRelationship('none');
 		} catch (error: any) {

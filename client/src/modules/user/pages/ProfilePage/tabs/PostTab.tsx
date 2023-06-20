@@ -3,14 +3,14 @@ import { PostType } from '@common/types';
 import { CreatePost, ListPost } from '@modules/post/components';
 import { useUserContext } from '@modules/user/hooks';
 import styles from './PostTab.module.scss';
-import { Button, Image, Tooltip, Typography, theme, Dropdown, Popconfirm } from 'antd';
+import { Button, Dropdown, Image, Popconfirm, theme, Tooltip, Typography } from 'antd';
 import { HiCamera, HiUserPlus } from 'react-icons/hi2';
 import { UploadImage } from '@common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
 import { toast } from 'react-hot-toast';
 import { uploadFileApi } from '@common/api';
 import { ReactNode, useState } from 'react';
-import { requestFriendApi, unFriendApi } from '@modules/friend/api';
+import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '@modules/friend/api';
 import { createConversationApi } from '@modules/messages/api';
 import { useRouter } from 'next/router';
 
@@ -108,7 +108,7 @@ export function PostTab() {
 		setLoading('accept', true);
 
 		try {
-			await requestFriendApi(user._id);
+			await acceptFriendApi(user._id);
 			toast.success('Xác nhận lời mời kết bạn thành công! Bạn bè với nhau rồi đó!', { id: toastId });
 			setRelationship('friend');
 		} catch (error: any) {
@@ -123,7 +123,7 @@ export function PostTab() {
 		setLoading('reject', true);
 
 		try {
-			await requestFriendApi(user._id);
+			await rejectFriendApi(user._id);
 			toast.success('Từ chối lời mời kết bạn thành công!', { id: toastId });
 			setRelationship('none');
 		} catch (error: any) {
