@@ -148,9 +148,7 @@ class MessageController {
 			.then((data) => {
 				getListData(res, data);
 			})
-			.catch((err) => {
-				return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
-			});
+			.catch((err) => responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.'));
 	}
 
 	// [Get] fetch messages from conversationId
@@ -202,21 +200,17 @@ class MessageController {
 						});
 						getListData(res, data);
 					})
-					.catch((err) => {
-						return responseError(
-							res,
-							500,
-							err.message ?? 'Some error occurred while retrieving tutorials.'
-						);
-					});
+					.catch((err) =>
+						responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+					);
 			} else {
-				return responseError(res, 403, err.message ?? 'Bạn không có trong cuộc hội thoại này!!!');
+				return responseError(res, 403, 'Bạn không có trong cuộc hội thoại này!!!');
 			}
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -239,7 +233,7 @@ class MessageController {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2

@@ -476,7 +476,35 @@ class PostController {
 
 	async react(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id);
+			const post = await Post.findById(req.params.id)
+				.populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline friends',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'media',
+					select: '_id link',
+				});
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
