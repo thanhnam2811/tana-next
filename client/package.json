@@ -41,7 +41,6 @@
 		"react-lottie-player": "^1.4.3",
 		"react-player": "^2.12.0",
 		"react-transition-group": "^4.4.5",
-		"sass": "^1.62.1",
 		"sharp": "^0.32.1",
 		"socket.io-client": "^4.5.4",
 		"sweetalert2": "^11.7.3",
@@ -70,6 +69,7 @@
 		"eslint-config-prettier": "^8.7.0",
 		"eslint-plugin-react": "^7.32.2",
 		"next-remove-imports": "^1.0.10",
-		"sanitize-html": "^2.10.0"
+		"sanitize-html": "^2.10.0",
+		"sass": "^1.63.4"
 	}
 }
