@@ -5,7 +5,7 @@ import { ReactPopover, SharePopover } from 'src/common/components/Popover';
 import { IPrivacy, PostType } from '@common/types';
 import { ReactionType } from '@common/types/common';
 import { useAuth } from '@modules/auth/hooks';
-import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space } from 'antd';
+import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space, Typography } from 'antd';
 import Link from 'next/link';
 import { HiArchive, HiBell, HiDotsHorizontal, HiEyeOff, HiLink } from 'react-icons/hi';
 import {
@@ -143,11 +143,32 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 			}
 		);
 
+	const statistics = [];
+
+	if (post!.numberReact > 0)
+		statistics.push(
+			<Typography.Text>
+				<strong>{post!.numberReact}</strong> lượt thích
+			</Typography.Text>
+		);
+	if (post!.numberComment > 0)
+		statistics.push(
+			<Typography.Text>
+				<strong>{post!.numberComment}</strong> bình luận
+			</Typography.Text>
+		);
+	if (post!.numberShare > 0)
+		statistics.push(
+			<Typography.Text>
+				<strong>{post!.numberShare}</strong> lượt chia sẻ
+			</Typography.Text>
+		);
+
 	return (
 		<Card
 			style={{ width: '100%' }}
 			headStyle={{ padding: '0 16px' }}
-			bodyStyle={{ padding: 16 }}
+			bodyStyle={{ padding: '8px 16px' }}
 			bordered={false}
 			extra={
 				<Space>
@@ -208,6 +229,10 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 			<PostContent post={post!} />
 
 			<PostMedia media={post!.media} />
+
+			{statistics.length > 0 && (
+				<Space style={{ marginTop: 8 }}>{statistics.map((statistic) => statistic)}</Space>
+			)}
 		</Card>
 	);
 }
