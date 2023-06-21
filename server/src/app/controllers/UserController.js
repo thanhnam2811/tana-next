@@ -12,6 +12,7 @@ const { notificationRequestFriend, notificationAcceptFriend } = require('../../u
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
 const moment = require('moment');
 const suggestFriend = require('../../utils/Suggest/friend');
+const { responseError } = require('../../utils/Response/error');
 
 function querySearchAllUsers(req) {
 	try {
@@ -291,7 +292,7 @@ class UserController {
 			if (user) {
 				res.status(200).json(user);
 			} else {
-				res.status(404).json('Không tìm thấy người dùng!!!');
+				return responseError(res, 404, 'Không tìm thấy người dùng!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -389,10 +390,10 @@ class UserController {
 
 					res.status(200).json('Kết bạn thành công!!!');
 				} else {
-					res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
+					return responseError(res, 403, 'Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
 				}
 			} else {
-				return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
+				return responseError(res, 403, 'Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -424,10 +425,10 @@ class UserController {
 					await currentUser.updateOne({ $pull: { friendRequests: { user: user._id } } });
 					res.status(200).json('Từ chối yêu cầu kết bạn thành công!!!');
 				} else {
-					res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn này!!!');
+					return responseError(res, 403, 'Bạn không thể từ chối yêu cầu kết bạn này!!!');
 				}
 			} else {
-				return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
+				return responseError(res, 403, 'Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -744,7 +745,7 @@ class UserController {
 		}
 	}
 
-	//add hobbies for user
+	// add hobbies for user
 	async addHobbies(req, res, next) {
 		try {
 			const { hobbies } = req.body;
@@ -1124,7 +1125,7 @@ class UserController {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -1191,7 +1192,7 @@ class UserController {
 		}
 	}
 
-	async searchAdmin(req, res) {
+	async searchAdmin(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
@@ -1584,7 +1585,7 @@ class UserController {
 
 	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
-			//increase endDay 1
+			// increase endDay 1
 			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalUserCreationsByDay = await User.aggregate([
 				{
@@ -1632,6 +1633,59 @@ class UserController {
 			return totalUserCreationsByDayArray;
 		} catch (err) {
 			console.log(err);
+		}
+	}
+
+	async getAllUserOnline(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					isOnline: true,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 }
