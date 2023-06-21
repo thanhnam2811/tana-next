@@ -6,6 +6,23 @@ const Comment = require('../models/Comment');
 const { getPagination } = require('../../utils/Pagination');
 
 class ReportController {
+	async addReport(req, res, next) {
+		try {
+			//
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// report user
 	async reportUser(req, res, next) {
 		try {

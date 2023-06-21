@@ -68,7 +68,7 @@ class AuthoController {
 
 			const dataToken = {
 				userId: newUser._id,
-				role: newUser.role.name,
+				role: 'USER',
 			};
 
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
@@ -80,7 +80,7 @@ class AuthoController {
 			newUser.refreshToken = refreshToken;
 			await newUser.save();
 
-			res.status(200).json({
+			return res.status(200).json({
 				msg: 'Đăng ký thành công.',
 				accessToken,
 				refreshToken,

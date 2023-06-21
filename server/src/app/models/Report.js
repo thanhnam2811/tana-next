@@ -20,9 +20,24 @@ const ReportSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Comment',
 		},
-		reason: {
+		description: {
 			type: String,
 		},
+		title: {
+			type: String,
+			require: true,
+		},
+		type: {
+			type: String,
+			enum: ['post', 'comment', 'user', 'conversation', 'other'],
+		},
+		images: [
+			{
+				type: mongoose.SchemaTypes.ObjectId,
+				ref: 'File',
+				default: [],
+			},
+		],
 		status: {
 			type: String,
 			enum: ['pending', 'approved', 'rejected'],
