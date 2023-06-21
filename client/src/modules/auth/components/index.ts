@@ -1,3 +1,4 @@
 export * from './LoginForm';
-export * from './RegisterForm';
+export * from './AccountForm';
+export * from './PasswordForm';
 export * from './withAuth';

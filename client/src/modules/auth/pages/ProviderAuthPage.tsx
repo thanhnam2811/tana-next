@@ -1,23 +1,30 @@
-import { withLayout } from '@layout/components';
+import Layout from '@layout/components';
 import { Avatar, Card, Spin } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks';
-import { authProviders } from '@modules/auth/data';
+import { AuthProvider } from '@modules/auth/data';
 import SEO from '@common/components/SEO';
 
-const ProviderAuthPage = () => {
+export interface ProviderAuthPageProps {
+	provider: AuthProvider;
+	accessToken?: string;
+	refreshToken?: string;
+}
+
+const ProviderAuthPage = ({ provider, accessToken, refreshToken }: ProviderAuthPageProps) => {
 	const router = useRouter();
 	const { login } = useAuth();
-
-	const { providerId, accessToken, refreshToken } = router.query as { [key: string]: string };
-
-	const provider = authProviders.find((p) => p.id === providerId);
 
 	useEffect(() => {
 		const loginWithProvider = async () => {
 			const toastId = toast.loading('Đang xử lý...');
+
+			if (!accessToken || !refreshToken) {
+				toast.error(`Đăng nhập với ${provider?.name} thất bại!`, { id: toastId });
+				return router.replace('/auth/login');
+			}
 
 			try {
 				// Save credentials
@@ -37,22 +44,12 @@ const ProviderAuthPage = () => {
 			}
 		};
 
-		if (router.isReady) {
-			// Redirect to login page if provider is not found
-			if (!provider) router.replace('/auth/login');
-			// Redirect to login page if access token and refresh token are not available
-			else if (!accessToken || !refreshToken) {
-				toast.error(`Đăng nhập với ${provider?.name} thất bại!`);
-				router.replace('/auth/login');
-			}
-
-			// Login if access token and refresh token are available
-			else loginWithProvider();
-		}
-	}, [router.isReady]);
+		// Login if access token and refresh token are available
+		loginWithProvider();
+	}, []);
 
 	return (
-		<>
+		<Layout.Container>
 			<SEO title={`Đăng nhập với ${provider?.name}`} robot />
 
 			<div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -64,8 +61,8 @@ const ProviderAuthPage = () => {
 					/>
 				</Card>
 			</div>
-		</>
+		</Layout.Container>
 	);
 };
 
-export default withLayout(ProviderAuthPage);
+export default ProviderAuthPage;

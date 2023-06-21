@@ -3,27 +3,24 @@ import { Col, Row } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import Lottie from 'react-lottie-player';
-import { LoginForm, RegisterForm } from '../components';
+import { LoginForm } from '../components';
 import { useAuth } from '../hooks';
 import SEO from '@common/components/SEO';
 
-function AuthPage() {
+function LoginPage() {
 	const router = useRouter();
-	const { type, from } = router.query;
+	const { from } = router.query;
 
-	const isLogin = !type || type === 'login';
-
-	// Check if user is logged in
 	const { authUser } = useAuth();
 	useEffect(() => {
-		if (authUser && router.isReady) {
+		if (authUser) {
 			router.replace((from as string) || '/home');
 		}
-	}, [router.isReady, authUser]);
+	}, []);
 
 	return (
 		<>
-			<SEO title={isLogin ? 'Đăng nhập' : 'Đăng ký'} robot />
+			<SEO title="TaNa - Đăng nhập" robot />
 
 			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
 				<Col span={12} style={{ height: 'fit-content' }}>
@@ -37,11 +34,11 @@ function AuthPage() {
 				</Col>
 
 				<Col span={12} style={{ height: 'fit-content' }}>
-					{isLogin ? <LoginForm /> : <RegisterForm />}
+					<LoginForm />
 				</Col>
 			</Row>
 		</>
 	);
 }
 
-export default withLayout(AuthPage);
+export default withLayout(LoginPage);

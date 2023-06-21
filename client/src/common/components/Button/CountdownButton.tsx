@@ -8,10 +8,18 @@ interface Props extends ButtonProps {
 	step?: number;
 	renderCountdown?: (duration: Duration) => ReactNode;
 	afterChildren?: ReactNode;
+	state?: 'start' | 'stop';
 }
 
-export function CountdownButton({ milliseconds, step = 1000, renderCountdown, afterChildren, ...props }: Props) {
-	const [state, setState] = useState<'start' | 'stop'>('stop');
+export function CountdownButton({
+	milliseconds,
+	step = 1000,
+	renderCountdown,
+	afterChildren,
+	state: initState = 'stop',
+	...props
+}: Props) {
+	const [state, setState] = useState<'start' | 'stop'>(initState);
 	const [countdown, setCountdown] = useState(milliseconds);
 	const duration = dateUtil.getDuration(countdown);
 

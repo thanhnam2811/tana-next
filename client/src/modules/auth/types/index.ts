@@ -1,6 +1,6 @@
 export * from './ILoginParams';
 export * from './ILoginResponse';
-export * from './IRegisterParams';
+export * from './IRegisterData';
 export * from './IResetPasswordParams';
 export * from './IUseAuth';
 export * from './IChangePasswordParams';
