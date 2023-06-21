@@ -640,7 +640,7 @@ class PostController {
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
-				if (post.author.toString() !== req.user._id.toString()) {
+				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 				}
 
