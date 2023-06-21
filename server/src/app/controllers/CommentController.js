@@ -72,9 +72,8 @@ class CommentController {
 						select: '_id link',
 					});
 				return res.status(200).json(comment);
-			} else {
-				return responseError(res, 404, 'Bài viết không tồn tại');
 			}
+			return responseError(res, 404, 'Bài viết không tồn tại');
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -119,9 +118,8 @@ class CommentController {
 					});
 
 				return res.status(200).json(commentUpdated);
-			} else {
-				return responseError(res, 401, 'Bạn không có quyền cập nhật bình luận này');
 			}
+			return responseError(res, 401, 'Bạn không có quyền cập nhật bình luận này');
 		} catch (error) {
 			console.log(error);
 			return next(
@@ -230,7 +228,7 @@ class CommentController {
 	}
 
 	// [Delete] delete a comment
-	async delete(req, res) {
+	async delete(req, res, next) {
 		try {
 			const comment = await Comment.findById(req.params.id).populate(
 				'author',
@@ -261,17 +259,15 @@ class CommentController {
 					// save and return post populated with comments
 					await post.save();
 					return res.status(200).json(comment);
-				} else {
-					return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
 				}
-			} else {
-				return responseError(res, 404, 'Bình luận không tồn tại');
+				return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
 			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -329,14 +325,13 @@ class CommentController {
 						select: '_id link',
 					});
 				return res.status(200).json(commentPopulated);
-			} else {
-				return responseError(res, 404, 'Bình luận không tồn tại');
 			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -391,9 +386,9 @@ class CommentController {
 						getListPost(res, data, listComments);
 					});
 				})
-				.catch((err) => {
-					return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -453,9 +448,9 @@ class CommentController {
 						getListPost(res, data, listComments);
 					});
 				})
-				.catch((err) => {
-					return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(

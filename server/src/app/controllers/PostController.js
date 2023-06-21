@@ -640,7 +640,7 @@ class PostController {
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
-				if (post.author.toString() !== req.user._id.toString()) {
+				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 				}
 
@@ -1120,19 +1120,31 @@ class PostController {
 	// [GET] get all posts
 	async getAllPosts(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const q = req.query.q ?? '';
 		// get posts of a user by query id and sort by date
 		try {
 			// check role Admin
 			if (req.user.role.name !== 'ADMIN') return next(createError.Forbidden('Bạn không có quyền truy cập'));
-
-			Post.paginate(
-				{},
-				{
-					offset,
-					limit,
-					sort: { createdAt: -1 },
-					populate: [
-						{
+			let query = {};
+			if (q) {
+				query = { $text: { $search: q } };
+			}
+			Post.paginate(query, {
+				offset,
+				limit,
+				sort: { createdAt: -1 },
+				populate: [
+					{
+						path: 'author',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					{
+						path: 'lastestFiveComments',
+						populate: {
 							path: 'author',
 							select: '_id fullname profilePicture isOnline',
 							populate: {
@@ -1140,48 +1152,37 @@ class PostController {
 								select: '_id link',
 							},
 						},
-						{
-							path: 'lastestFiveComments',
-							populate: {
-								path: 'author',
-								select: '_id fullname profilePicture isOnline',
-								populate: {
-									path: 'profilePicture',
-									select: '_id link',
-								},
-							},
-						},
-						{
-							path: 'tags',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
-						},
-						{
-							path: 'media',
+					},
+					{
+						path: 'tags',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
-						{
-							path: 'privacy.includes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'media',
+						select: '_id link',
+					},
+					{
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-						{
-							path: 'privacy.excludes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-					],
-				}
-			)
+					},
+				],
+			})
 				.then((data) => {
 					getListData(res, data);
 				})

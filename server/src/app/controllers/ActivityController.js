@@ -55,9 +55,9 @@ class ActivityController {
 				.then((data) => {
 					getListData(res, data);
 				})
-				.catch((err) => {
-					return responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(

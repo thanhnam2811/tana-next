@@ -5,6 +5,7 @@ const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 const ReportController = require('../app/controllers/ReportController');
 const UserController = require('../app/controllers/UserController');
 const ActivityController = require('../app/controllers/ActivityController');
+const AuthoController = require('../app/controllers/AuthController');
 
 router.get('/dashboard', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.getDashboard);
 router.get('/statictisUser', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, AdminController.statictisUserPieChart);
@@ -21,6 +22,7 @@ router.get(
 );
 
 router.post('/login', AdminController.login);
+router.post('/refresh', AuthoController.refreshToken);
 router.post('/createAccount', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, UserController.createAccountAdmin);
 
 router.put('/unlockUser/:id', AuthoMiddleware.isAuth, RoleMiddleware.IsAdmin, UserController.unlockAccount);
