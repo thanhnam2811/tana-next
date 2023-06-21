@@ -64,7 +64,7 @@ class AuthoController {
 					value: req.body.gender.value,
 					label: labelOfGender[req.body.gender.value],
 				},
-			}).save();
+			});
 
 			const dataToken = {
 				userId: newUser._id,
