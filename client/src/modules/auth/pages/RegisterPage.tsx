@@ -20,7 +20,7 @@ function RegisterPage() {
 	// Check if user is logged in
 	const { authUser, updateAuthUser, login } = useAuth();
 	useEffect(() => {
-		if (authUser && step !== INFO_STEP) {
+		if (authUser && step === ACCOUNT_STEP) {
 			router.replace((from as string) || '/home');
 		}
 	}, []);

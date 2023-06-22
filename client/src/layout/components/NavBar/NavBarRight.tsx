@@ -6,6 +6,7 @@ import { HiBell, HiCog6Tooth, HiExclamationTriangle, HiMoon, HiSun, HiUser } fro
 import { HeaderRight } from '../Header';
 import { useReport } from '@modules/report/hooks';
 import { NotificationPopover } from '@modules/notification/components';
+import Link from 'next/link';
 
 export function NavBarRight() {
 	const { authUser, logout } = useAuth();
@@ -15,7 +16,7 @@ export function NavBarRight() {
 	const avatarDropdownItems: MenuProps['items'] = [
 		{
 			key: 'profile',
-			label: 'Trang cá nhân',
+			label: <Link href="/profile">Trang cá nhân</Link>,
 			icon: <HiUser />,
 		},
 		{
