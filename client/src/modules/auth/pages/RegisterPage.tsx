@@ -2,12 +2,12 @@ import Layout, { withLayout } from '@layout/components';
 import { Button, Form, Space, StepProps, Steps } from 'antd';
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
-import { AccountForm, InfoForm, PasswordForm } from '../components';
-import { useAuth } from '../hooks';
 import SEO from '@common/components/SEO';
 import { IRegisterData, RegisterAccount } from '@modules/auth/types';
 import { toast } from 'react-hot-toast';
 import { registerApi, sendOtpRegisterApi } from '@modules/auth/api';
+import { useAuth } from '@modules/auth/hooks';
+import { AccountForm, InfoForm, PasswordForm } from '@modules/auth/components';
 
 const ACCOUNT_STEP = 0;
 const PASSWORD_STEP = 1;
@@ -26,7 +26,7 @@ function RegisterPage() {
 	}, []);
 
 	const [data, setData] = useState<Partial<IRegisterData>>({});
-	const [step, setStep] = useState(2);
+	const [step, setStep] = useState(ACCOUNT_STEP);
 	const nextStep = () => {
 		if (step === steps.length - 1) {
 			return router.push('/home');
@@ -36,7 +36,7 @@ function RegisterPage() {
 	};
 	const prevStep = () => setStep((step) => step - 1);
 
-	const canSkip = step === ACCOUNT_STEP;
+	const canSkip = step === INFO_STEP;
 	const canBack = step === PASSWORD_STEP;
 
 	const steps: (StepProps & { content: ReactNode })[] = [
