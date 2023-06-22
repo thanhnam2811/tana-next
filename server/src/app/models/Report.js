@@ -20,6 +20,10 @@ const ReportSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Comment',
 		},
+		conversation: {
+			type: mongoose.SchemaTypes.ObjectId,
+			ref: 'Conversation',
+		},
 		description: {
 			type: String,
 		},

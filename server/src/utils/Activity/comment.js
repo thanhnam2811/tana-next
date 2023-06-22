@@ -6,7 +6,7 @@ async function createActivityWithComment(comment, user) {
 		type: 'comment',
 		content: `Bạn đã bình luận một bài viết`,
 		link: `/post/${comment.post}/comments/${comment._id}`,
-		target: comment._id,
+		comment: comment._id,
 		user: user._id,
 	});
 	await activity.save();
@@ -17,7 +17,7 @@ async function createActivityWithReplyComment(comment, user) {
 		type: 'comment',
 		content: `Bạn đã trả lời một bình luận`,
 		link: `/post/${comment.post}/comments/${comment._id}`,
-		target: comment._id,
+		comment: comment._id,
 		user: user._id,
 	});
 	await activity.save();
@@ -28,7 +28,7 @@ async function createActivityWithReactComment(comment, user) {
 		type: 'comment',
 		content: `Bạn đã bày tỏ cảm xúc về một bình luận`,
 		link: `/post/${comment.post}/comments/${comment._id}`,
-		target: comment._id,
+		comment: comment._id,
 		user: user._id,
 	});
 	await activity.save();
@@ -39,7 +39,7 @@ async function createActivityWithTagComment(comment, user) {
 		type: 'comment',
 		content: `Bạn đã gắn thẻ bạn bè trong một bình luận`,
 		link: `/post/${comment.post}/comments/${comment._id}`,
-		target: comment._id,
+		comment: comment._id,
 		user: user._id,
 	});
 	await activity.save();
