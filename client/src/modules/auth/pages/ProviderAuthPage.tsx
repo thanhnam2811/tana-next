@@ -9,17 +9,17 @@ import SEO from '@common/components/SEO';
 
 export interface ProviderAuthPageProps {
 	provider: AuthProvider;
-	accessToken?: string;
-	refreshToken?: string;
 }
 
-const ProviderAuthPage = ({ provider, accessToken, refreshToken }: ProviderAuthPageProps) => {
+const ProviderAuthPage = ({ provider }: ProviderAuthPageProps) => {
 	const router = useRouter();
 	const { login } = useAuth();
 
 	useEffect(() => {
 		const loginWithProvider = async () => {
 			const toastId = toast.loading('Đang xử lý...');
+
+			const { accessToken, refreshToken } = router.query as { [key: string]: string };
 
 			if (!accessToken || !refreshToken) {
 				toast.error(`Đăng nhập với ${provider?.name} thất bại!`, { id: toastId });
