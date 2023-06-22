@@ -84,7 +84,7 @@ class AuthoController {
 				msg: 'Đăng ký thành công.',
 				accessToken,
 				refreshToken,
-				newUser,
+				user: newUser,
 			});
 		} catch (err) {
 			if (err.code === 11000) {
