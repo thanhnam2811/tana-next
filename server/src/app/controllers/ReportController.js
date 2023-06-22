@@ -1,11 +1,75 @@
 const createError = require('http-errors');
+const Joi = require('joi');
 const Report = require('../models/Report');
 const { User } = require('../models/User');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
+const Conversation = require('../models/Conversation');
 const { getPagination } = require('../../utils/Pagination');
+const { responseError } = require('../../utils/Response/error');
+const { getListData } = require('../../utils/Response/listData');
 
 class ReportController {
+	async createReport(req, res, next) {
+		try {
+			//
+			const schema = Joi.object({
+				title: Joi.string().required(),
+				description: Joi.string(),
+				type: Joi.string().valid('user', 'post', 'comment', 'conversation', 'orther').required(),
+				images: Joi.array().items(Joi.string()),
+				user: Joi.string(),
+				post: Joi.string(),
+				comment: Joi.string(),
+				conversation: Joi.string(),
+			}).unknown();
+
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+			// check object reported exist?
+			if (req.body.type === 'user') {
+				const user = await User.findById(req.body.user);
+				if (!user) {
+					return responseError(res, 404, 'User không tồn tại');
+				}
+			} else if (req.body.type === 'post') {
+				const post = await Post.findById(req.body.post);
+				if (!post) {
+					return responseError(res, 404, 'Bài viết không tồn tại');
+				}
+			} else if (req.body.type === 'comment') {
+				const comment = await Comment.findById(req.body.comment);
+				if (!comment) {
+					return responseError(res, 404, 'Bình luận không tồn tại');
+				}
+			} else if (req.body.type === 'conversation') {
+				const conversation = await Conversation.findById(req.body.conversation);
+				if (!conversation) {
+					return responseError(res, 404, 'Cuộc trò chuyện không tồn tại');
+				}
+			}
+
+			const newReport = new Report(req.body);
+			newReport.reporter = req.user._id;
+			await newReport.save();
+
+			return res.status(200).json(newReport);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// report user
 	async reportUser(req, res, next) {
 		try {
@@ -101,216 +165,92 @@ class ReportController {
 		}
 	}
 
+	// Get report by id
+	async getReportById(req, res, next) {
+		try {
+			const report = await Report.findById(req.params.id)
+				.populate({
+					path: 'reporter',
+					select: '_id fullname profilePicture isOnline',
+					populate: { path: 'profilePicture', select: '_id link' },
+				})
+				.populate({
+					path: 'user',
+					select: '_id fullname profilePicture isOnline',
+					populate: { path: 'profilePicture', select: '_id link' },
+				})
+				.populate({
+					path: 'post',
+					select: '_id content',
+					populate: { path: 'media', select: '_id link' },
+				})
+				.populate({
+					path: 'comment',
+					select: '_id content',
+					populate: { path: 'media', select: '_id link' },
+				})
+				.populate('conversation');
+			if (!report) {
+				return next(createError.NotFound('Báo cáo không tồn tại'));
+			}
+
+			return res.status(200).json(report);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// Get all reports order by quantity or created date
 	async getAllReports(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-			// count total reports of user or post or comment
-			const reports = await Report.aggregate([
-				{
-					$group: {
-						_id: {
-							$cond: [
-								{ $gt: ['$user', null] },
-								'$user',
-								{
-									$cond: [{ $gt: ['$post', null] }, '$post', '$comment'],
-								},
-							],
-						},
-						quantity: { $sum: 1 },
-						reporter: { $push: '$reporter' },
-						reason: { $push: '$reason' },
-						user: { $first: '$user' },
-						post: { $first: '$post' },
-						comment: { $first: '$comment' },
-						createdAt: { $first: '$createdAt' },
-						updatedAt: { $first: '$updatedAt' },
-					},
-				},
-				{
-					$lookup: {
-						from: 'users',
-						localField: 'reporter',
-						pipeline: [
-							{
-								$project: {
-									_id: 1,
-									fullname: 1,
-									profilePicture: 1,
-								},
-							},
-							{
-								$lookup: {
-									from: 'files',
-									localField: 'profilePicture',
-									pipeline: [
-										{
-											$project: {
-												_id: 1,
-												link: 1,
-											},
-										},
-									],
-									foreignField: '_id',
-									as: 'profilePicture',
-								},
-							},
-						],
-						foreignField: '_id',
-						as: 'reporter',
-					},
-				},
-				{
-					$lookup: {
-						from: 'users',
-						localField: 'user',
-						pipeline: [
-							{
-								$project: {
-									_id: 1,
-									fullname: 1,
-									profilePicture: 1,
-								},
-							},
-							{
-								$lookup: {
-									from: 'files',
-									localField: 'profilePicture',
-									pipeline: [
-										{
-											$project: {
-												_id: 1,
-												link: 1,
-											},
-										},
-									],
-									foreignField: '_id',
-									as: 'profilePicture',
-								},
-							},
-						],
-						foreignField: '_id',
-						as: 'user',
-					},
-				},
-				{
-					$lookup: {
-						from: 'posts',
-						localField: 'post',
-						pipeline: [
-							{
-								$project: {
-									_id: 1,
-									content: 1,
-									media: 1,
-									numberReact: 1,
-									numberComment: 1,
-									numberShare: 1,
-									tags: 1,
-									author: 1,
-									privacy: 1,
-								},
-							},
-							{
-								$lookup: {
-									from: 'users',
-									localField: 'author',
-									pipeline: [
-										{
-											$project: {
-												_id: 1,
-												fullname: 1,
-												profilePicture: 1,
-											},
-										},
-										{
-											$lookup: {
-												from: 'files',
-												localField: 'profilePicture',
-												pipeline: [
-													{
-														$project: {
-															_id: 1,
-															link: 1,
-														},
-													},
-												],
-												foreignField: '_id',
-												as: 'profilePicture',
-											},
-										},
-									],
-									foreignField: '_id',
-									as: 'author',
-								},
-							},
-							{
-								$lookup: {
-									from: 'files',
-									localField: 'media',
-									pipeline: [
-										{
-											$project: {
-												_id: 1,
-												link: 1,
-											},
-										},
-									],
-									foreignField: '_id',
-									as: 'media',
-								},
-							},
-						],
-						foreignField: '_id',
-						as: 'post',
-					},
-				},
-				{
-					$lookup: {
-						from: 'comments',
-						localField: 'comment',
-						foreignField: '_id',
-						as: 'comment',
-					},
-				},
-				// { $skip: offset },
-				// { $limit: limit },
-				{ $sort: { quantity: -1 } },
-				{
-					$facet: {
-						totalItems: [{ $count: 'totalItems' }],
-						items: [
-							{
-								$skip: offset,
-							},
-							{
-								$limit: limit,
-							},
-							{
-								$project: {
-									_id: 1,
-									quantity: 1,
-									reason: 1,
-									reporter: 1,
-									createdAt: 1,
-									updatedAt: 1,
-									user: { $arrayElemAt: ['$user', 0] },
-									post: { $arrayElemAt: ['$post', 0] },
-									comment: { $arrayElemAt: ['$comment', 0] },
-								},
-							},
-						],
-					},
-				},
-			]);
-			return res.status(200).json({
-				totalItems: reports[0].totalItems[0].totalItems,
-				items: reports[0].items,
-				totalPages: Math.ceil(reports[0].totalItems[0].totalItems / limit),
-				currentPage: reports[0].items.length > 0 ? Math.ceil(offset / limit) : 0,
+			let query = {};
+			if (req.query.type) {
+				query = { type: req.query.type };
+			}
+			Report.paginate(query, {
 				offset,
-			});
+				limit,
+				sort: { createdAt: -1 },
+				populate: [
+					{
+						path: 'reporter',
+						select: '_id fullname profilePicture isOnline',
+						populate: { path: 'profilePicture', select: '_id link' },
+					},
+					{
+						path: 'user',
+						select: '_id fullname profilePicture isOnline',
+						populate: { path: 'profilePicture', select: '_id link' },
+					},
+					{
+						path: 'post',
+						select: '_id content',
+						populate: { path: 'media', select: '_id link' },
+					},
+					{
+						path: 'comment',
+						select: '_id content',
+						populate: { path: 'media', select: '_id link' },
+					},
+					{ path: 'conversation' },
+				],
+			})
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) => {
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
+				});
 		} catch (err) {
 			console.error(err);
 			return next(
