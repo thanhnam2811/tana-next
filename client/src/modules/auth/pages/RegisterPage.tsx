@@ -19,17 +19,19 @@ function RegisterPage() {
 
 	// Check if user is logged in
 	const { authUser, updateAuthUser, login } = useAuth();
+	const [data, setData] = useState<Partial<IRegisterData>>({});
+	const [step, setStep] = useState(ACCOUNT_STEP);
+
 	useEffect(() => {
+		console.log({ authUser, step, router });
 		if (authUser && step === ACCOUNT_STEP) {
 			router.replace((from as string) || '/home');
 		}
 	}, []);
-
-	const [data, setData] = useState<Partial<IRegisterData>>({});
-	const [step, setStep] = useState(ACCOUNT_STEP);
-	const nextStep = () => {
-		if (step === steps.length - 1) {
-			return router.push('/home');
+	const nextStep = async () => {
+		if (step === INFO_STEP) {
+			await login();
+			return router.replace('/home');
 		}
 
 		setStep((step) => step + 1);
@@ -78,7 +80,8 @@ function RegisterPage() {
 							try {
 								await sendOTP(values as RegisterAccount);
 								setData(values);
-								nextStep();
+
+								await nextStep();
 							} catch (error: any) {
 								const errorText = error.message || error.toString();
 								accountForm.setFields([
@@ -95,12 +98,11 @@ function RegisterPage() {
 									...data,
 									...values,
 								} as IRegisterData);
-								nextStep();
 
 								localStorage.setItem('accessToken', accessToken);
 								localStorage.setItem('refreshToken', refreshToken);
 
-								await login();
+								await nextStep();
 							} catch (error: any) {
 								const errorText = error.message || error.toString();
 								passwordForm.setFields([

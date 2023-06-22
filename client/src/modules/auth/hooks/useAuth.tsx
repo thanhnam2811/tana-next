@@ -44,17 +44,17 @@ export const useAuth = create<IUseAuth>()((set, get) => ({
 		// Save rollback data
 		const prev = get().authUser;
 
-		if (!prev) throw new Error('Chưa đăng nhập!');
+		if (prev) {
+			// Get optimistic data if not provided
+			optimisticData ??= {
+				...data,
+				profilePicture: prev.profilePicture, // Keep old profile picture
+				coverPicture: prev.coverPicture, // Keep old cover picture
+			};
 
-		// Get optimistic data if not provided
-		optimisticData ??= {
-			...data,
-			profilePicture: prev.profilePicture, // Keep old profile picture
-			coverPicture: prev.coverPicture, // Keep old cover picture
-		};
-
-		// Optimistic update
-		set({ authUser: { ...prev, ...optimisticData } });
+			// Optimistic update
+			set({ authUser: { ...prev, ...optimisticData } });
+		}
 
 		try {
 			// Update to server
