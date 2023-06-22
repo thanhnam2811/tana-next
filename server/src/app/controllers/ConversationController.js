@@ -265,7 +265,7 @@ class ConversationController {
 										$size: 2,
 									},
 								},
-								//check type = 'direct'
+								// check type = 'direct'
 								{ type: 'direct' },
 							],
 						},
