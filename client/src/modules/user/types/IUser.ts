@@ -60,6 +60,7 @@ interface IUser extends IData {
 	contact: IContact[];
 	work: IWork[];
 	education: IEducation[];
+	hobbies?: string[];
 }
 
 // For use

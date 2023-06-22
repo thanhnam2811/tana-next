@@ -42,7 +42,9 @@ export const useAuth = create<IUseAuth>()((set, get) => ({
 
 	updateAuthUser: async (data, optimisticData) => {
 		// Save rollback data
-		const prev = get().authUser!;
+		const prev = get().authUser;
+
+		if (!prev) throw new Error('Chưa đăng nhập!');
 
 		// Get optimistic data if not provided
 		optimisticData ??= {
