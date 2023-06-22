@@ -326,6 +326,7 @@ const validate = (user) => {
 			privacy: validatePrivacy(),
 		}),
 		birthdate: Joi.date(),
+		hobbies: Joi.array().items(Joi.string().min(1).max(50)),
 	});
 
 	return schema.validate(user);

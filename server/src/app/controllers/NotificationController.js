@@ -5,7 +5,7 @@ const { responseError } = require('../../utils/Response/error');
 
 class NotificationController {
 	// get Notification by user ID
-	async getNotifications(req, res) {
+	async getNotifications(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			Notification.paginate(
@@ -155,7 +155,7 @@ class NotificationController {
 			console.log(error.message);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -213,7 +213,8 @@ class NotificationController {
 			const notification = await Notification.findById(req.params.notificationId);
 			if (!notification) {
 				return responseError(res, 404, `Thông báo không được tìm thấy với id:${req.params.notificationId}`);
-			} else if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
+			}
+			if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
 				const result = await Notification.findByIdAndUpdate(
 					req.params.notificationId,
 					{ $pull: { receiver: req.user._id } },
@@ -222,9 +223,8 @@ class NotificationController {
 				return res.status(200).send({
 					notification: result,
 				});
-			} else {
-				return responseError(res, 403, `Bạn không có quyền xóa thông báo với id:${req.params.notificationId}`);
 			}
+			return responseError(res, 403, `Bạn không có quyền xóa thông báo với id:${req.params.notificationId}`);
 		} catch (err) {
 			console.log(err);
 			return next(
