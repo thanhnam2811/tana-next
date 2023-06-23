@@ -1148,6 +1148,9 @@ class UserController {
 				{
 					offset,
 					limit,
+					sort: {
+						createdAt: -1,
+					},
 					populate: [
 						{ path: 'profilePicture', select: '_id link' },
 						{ path: 'coverPicture', select: '_id link' },
