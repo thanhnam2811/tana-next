@@ -61,13 +61,8 @@ export function ListComment({ post, comment }: Props) {
 
 	// React to the post
 	const handleReact = async (commentId: string, react: ReactionTypeValue) => {
-		try {
-			const reacted = await reactToCommentApi(post._id, commentId, react);
-
-			fetcher.updateData(commentId, reacted);
-		} catch (error: any) {
-			toast.error(error.toString());
-		}
+		const reacted = await reactToCommentApi(post._id, commentId, react);
+		fetcher.updateData(commentId, reacted);
 	};
 
 	return (

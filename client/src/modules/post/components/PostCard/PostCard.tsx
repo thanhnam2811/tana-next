@@ -1,4 +1,3 @@
-import { reactOptions } from '@assets/data';
 import { PrivacyDropdown } from 'src/common/components/Button';
 import { UserAvatar } from '@modules/user/components';
 import { ReactPopover, SharePopover } from 'src/common/components/Popover';
@@ -96,8 +95,6 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 
 	const isAuthor = authUser?._id === post!.author._id;
 	const author = isAuthor ? authUser! : post!.author;
-
-	const reaction = reactOptions.find((react) => react.value === post!.reactOfUser);
 
 	// React to the post
 	const handleReact = async (react: ReactionTypeValue) => {
@@ -203,18 +200,20 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 			actions={[
 				<ReactPopover
 					key="reaction"
-					reaction={reaction?.value}
+					reaction={post!.reactOfUser}
 					onReact={handleReact}
 					trigger={authUser ? 'click' : []} // Disable trigger if user is not logged in
-				>
-					<Button
-						icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
-						type="text"
-						disabled={!authUser} // Disable if user is not logged in
-					>
-						{reaction?.label || 'Thích'}
-					</Button>
-				</ReactPopover>,
+					renderChildren={({ reaction, loading }) => (
+						<Button
+							icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
+							type="text"
+							disabled={!authUser} // Disable if user is not logged in
+							loading={loading}
+						>
+							{reaction?.label || 'Thích'}
+						</Button>
+					)}
+				/>,
 				<Button
 					key="comment"
 					icon={<HiOutlineChatBubbleLeft />}
