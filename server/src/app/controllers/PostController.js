@@ -303,8 +303,7 @@ class PostController {
 		}
 	}
 
-	// [Delete] delete a post
-	async delete(req, res, next) {
+	async deletePost(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
 			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
@@ -318,13 +317,33 @@ class PostController {
 				if (sharedPost) {
 					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
 				}
-				return res.status(200).json({
-					message: 'Xóa bài viết thành công',
-					Post: post,
-				});
+				return post;
 			} else {
 				return responseError(res, 401, 'Bạn không có quyền xóa bài viết này');
 			}
+		} catch (err) {
+			console.error(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [Delete] delete a post
+	async delete(req, res, next) {
+		try {
+			const post = await this.deletePost(req, res, next);
+			if (!post) return responseError(res, 500, 'Không xóa được bài viết!!!');
+			return res.status(200).json({
+				message: 'Xóa bài viết thành công',
+				Post: post,
+			});
 		} catch (err) {
 			console.error(err);
 			return next(

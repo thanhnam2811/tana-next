@@ -238,7 +238,7 @@ class UserController {
 
 	// delete user
 	async delete(req, res, next) {
-		if (req.user._id === req.params.id || req.user.isAdmin) {
+		if (req.user._id === req.params.id || req.user.role.name === 'ADMIN') {
 			try {
 				const user = await User.findByIdAndDelete(req.params.id);
 				res.status(200).send({

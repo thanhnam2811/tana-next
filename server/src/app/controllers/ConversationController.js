@@ -913,7 +913,7 @@ class ConversationController {
 			const adminOfConversation = conversation.members
 				.filter((member) => member.role === 'admin')
 				.map((member) => member.user.toString());
-			if (adminOfConversation.includes(req.user._id.toString())) {
+			if (adminOfConversation.includes(req.user._id.toString()) || req.user.role.name === 'ADMIN') {
 				await conversation.delete();
 				// delete all message in conversation
 				await Message.deleteMany({ conversation: req.params.id });

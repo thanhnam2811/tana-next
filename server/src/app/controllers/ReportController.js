@@ -8,6 +8,16 @@ const Conversation = require('../models/Conversation');
 const { getPagination } = require('../../utils/Pagination');
 const { responseError } = require('../../utils/Response/error');
 const { getListData } = require('../../utils/Response/listData');
+const PostController = require('./PostController');
+const CommentController = require('./CommentController');
+const ConversationController = require('./ConversationController');
+const UserController = require('./UserController');
+const {
+	notificationToAuthorOfComment,
+	notificationToAuthorOfPost,
+	notificationToUser,
+	notificationToMembersOfConv,
+} = require('../../utils/Notification/Admin');
 
 class ReportController {
 	async createReport(req, res, next) {
@@ -56,6 +66,96 @@ class ReportController {
 			await newReport.save();
 
 			return res.status(200).json(newReport);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// handle report
+	async handleReport(req, res, next) {
+		try {
+			const report = await Report.findById(req.params.id)
+				.populate({
+					path: 'reporter',
+					select: '_id fullname profilePicture isOnline',
+					populate: { path: 'profilePicture', select: '_id link' },
+				})
+				.populate({
+					path: 'user',
+					select: '_id fullname profilePicture isOnline',
+					populate: { path: 'profilePicture', select: '_id link' },
+				})
+				.populate({
+					path: 'post',
+					select: '_id content author',
+					populate: { path: 'author', select: '_id fullname profilePicture isOnline' },
+				})
+				.populate({
+					path: 'comment',
+					select: '_id content author',
+					populate: [
+						{
+							path: 'author',
+							select: '_id fullname profilePicture isOnline',
+						},
+						{
+							path: 'post',
+							select: '_id content author',
+							populate: { path: 'author', select: '_id fullname profilePicture isOnline' },
+						},
+					],
+				})
+				.populate({
+					path: 'conversation',
+					select: '_id name members',
+					populate: { path: 'members', select: '_id fullname profilePicture isOnline' },
+				});
+
+			if (!report) {
+				return next(createError.NotFound('Báo cáo không tồn tại'));
+			}
+
+			if (report.type) {
+				if (report.type === 'post') {
+					req.params.id = report.post._id;
+					// delete post and notification to author
+					await PostController.deletePost(req, res, next);
+					await notificationToAuthorOfPost(report.post, req.user);
+				} else if (report.type === 'comment') {
+					console.log(report);
+					req.params.id = report.comment._id;
+					req.params.postId = req.comment.post._id;
+					// delete comment and notification to author
+					await CommentController.deleteComment(req, res, next);
+					await notificationToAuthorOfComment(report.comment.post, report.comment, req.user);
+				} else if (report.type === 'conversation') {
+					req.params.id = report.conversation._id;
+					// delete conversation and notification to members
+					await ConversationController.delete(req, res, next);
+					await notificationToMembersOfConv(report.conversation, req.user);
+				} else if (report.type === 'user') {
+					// delete user and notification to user
+					req.params.id = report.user._id;
+					await UserController.lockAccount(req, res, next);
+					await notificationToUser(report.user, req.user);
+				} else {
+					throw new Error('Report type not found');
+				}
+			}
+
+			report.status = 'approved';
+			await report.save();
+
+			return res.status(200).json(report);
 		} catch (error) {
 			console.log(error);
 			return next(
@@ -213,10 +313,29 @@ class ReportController {
 	async getAllReports(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const { type } = req.query;
 			let query = {};
-			if (req.query.type) {
-				query = { type: req.query.type };
+
+			if (req.query.reporterId) {
+				query = { reporter: req.query.reporterId };
 			}
+
+			if (type) {
+				query = { type };
+
+				if (req.query.id) {
+					if (type === 'post') {
+						query = { ...query, post: req.query.id };
+					} else if (type === 'comment') {
+						query = { ...query, comment: req.query.id };
+					} else if (type === 'user') {
+						query = { ...query, user: req.query.id };
+					} else if (type === 'conversation') {
+						query = { ...query, conversation: req.query.id };
+					}
+				}
+			}
+
 			Report.paginate(query, {
 				offset,
 				limit,
@@ -234,12 +353,12 @@ class ReportController {
 					},
 					{
 						path: 'post',
-						select: '_id content',
+						select: '_id content author',
 						populate: { path: 'media', select: '_id link' },
 					},
 					{
 						path: 'comment',
-						select: '_id content',
+						select: '_id content author',
 						populate: { path: 'media', select: '_id link' },
 					},
 					{ path: 'conversation' },
