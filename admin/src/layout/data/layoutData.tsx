@@ -1,11 +1,13 @@
 import Icon from '@ant-design/icons';
 import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
-import { ILayoutData } from '@layout/types';
+import { BsExclamationTriangle } from 'react-icons/bs';
 
+import { ILayoutData } from '@layout/types';
 import UserPage from '@modules/user/pages/UserPage';
 import AdminPage from '@modules/admin/pages/AdminPage';
 import DashboardPage from '@modules/dashboard/pages/Dashboard';
+import ReportPage from '@modules/report/pages/ReportPage.tsx';
 
 export const layoutData: ILayoutData[] = [
 	{
@@ -38,5 +40,11 @@ export const layoutData: ILayoutData[] = [
 				element: <div>Role</div>,
 			},
 		],
+	},
+	{
+		path: 'report',
+		title: 'Báo cáo',
+		icon: <Icon component={BsExclamationTriangle} />,
+		element: <ReportPage />,
 	},
 ];

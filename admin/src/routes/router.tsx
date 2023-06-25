@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import LoginPage from '@modules/auth/pages/LoginPage';
 import UserDetail from '@modules/user/pages/UserDetail.tsx';
+import ReportDetail from '@modules/report/pages/ReportDetail.tsx';
 
 export const router = createBrowserRouter([
 	{
@@ -26,6 +27,15 @@ export const router = createBrowserRouter([
 								element: <UserDetail />,
 							},
 						],
+					},
+				],
+			},
+			{
+				path: 'report',
+				children: [
+					{
+						path: ':id',
+						element: <ReportDetail />,
 					},
 				],
 			},

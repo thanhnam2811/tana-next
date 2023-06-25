@@ -1,31 +1,21 @@
 import useSWR from 'swr';
 import { Navigate, useParams } from 'react-router-dom';
 import { swrFetcher } from '@common/api';
-import { Avatar, Badge, Card, Descriptions, Space, Spin } from 'antd';
+import { Avatar, Badge, Card, Descriptions, Space } from 'antd';
 import { UserType } from '@modules/user/types';
-import { AxiosError } from 'axios';
 import { timeUtil } from '@common/utils';
 import { capitalize } from 'lodash';
+import { FullscreenSpin } from '@common/components/Loading';
 
 export default function UserDetail() {
 	const { id } = useParams();
-	const { data, isLoading, error } = useSWR<UserType, AxiosError>(`users/${id}`, swrFetcher);
+	const { data: user, isLoading, error } = useSWR<UserType, string>(`users/${id}`, swrFetcher);
 
-	if (error) {
-		if (error.response?.status === 404) {
-			return <Navigate to="/404" />;
-		}
-		return <div>{error.message}</div>;
-	}
+	if (isLoading) return <FullscreenSpin />;
 
-	if (isLoading)
-		return (
-			<div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-				<Spin />
-			</div>
-		);
+	if (error) return <div>{error}</div>;
 
-	const user = data!;
+	if (!user) return <Navigate to="/404" />;
 
 	return (
 		<Card
@@ -71,8 +61,8 @@ export default function UserDetail() {
 						/>
 					)}
 				</Descriptions.Item>
-				<Descriptions.Item label="Ngày tạo">{timeUtil.formatDate(user!.createdAt)}</Descriptions.Item>
-				<Descriptions.Item label="Ngày cập nhật">{timeUtil.formatDate(user!.updatedAt)}</Descriptions.Item>
+				<Descriptions.Item label="Ngày tạo">{timeUtil.formatDate(user.createdAt)}</Descriptions.Item>
+				<Descriptions.Item label="Ngày cập nhật">{timeUtil.formatDate(user.updatedAt)}</Descriptions.Item>
 
 				<Descriptions.Item label="Liên hệ">
 					<Space direction="vertical">{user.contact.map((contact) => contact.value)}</Space>
