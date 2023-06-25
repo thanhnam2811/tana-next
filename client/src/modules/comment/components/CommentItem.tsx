@@ -6,10 +6,16 @@ import { Collapse } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, List } from 'antd';
 import { useState } from 'react';
-import { HiOutlineChatBubbleLeft, HiOutlineHandThumbUp, HiOutlineTrash } from 'react-icons/hi2';
+import {
+	HiOutlineChatBubbleLeft,
+	HiOutlineExclamationTriangle,
+	HiOutlineHandThumbUp,
+	HiOutlineTrash,
+} from 'react-icons/hi2';
 import { CommentType } from '../types';
 import { ListComment } from './ListComment';
 import { dateUtil } from '@common/utils';
+import { useReport } from '@modules/report/hooks';
 
 interface Props {
 	post: PostType;
@@ -51,6 +57,20 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			</Button>,
 		];
 	}
+
+	const { openReport } = useReport({ type: 'comment', id: comment._id });
+	if (!isAuthor)
+		actions = [
+			...actions,
+			<Button
+				key="report"
+				size="small"
+				type="text"
+				danger
+				icon={<HiOutlineExclamationTriangle />}
+				onClick={openReport}
+			/>,
+		];
 
 	if (isAuthor || isPostAuthor) {
 		actions = [
