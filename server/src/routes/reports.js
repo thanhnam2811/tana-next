@@ -9,4 +9,7 @@ router.get('/:id', isAuth, RoleMiddleware.IsAdmin, ReportController.getReportByI
 router.get('/', isAuth, RoleMiddleware.IsAdmin, ReportController.getAllReports);
 
 router.post('/', isAuth, ReportController.createReport);
+
+router.put('/:id/approve', isAuth, RoleMiddleware.IsAdmin, ReportController.handleReport);
+router.put('/:id/reject', isAuth, RoleMiddleware.IsAdmin);
 module.exports = router;

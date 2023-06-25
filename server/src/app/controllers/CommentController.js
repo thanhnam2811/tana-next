@@ -227,8 +227,7 @@ class CommentController {
 		}
 	}
 
-	// [Delete] delete a comment
-	async delete(req, res, next) {
+	async deleteComment(req, res, next) {
 		try {
 			const comment = await Comment.findById(req.params.id).populate(
 				'author',
@@ -238,7 +237,8 @@ class CommentController {
 			if (comment) {
 				if (
 					comment.author._id.toString() === req.user._id.toString() ||
-					post.author.toString() === req.user._id.toString()
+					post.author.toString() === req.user._id.toString() ||
+					req.user.role.name === 'ADMIN'
 				) {
 					await comment.delete();
 					// check comment is included in lastestFiveComments of post
@@ -258,11 +258,32 @@ class CommentController {
 					});
 					// save and return post populated with comments
 					await post.save();
-					return res.status(200).json(comment);
+					return comment;
 				}
 				return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
 			}
 			return responseError(res, 404, 'Bình luận không tồn tại');
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [Delete] delete a comment
+	async delete(req, res, next) {
+		try {
+			const comment = await this.deleteComment(req, res, next);
+			if (!comment) return responseError(res, 500, 'Không xóa được bình luận!!!');
+
+			return res.status(200).json(comment);
 		} catch (error) {
 			console.log(error);
 			return next(
