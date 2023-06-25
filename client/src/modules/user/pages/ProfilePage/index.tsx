@@ -43,21 +43,23 @@ function Index() {
 			tab: 'about',
 			component: <InfoTab />,
 		},
-		{
-			label: 'Hoạt động',
-			Icon: BiHistory,
-			tab: 'activity',
-			component: <ActivityTab />,
-		},
 	];
 	const isAuthUser = authUser?._id === id;
 	if (isAuthUser) {
-		tabList.push({
-			label: 'Bảo mật',
-			Icon: HiShieldExclamation,
-			tab: 'security',
-			component: <SecurityTab />,
-		});
+		tabList.push(
+			{
+				label: 'Hoạt động',
+				Icon: BiHistory,
+				tab: 'activity',
+				component: <ActivityTab />,
+			},
+			{
+				label: 'Bảo mật',
+				Icon: HiShieldExclamation,
+				tab: 'security',
+				component: <SecurityTab />,
+			}
+		);
 	}
 
 	const tabItem = tabList.find((item) => item.tab === tab);
