@@ -1315,8 +1315,7 @@ class UserController {
 		}
 	}
 
-	// lock account
-	async lockAccount(req, res, next) {
+	async lock(req, res, next) {
 		try {
 			const user = await populateUser(req.params.id);
 			if (!user) {
@@ -1328,6 +1327,29 @@ class UserController {
 			// lock account 100 years
 			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 			await user.save();
+			return user;
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// lock account
+	async lockAccount(req, res, next) {
+		try {
+			const user = await this.lock(req, res, next);
+			if (!user) {
+				return next(createError.NotFound('User not found'));
+			}
+
 			return res.status(200).json(user);
 		} catch (err) {
 			console.log(err);

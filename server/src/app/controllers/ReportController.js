@@ -140,12 +140,12 @@ class ReportController {
 				} else if (report.type === 'conversation') {
 					req.params.id = report.conversation._id;
 					// delete conversation and notification to members
-					await ConversationController.delete(req, res, next);
+					await ConversationController.deleteConversation(req, res, next);
 					await notificationToMembersOfConv(report.conversation, req.user);
 				} else if (report.type === 'user') {
 					// delete user and notification to user
 					req.params.id = report.user._id;
-					await UserController.lockAccount(req, res, next);
+					await UserController.lock(req, res, next);
 					await notificationToUser(report.user, req.user);
 				} else {
 					throw new Error('Report type not found');

@@ -903,8 +903,7 @@ class ConversationController {
 		}
 	}
 
-	// [Delete] delete conversation
-	async delete(req, res, next) {
+	async deleteConversation(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
 			if (!conversation) {
@@ -917,10 +916,31 @@ class ConversationController {
 				await conversation.delete();
 				// delete all message in conversation
 				await Message.deleteMany({ conversation: req.params.id });
-				return res.status(200).json(conversation);
+				return conversation;
 			} else {
 				return responseError(res, 403, 'Bạn không có quyền xóa cuộc hội thoại này');
 			}
+		} catch (error) {
+			console.error(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [Delete] delete conversation
+	async delete(req, res, next) {
+		try {
+			const conversation = await this.deleteConversation(req, res, next);
+			if (!conversation) return responseError(res, 500, 'Không thể xóa cuộc trò chuyện này');
+
+			return res.status(200).json(conversation);
 		} catch (err) {
 			console.log(err);
 			return next(
