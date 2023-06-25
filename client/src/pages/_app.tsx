@@ -8,16 +8,13 @@ import { Analytics } from '@vercel/analytics/react';
 import { App, ConfigProvider, theme } from 'antd';
 
 import '@styles/global.scss';
-import 'aos/dist/aos.css';
 import 'draft-js/dist/Draft.css';
-import 'swiper/css';
 
 import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useTheme } from 'src/layout/hooks';
 import { SERVER_URL } from '@common/config';
-import SEO from '@common/components/SEO';
 
 dayjs.locale('vi');
 
@@ -67,28 +64,24 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 	};
 
 	return (
-		<>
-			<SEO />
+		<ConfigProvider
+			locale={viVn}
+			theme={{
+				token: {},
+				algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+			}}
+			input={{ autoComplete: 'off' }}
+			select={{ showSearch: true }}
+		>
+			<Toaster position="bottom-right" />
 
-			<ConfigProvider
-				locale={viVn}
-				theme={{
-					token: {},
-					algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
-				}}
-				input={{ autoComplete: 'off' }}
-				select={{ showSearch: true }}
-			>
-				<Toaster position="bottom-right" />
+			<NextProgress color={token.colorPrimary} delay={300} height={2} />
 
-				<NextProgress color={token.colorPrimary} delay={300} height={2} />
+			<AppContainer>
+				<Component {...pageProps} />
+			</AppContainer>
 
-				<AppContainer>
-					<Component {...pageProps} />
-				</AppContainer>
-
-				<Analytics />
-			</ConfigProvider>
-		</>
+			<Analytics />
+		</ConfigProvider>
 	);
 }
