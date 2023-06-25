@@ -9,6 +9,7 @@ import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space, Typography 
 import Link from 'next/link';
 import { HiArchive, HiBell, HiDotsHorizontal, HiEyeOff, HiLink } from 'react-icons/hi';
 import {
+	HiExclamationTriangle,
 	HiOutlineArrowTopRightOnSquare,
 	HiOutlineChatBubbleLeft,
 	HiOutlineHandThumbUp,
@@ -23,6 +24,7 @@ import { deletePostApi, reactToPostApi, updatePostApi } from '@modules/post/api'
 import { toast } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { dateUtil, randomUtil, urlUtil } from '@common/utils';
+import { useReport } from '@modules/report/hooks';
 
 const { Meta } = Card;
 
@@ -45,31 +47,41 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 	const loading = !post;
 	const { authUser } = useAuth();
 
+	const { openReport } = useReport({ type: 'post', id: post?._id });
 	const menuProps: MenuProps = {
 		items: [
 			{
 				key: 'archive',
 				icon: <HiArchive />,
 				label: 'Lưu bài viết',
-				onClick: () => console.log('Lưu bài viết'),
+				disabled: true,
 			},
 			{
 				key: 'subscribe',
 				icon: <HiBell />,
 				label: 'Theo dõi bài viết',
-				onClick: () => console.log('Theo dõi bài viết'),
+				disabled: true,
 			},
 			{
 				key: 'hide',
 				icon: <HiEyeOff />,
 				label: 'Ẩn bài viết',
-				onClick: () => console.log('Ẩn bài viết'),
+				disabled: true,
 			},
 			{
 				key: 'copy',
 				icon: <HiLink />,
 				label: 'Sao chép liên kết',
-				onClick: () => console.log('Sao chép liên kết'),
+				onClick: async () => {
+					await navigator.clipboard.writeText(link);
+					toast.success('Đã sao chép liên kết');
+				},
+			},
+			{
+				key: 'report',
+				icon: <HiExclamationTriangle />,
+				label: 'Báo cáo bài viết',
+				onClick: openReport,
 			},
 		],
 	};

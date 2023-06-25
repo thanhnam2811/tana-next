@@ -37,9 +37,9 @@ export function useReport({ type, id }: Props) {
 			values[type] = id;
 
 			await reportApi(values);
-			toast.success('Gửi báo cáo thành công!', { id: toastId });
+			toast.success(`${labelReport[type]} thành công!`, { id: toastId });
 		} catch (error: any) {
-			toast.error(`Gửi báo cáo thất bại: ${error.message}!`, { id: toastId });
+			toast.error(`${labelReport[type]} thất bại!`, { id: toastId });
 		}
 	};
 
