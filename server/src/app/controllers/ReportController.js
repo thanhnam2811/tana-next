@@ -101,7 +101,7 @@ class ReportController {
 				})
 				.populate({
 					path: 'comment',
-					select: '_id content author',
+					select: '_id content author post',
 					populate: [
 						{
 							path: 'author',
