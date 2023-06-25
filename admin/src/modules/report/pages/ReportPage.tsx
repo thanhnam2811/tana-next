@@ -2,10 +2,24 @@ import { PageTableBase } from '@common/components/PageTableBase';
 import { ColumnType } from 'antd/es/table';
 import { Link, useNavigate } from 'react-router-dom';
 import { ReportType } from '@modules/report/types';
-import { Image, Typography } from 'antd';
-import { StatusTag } from '@modules/report/components';
+import { Typography } from 'antd';
+import { ReportStatusTag } from '@modules/report/components';
+import { ReportTypeTag } from '@modules/report/components/ReportTypeTag.tsx';
 
 const columns: ColumnType<ReportType>[] = [
+	{
+		key: 'type',
+		title: 'Loại',
+		dataIndex: 'type',
+		render: (type: ReportType['type']) => <ReportTypeTag type={type} />,
+	},
+	{
+		key: 'status',
+		title: 'Trạng thái',
+		dataIndex: 'status',
+		render: (status: ReportType['status']) => <ReportStatusTag status={status} />,
+		width: 120,
+	},
 	{
 		key: 'content',
 		title: 'Nội dung',
@@ -29,25 +43,6 @@ const columns: ColumnType<ReportType>[] = [
 				</Typography.Paragraph>
 			</Typography>
 		),
-	},
-	{
-		key: 'images',
-		title: 'Hình ảnh',
-		dataIndex: 'images',
-		render: (images: ReportType['images']) => (
-			<Image.PreviewGroup>
-				{images?.map((image) => (
-					<Image key={image._id} width={100} height={100} src={image.link} />
-				))}
-			</Image.PreviewGroup>
-		),
-	},
-	{
-		key: 'status',
-		title: 'Trạng thái',
-		dataIndex: 'status',
-		render: (status: ReportType['status']) => <StatusTag status={status} />,
-		width: 120,
 	},
 ];
 

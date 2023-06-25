@@ -1,1 +1,1 @@
-export * from './StatusTag.tsx';
+export * from './ReportStatusTag.tsx';

@@ -5,9 +5,10 @@ import { FullscreenSpin } from '@common/components/Loading';
 import { ReportType } from '@modules/report/types';
 import { Button, Card, Image, message, Space, Typography } from 'antd';
 import { timeUtil } from '@common/utils';
-import { StatusTag } from '@modules/report/components';
+import { ReportStatusTag } from '@modules/report/components';
 import { approveReportApi } from '@modules/report/api';
 import { useState } from 'react';
+import { ReportTypeTag } from '@modules/report/components/ReportTypeTag.tsx';
 
 function ReportDetail() {
 	const { id } = useParams();
@@ -108,9 +109,15 @@ function ReportDetail() {
 				</Typography.Paragraph>
 
 				<Typography.Paragraph>
+					<b>Loại: </b>
+
+					<ReportTypeTag type={report.type} />
+				</Typography.Paragraph>
+
+				<Typography.Paragraph>
 					<b>Trạng thái: </b>
 
-					<StatusTag status={report.status} />
+					<ReportStatusTag status={report.status} />
 				</Typography.Paragraph>
 
 				<Typography.Paragraph>

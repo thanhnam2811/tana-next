@@ -26,7 +26,7 @@ interface Props {
 	status: ReportType['status'];
 }
 
-export function StatusTag({ status, ...props }: Props & TagProps) {
+export function ReportStatusTag({ status, ...props }: Props & TagProps) {
 	const { color, label } = statusMap[status];
 
 	return (
