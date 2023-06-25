@@ -13,6 +13,7 @@ export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPag
 	addData: (newData: T, validate?: boolean) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
+	loadingMore: boolean;
 	validating: boolean;
 	hasMore: boolean;
 	params: IPaginationParams;
@@ -75,13 +76,20 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 
 	const removeData = (id: string) => setData((prevData) => prevData.filter((item) => item._id !== id));
 
-	const loadMore = () => setPage(page + 1);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const loadMore = () => {
+		if (loadingMore || !hasMore) return;
+
+		setLoadingMore(true);
+		setPage(page + 1).finally(() => setLoadingMore(false));
+	};
 
 	return {
 		data,
 		listRes,
 		params,
 		fetching,
+		loadingMore,
 		validating,
 		hasMore,
 		loadMore,
