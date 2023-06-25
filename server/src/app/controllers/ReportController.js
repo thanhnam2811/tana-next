@@ -144,6 +144,9 @@ class ReportController {
 					path: 'conversation',
 					select: '_id name members',
 					populate: { path: 'members', select: '_id fullname profilePicture isOnline' },
+				})
+				.populate({
+					path: 'images',
 				});
 
 			if (!report) {
@@ -314,7 +317,8 @@ class ReportController {
 					select: '_id content',
 					populate: { path: 'media', select: '_id link' },
 				})
-				.populate('conversation');
+				.populate('conversation')
+				.populate('images');
 			if (!report) {
 				return next(createError.NotFound('Báo cáo không tồn tại'));
 			}
@@ -387,6 +391,9 @@ class ReportController {
 						populate: { path: 'media', select: '_id link' },
 					},
 					{ path: 'conversation' },
+					{
+						path: 'images',
+					},
 				],
 			})
 				.then((data) => {
