@@ -1,6 +1,5 @@
 import { PrivacyDropdown } from 'src/common/components/Button';
 import { RichTextInput } from 'src/common/components/Input';
-import { PostFormType, PostType } from '@common/types';
 import { IMedia } from '@common/types/common';
 import { Collapse } from '@mui/material';
 import { Button, Card, Form, Modal, Space, theme } from 'antd';
@@ -10,6 +9,7 @@ import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { PostMedia } from './PostCard';
 import { randomUtil } from '@common/utils';
 import { uploadFileApi } from '@common/api';
+import { PostFormType, PostType } from '@modules/post/types';
 
 interface Props {
 	data?: PostType;

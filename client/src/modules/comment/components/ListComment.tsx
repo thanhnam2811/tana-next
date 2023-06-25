@@ -1,5 +1,5 @@
 import { useFetcher } from '@common/hooks';
-import { CommentFormType, CommentType, PostType, ReactionType } from '@common/types';
+import { ReactionTypeValue } from '@common/types';
 import { Button, Form, Input, List, Space } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import React, { useState } from 'react';
@@ -7,6 +7,8 @@ import { toast } from 'react-hot-toast';
 import { createCommentApi, deleteCommentApi, reactToCommentApi, replyToCommentApi } from '../api';
 import { CommentItem } from './CommentItem';
 import { useAuth } from '@modules/auth/hooks';
+import { CommentFormType, CommentType } from '@modules/comment/types';
+import { PostType } from '@modules/post/types';
 
 interface Props {
 	post: PostType;
@@ -58,7 +60,7 @@ export function ListComment({ post, comment }: Props) {
 	};
 
 	// React to the post
-	const handleReact = async (commentId: string, react: ReactionType) => {
+	const handleReact = async (commentId: string, react: ReactionTypeValue) => {
 		try {
 			const reacted = await reactToCommentApi(post._id, commentId, react);
 

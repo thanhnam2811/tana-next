@@ -1,5 +1,4 @@
 import { useFetcher } from '@common/hooks';
-import { PostType } from '@common/types';
 import { CreatePost, ListPost } from '@modules/post/components';
 import { useUserAction, useUserContext } from '@modules/user/hooks';
 import styles from './PostTab.module.scss';
@@ -12,6 +11,7 @@ import { uploadFileApi } from '@common/api';
 import { ReactNode } from 'react';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { useReport } from '@modules/report/hooks';
+import { PostType } from '@modules/post/types';
 
 export function PostTab() {
 	const { token } = theme.useToken();

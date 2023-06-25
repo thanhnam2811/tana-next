@@ -1,5 +1,4 @@
 import { FetcherType } from '@common/hooks';
-import { PostFormType, PostType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
 import { Button, Card, CardProps, Input, theme } from 'antd';
 import { useState } from 'react';
@@ -7,6 +6,7 @@ import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { createPostApi } from '@modules/post/api';
 import dynamic from 'next/dynamic';
+import { PostFormType, PostType } from '@modules/post/types';
 
 const PostModal = dynamic(() => import('./PostModal').then((mod) => mod.PostModal));
 const UserAvatar = dynamic(() => import('@modules/user/components').then((mod) => mod.UserAvatar));

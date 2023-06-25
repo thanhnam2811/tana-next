@@ -1,8 +1,8 @@
-import { PostType } from '@common/types';
 import { getPostApi } from '@modules/post/api';
 import PostPage, { PostSEO } from '@modules/post/pages/PostPage';
 import { GetServerSideProps } from 'next';
 import { ApiError, handleError, isApiError } from '@common/api';
+import { PostType } from '@modules/post/types';
 
 interface Props {
 	post?: PostType;

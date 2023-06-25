@@ -2,8 +2,8 @@ import { reactOptions } from '@assets/data';
 import { PrivacyDropdown } from 'src/common/components/Button';
 import { UserAvatar } from '@modules/user/components';
 import { ReactPopover, SharePopover } from 'src/common/components/Popover';
-import { IPrivacy, PostType } from '@common/types';
-import { ReactionType } from '@common/types/common';
+import { IPrivacy } from '@common/types';
+import { ReactionTypeValue } from '@common/types/common';
 import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space, Typography } from 'antd';
 import Link from 'next/link';
@@ -25,6 +25,7 @@ import { toast } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { dateUtil, randomUtil, urlUtil } from '@common/utils';
 import { useReport } from '@modules/report/hooks';
+import { PostType } from '@modules/post/types';
 
 const { Meta } = Card;
 
@@ -99,7 +100,7 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 	const reaction = reactOptions.find((react) => react.value === post!.reactOfUser);
 
 	// React to the post
-	const handleReact = async (react: ReactionType) => {
+	const handleReact = async (react: ReactionTypeValue) => {
 		try {
 			const reacted = await reactToPostApi(post!._id, react);
 
