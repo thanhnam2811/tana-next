@@ -16,7 +16,7 @@ class ReportController {
 			const schema = Joi.object({
 				title: Joi.string().required(),
 				description: Joi.string(),
-				type: Joi.string().valid('user', 'post', 'comment', 'conversation', 'other').required(),
+				type: Joi.string().valid('user', 'post', 'comment', 'conversation', 'bug').required(),
 				images: Joi.array().items(Joi.string()),
 				user: Joi.string(),
 				post: Joi.string(),

@@ -33,7 +33,7 @@ const ReportSchema = new mongoose.Schema(
 		},
 		type: {
 			type: String,
-			enum: ['post', 'comment', 'user', 'conversation', 'other'],
+			enum: ['post', 'comment', 'user', 'conversation', 'bug'],
 		},
 		images: [
 			{
