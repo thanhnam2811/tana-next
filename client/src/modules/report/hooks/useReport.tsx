@@ -60,7 +60,12 @@ export function useReport({ type, id }: Props) {
 					</Form.Item>
 
 					<Form.Item name="files" label="Hình ảnh mô tả (Tối đa 3 ảnh)" shouldUpdate>
-						<Upload listType="picture-card" maxCount={3} accept="image/*">
+						<Upload
+							listType="picture-card"
+							maxCount={3}
+							accept="image/*"
+							beforeUpload={() => false} // Prevent upload
+						>
 							+ Thêm ảnh
 						</Upload>
 					</Form.Item>
