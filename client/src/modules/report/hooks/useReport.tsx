@@ -5,7 +5,7 @@ import { uploadFileApi } from '@common/api';
 import { reportApi } from '@modules/report/api';
 
 const labelReport: Record<ReportTypeValue, string> = {
-	other: 'Báo cáo lỗi',
+	bug: 'Báo lỗi',
 	comment: 'Báo cáo bình luận',
 	post: 'Báo cáo bài viết',
 	conversation: 'Báo cáo cuộc trò chuyện',

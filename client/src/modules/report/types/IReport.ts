@@ -1,7 +1,7 @@
 import { IData, IMedia } from '@common/types';
 import { RcFile } from 'antd/es/upload';
 
-export type ReportTypeValue = 'user' | 'post' | 'comment' | 'conversation' | 'other';
+export type ReportTypeValue = 'user' | 'post' | 'comment' | 'conversation' | 'bug';
 
 interface IReport extends IData {
 	title: string;

@@ -15,12 +15,10 @@ import {
 } from 'react-icons/hi2';
 import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../data';
 import { FriendType } from '../types';
-import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
-import { createConversationApi } from '@modules/messages/api';
 import { useAuth } from '@modules/auth/hooks';
-import { useState } from 'react';
+import { useReport } from '@modules/report/hooks';
+import { useUserAction } from '@modules/user/hooks';
 
 interface Props {
 	user: UserType;
@@ -35,106 +33,24 @@ export function FriendCard({ user }: Props) {
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
 	const _relationship = user.relationship || friendRelationshipMap[type] || 'none';
-	const [relationship, setRelationship] = useState(_relationship);
-	const [loading, setLoadingState] = useState<{ [key: string]: boolean }>({});
-	const setLoading = (key: string, value: boolean) => setLoadingState((prev) => ({ ...prev, [key]: value }));
+	const {
+		relationship,
+		loading,
+		handleRequestFriend,
+		handleCancelRequestFriend,
+		handleAcceptFriend,
+		handleUnfriend,
+		handleChat,
+		handleRejectFriend,
+	} = useUserAction({ ...user, relationship: _relationship });
 
-	const handleRequestFriend = async () => {
-		const toastId = toast.loading('Đang gửi lời mời kết bạn...');
-		setLoading('request', true);
-
-		try {
-			await requestFriendApi(user._id);
-			toast.success('Gửi lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('sent');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('request', false);
-	};
-
-	const handleUnfriend = async () => {
-		const toastId = toast.loading('Đang hủy kết bạn...');
-		setLoading('unfriend', true);
-
-		try {
-			await unFriendApi(user._id);
-			toast.success('Hủy kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('unfriend', false);
-	};
-
-	const handleChat = async () => {
-		const toastId = toast.loading('Đang chuyển hướng đến trang nhắn tin...');
-		setLoading('chat', true);
-
-		try {
-			const created = await createConversationApi({ members: [{ user: user._id }] });
-			await router.push(`/messages?id=${created._id}`);
-
-			toast.dismiss(toastId);
-		} catch (error) {
-			toast('Có lỗi xảy ra, vui lòng thử lại sau', { id: toastId });
-		}
-
-		setLoading('chat', false);
-	};
-
-	const handleAcceptFriend = async () => {
-		const toastId = toast.loading('Đang xác nhận lời mời kết bạn...');
-		setLoading('accept', true);
-
-		try {
-			await acceptFriendApi(user._id);
-			toast.success('Xác nhận lời mời kết bạn thành công! Bạn bè với nhau rồi đó!', { id: toastId });
-			setRelationship('friend');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('accept', false);
-	};
-
-	const handleRejectFriend = async () => {
-		const toastId = toast.loading('Đang từ chối lời mời kết bạn...');
-		setLoading('reject', true);
-
-		try {
-			await rejectFriendApi(user._id);
-			toast.success('Từ chối lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('reject', false);
-	};
-
-	const handleCancelRequestFriend = async () => {
-		const toastId = toast.loading('Đang hủy lời mời kết bạn...');
-		setLoading('cancel', true);
-
-		try {
-			await requestFriendApi(user._id); // Request friend again to cancel
-			toast.success('Hủy lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('cancel', false);
-	};
-
+	const { openReport } = useReport({ type: 'user', id: user._id });
 	const dropdownItems: MenuProps['items'] = [
 		{
 			key: 'report',
 			icon: <HiExclamationTriangle />,
 			label: 'Báo cáo',
+			onClick: openReport,
 		},
 	];
 
@@ -237,7 +153,7 @@ export function FriendCard({ user }: Props) {
 					<Button
 						icon={<HiDotsHorizontal />}
 						disabled={isAuthUser}
-						loading={Object.keys(loading).some((item) => item !== 'chat' && loading[item])} // loading not include chat
+						loading={Object.keys(loading).some((item) => item !== 'chat' && loading[item])} // loading doesn't include chat
 					/>
 				</Dropdown>,
 			]}

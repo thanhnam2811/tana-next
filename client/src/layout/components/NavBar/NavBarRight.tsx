@@ -27,12 +27,12 @@ export function NavBarRight() {
 		{
 			key: 'theme',
 			label: `Chế độ ${mode === 'dark' ? 'sáng' : 'tối'}`,
-			icon: mode === 'dark' ? <HiMoon /> : <HiSun />,
+			icon: mode === 'dark' ? <HiSun /> : <HiMoon />,
 			onClick: toggleTheme,
 		},
 		{
 			key: 'report',
-			label: 'Báo cáo sự cố',
+			label: 'Báo lỗi',
 			icon: <HiExclamationTriangle />,
 			onClick: openReport,
 		},
@@ -56,7 +56,7 @@ export function NavBarRight() {
 				)}
 			/>
 
-			<Dropdown menu={{ items: avatarDropdownItems }} arrow>
+			<Dropdown menu={{ items: avatarDropdownItems }} arrow trigger={['click']}>
 				<Button shape="circle" size="large">
 					<Avatar src={authUser?.profilePicture.link} />
 				</Button>
