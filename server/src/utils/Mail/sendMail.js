@@ -5,7 +5,7 @@ const emailTemplateVerify = (link, name) => `
     <div style="background-color: #f5f5f5; padding: 20px 0;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <img src="./LogoTana.png" alt="logo" style="width: 100px; height: 100px;">
+                <img src="https://www.tana.social/logo.png" alt="logo" style="width: 100px; height: 100px;">
             </div>
             <div style="text-align: center; margin-bottom: 20px;">
                 <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">Xin chào ${name}</h1>
@@ -27,7 +27,7 @@ const emailTemplateSendOTP = (otp, name) =>
     <div style="background-color: #f5f5f5; padding: 20px 0;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <img src="./LogoTana.png" alt="logo" style="width: 100px; height: 100px;">
+                <img src="https://www.tana.social/logo.png" alt="logo" style="width: 100px; height: 100px;">
             </div>
             <div style="text-align: center; margin-bottom: 20px;">
                 <h1 style="color: #333; font-size: 24px; margin-bottom: 10px;">Xin chào ${name}</h1>
@@ -280,7 +280,7 @@ const sendEmailVerify = async (email, subject, link, user) => {
 	}
 };
 
-const sendMailOTP = async (email, subject, otp, user) => {
+const sendMailOTP = async (email, subject, otp, name) => {
 	try {
 		const transporter = nodemailer.createTransport({
 			host: process.env.HOST,
@@ -298,7 +298,7 @@ const sendMailOTP = async (email, subject, otp, user) => {
 			to: email,
 			subject,
 			text: otp,
-			html: emailTemplateSendOTP(otp, user.fullname),
+			html: emailTemplateSendOTP(otp, name),
 		});
 		// return true if email sent successfully
 		console.log('email sent sucessfully');

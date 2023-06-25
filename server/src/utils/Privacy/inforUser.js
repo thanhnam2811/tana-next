@@ -63,11 +63,15 @@ async function getUserWithPrivacy(req, res) {
 					if (item.privacy.value == 'public') return true;
 					if (item.privacy.value == 'private') return false;
 					if (item.privacy.value == 'friends' && isFriend) return true;
-					if (item.privacy.value == 'includes' && item.privacy.includes.some((id) => id == req.user._id))
+					if (
+						item.privacy.value == 'includes' &&
+						item.privacy.includes.some((id) => id.toString() == req.user._id.toString()) &&
+						isFriend
+					)
 						return true;
 					if (
 						item.privacy.value == 'excludes' &&
-						!item.privacy.excludes.some((id) => id == req.user._id) &&
+						!item.privacy.excludes.some((id) => id.toString() == req.user._id.toString()) &&
 						isFriend
 					)
 						return true;
@@ -83,9 +87,10 @@ async function getUserWithPrivacy(req, res) {
 				} else if (privacy.value == 'friends') {
 					if (!isFriend) user[field] = null;
 				} else if (privacy.value == 'includes') {
-					if (!privacy.includes.some((u) => u._id == req.user._id)) user[field] = null;
+					if (!privacy.includes.some((u) => u._id.toString() == req.user._id.toString())) user[field] = null;
 				} else if (privacy.value == 'excludes') {
-					if (privacy.exclues.some((u) => u._id == req.user._id) && !isFriend) user[field] = null;
+					if (privacy.exclues.some((u) => u._id.toString() == req.user._id.toString()) && !isFriend)
+						user[field] = null;
 				}
 			}
 		});

@@ -6,7 +6,7 @@ async function createActivityWithFriendRequest(currentUser, user) {
 		type: 'friend',
 		content: `Bạn đã gửi lời mời kết bạn ${user.fullname}`,
 		link: `/profile/${user._id}`,
-		target: user._id,
+		friend: user._id,
 		user: currentUser._id,
 	});
 	await activity.save();
@@ -17,7 +17,7 @@ async function createActivityWithFriendAccept(currentUser, user) {
 		type: 'friend',
 		content: `Bạn đã chấp nhận lời mời kết bạn ${user.fullname}`,
 		link: `/profile/${user._id}`,
-		target: user._id,
+		friend: user._id,
 		user: currentUser._id,
 	});
 	await activity.save();

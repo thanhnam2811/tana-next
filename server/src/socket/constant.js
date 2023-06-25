@@ -20,6 +20,10 @@ const notificationType = {
 	REACT_COMMENT: 'reactComment',
 	REPLY_COMMENT: 'replyComment',
 	TAG_COMMENT: 'tagComment',
+	DELETE_POST: 'deletePost',
+	DELETE_COMMENT: 'deleteComment',
+	LOCK_ACCOUNT: 'lockAccount',
+	DELETE_CONVERSATION: 'deleteConversation',
 };
 
 module.exports = {

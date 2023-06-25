@@ -23,9 +23,8 @@ router.get(
 	AuthoController.loginGithub
 );
 
-router.get('/verify/:userId/:token', AuthoController.verify);
-router.get('/sendOTP-confirm', AuthoMiddleware.isAuth, AuthoController.sendOTP);
-router.get('/sendOTP-verify', AuthoMiddleware.isAuth, AuthoController.sendOTP);
+router.post('/otp/set-password', AuthoMiddleware.isAuth, AuthoController.sendOTP);
+router.post('/otp/register', AuthoController.sendOTPverify);
 
 // REFRESH ACCESS_TOKEN
 router.post('/refresh', AuthoController.refreshToken);

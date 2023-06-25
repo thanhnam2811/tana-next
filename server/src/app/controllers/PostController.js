@@ -303,8 +303,7 @@ class PostController {
 		}
 	}
 
-	// [Delete] delete a post
-	async delete(req, res, next) {
+	async deletePost(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
 			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
@@ -318,13 +317,33 @@ class PostController {
 				if (sharedPost) {
 					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
 				}
-				return res.status(200).json({
-					message: 'Xóa bài viết thành công',
-					Post: post,
-				});
+				return post;
 			} else {
 				return responseError(res, 401, 'Bạn không có quyền xóa bài viết này');
 			}
+		} catch (err) {
+			console.error(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [Delete] delete a post
+	async delete(req, res, next) {
+		try {
+			const post = await this.deletePost(req, res, next);
+			if (!post) return responseError(res, 500, 'Không xóa được bài viết!!!');
+			return res.status(200).json({
+				message: 'Xóa bài viết thành công',
+				Post: post,
+			});
 		} catch (err) {
 			console.error(err);
 			return next(
@@ -476,7 +495,35 @@ class PostController {
 
 	async react(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id);
+			const post = await Post.findById(req.params.id)
+				.populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline friends',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'media',
+					select: '_id link',
+				});
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
@@ -612,7 +659,7 @@ class PostController {
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
-				if (post.author.toString() !== req.user._id.toString()) {
+				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 				}
 
@@ -1092,19 +1139,31 @@ class PostController {
 	// [GET] get all posts
 	async getAllPosts(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const q = req.query.q ?? '';
 		// get posts of a user by query id and sort by date
 		try {
 			// check role Admin
 			if (req.user.role.name !== 'ADMIN') return next(createError.Forbidden('Bạn không có quyền truy cập'));
-
-			Post.paginate(
-				{},
-				{
-					offset,
-					limit,
-					sort: { createdAt: -1 },
-					populate: [
-						{
+			let query = {};
+			if (q) {
+				query = { $text: { $search: q } };
+			}
+			Post.paginate(query, {
+				offset,
+				limit,
+				sort: { createdAt: -1 },
+				populate: [
+					{
+						path: 'author',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					{
+						path: 'lastestFiveComments',
+						populate: {
 							path: 'author',
 							select: '_id fullname profilePicture isOnline',
 							populate: {
@@ -1112,48 +1171,37 @@ class PostController {
 								select: '_id link',
 							},
 						},
-						{
-							path: 'lastestFiveComments',
-							populate: {
-								path: 'author',
-								select: '_id fullname profilePicture isOnline',
-								populate: {
-									path: 'profilePicture',
-									select: '_id link',
-								},
-							},
-						},
-						{
-							path: 'tags',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
-						},
-						{
-							path: 'media',
+					},
+					{
+						path: 'tags',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
-						{
-							path: 'privacy.includes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'media',
+						select: '_id link',
+					},
+					{
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-						{
-							path: 'privacy.excludes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-					],
-				}
-			)
+					},
+				],
+			})
 				.then((data) => {
 					getListData(res, data);
 				})

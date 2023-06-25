@@ -23,7 +23,7 @@ class FileController {
 						originalname: file.originalname,
 						type: file.mimetype,
 						link: newPath.url,
-						size: file.size, //bytes
+						size: file.size, // bytes
 						public_id: newPath.id,
 						creator: req.user._id,
 					});
@@ -87,14 +87,13 @@ class FileController {
 						if (err) {
 							console.log(err);
 							return responseError(res, 500, 'Xóa file thất bại!!!');
-						} else {
-							console.log(result);
-							await file.delete();
-							res.status(200).send({
-								message: 'Xóa file thành công',
-								File: file,
-							});
 						}
+						console.log(result);
+						await file.delete();
+						res.status(200).send({
+							message: 'Xóa file thành công',
+							File: file,
+						});
 					});
 				} else {
 					await file.delete();

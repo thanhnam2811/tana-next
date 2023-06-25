@@ -28,7 +28,7 @@ class AccessController {
 
 	async dailyAccessSevenDaysAgo(startDay, endDay) {
 		try {
-			//increase endDay 1
+			// increase endDay 1
 			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalAccessByDay = await Access.aggregate([
 				{
