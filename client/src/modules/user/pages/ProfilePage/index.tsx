@@ -12,8 +12,10 @@ import { IconType } from 'react-icons/lib';
 import useSWR from 'swr';
 import { FriendTab, InfoTab, PostTab, SecurityTab } from './tabs';
 import SEO from '@common/components/SEO';
+import ActivityTab from '@modules/user/pages/ProfilePage/tabs/ActivityTab';
+import { BiHistory } from 'react-icons/bi';
 
-type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security';
+type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security' | 'activity';
 
 function Index() {
 	const { authUser } = useAuth();
@@ -40,6 +42,12 @@ function Index() {
 			Icon: HiInformationCircle,
 			tab: 'about',
 			component: <InfoTab />,
+		},
+		{
+			label: 'Hoạt động',
+			Icon: BiHistory,
+			tab: 'activity',
+			component: <ActivityTab />,
 		},
 	];
 	const isAuthUser = authUser?._id === id;
