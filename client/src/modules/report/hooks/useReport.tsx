@@ -28,9 +28,8 @@ export function useReport({ type, id }: Props) {
 		try {
 			const fileList = values.files?.fileList;
 			if (fileList?.length) {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				const { files } = await uploadFileApi(fileList.map((file) => file.originFileObj));
+				const uploadFiles = fileList.map((file) => file.originFileObj);
+				const { files } = await uploadFileApi(uploadFiles);
 				values.images = files.map((file) => file._id);
 			}
 			delete values.files;
@@ -38,8 +37,10 @@ export function useReport({ type, id }: Props) {
 
 			await reportApi(values);
 			toast.success(`${labelReport[type]} thành công!`, { id: toastId });
+
+			form.resetFields();
 		} catch (error: any) {
-			toast.error(`${labelReport[type]} thất bại!`, { id: toastId });
+			toast.error(`${labelReport[type]} thất bại! Lỗi: ${error}`, { id: toastId });
 		}
 	};
 
