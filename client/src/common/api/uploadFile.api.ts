@@ -2,6 +2,7 @@ import { IFileUploadResponse } from '@common/types';
 import { apiClient } from './apiClient';
 
 export const uploadFileApi = (files: FileList | File[], data: any = {}) => {
+	console.log('uploadFileApi', files, files.length);
 	const formData = new FormData();
 
 	// append files

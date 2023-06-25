@@ -30,7 +30,7 @@ export function SelectApi<T extends IData = any>({
 	return (
 		<Select
 			options={!renderOption ? fetcher.data.map(toOption) : undefined} // if renderOption is defined, options will be rendered by renderOption
-			loading={fetcher.fetching}
+			loading={fetcher.fetching || (fetcher.hasMore && fetcher.data.length === 0)}
 			onPopupScroll={handeScroll}
 			filterOption={(input, option) => {
 				const label = option?.label?.toString() || '';

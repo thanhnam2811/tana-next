@@ -2,8 +2,11 @@ import { withLayout } from '@layout/components';
 import { Button, Card } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import Lottie from 'react-lottie-player';
 import SEO from '@common/components/SEO';
+import dynamic from 'next/dynamic';
+import { notFoundJson } from '@assets/data/json';
+
+const Lottie = dynamic(() => import('lottie-react'));
 
 function NotFoundPage() {
 	const router = useRouter();
@@ -22,17 +25,7 @@ function NotFoundPage() {
 			>
 				<Card
 					cover={
-						<Lottie
-							path="https://assets2.lottiefiles.com/packages/lf20_q2pevjuc.json"
-							speed={1}
-							loop
-							play
-							style={{
-								width: '100%',
-								height: '100%',
-								margin: 'auto',
-							}}
-						/>
+						<Lottie animationData={notFoundJson} loop autoplay style={{ width: '100%', height: '100%' }} />
 					}
 					style={{ width: '80%', maxWidth: 600 }}
 					actions={[

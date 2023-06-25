@@ -38,6 +38,7 @@ import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
 import { FileMenu, InfoMenu, MediaMenu, MemberMenu } from './menu';
 import { UserType } from '@modules/user/types';
+import { useReport } from '@modules/report/hooks';
 
 export function ConversationDetail() {
 	const router = useRouter();
@@ -48,6 +49,7 @@ export function ConversationDetail() {
 	const { modal } = App.useApp();
 
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
+	const { openReport } = useReport({ type: 'conversation', id: conversation._id });
 
 	const [addMemberForm] = Form.useForm<{ members: string[] }>();
 	const handleAddMember = async ({ members }: { members: string[] }) => {
@@ -223,7 +225,7 @@ export function ConversationDetail() {
 						</Tooltip>
 
 						<Tooltip title="Báo cáo">
-							<Button shape="circle" icon={<HiExclamationTriangle />} />
+							<Button shape="circle" icon={<HiExclamationTriangle />} onClick={openReport} />
 						</Tooltip>
 					</Space>
 				</Space>

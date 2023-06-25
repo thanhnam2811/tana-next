@@ -65,20 +65,27 @@ export function ListFriend({ api, title = 'Danh sách bạn bè' }: Props) {
 					itemLayout="horizontal"
 					dataSource={friendFetcher.data}
 					loading={friendFetcher.fetching}
-					loadMore={
-						!friendFetcher.fetching &&
-						friendFetcher.hasMore && (
-							<Button type="primary" onClick={friendFetcher.loadMore}>
-								Xem thêm
-							</Button>
-						)
-					}
 					grid={{ gutter: 16, column: 3 }}
 					renderItem={(user) => (
 						<List.Item>
 							<FriendCard user={user} />
 						</List.Item>
 					)}
+					loadMore={
+						!friendFetcher.fetching &&
+						friendFetcher.data.length > 0 && (
+							<div style={{ textAlign: 'center', marginTop: 16 }}>
+								<Button
+									size="small"
+									onClick={friendFetcher.loadMore}
+									loading={friendFetcher.loadingMore}
+									disabled={!friendFetcher.hasMore}
+								>
+									{friendFetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
+								</Button>
+							</div>
+						)
+					}
 				/>
 			</Space>
 		</Card>

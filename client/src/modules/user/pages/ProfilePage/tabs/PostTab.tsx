@@ -1,18 +1,17 @@
 import { useFetcher } from '@common/hooks';
-import { PostType } from '@common/types';
 import { CreatePost, ListPost } from '@modules/post/components';
-import { useUserContext } from '@modules/user/hooks';
+import { useUserAction, useUserContext } from '@modules/user/hooks';
 import styles from './PostTab.module.scss';
-import { Button, Image, Tooltip, Typography, theme, Dropdown, Popconfirm } from 'antd';
-import { HiCamera, HiUserPlus } from 'react-icons/hi2';
+import { Button, Dropdown, Image, Popconfirm, theme, Tooltip, Typography } from 'antd';
+import { HiCamera, HiExclamationTriangle, HiUserPlus } from 'react-icons/hi2';
 import { UploadImage } from '@common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
 import { toast } from 'react-hot-toast';
 import { uploadFileApi } from '@common/api';
-import { ReactNode, useState } from 'react';
-import { requestFriendApi, unFriendApi } from '@modules/friend/api';
-import { createConversationApi } from '@modules/messages/api';
-import { useRouter } from 'next/router';
+import { ReactNode } from 'react';
+import { HiDotsHorizontal } from 'react-icons/hi';
+import { useReport } from '@modules/report/hooks';
+import { PostType } from '@modules/post/types';
 
 export function PostTab() {
 	const { token } = theme.useToken();
@@ -52,101 +51,16 @@ export function PostTab() {
 		}
 	};
 
-	const [relationship, setRelationship] = useState(user.relationship);
-	const [loading, setLoadingState] = useState<{ [key: string]: boolean }>({});
-	const setLoading = (key: string, value: boolean) => setLoadingState((prev) => ({ ...prev, [key]: value }));
-
-	const handleRequestFriend = async () => {
-		const toastId = toast.loading('Đang gửi lời mời kết bạn...');
-		setLoading('request', true);
-
-		try {
-			await requestFriendApi(user._id);
-			toast.success('Gửi lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('sent');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('request', false);
-	};
-
-	const handleUnfriend = async () => {
-		const toastId = toast.loading('Đang hủy kết bạn...');
-		setLoading('unfriend', true);
-
-		try {
-			await unFriendApi(user._id);
-			toast.success('Hủy kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('unfriend', false);
-	};
-
-	const router = useRouter();
-	const handleChat = async () => {
-		const toastId = toast.loading('Đang chuyển hướng đến trang nhắn tin...');
-		setLoading('chat', true);
-
-		try {
-			const created = await createConversationApi({ members: [{ user: user._id }] });
-			await router.push(`/messages?id=${created._id}`);
-
-			toast.dismiss(toastId);
-		} catch (error) {
-			toast('Có lỗi xảy ra, vui lòng thử lại sau', { id: toastId });
-		}
-
-		setLoading('chat', false);
-	};
-
-	const handleAcceptFriend = async () => {
-		const toastId = toast.loading('Đang xác nhận lời mời kết bạn...');
-		setLoading('accept', true);
-
-		try {
-			await requestFriendApi(user._id);
-			toast.success('Xác nhận lời mời kết bạn thành công! Bạn bè với nhau rồi đó!', { id: toastId });
-			setRelationship('friend');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('accept', false);
-	};
-
-	const handleRejectFriend = async () => {
-		const toastId = toast.loading('Đang từ chối lời mời kết bạn...');
-		setLoading('reject', true);
-
-		try {
-			await requestFriendApi(user._id);
-			toast.success('Từ chối lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('reject', false);
-	};
-
-	const handleCancelRequestFriend = async () => {
-		const toastId = toast.loading('Đang hủy lời mời kết bạn...');
-		setLoading('cancel', true);
-
-		try {
-			await requestFriendApi(user._id); // Request friend again to cancel
-			toast.success('Hủy lời mời kết bạn thành công!', { id: toastId });
-			setRelationship('none');
-		} catch (error: any) {
-			toast.error(error.message || error.toString(), { id: toastId });
-		}
-
-		setLoading('cancel', false);
-	};
+	const {
+		relationship,
+		loading,
+		handleRequestFriend,
+		handleCancelRequestFriend,
+		handleAcceptFriend,
+		handleUnfriend,
+		handleChat,
+		handleRejectFriend,
+	} = useUserAction(user);
 
 	const actions: ReactNode[] = [];
 
@@ -240,6 +154,29 @@ export function PostTab() {
 				break;
 		}
 	}
+
+	const { openReport } = useReport({ type: 'user', id: user._id });
+	if (!isCurrentUser)
+		actions.push(
+			<Dropdown
+				key="more"
+				arrow
+				trigger={['click']}
+				menu={{
+					items: [
+						{
+							key: 'report',
+							label: 'Báo cáo',
+							danger: true,
+							onClick: openReport,
+							icon: <HiExclamationTriangle />,
+						},
+					],
+				}}
+			>
+				<Button icon={<HiDotsHorizontal />} />
+			</Dropdown>
+		);
 
 	return (
 		<>

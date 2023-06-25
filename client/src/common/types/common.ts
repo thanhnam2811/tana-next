@@ -3,7 +3,7 @@ export interface IMedia {
 	link: string;
 }
 
-export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
+export type ReactionTypeValue = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
 
 export interface IPaginationResponse<T> {
 	items: T[];

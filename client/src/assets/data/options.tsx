@@ -1,5 +1,5 @@
 import Reaction from '@assets/icons/reactions';
-import { PrivacyValueType, ReactionType } from '@common/types';
+import { PrivacyValueType, ReactionTypeValue } from '@common/types';
 import { HiGlobeAsiaAustralia, HiLockClosed, HiUserMinus, HiUserPlus, HiUsers } from 'react-icons/hi2';
 import { IconType } from 'react-icons/lib';
 import { ContactType, EducationType, WorkType } from '@modules/user/types';
@@ -122,9 +122,8 @@ export const workOptions: IOption<WorkType>[] = [
 	},
 ];
 
-export const reactOptions: (IOption<ReactionType> & {
-	img: string;
-})[] = [
+export type IReactionOption = IOption<ReactionTypeValue> & { img: string };
+export const reactOptions: IReactionOption[] = [
 	{
 		img: Reaction.Like.src,
 		label: 'Thích',

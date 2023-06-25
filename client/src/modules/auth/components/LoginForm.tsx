@@ -23,9 +23,9 @@ export function LoginForm() {
 		try {
 			await login(values);
 
-			toast.success('Đăng nhập thành công!', { id: toastId });
-
 			await router.replace((query?.redirect as string) || '/home');
+
+			toast.success('Đăng nhập thành công!', { id: toastId });
 		} catch (error) {
 			toast.error(`Đăng nhập thất bại! Lỗi: ${error}`, { id: toastId });
 		}

@@ -81,19 +81,19 @@ export function NotificationPopover({ renderChildren, ...props }: Props & Popove
 					split={false}
 					renderItem={(noti) => <NotificationItem noti={noti} onClick={() => handleReadNotification(noti)} />}
 					loadMore={
-						<div style={{ padding: 8 }}>
-							{notiFetcher.hasMore ? (
-								<Button onClick={notiFetcher.loadMore} block loading={notiFetcher.fetching}>
-									Xem thêm
+						!notiFetcher.fetching &&
+						notiFetcher.data.length > 0 && (
+							<div style={{ textAlign: 'center', marginTop: 16 }}>
+								<Button
+									size="small"
+									onClick={notiFetcher.loadMore}
+									loading={notiFetcher.loadingMore}
+									disabled={!notiFetcher.hasMore}
+								>
+									{notiFetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
 								</Button>
-							) : (
-								<div style={{ textAlign: 'center' }}>
-									<Typography.Text type="secondary" strong>
-										Đã hết thông báo
-									</Typography.Text>
-								</div>
-							)}
-						</div>
+							</div>
+						)
 					}
 				/>
 			}

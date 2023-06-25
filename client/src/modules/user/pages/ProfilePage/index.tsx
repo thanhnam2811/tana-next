@@ -12,8 +12,10 @@ import { IconType } from 'react-icons/lib';
 import useSWR from 'swr';
 import { FriendTab, InfoTab, PostTab, SecurityTab } from './tabs';
 import SEO from '@common/components/SEO';
+import ActivityTab from '@modules/user/pages/ProfilePage/tabs/ActivityTab';
+import { BiHistory } from 'react-icons/bi';
 
-type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security';
+type TabType = 'posts' | 'friends' | 'media' | 'about' | 'security' | 'activity';
 
 function Index() {
 	const { authUser } = useAuth();
@@ -44,12 +46,20 @@ function Index() {
 	];
 	const isAuthUser = authUser?._id === id;
 	if (isAuthUser) {
-		tabList.push({
-			label: 'Bảo mật',
-			Icon: HiShieldExclamation,
-			tab: 'security',
-			component: <SecurityTab />,
-		});
+		tabList.push(
+			{
+				label: 'Hoạt động',
+				Icon: BiHistory,
+				tab: 'activity',
+				component: <ActivityTab />,
+			},
+			{
+				label: 'Bảo mật',
+				Icon: HiShieldExclamation,
+				tab: 'security',
+				component: <SecurityTab />,
+			}
+		);
 	}
 
 	const tabItem = tabList.find((item) => item.tab === tab);

@@ -1,12 +1,12 @@
 import { useAuth } from '@modules/auth/hooks';
-import { stringUtil } from '@common/utils';
+import { dateUtil, stringUtil } from '@common/utils';
 import { Button, theme, Typography } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import styles from './ConversationListItem.module.scss';
 import { ConversationType } from '../types';
 import { ConversationAvatar } from './ConversationAvatar';
-import { dateUtil } from '@common/utils';
+import { getConversationInfo } from '@modules/messages/utils';
 
 interface Props {
 	conversation: ConversationType;
@@ -21,10 +21,9 @@ export function ConversationListItem({ conversation }: Props) {
 
 	const active = id === conversation._id;
 
-	const { members, lastest_message, name } = conversation;
+	const { lastest_message } = conversation;
 
-	const isDirect = members?.length === 2;
-	const receiver = (isDirect && members?.find((member) => member.user._id !== id)!.user) || null;
+	const { name } = getConversationInfo(conversation, authUser!);
 
 	const unread = lastest_message ? !lastest_message?.reader?.find(({ _id }) => _id === authUser!._id) : false;
 
@@ -37,7 +36,7 @@ export function ConversationListItem({ conversation }: Props) {
 
 				<div className={styles.content}>
 					<Typography.Title level={5} ellipsis className={styles.name}>
-						{isDirect ? receiver?.fullname : name}
+						{name}
 					</Typography.Title>
 
 					<div className={styles.lastest_message}>

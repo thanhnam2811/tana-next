@@ -4,9 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import Lottie from 'react-lottie-player';
 import { resetPasswordApi } from '../api';
 import SEO from '@common/components/SEO';
+import dynamic from 'next/dynamic';
+import { resetPwdJson } from '@assets/data/json';
+
+const Lottie = dynamic(() => import('lottie-react'));
 
 const ResetPasswordPage = () => {
 	const router = useRouter();
@@ -38,13 +41,7 @@ const ResetPasswordPage = () => {
 
 			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
 				<Col span={12} style={{ height: 'fit-content' }}>
-					<Lottie
-						path="https://assets3.lottiefiles.com/private_files/lf30_GjhcdO.json"
-						speed={1}
-						loop
-						play
-						style={{ width: '100%', height: '100%' }}
-					/>
+					<Lottie animationData={resetPwdJson} loop autoplay style={{ width: '100%', height: '100%' }} />
 				</Col>
 
 				<Card
