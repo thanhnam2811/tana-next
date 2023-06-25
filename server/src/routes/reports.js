@@ -10,5 +10,6 @@ router.get('/', isAuth, RoleMiddleware.IsAdmin, ReportController.getAllReports);
 
 router.post('/', isAuth, ReportController.createReport);
 
-router.put('/:id/handle', isAuth, RoleMiddleware.IsAdmin, ReportController.handleReport);
+router.put('/:id/approve', isAuth, RoleMiddleware.IsAdmin, ReportController.handleReport);
+router.put('/:id/reject', isAuth, RoleMiddleware.IsAdmin);
 module.exports = router;

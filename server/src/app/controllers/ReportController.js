@@ -80,6 +80,32 @@ class ReportController {
 		}
 	}
 
+	// reject report
+	async rejectReport(req, res, next) {
+		try {
+			const report = await Report.findById(req.params.id);
+			if (!report) {
+				return next(createError.NotFound('Báo cáo không tồn tại'));
+			}
+
+			report.status = 'rejected';
+
+			await report.save();
+			res.json(report);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// handle report
 	async handleReport(req, res, next) {
 		try {
