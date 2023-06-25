@@ -21,6 +21,7 @@ export default function LoginPage() {
 
 			message.success({ content: 'Đăng nhập thành công!', key });
 		} catch (error: any) {
+			console.error({ error });
 			message.error({ content: error || 'Đăng nhập thất bại!', key });
 		}
 	};
