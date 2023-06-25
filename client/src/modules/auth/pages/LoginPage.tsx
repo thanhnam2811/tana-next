@@ -2,10 +2,13 @@ import { withLayout } from '@layout/components';
 import { Col, Row } from 'antd';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import Lottie from 'react-lottie-player';
 import { LoginForm } from '../components';
 import { useAuth } from '../hooks';
 import SEO from '@common/components/SEO';
+import { loginJson } from '@assets/data/json';
+import dynamic from 'next/dynamic';
+
+const Lottie = dynamic(() => import('lottie-react'));
 
 function LoginPage() {
 	const router = useRouter();
@@ -24,13 +27,7 @@ function LoginPage() {
 
 			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
 				<Col span={12} style={{ height: 'fit-content' }}>
-					<Lottie
-						path="https://assets6.lottiefiles.com/packages/lf20_xd8pnngo.json"
-						speed={1}
-						loop
-						play
-						style={{ width: '100%', height: '100%' }}
-					/>
+					<Lottie animationData={loginJson} loop autoplay style={{ width: '100%', height: '100%' }} />
 				</Col>
 
 				<Col span={12} style={{ height: 'fit-content' }}>
