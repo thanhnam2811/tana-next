@@ -52,15 +52,18 @@ function ActivityTab() {
 					</List.Item>
 				)}
 				loadMore={
-					<div style={{ textAlign: 'center', marginTop: 16 }}>
-						<Button
-							onClick={activityFetcher.loadMore}
-							loading={activityFetcher.loadingMore}
-							disabled={!activityFetcher.hasMore}
-						>
-							{activityFetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
-						</Button>
-					</div>
+					!activityFetcher.fetching &&
+					activityFetcher.data.length > 0 && (
+						<div style={{ textAlign: 'center', marginTop: 16 }}>
+							<Button
+								onClick={activityFetcher.loadMore}
+								loading={activityFetcher.loadingMore}
+								disabled={!activityFetcher.hasMore}
+							>
+								{activityFetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
+							</Button>
+						</div>
+					)
 				}
 			/>
 		</Card>

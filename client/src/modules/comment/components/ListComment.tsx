@@ -80,18 +80,8 @@ export function ListComment({ post, comment }: Props) {
 				}}
 				itemLayout="vertical"
 				loading={fetcher.fetching}
-				loadMore={
-					fetcher.hasMore &&
-					!fetcher.fetching && (
-						<div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-							<Button onClick={fetcher.loadMore} loading={fetcher.fetching}>
-								Xem thêm
-							</Button>
-						</div>
-					)
-				}
-			>
-				{fetcher.data.map((comment) => (
+				dataSource={fetcher.data}
+				renderItem={(comment) => (
 					<CommentItem
 						key={comment._id}
 						comment={comment}
@@ -100,13 +90,22 @@ export function ListComment({ post, comment }: Props) {
 						onDelete={handleDelete}
 						isReply={isReply}
 					/>
-				))}
-
-				{/* Empty */}
-				{!fetcher.fetching && fetcher.data.length === 0 && (
-					<div className="empty-text">Chưa có bình luận nào</div>
 				)}
-			</List>
+				loadMore={
+					!fetcher.fetching &&
+					fetcher.data.length > 0 && (
+						<div style={{ textAlign: 'center', marginTop: 16 }}>
+							<Button
+								onClick={fetcher.loadMore}
+								loading={fetcher.loadingMore}
+								disabled={!fetcher.hasMore}
+							>
+								{fetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
+							</Button>
+						</div>
+					)
+				}
+			/>
 
 			<Form form={form} onFinish={onSubmit} layout="inline">
 				<Form.Item
