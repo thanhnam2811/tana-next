@@ -21,7 +21,8 @@ export default function LoginPage() {
 
 			message.success({ content: 'Đăng nhập thành công!', key });
 		} catch (error: any) {
-			message.error({ content: error.toString() || 'Đăng nhập thất bại!', key });
+			const msg = error.message || error.toString() || 'Đăng nhập thất bại! Vui lòng thử lại sau.';
+			message.error({ content: msg, key });
 		}
 	};
 
