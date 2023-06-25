@@ -131,7 +131,6 @@ class ReportController {
 					await PostController.deletePost(req, res, next);
 					await notificationToAuthorOfPost(report.post, req.user);
 				} else if (report.type === 'comment') {
-					console.log(report);
 					req.params.id = report.comment._id;
 					req.params.postId = req.comment.post._id;
 					// delete comment and notification to author
