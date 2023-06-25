@@ -1,5 +1,5 @@
 import NextProgress from 'next-progress';
-import type { AppProps, NextWebVitalsMetric } from 'next/app';
+import type { AppProps } from 'next/app';
 import React, { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { io } from 'socket.io-client';
@@ -91,8 +91,4 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 			</ConfigProvider>
 		</>
 	);
-}
-
-export function reportWebVitals(metric: NextWebVitalsMetric) {
-	console.log(metric);
 }

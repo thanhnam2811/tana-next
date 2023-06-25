@@ -23,7 +23,6 @@ function RegisterPage() {
 	const [step, setStep] = useState(ACCOUNT_STEP);
 
 	useEffect(() => {
-		console.log({ authUser, step, router });
 		if (authUser && step === ACCOUNT_STEP) {
 			router.replace((from as string) || '/home');
 		}
