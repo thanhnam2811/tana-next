@@ -8,15 +8,16 @@ import { IPaginationResponse } from '@common/types';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;
+	search?: string;
 }
 
-export function TableBase<T extends object>({ endpoint, ...props }: TableBaseProps<T>) {
+export function TableBase<T extends object>({ endpoint, search, ...props }: TableBaseProps<T>) {
 	const [pagination, setPagination] = useState({
 		current: 1,
 		pageSize: 5,
 	});
 
-	const swrKey = `${endpoint}?page=${pagination.current - 1}&size=${pagination.pageSize}`;
+	const swrKey = `${endpoint}?page=${pagination.current - 1}&size=${pagination.pageSize}&key=${search}`;
 	const { data, isLoading, mutate, isValidating } = useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
 
 	return (
