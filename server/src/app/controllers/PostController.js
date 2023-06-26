@@ -7,6 +7,7 @@ const Post = require('../models/Post');
 const { User } = require('../models/User');
 const Comment = require('../models/Comment');
 const React = require('../models/React');
+const File = require('../models/File');
 const { getListPost, getListData } = require('../../utils/Response/listData');
 const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 const {
@@ -162,14 +163,37 @@ class PostController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
-				media: Joi.array().items(Joi.string()),
+				media: Joi.array().items(
+					Joi.object({
+						file: Joi.string().required(),
+						description: Joi.string(),
+					})
+				),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
 			}
-			const newPost = new Post(req.body);
+			// update description of file
+			await Promise.all(
+				req.body.media.map(async (file) => {
+					const fileUpdated = await File.findByIdAndUpdate(
+						file.file,
+						{
+							description: file.description,
+						},
+						{ new: true }
+					);
+					return fileUpdated;
+				})
+			);
+
+			const files = req.body.media.map((file) => file.file);
+			const newPost = new Post({
+				...req.body,
+				media: files,
+			});
 			newPost.author = req.user._id;
 			const savedPost = await newPost.save();
 			const post = await Post.findById(savedPost._id)
@@ -205,7 +229,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 			// create a notification for all tags of this post and all friends of the author
 			await notificationForTags(savedPost, req.user);
@@ -228,7 +252,12 @@ class PostController {
 			const schema = Joi.object({
 				content: Joi.string(),
 				tags: Joi.array().items(Joi.string()),
-				media: Joi.array().items(Joi.string()),
+				media: Joi.array().items(
+					Joi.object({
+						file: Joi.string().required(),
+						description: Joi.string(),
+					})
+				),
 				privacy: Joi.object({
 					value: Joi.string().valid('public', 'private', 'friends', 'includes', 'excludes').required(),
 					// check if privacy is includes or excludes
@@ -250,7 +279,31 @@ class PostController {
 			}
 			const post = await Post.findById(req.params.id);
 			if (post.author.toString() === req.user._id.toString()) {
-				const postUpdated = await Post.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
+				// update description of file
+				await Promise.all(
+					req.body.media.map(async (file) => {
+						const fileUpdated = await File.findByIdAndUpdate(
+							file.file,
+							{
+								description: file.description,
+							},
+							{ new: true }
+						);
+						return fileUpdated;
+					})
+				);
+
+				const files = req.body.media.map((file) => file.file);
+				const postUpdated = await Post.findByIdAndUpdate(
+					req.params.id,
+					{
+						$set: {
+							...req.body,
+							media: files,
+						},
+					},
+					{ new: true }
+				)
 					.populate({
 						path: 'author',
 						populate: {

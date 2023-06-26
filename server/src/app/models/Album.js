@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const mongoosePaginate = require('mongoose-paginate-v2');
+const { PrivacyModel } = require('./Privacy');
 
 const AlbumSchema = new mongoose.Schema(
 	{
@@ -19,6 +20,15 @@ const AlbumSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'User',
 			required: true,
+		},
+		// privacy
+		privacy: {
+			type: PrivacyModel.schema,
+			default: {
+				value: 'public',
+				includes: [],
+				excludes: [],
+			},
 		},
 	},
 	{ timestamps: true }

@@ -5,6 +5,7 @@ const { getListPost, getListData } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
 const Album = require('../models/Album');
 const File = require('../models/File');
+const { validatePrivacy } = require('../models/Privacy');
 
 class AlbumController {
 	// create album
@@ -20,6 +21,7 @@ class AlbumController {
 						})
 					)
 					.required(),
+				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
@@ -39,12 +41,13 @@ class AlbumController {
 				})
 			);
 
-			const { name, media } = req.body;
+			const { name, media, privacy } = req.body;
 			const files = media.map((file) => file.file);
 			const album = await Album.create({
 				name,
 				media: files,
 				user: req.user._id,
+				privacy,
 			});
 
 			// populate album
@@ -135,6 +138,7 @@ class AlbumController {
 						})
 					)
 					.required(),
+				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
@@ -142,7 +146,7 @@ class AlbumController {
 			}
 
 			const { id } = req.params;
-			const { name, media } = req.body;
+			const { name, media, privacy } = req.body;
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
@@ -162,6 +166,7 @@ class AlbumController {
 				{
 					name,
 					media: files,
+					privacy,
 				},
 				{ new: true }
 			).populate({
