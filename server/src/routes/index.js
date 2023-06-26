@@ -13,6 +13,7 @@ const Admin = require('./admin');
 const Notification = require('./notification');
 const Hobby = require('./hobby');
 const Search = require('./search');
+const Album = require('./album');
 
 const logEvents = require('../Helpers/logEvents');
 const bot = require('../utils/SlackLogger/bot');
@@ -47,6 +48,7 @@ function route(app) {
 	// app.use(limiter);
 	// route
 	app.use('/search', Search);
+	app.use('/albums', Album);
 	app.use('/admin', Admin);
 	app.use('/files', File);
 	app.use('/conversations/:conversationId/messages', Message);
