@@ -185,6 +185,13 @@ const UserSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		isPermanentlyLocked: {
+			type: Boolean,
+			default: false,
+		},
+		reasonLock: {
+			type: String,
+		},
 		lockTime: {
 			type: Date,
 		},

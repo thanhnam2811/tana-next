@@ -394,12 +394,25 @@ class PostController {
 	// [Delete] delete a post
 	async delete(req, res, next) {
 		try {
-			const post = await this.deletePost(req, res, next);
-			if (!post) return responseError(res, 500, 'Không xóa được bài viết!!!');
-			return res.status(200).json({
-				message: 'Xóa bài viết thành công',
-				Post: post,
-			});
+			const post = await Post.findById(req.params.id);
+			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
+				await post.delete();
+				// delete all comments of this post
+				await Comment.deleteMany({ post: req.params.id });
+				// delete all reactions of this post
+				await React.deleteMany({ post: req.params.id });
+				// update the number of shares of the post
+				const sharedPost = await Post.findById(post.sharedPost);
+				if (sharedPost) {
+					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
+				}
+				return res.status(200).json({
+					message: 'Xóa bài viết thành công',
+					Post: post,
+				});
+			} else {
+				return responseError(res, 401, 'Bạn không có quyền xóa bài viết này');
+			}
 		} catch (err) {
 			console.error(err);
 			return next(

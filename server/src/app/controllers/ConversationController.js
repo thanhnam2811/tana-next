@@ -948,10 +948,22 @@ class ConversationController {
 	// [Delete] delete conversation
 	async delete(req, res, next) {
 		try {
-			const conversation = await this.deleteConversation(req, res, next);
-			if (!conversation) return responseError(res, 500, 'Không thể xóa cuộc trò chuyện này');
+			const conversation = await Conversation.findById(req.params.id);
+			if (!conversation) {
+				return res.status(404).json('Không tìm thấy cuộc hội thoại');
+			}
+			const adminOfConversation = conversation.members
+				.filter((member) => member.role === 'admin')
+				.map((member) => member.user.toString());
+			if (adminOfConversation.includes(req.user._id.toString()) || req.user.role.name === 'ADMIN') {
+				await conversation.delete();
+				// delete all message in conversation
+				await Message.deleteMany({ conversation: req.params.id });
 
-			return res.status(200).json(conversation);
+				return res.status(200).json('Đã xóa cuộc hội thoại thành công');
+			} else {
+				return responseError(res, 403, 'Bạn không có quyền xóa cuộc hội thoại này');
+			}
 		} catch (err) {
 			console.log(err);
 			return next(
