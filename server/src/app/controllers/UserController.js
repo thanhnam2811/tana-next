@@ -1381,10 +1381,10 @@ class UserController {
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			if (user.isPermanentlyLocked === true) {
+			if (user.isPermanentlyLocked === true || user.lockTime > Date.now()) {
 				// update lockTime < now
 				user.isPermanentlyLocked = false;
-				user.lockTime = 0;
+				user.lockTime = Date.now() - 5 * 60 * 60 * 1000;
 				user.loginAttempts = 0;
 				await user.save();
 				return res.status(200).json(user);
