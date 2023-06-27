@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { swrFetcher } from '@common/api';
-import { Alert, App, Avatar, Button, Card, Form, Input } from 'antd';
+import { Alert, App, Avatar, Button, Card, Form, Input, Typography } from 'antd';
 import { UserType } from '@modules/user/types';
 import { FullscreenSpin } from '@common/components/Loading';
 import { CardTabListType } from 'antd/lib/card';
@@ -108,7 +108,7 @@ export default function UserDetail() {
 				<Card.Meta
 					avatar={<Avatar src={user.profilePicture.link} alt={user.fullname} />}
 					title={user.fullname}
-					description={user.email}
+					description={<Typography.Text copyable>{user.email}</Typography.Text>}
 				/>
 			}
 			extra={
