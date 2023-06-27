@@ -1383,7 +1383,8 @@ class UserController {
 			}
 			if (user.isPermanentlyLocked === true) {
 				// update lockTime < now
-				user.lockTime = Date.now() - 5 * 60 * 60 * 1000;
+				user.isPermanentlyLocked = false;
+				user.lockTime = 0;
 				user.loginAttempts = 0;
 				await user.save();
 				return res.status(200).json(user);
