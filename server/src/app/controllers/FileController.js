@@ -4,6 +4,8 @@ const cloudinaryV2 = require('cloudinary').v2;
 const cloudinary = require('../../configs/cloudinary');
 const File = require('../models/File');
 const { responseError } = require('../../utils/Response/error');
+const { getPagination } = require('../../utils/Pagination');
+const { getListData } = require('../../utils/Response/listData');
 
 class FileController {
 	async uploadFiles(req, res, next) {
@@ -116,6 +118,55 @@ class FileController {
 					)}`
 				)
 			);
+		}
+	}
+
+	// get all file media of user post and ablum
+	async getAllMedia(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			File.paginate(
+				{
+					creator: req.params.id,
+					$or: [{ album: { $exists: true } }, { post: { $exists: true } }],
+				},
+				{
+					limit,
+					offset,
+					sort: { createdAt: -1 },
+					populate: [
+						{
+							path: 'creator',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'album',
+							select: '_id name',
+						},
+						{
+							path: 'post',
+							select: '_id content author',
+							populate: [
+								{
+									path: 'author',
+									select: '_id fullname profilePicture isOnline',
+									populate: { path: 'profilePicture', select: '_id link' },
+								},
+							],
+						},
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
+		} catch (error) {
+			console.error(error);
+			return next(error);
 		}
 	}
 }

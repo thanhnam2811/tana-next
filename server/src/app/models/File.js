@@ -8,6 +8,10 @@ const FileSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		description: {
+			type: String,
+			default: '',
+		},
 		originalname: {
 			type: String,
 		},
@@ -36,6 +40,10 @@ const FileSchema = new mongoose.Schema(
 		post: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Post',
+		},
+		album: {
+			type: mongoose.SchemaTypes.ObjectId,
+			ref: 'Album',
 		},
 		creator: {
 			type: mongoose.Schema.Types.ObjectId,

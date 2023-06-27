@@ -1321,11 +1321,12 @@ class UserController {
 			if (!user) {
 				return next(createError.NotFound('Tài khoản không toàn tại'));
 			}
-			if (user.lockTime > Date.now()) {
+			if (user.isPermanentlyLocked === true) {
 				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
 			}
-			// lock account 100 years
-			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+			// lock account
+			user.isPermanentlyLocked = true;
+			user.reasonLock = req.body.reasonLock;
 			await user.save();
 			return user;
 		} catch (err) {
@@ -1345,12 +1346,20 @@ class UserController {
 	// lock account
 	async lockAccount(req, res, next) {
 		try {
-			const user = await this.lock(req, res, next);
+			const user = await populateUser(req.params.id);
 			if (!user) {
-				return next(createError.NotFound('User not found'));
+				return next(createError.NotFound('Tài khoản không toàn tại'));
 			}
+			if (user.isPermanentlyLocked === true) {
+				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
+			}
+			// lock account
+			user.isPermanentlyLocked = true;
+			user.reasonLock = req.body.reasonLock;
+			await user.save();
 
-			return res.status(200).json(user);
+			// send email
+			return res.status(200).json('Đã khóa tài khoản thành công!!');
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -1372,7 +1381,7 @@ class UserController {
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			if (user.lockTime > Date.now()) {
+			if (user.isPermanentlyLocked === true) {
 				// update lockTime < now
 				user.lockTime = Date.now() - 5 * 60 * 60 * 1000;
 				user.loginAttempts = 0;

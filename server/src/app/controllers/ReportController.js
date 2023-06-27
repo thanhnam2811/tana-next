@@ -342,7 +342,7 @@ class ReportController {
 	async getAllReports(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-			const { type } = req.query;
+			const { type, key } = req.query;
 			let query = {};
 
 			if (req.query.reporterId) {
@@ -363,6 +363,17 @@ class ReportController {
 						query = { ...query, conversation: req.query.id };
 					}
 				}
+			}
+
+			if (key) {
+				// search by title or description
+				query = {
+					...query,
+					$or: [
+						{ title: { $regex: new RegExp(key), $options: 'i' } },
+						{ description: { $regex: new RegExp(key), $options: 'i' } },
+					],
+				};
 			}
 
 			Report.paginate(query, {

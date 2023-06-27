@@ -378,7 +378,7 @@ class ConversationController {
 	// [Get] get conv of a user
 	async getConversationOfUser(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const q = req.query.q ?? '';
+		const q = req.query.key ?? '';
 
 		try {
 			Conversation.paginate(
@@ -642,10 +642,21 @@ class ConversationController {
 				for (const key of Object.keys(req.body)) {
 					if (key === 'avatar') {
 						contentMessage += 'đã đổi avatar cho cuộc hội thoại này';
-					} else if (key === 'name') {
+						conversation[key] = req.body[key];
+					} else if (key === 'name' && conversation.members.length > 2) {
 						contentMessage += `đã đổi tên cuộc hội thoại này thành <b>${req.body[key]}</b>`;
+						conversation[key] = req.body[key];
+					} else if (key === 'name' && conversation.members.length == 2) {
+						// change nickname of orther member
+						const member = conversation.members.find(
+							(member) => member.user.toString() !== req.user._id.toString()
+						);
+
+						contentMessage += `đã đổi biệt danh của ${member.nickname} thành ${req.body[key]}`;
+
+						member.nickname = req.body[key];
+						member.changedNicknameBy = req.user._id;
 					}
-					conversation[key] = req.body[key];
 				}
 
 				// Check update
@@ -937,10 +948,22 @@ class ConversationController {
 	// [Delete] delete conversation
 	async delete(req, res, next) {
 		try {
-			const conversation = await this.deleteConversation(req, res, next);
-			if (!conversation) return responseError(res, 500, 'Không thể xóa cuộc trò chuyện này');
+			const conversation = await Conversation.findById(req.params.id);
+			if (!conversation) {
+				return res.status(404).json('Không tìm thấy cuộc hội thoại');
+			}
+			const adminOfConversation = conversation.members
+				.filter((member) => member.role === 'admin')
+				.map((member) => member.user.toString());
+			if (adminOfConversation.includes(req.user._id.toString()) || req.user.role.name === 'ADMIN') {
+				await conversation.delete();
+				// delete all message in conversation
+				await Message.deleteMany({ conversation: req.params.id });
 
-			return res.status(200).json(conversation);
+				return res.status(200).json('Đã xóa cuộc hội thoại thành công');
+			} else {
+				return responseError(res, 403, 'Bạn không có quyền xóa cuộc hội thoại này');
+			}
 		} catch (err) {
 			console.log(err);
 			return next(
