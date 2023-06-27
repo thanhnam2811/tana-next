@@ -642,10 +642,21 @@ class ConversationController {
 				for (const key of Object.keys(req.body)) {
 					if (key === 'avatar') {
 						contentMessage += 'đã đổi avatar cho cuộc hội thoại này';
-					} else if (key === 'name') {
+						conversation[key] = req.body[key];
+					} else if (key === 'name' && conversation.members.length > 2) {
 						contentMessage += `đã đổi tên cuộc hội thoại này thành <b>${req.body[key]}</b>`;
+						conversation[key] = req.body[key];
+					} else if (key === 'name' && conversation.members.length == 2) {
+						// change nickname of orther member
+						const member = conversation.members.find(
+							(member) => member.user.toString() !== req.user._id.toString()
+						);
+
+						contentMessage += `đã đổi biệt danh của ${member.nickname} thành ${req.body[key]}`;
+
+						member.nickname = req.body[key];
+						member.changedNicknameBy = req.user._id;
 					}
-					conversation[key] = req.body[key];
 				}
 
 				// Check update
