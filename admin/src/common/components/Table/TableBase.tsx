@@ -1,42 +1,49 @@
 import { swrFetcher } from '@common/api';
 import { Button, Table, TableProps, Tooltip } from 'antd';
-import { useState } from 'react';
 import { IoRefresh } from 'react-icons/io5';
 import useSWR from 'swr';
 import styles from './Table.module.scss';
 import { IPaginationResponse } from '@common/types';
+import { stringUtil } from '@common/utils';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;
-	search?: string;
+	params?: {
+		page?: number;
+		size?: number;
+		search?: string;
+		filter?: object;
+	};
+	onPaginationChange?: (nextPage: number, pageSize?: number) => void;
 }
 
-export function TableBase<T extends object>({ endpoint, search, ...props }: TableBaseProps<T>) {
-	const [pagination, setPagination] = useState({
-		current: 1,
-		pageSize: 5,
-	});
-
-	const swrKey = `${endpoint}?page=${pagination.current - 1}&size=${pagination.pageSize}&key=${search}`;
+export function TableBase<T extends object>({
+	endpoint,
+	params: { page = 1, size = 5, search = '', filter = {} } = {},
+	onPaginationChange,
+	...props
+}: TableBaseProps<T>) {
+	const swrKey = stringUtil.generateUrl(endpoint, { page: page - 1, size, key: search, filter });
 	const { data, isLoading, mutate, isValidating } = useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
 
 	return (
 		<div className={styles.container}>
 			<Table<T>
 				rowKey="_id"
+				loading={isLoading}
+				dataSource={data?.items || []}
+				{...props}
 				pagination={{
-					...pagination,
+					current: page,
+					pageSize: size,
+					onChange: onPaginationChange,
 					total: data?.totalItems,
 					position: ['bottomRight'],
 					pageSizeOptions: [5, 10, 20, 50],
-					onChange: (page, pageSize) => setPagination({ current: page, pageSize }),
 					showLessItems: true,
 					showSizeChanger: true,
 					...props?.pagination,
 				}}
-				loading={isLoading}
-				dataSource={data?.items || []}
-				{...props}
 			/>
 
 			<Tooltip title="Làm mới">

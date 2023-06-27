@@ -65,9 +65,10 @@ export default function Layout() {
 		},
 	];
 
-	const selectedKeys = pathname.split('/').slice(1).reverse();
+	const selectedKey = pathname.split('/').slice(1).reverse()[0];
 	const onMenuSelect = ({ keyPath }: { keyPath: string[] }) => {
 		const path = '/' + keyPath.reverse().join('/');
+		console.log({ path });
 
 		navigate(path);
 	};
@@ -90,7 +91,7 @@ export default function Layout() {
 
 				<Menu
 					mode="inline"
-					selectedKeys={selectedKeys}
+					selectedKeys={[selectedKey]}
 					items={menuItems}
 					onSelect={onMenuSelect}
 					className={styles.menu}
