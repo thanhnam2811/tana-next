@@ -1,35 +1,21 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { SERVER_URL } from '@common/config';
+import { ApiError } from '@common/api/ApiError';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.response?.status === 401;
 
-export interface ApiError extends Error {
-	code: number;
-	message: string;
-}
-
-export const isApiError = (error: any): error is ApiError =>
-	!!error.code && !!error.message && Object.keys(error).length === 2;
-
 // Handle error
 export const handleError = (error: any) => {
-	if (isApiError(error)) return Promise.reject(error);
+	// Remove access token, refresh token from local storage
+	localStorage.removeItem('accessToken');
+	localStorage.removeItem('refreshToken');
 
-	let message = 'Lỗi kết nối đến máy chủ!';
-	let code = 500;
+	if (ApiError.isApiError(error)) return Promise.reject(error);
 
-	if (axios.isAxiosError(error)) {
-		const { response } = error;
-		if (response?.status) code = response.status;
+	if (axios.isAxiosError(error)) return Promise.reject(ApiError.fromAxiosError(error));
 
-		if (response?.data?.error?.message) message = response.data.error.message;
-		else if (response?.data?.message) message = response.data.message;
-		else if (response?.data) message = response.data;
-		else if (response?.statusText) message = response.statusText;
-	} else if (error?.message) message = error.message;
-
-	return Promise.reject({ code, message });
+	return Promise.reject(ApiError.fromError(error));
 };
 
 const MAX_RETRY = 3;
