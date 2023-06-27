@@ -27,19 +27,6 @@ class AlbumController {
 			if (error) {
 				return next(createError(400, error.details[0].message));
 			}
-			// update description of file
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
 
 			const { name, media, privacy } = req.body;
 			const files = media.map((file) => file.file);
@@ -49,6 +36,21 @@ class AlbumController {
 				user: req.user._id,
 				privacy,
 			});
+
+			// update description of file
+			await Promise.all(
+				req.body.media.map(async (file) => {
+					const fileUpdated = await File.findByIdAndUpdate(
+						file.file,
+						{
+							description: file.description,
+							album: album._id,
+						},
+						{ new: true }
+					);
+					return fileUpdated;
+				})
+			);
 
 			// populate album
 			const albumPopulated = await album.populate({
@@ -147,18 +149,6 @@ class AlbumController {
 
 			const { id } = req.params;
 			const { name, media, privacy } = req.body;
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
 
 			const files = media.map((file) => file.file);
 			const albumUpdated = await Album.findByIdAndUpdate(
@@ -173,6 +163,20 @@ class AlbumController {
 				path: 'media',
 				select: '_id link description',
 			});
+
+			await Promise.all(
+				req.body.media.map(async (file) => {
+					const fileUpdated = await File.findByIdAndUpdate(
+						file.file,
+						{
+							description: file.description,
+							album: albumUpdated._id,
+						},
+						{ new: true }
+					);
+					return fileUpdated;
+				})
+			);
 
 			if (!albumUpdated) {
 				return next(createError(404, 'Album not found'));

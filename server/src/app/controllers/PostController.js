@@ -175,19 +175,6 @@ class PostController {
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
 			}
-			// update description of file
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
 
 			const files = req.body.media.map((file) => file.file);
 			const newPost = new Post({
@@ -196,6 +183,21 @@ class PostController {
 			});
 			newPost.author = req.user._id;
 			const savedPost = await newPost.save();
+
+			// update description of file
+			await Promise.all(
+				req.body.media.map(async (file) => {
+					const fileUpdated = await File.findByIdAndUpdate(
+						file.file,
+						{
+							description: file.description,
+							post: savedPost._id,
+						},
+						{ new: true }
+					);
+					return fileUpdated;
+				})
+			);
 			const post = await Post.findById(savedPost._id)
 				.populate({
 					path: 'author',
@@ -286,6 +288,7 @@ class PostController {
 							file.file,
 							{
 								description: file.description,
+								post: post._id,
 							},
 							{ new: true }
 						);

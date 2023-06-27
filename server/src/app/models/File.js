@@ -41,6 +41,10 @@ const FileSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Post',
 		},
+		album: {
+			type: mongoose.SchemaTypes.ObjectId,
+			ref: 'Album',
+		},
 		creator: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'User',
