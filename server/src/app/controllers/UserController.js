@@ -1381,7 +1381,7 @@ class UserController {
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			if (user.lockTime > Date.now()) {
+			if (user.isPermanentlyLocked === true) {
 				// update lockTime < now
 				user.lockTime = Date.now() - 5 * 60 * 60 * 1000;
 				user.loginAttempts = 0;
