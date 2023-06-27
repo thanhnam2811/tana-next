@@ -1195,7 +1195,7 @@ class PostController {
 	// [GET] get all posts
 	async getAllPosts(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const q = req.query.q ?? '';
+		const q = req.query.key ?? '';
 		// get posts of a user by query id and sort by date
 		try {
 			// check role Admin
