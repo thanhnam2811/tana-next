@@ -1,15 +1,16 @@
-import { IPicture, UserType } from '@common/types';
-import { TableBase } from '@components/Table';
+import { TableBase } from '@common/components/Table';
 import { Avatar, Button, Card } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
+import { IMedia } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 const columns: ColumnType<UserType>[] = [
 	{
 		key: 'avatar',
 		title: 'Avatar',
 		dataIndex: 'profilePicture',
-		render: (profilePicture: IPicture, user) => (
+		render: (profilePicture: IMedia, user) => (
 			<Avatar src={profilePicture.link} alt="avatar">
 				{user.fullname}
 			</Avatar>

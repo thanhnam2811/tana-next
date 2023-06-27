@@ -7,7 +7,10 @@ const Conversation = require('../models/Conversation');
 const { getListData } = require('../../utils/Response/listData');
 const { openai } = require('../../configs/chatgpt');
 const SocketManager = require('../../socket/SocketManager');
-const eventName = require('../../socket/constant');
+const { eventName } = require('../../socket/constant');
+
+const { responseError } = require('../../utils/Response/error');
+
 // set encryption algorithm
 const algorithm = 'aes-256-cbc';
 
@@ -22,7 +25,9 @@ class MessageController {
 			const schema = Joi.object({
 				text: Joi.string().min(0),
 				media: Joi.array().items(Joi.string()),
-			}).or('text', 'media');
+			})
+				.or('text', 'media')
+				.unknown();
 
 			const { error } = schema.validate(req.body);
 			if (error) {
@@ -114,13 +119,12 @@ class MessageController {
 	async delete(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
-			console.log(message.sender, req.user._id);
 			if (message.sender.toString() === req.user._id.toString()) {
 				// await Message.delete({ _id: req.params.id });
 				await message.delete();
 				res.status(200).json(message);
 			} else {
-				res.status(401).send('Bạn không có quyền xóa tin nhắn này');
+				return responseError(res, 401, 'Bạn không có quyền xóa tin nhắn này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -144,11 +148,7 @@ class MessageController {
 			.then((data) => {
 				getListData(res, data);
 			})
-			.catch((err) => {
-				res.status(500).send({
-					message: err.message || 'Some error occurred while retrieving tutorials.',
-				});
-			});
+			.catch((err) => responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.'));
 	}
 
 	// [Get] fetch messages from conversationId
@@ -200,19 +200,17 @@ class MessageController {
 						});
 						getListData(res, data);
 					})
-					.catch((err) => {
-						res.status(500).send({
-							message: err.message || 'Some error occurred while retrieving tutorials.',
-						});
-					});
+					.catch((err) =>
+						responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+					);
 			} else {
-				res.status(403).send('Bạn không có trong cuộc hội thoại này!!!');
+				return responseError(res, 403, 'Bạn không có trong cuộc hội thoại này!!!');
 			}
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -235,7 +233,7 @@ class MessageController {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2

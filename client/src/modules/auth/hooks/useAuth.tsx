@@ -5,6 +5,8 @@ import { IUseAuth } from '../types';
 export const useAuth = create<IUseAuth>()((set, get) => ({
 	authUser: null,
 
+	setAuthUser: (user) => set({ authUser: user }),
+
 	login: async (data) => {
 		// Login by token
 		if (!data) {
@@ -40,17 +42,19 @@ export const useAuth = create<IUseAuth>()((set, get) => ({
 
 	updateAuthUser: async (data, optimisticData) => {
 		// Save rollback data
-		const prev = get().authUser!;
+		const prev = get().authUser;
 
-		// Get optimistic data if not provided
-		optimisticData ??= {
-			...data,
-			profilePicture: prev.profilePicture, // Keep old profile picture
-			coverPicture: prev.coverPicture, // Keep old cover picture
-		};
+		if (prev) {
+			// Get optimistic data if not provided
+			optimisticData ??= {
+				...data,
+				profilePicture: prev.profilePicture, // Keep old profile picture
+				coverPicture: prev.coverPicture, // Keep old cover picture
+			};
 
-		// Optimistic update
-		set({ authUser: { ...prev, ...optimisticData } });
+			// Optimistic update
+			set({ authUser: { ...prev, ...optimisticData } });
+		}
 
 		try {
 			// Update to server

@@ -1,15 +1,23 @@
-const { populateUser } = require('../Populate/User');
+const { populateUser, populateUserForOther } = require('../Populate/User');
 
 async function getUserWithPrivacy(req, res) {
 	try {
-		const user = await populateUser(req.params.id);
+		let user;
+		if (req.user && req.user._id.toString() === req.params.id.toString()) {
+			user = await populateUser(req.user._id);
+		} else {
+			user = await populateUserForOther(req.params.id);
+		}
 
-		if (!user) return res.status(404).send('User not found');
+		if (!user) return null;
 
 		// check fields have privacy or not
 		const fields = Object.keys(user._doc);
 		const privacyFields = [];
 		fields.forEach((field) => {
+			if (field == 'hobbies') {
+				return;
+			}
 			// check user[field] is object or not
 			if (typeof user[field] === 'object') {
 				// check array or not
@@ -55,11 +63,15 @@ async function getUserWithPrivacy(req, res) {
 					if (item.privacy.value == 'public') return true;
 					if (item.privacy.value == 'private') return false;
 					if (item.privacy.value == 'friends' && isFriend) return true;
-					if (item.privacy.value == 'includes' && item.privacy.includes.some((id) => id == req.user._id))
+					if (
+						item.privacy.value == 'includes' &&
+						item.privacy.includes.some((id) => id.toString() == req.user._id.toString()) &&
+						isFriend
+					)
 						return true;
 					if (
 						item.privacy.value == 'excludes' &&
-						!item.privacy.excludes.some((id) => id == req.user._id) &&
+						!item.privacy.excludes.some((id) => id.toString() == req.user._id.toString()) &&
 						isFriend
 					)
 						return true;
@@ -75,9 +87,10 @@ async function getUserWithPrivacy(req, res) {
 				} else if (privacy.value == 'friends') {
 					if (!isFriend) user[field] = null;
 				} else if (privacy.value == 'includes') {
-					if (!privacy.includes.some((u) => u._id == req.user._id)) user[field] = null;
+					if (!privacy.includes.some((u) => u._id.toString() == req.user._id.toString())) user[field] = null;
 				} else if (privacy.value == 'excludes') {
-					if (privacy.exclues.some((u) => u._id == req.user._id) && !isFriend) user[field] = null;
+					if (privacy.exclues.some((u) => u._id.toString() == req.user._id.toString()) && !isFriend)
+						user[field] = null;
 				}
 			}
 		});

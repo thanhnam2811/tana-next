@@ -1,4 +1,4 @@
-import { IData, IMedia, IPrivacy } from '@common/types';
+import { IData, IMedia, IPrivacy, ReactionTypeValue } from '@common/types';
 import { UserType } from '@modules/user/types';
 
 interface IPost extends IData {
@@ -13,7 +13,7 @@ interface IPost extends IData {
 	numberShare: number;
 	numberComment: number;
 
-	reactOfUser: string;
+	reactOfUser: ReactionTypeValue;
 	deleted: boolean;
 }
 

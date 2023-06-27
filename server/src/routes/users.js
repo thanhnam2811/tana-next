@@ -17,6 +17,8 @@ router.get('/profile', isAuth, async (req, res) => {
 router.delete('/:id', isAuth, RoleMiddleware.IsAdmin, UserController.delete);
 
 // GET
+router.get('/online', isAuth, RoleMiddleware.IsAdmin, UserController.getAllUserOnline);
+router.get('/suggests', isAuth, UserController.suggestFriends);
 router.get('/friends', isAuth, UserController.getFriendsList);
 router.get('/notifications', isAuth, NotificationController.getNotifications);
 router.get('/activities', isAuth, ActivityController.getAllActivityOfUser);
@@ -31,13 +33,14 @@ router.get('/', UserController.getUser);
 // router.get("/:id/information", getUserFromToken, UserController.getUserInformation);
 
 // PUT
+router.put('/hobbies', isAuth, UserController.addHobbies);
 router.put('/remove-notification', isAuth, NotificationController.removeNotification);
 router.put('/update-profile', isAuth, UserController.update);
 router.put('/password', isAuth, UserController.updatePassword);
 router.put('/set-password', isAuth, UserController.setPassword);
 router.put('/:id/friend-request', isAuth, UserController.sendFriendRequest);
 router.put('/:id/accept-friend', isAuth, UserController.acceptFriendRequest);
-router.put('/:id/reject-friend', isAuth, UserController.rejectFriendRequest);
+router.put('/:id/reject-request', isAuth, UserController.rejectFriendRequest);
 router.put('/:id/unfriend', isAuth, UserController.unfriend);
 
 // DELETE

@@ -3,13 +3,14 @@ import Layout, { withLayout } from '@layout/components';
 import { withAuth } from '@modules/auth/components';
 import { Button, Card, Divider, Input, List, Space, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencilSquare } from 'react-icons/hi2';
 import { createConversationApi } from '../api';
 import { ConversationContent, ConversationListItem, CreateConversationModal } from '../components';
-import { ConversationCreateType, ConversationType } from '../types';
-import Head from 'next/head';
+import { ConversationCreateType, ConversationType, MessageType } from '../types';
+import SEO from '@common/components/SEO';
+import { sortListConversation } from '@modules/messages/utils';
 
 export const MessageContext = React.createContext<{
 	// eslint-disable-next-line no-unused-vars
@@ -22,6 +23,7 @@ export const MessageContext = React.createContext<{
 
 function MessagesPage() {
 	const convFetcher = useFetcher<ConversationType>({ api: 'conversations' });
+	const listConv = convFetcher.data || [];
 
 	const router = useRouter();
 	const id = router.query.id as string;
@@ -49,11 +51,22 @@ function MessagesPage() {
 		}
 	};
 
+	useEffect(() => {
+		if (id) {
+			window.socket.on('sendMessage', (msg: MessageType) => {
+				const conv = listConv?.find((conv) => conv._id === msg.conversation);
+				if (conv) convFetcher.updateData(conv._id, { ...conv, lastest_message: msg });
+			});
+		}
+
+		return () => {
+			window.socket.off('sendMessage');
+		};
+	}, [id]);
+
 	return (
 		<>
-			<Head>
-				<title>TaNa - Tin nhắn</title>
-			</Head>
+			<SEO title="Tin nhắn" />
 
 			<Layout.Sider align="left">
 				<Card
@@ -87,7 +100,7 @@ function MessagesPage() {
 				>
 					<List
 						style={{ marginTop: 8 }}
-						dataSource={convFetcher.data}
+						dataSource={sortListConversation(listConv)}
 						loading={convFetcher.fetching}
 						renderItem={(item) => <ConversationListItem conversation={item} key={item._id} />}
 					/>

@@ -22,9 +22,9 @@ import {
 	Space,
 	Spin,
 	Tag,
+	theme,
 	Tooltip,
 	Typography,
-	theme,
 } from 'antd';
 import { TextAreaRef } from 'antd/es/input/TextArea';
 import classnames from 'classnames';
@@ -87,7 +87,7 @@ export function ConversationMessage() {
 		try {
 			// Upload file
 			if (data.files?.length) {
-				const uploaded = await uploadFileApi(data.files);
+				const uploaded = await uploadFileApi(data.files, { conversation: id });
 				data.media = uploaded.files.map(({ _id }) => _id);
 			}
 			delete data.files;
@@ -210,6 +210,14 @@ export function ConversationMessage() {
 	// listen typing event from socket io
 	const [typingList, setTypingList] = useState<IMember[]>([]);
 
+	const handleReceiveMessage = (msg: MessageType) => {
+		if (msg.conversation === id) {
+			if (authUser?._id !== msg.sender._id) {
+				msgFetcher.addData(msg);
+			}
+		}
+	};
+
 	useEffect(() => {
 		if (id) {
 			window.socket.on('typingMessage', ({ senderId }: { senderId: string }) => {
@@ -220,11 +228,14 @@ export function ConversationMessage() {
 			window.socket.on('stopTypingMessage', ({ senderId }: any) => {
 				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
 			});
+
+			window.socket.on('sendMessage', handleReceiveMessage);
 		}
 
 		return () => {
 			window.socket.off('typingMessage');
 			window.socket.off('stopTypingMessage');
+			window.socket.off('sendMessage');
 		};
 	}, [id]);
 
@@ -303,6 +314,7 @@ export function ConversationMessage() {
 					style={{
 						backgroundColor: token.colorBgContainer,
 						borderColor: token.colorBorder,
+						boxShadow: token.boxShadow,
 					}}
 				>
 					<Avatar.Group maxCount={3} size="small" className={styles.typing_list}>

@@ -3,13 +3,14 @@ const fs = require('fs');
 const cloudinaryV2 = require('cloudinary').v2;
 const cloudinary = require('../../configs/cloudinary');
 const File = require('../models/File');
+const { responseError } = require('../../utils/Response/error');
 
 class FileController {
 	async uploadFiles(req, res, next) {
 		try {
 			const uploader = (path) => cloudinary.uploads(path, 'Files');
 			if (req.files.length <= 0) {
-				return res.status(400).send({ message: 'Bạn nên chọn ít nhất là 1 file để upload.' });
+				return responseError(res, 400, 'Bạn nên chọn ít nhất là 1 file để upload.');
 			}
 
 			const files = [];
@@ -22,6 +23,7 @@ class FileController {
 						originalname: file.originalname,
 						type: file.mimetype,
 						link: newPath.url,
+						size: file.size, // bytes
 						public_id: newPath.id,
 						creator: req.user._id,
 					});
@@ -59,16 +61,19 @@ class FileController {
 		try {
 			const file = await File.findById(req.params.id);
 			if (req.query.width && req.query.height) {
-				file.link = cloudinaryV2.url(file.public_id, {
+				const linkResize = cloudinaryV2.url(file.public_id, {
 					width: req.query.width,
 					height: req.query.height,
 					crop: 'scale',
 				});
+				if (linkResize) {
+					file.link = linkResize;
+				}
 			}
 			res.status(200).send(file);
 		} catch (error) {
 			console.error(error);
-			res.send('Không tìm thấy file');
+			return responseError(res, 404, 'Không tìm thấy file');
 		}
 	}
 
@@ -81,15 +86,14 @@ class FileController {
 					cloudinaryV2.uploader.destroy(file.public_id, async (err, result) => {
 						if (err) {
 							console.log(err);
-							res.status(500).send('Xóa file thất bại');
-						} else {
-							console.log(result);
-							await file.delete();
-							res.status(200).send({
-								message: 'Xóa file thành công',
-								File: file,
-							});
+							return responseError(res, 500, 'Xóa file thất bại!!!');
 						}
+						console.log(result);
+						await file.delete();
+						res.status(200).send({
+							message: 'Xóa file thành công',
+							File: file,
+						});
 					});
 				} else {
 					await file.delete();

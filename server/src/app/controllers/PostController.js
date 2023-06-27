@@ -1,3 +1,5 @@
+/* eslint-disable no-lonely-if */
+/* eslint-disable no-else-return */
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
@@ -6,7 +8,7 @@ const { User } = require('../models/User');
 const Comment = require('../models/Comment');
 const React = require('../models/React');
 const { getListPost, getListData } = require('../../utils/Response/listData');
-const { getAllPostWithPrivacy } = require('../../utils/Privacy/Post');
+const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 const {
 	notificationForFriends,
 	notificationForTags,
@@ -20,6 +22,7 @@ const {
 	createActivityWithReactPost,
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
+const { responseError } = require('../../utils/Response/error');
 
 class PostController {
 	// search post by content
@@ -161,7 +164,7 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
 				privacy: validatePrivacy,
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -240,7 +243,7 @@ class PostController {
 						otherwise: Joi.array().items(Joi.string()),
 					}),
 				}),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -282,9 +285,41 @@ class PostController {
 						select: '_id link',
 					});
 
-				res.status(200).send(postUpdated);
+				return res.status(200).send(postUpdated);
 			} else {
-				res.status(401).send('Bạn không có quyền cập nhật bài viết này');
+				return responseError(res, 401, 'Bạn không có quyền cập nhật bài viết này');
+			}
+		} catch (err) {
+			console.error(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	async deletePost(req, res, next) {
+		try {
+			const post = await Post.findById(req.params.id);
+			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
+				await post.delete();
+				// delete all comments of this post
+				await Comment.deleteMany({ post: req.params.id });
+				// delete all reactions of this post
+				await React.deleteMany({ post: req.params.id });
+				// update the number of shares of the post
+				const sharedPost = await Post.findById(post.sharedPost);
+				if (sharedPost) {
+					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
+				}
+				return post;
+			} else {
+				return responseError(res, 401, 'Bạn không có quyền xóa bài viết này');
 			}
 		} catch (err) {
 			console.error(err);
@@ -303,25 +338,12 @@ class PostController {
 	// [Delete] delete a post
 	async delete(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id);
-			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
-				await post.delete();
-				// delete all comments of this post
-				await Comment.deleteMany({ post: req.params.id });
-				// delete all reactions of this post
-				await React.deleteMany({ post: req.params.id });
-				// update the number of shares of the post
-				const sharedPost = await Post.findById(post.sharedPost);
-				if (sharedPost) {
-					await Post.findByIdAndUpdate(post.sharedPost, { $inc: { shares: -1 } });
-				}
-				res.status(200).send({
-					message: 'Xóa bài viết thành công',
-					Post: post,
-				});
-			} else {
-				res.status(401).send('Bạn không có quyền xóa bài viết này');
-			}
+			const post = await this.deletePost(req, res, next);
+			if (!post) return responseError(res, 500, 'Không xóa được bài viết!!!');
+			return res.status(200).json({
+				message: 'Xóa bài viết thành công',
+				Post: post,
+			});
 		} catch (err) {
 			console.error(err);
 			return next(
@@ -473,10 +495,44 @@ class PostController {
 
 	async react(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id);
+			const post = await Post.findById(req.params.id)
+				.populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline friends',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'media',
+					select: '_id link',
+				});
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
 			}
+
+			const checkPrivacy = await getPostWithPrivacy(post, req);
+			if (!checkPrivacy) {
+				return next(createError.Forbidden('Bạn không có quyền xem bài viết này'));
+			}
+
 			// check if the user has reacted this post before
 			const listReactOfPost = await React.find({ post: req.params.id });
 			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user._id.toString());
@@ -535,7 +591,7 @@ class PostController {
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = 'none';
-				res.status(200).json(postReturn);
+				return res.status(200).json(postReturn);
 			} else if (userReacted && userReacted.type.toString() !== req.body.type.toString()) {
 				// if user has reacted but change the type of reaction
 				userReacted.type = req.body.type;
@@ -590,7 +646,7 @@ class PostController {
 
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = req.body.type;
-				res.status(200).json(postReturn);
+				return res.status(200).json(postReturn);
 			} else {
 				// if user has not reacted, add a new reaction
 				const newReact = new React({
@@ -603,7 +659,7 @@ class PostController {
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
-				if (post.author.toString() !== req.user._id.toString()) {
+				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 				}
 
@@ -659,7 +715,7 @@ class PostController {
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = newReact.type;
-				res.status(200).send(postReturn);
+				return res.status(200).send(postReturn);
 			}
 		} catch (err) {
 			console.error(err);
@@ -682,7 +738,7 @@ class PostController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError.BadRequest(error.details[0].message));
@@ -768,7 +824,7 @@ class PostController {
 					path: 'lastestFiveComments',
 					populate: {
 						path: 'author',
-						select: '_id fullname profilePicture isOnline',
+						select: '_id fullname profilePicture isOnline friends',
 						populate: {
 							path: 'profilePicture',
 							select: '_id link',
@@ -777,7 +833,7 @@ class PostController {
 				})
 				.populate({
 					path: 'author',
-					select: '_id fullname profilePicture isOnline',
+					select: '_id fullname profilePicture isOnline friends',
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
@@ -817,8 +873,8 @@ class PostController {
 			let reactOfUser = 'none';
 
 			if (req.user) {
-				const posts = await getAllPostWithPrivacy([post], req);
-				if (posts.length === 0) {
+				const postPrivacy = await getPostWithPrivacy(post, req);
+				if (!postPrivacy) {
 					return res.status(403).json('Bạn không có quyền xem bài viết này');
 				}
 
@@ -828,15 +884,19 @@ class PostController {
 					reactOfUser = react.type;
 				}
 			} else {
-				if (post.privacy.value != 'public') return res.status(401).json('Bạn không có quyền xem bài viết này');
+				if (post.privacy.value != 'public') {
+					return responseError(res, 401, 'Bạn không có quyền xem bài viết này');
+				}
 			}
 
 			const postObject = post.toObject();
 			postObject.reactOfUser = reactOfUser;
 			//
-			res.status(200).json(postObject);
+			return res.status(200).json(postObject);
 		} catch (err) {
 			console.error(err);
+			// if (err.kind.toString() == 'ObjectId')
+			// 	return next(createError.NotFound(`Post not found with ${req.params.id}`));
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
@@ -1079,19 +1139,31 @@ class PostController {
 	// [GET] get all posts
 	async getAllPosts(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+		const q = req.query.q ?? '';
 		// get posts of a user by query id and sort by date
 		try {
 			// check role Admin
 			if (req.user.role.name !== 'ADMIN') return next(createError.Forbidden('Bạn không có quyền truy cập'));
-
-			Post.paginate(
-				{},
-				{
-					offset,
-					limit,
-					sort: { createdAt: -1 },
-					populate: [
-						{
+			let query = {};
+			if (q) {
+				query = { $text: { $search: q } };
+			}
+			Post.paginate(query, {
+				offset,
+				limit,
+				sort: { createdAt: -1 },
+				populate: [
+					{
+						path: 'author',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+					{
+						path: 'lastestFiveComments',
+						populate: {
 							path: 'author',
 							select: '_id fullname profilePicture isOnline',
 							populate: {
@@ -1099,48 +1171,37 @@ class PostController {
 								select: '_id link',
 							},
 						},
-						{
-							path: 'lastestFiveComments',
-							populate: {
-								path: 'author',
-								select: '_id fullname profilePicture isOnline',
-								populate: {
-									path: 'profilePicture',
-									select: '_id link',
-								},
-							},
-						},
-						{
-							path: 'tags',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
-						},
-						{
-							path: 'media',
+					},
+					{
+						path: 'tags',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
 							select: '_id link',
 						},
-						{
-							path: 'privacy.includes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'media',
+						select: '_id link',
+					},
+					{
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-						{
-							path: 'privacy.excludes',
-							select: '_id fullname profilePicture isOnline',
-							populate: {
-								path: 'profilePicture',
-								select: '_id link',
-							},
+					},
+					{
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
 						},
-					],
-				}
-			)
+					},
+				],
+			})
 				.then((data) => {
 					getListData(res, data);
 				})

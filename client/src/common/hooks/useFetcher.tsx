@@ -1,25 +1,25 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
+import { KeyedMutator } from 'swr';
 
 // T: Data type,
 export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
 	data: T[];
 	listRes?: U[];
 	updateData: (id: string, newData: T) => void;
-	addData: (newData: T) => void;
+	addData: (newData: T, validate?: boolean) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
+	loadingMore: boolean;
 	validating: boolean;
 	hasMore: boolean;
 	params: IPaginationParams;
-	fetch: (params: any) => void;
 	loadMore: () => void;
-	filter: (filter: any) => void;
-	reload: () => void;
 	api: string;
+	mutate: KeyedMutator<U[]>;
 };
 
 export interface FetcherProps {
@@ -55,120 +55,48 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		size: page,
 		setSize: setPage,
 	} = useSWRInfinite<U>(getKey, swrFetcher);
+	const lastRes = listRes?.[listRes.length - 1];
+	const hasMore = !!lastRes && page < lastRes.totalPages;
 
-	const { data, hasMore } = useMemo(() => {
-		const memo = { data: [], hasMore: true };
+	const resData = listRes?.flatMap((res) => res.items) || [];
+	const [data, setData] = useState<T[]>(resData);
+	useEffect(() => {
+		if (!validating) {
+			const isSame =
+				data.length === resData.length &&
+				resData.every((item, index) => JSON.stringify(item) === JSON.stringify(data[index]));
+			if (!isSame) setData(resData);
+		}
+	}, [validating]);
 
-		if (!listRes?.length) return memo;
+	const addData = (newData: T) => setData((prevData) => [newData, ...prevData]);
 
-		const lastPage = listRes[listRes.length - 1];
-		const data = listRes.reduce<T[]>((acc, res) => [...acc, ...res.items], []);
-		const hasMore = lastPage.totalItems > data.length;
+	const updateData = (id: string, newData: T) =>
+		setData((prevData) => prevData.map((item) => (item._id === id ? newData : item)));
 
-		return { data, hasMore };
-	}, [listRes]);
+	const removeData = (id: string) => setData((prevData) => prevData.filter((item) => item._id !== id));
 
-	const addData = (newData: T) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = [newData, ...data];
-
-		// Update the cache with the new data (don't mutate the existing cache)
-		mutate(
-			(prevData) =>
-				prevData?.map((page, index) => {
-					const startIndex = index * limit,
-						endIndex = (index + 1) * limit;
-					return {
-						...page,
-						items: newItems.slice(startIndex, endIndex),
-						totalItems: page.totalItems + 1,
-					};
-				}),
-			false
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const updateData = (id: string, newData: T) => {
-		let updated = false;
-
-		// Update the cache with the new data
-		mutate(
-			(prevData) =>
-				prevData?.map((page) => {
-					if (updated) return page;
-
-					return {
-						...page,
-						items: page.items.map((item) => {
-							if (item._id === id) {
-								updated = true;
-								return newData;
-							}
-							return item;
-						}),
-					};
-				}),
-			false
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const removeData = (id: string) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.filter((item) => item._id !== id);
-
-		// Update the cache with the new data
-		mutate(
-			(prevData) =>
-				prevData?.map((page, index) => {
-					const startIndex = index * limit,
-						endIndex = (index + 1) * limit;
-					return {
-						...page,
-						items: newItems.slice(startIndex, endIndex),
-						totalItems: page.totalItems - 1,
-					};
-				}),
-			false
-		); // Optimistically update the data to add the new item to the beginning of the list
-	};
-
-	const fetch = (params: object) => {
-		console.log({ params });
-	};
-
+	const [loadingMore, setLoadingMore] = useState(false);
 	const loadMore = () => {
-		console.log('loadMore');
+		if (loadingMore || !hasMore) return;
 
-		setPage(page + 1);
+		setLoadingMore(true);
+		setPage(page + 1).finally(() => setLoadingMore(false));
 	};
 
-	const reload = () => {
-		mutate();
+	return {
+		data,
+		listRes,
+		params,
+		fetching,
+		loadingMore,
+		validating,
+		hasMore,
+		loadMore,
+		addData,
+		updateData,
+		removeData,
+		api,
+		mutate,
 	};
-
-	const filter = (filter: object) => {
-		console.log({ filter });
-	};
-
-	const fetcher = useMemo(
-		() => ({
-			data,
-			listRes,
-			params,
-			fetching,
-			validating,
-			hasMore,
-			fetch,
-			loadMore,
-			filter,
-			reload,
-			addData,
-			updateData,
-			removeData,
-			api,
-		}),
-		[data, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
-	);
-
-	return fetcher;
 };

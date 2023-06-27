@@ -1,3 +1,5 @@
+/* eslint-disable import/order */
+/* eslint-disable import/no-extraneous-dependencies */
 const crypto = require('crypto');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
@@ -8,9 +10,11 @@ const authMethod = require('../../auth/auth.method');
 const redisClient = require('../../configs/redis/index');
 // const randToken = require('rand-Token');
 const { populateUserByEmail } = require('../../utils/Populate/User');
-const { sendEmail, sendEmailVerify } = require('../../utils/Mail/sendMail');
+const { sendEmail, sendMailOTP } = require('../../utils/Mail/sendMail');
 const Token = require('../models/Token');
 const { User, labelOfGender } = require('../models/User');
+const { responseError } = require('../../utils/Response/error');
+const speakeasy = require('speakeasy');
 
 const hostClient = process.env.HOST_CLIENT;
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
@@ -29,16 +33,23 @@ class AuthoController {
 				gender: Joi.object({
 					value: Joi.string().valid('male', 'female', 'other').required(),
 				}),
-			});
+				otp: Joi.number().required(),
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
-			// const { valid, reason, validators } = await isEmailValid(req.body.email);
+			// get OTP from redis
+			const otp = await redisClient.get(`verify:${req.body.email}`);
+			if (!otp) {
+				return responseError(res, 400, 'OTP không tồn tại!');
+			}
 
-			// if (!valid) return res.status(400).send({
-			// 	message: "Vui lòng kiểm tra lại email của bạn!!! Email không hợp lệ",
-			// 	reason: validators[reason].reason
-			// })
+			// check OTP
+			if (req.body.otp !== otp) {
+				return responseError(res, 400, 'OTP không chính xác!');
+			}
 
 			// generate new password
 			const salt = await bcrypt.genSalt(10);
@@ -55,52 +66,30 @@ class AuthoController {
 				},
 			});
 
-			// save user and respond
-			const user = await newUser.save();
+			const dataToken = {
+				userId: newUser._id,
+				role: 'USER',
+			};
 
-			// send email verify
-			const token = await new Token({
-				userId: user._id,
-				token: crypto.randomBytes(16).toString('hex'),
-			}).save();
+			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
-			const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
-			const status = await sendEmailVerify(user.email, 'Verify account', link, user);
-			// check status
-			if (!status) {
-				// delete user and token
-				await user.deleteOne();
-				await token.deleteOne();
-				return res.status(400).send('Gửi email xác nhận thất bại. Vui lòng kiểm tra lại email!!!');
+			if (!accessToken) {
+				return responseError(res, 401, 'Đăng ký không thành công, vui lòng thử lại.');
 			}
-			res.status(200).json(user);
-		} catch (err) {
-			if (err.code === 11000) return res.status(500).send('Email đã tồn tại!');
-			return next(
-				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
-						req.body,
-						null,
-						2
-					)}`
-				)
-			);
-		}
-	}
+			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
+			newUser.refreshToken = refreshToken;
+			await newUser.save();
 
-	// VERIFY
-	async verify(req, res, next) {
-		try {
-			const { userId, token } = req.params;
-			const user = await User.findById(userId);
-			if (!user) return res.status(400).send('User không tồn tại!!!');
-			const tokenVerify = await Token.findOne({ userId: user._id, token });
-			if (!tokenVerify) return res.status(400).send('Link xác nhận không hợp lệ!!!');
-			user.isVerified = true;
-			await user.save();
-			await tokenVerify.deleteOne();
-			res.status(200).send('Xác nhận thành công!!!');
+			return res.status(200).json({
+				msg: 'Đăng ký thành công.',
+				accessToken,
+				refreshToken,
+				user: newUser,
+			});
 		} catch (err) {
+			if (err.code === 11000) {
+				return responseError(res, 400, 'Email đã tồn tại!');
+			}
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
@@ -130,9 +119,11 @@ class AuthoController {
 			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 			const userSave = await User.findById(user._id);
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 			userSave.refreshToken = refreshToken;
 			userSave.isVerified = true;
@@ -171,9 +162,11 @@ class AuthoController {
 			const userSave = await User.findById(user._id);
 
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 			userSave.refreshToken = refreshToken;
 			userSave.isVerified = true;
@@ -202,48 +195,32 @@ class AuthoController {
 			const schema = Joi.object({
 				email: Joi.string().min(6).max(255).required().email(),
 				password: Joi.string().min(6).max(1024).required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await populateUserByEmail(req.body.email);
 			if (!user) {
-				return res.status(401).json('Email không tồn tại.');
+				return responseError(res, 401, 'Email không tồn tại.');
 			}
 
 			if (user.password == null) {
-				return res
-					.status(401)
-					.json('Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!');
+				return responseError(
+					res,
+					401,
+					'Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google, và đặt mật khẩu mới!!!'
+				);
 			}
 
-			//check isVerify
-			if (!user.isVerified) {
-				const exsitToken = await Token.findOne({
-					userId: user._id,
-				});
-
-				if (exsitToken) {
-					await exsitToken.deleteOne();
-				}
-
-				// send email verify
-				const token = await new Token({
-					userId: user._id,
-					token: crypto.randomBytes(16).toString('hex'),
-				}).save();
-
-				const link = `${hostClient}/auth/verify/${user._id}/${token.token}`;
-				const status = await sendEmailVerify(user.email, 'Verify account', link, user);
-				if (!status) return res.status(500).json('Gửi email xác nhận thất bại. Vui lòng thử lại!!!');
-
-				return res.status(401).json('Tài khoản chưa được xác nhận. Vui lòng kiểm tra email!!!');
-			}
 			// check account is being blocked (LockTime - current time > 0)
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`
+				);
 			}
 
 			const isPasswordValid = bcrypt.compareSync(req.body.password, user.password);
@@ -254,18 +231,20 @@ class AuthoController {
 					// lock account after 5 minutes
 					user.lockTime = Date.now() + 5 * 60 * 1000;
 					await user.save();
-					return res.status(401).json('Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
+					return responseError(res, 401, 'Tài khoản đã bị khóa. Vui lòng thử lại sau 5 phút!!!');
 				}
 				if (user.loginAttempts > 3) {
 					// lock account forever
 					user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
 					await user.save();
-					return res
-						.status(401)
-						.json('Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!');
+					return responseError(
+						res,
+						401,
+						'Tài khoản đã bị khóa vĩnh viễn, Vui lòng liên hệ admin để được hỗ trợ!!!'
+					);
 				}
 				await user.save();
-				return res.status(401).json('Mật khẩu không chính xác.');
+				return responseError(res, 401, 'Mật khẩu không chính xác.');
 			}
 			// reset login attempt
 			user.loginAttempts = 0;
@@ -278,7 +257,7 @@ class AuthoController {
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			if (!accessToken) {
-				return res.status(401).send('Đăng nhập không thành công, vui lòng thử lại.');
+				return responseError(res, 401, 'Đăng nhập không thành công, vui lòng thử lại.');
 			}
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 			user.refreshToken = refreshToken;
@@ -314,9 +293,11 @@ class AuthoController {
 			// validate token
 			const schema = Joi.object({
 				refreshToken: Joi.string().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			// get access token from header
 			// const accessTokenFromHeader = req.headers.authorization;
@@ -327,14 +308,14 @@ class AuthoController {
 			// get refresh token from body
 			const refreshTokenFromBody = req.body.refreshToken;
 			if (!refreshTokenFromBody) {
-				return res.status(400).send('Không tìm thấy refresh token.');
+				return responseError(res, 400, 'Không tìm thấy refresh token.');
 			}
 
 			// const accessToken_ = accessTokenFromHeader?.replace('Bearer ', '');
 			// Decode access token đó
 			const decoded = await authMethod.decodeToken(refreshTokenFromBody, refreshTokenSecret);
 			if (!decoded) {
-				return res.status(400).send('Refresh token không hợp lệ.');
+				return responseError(res, 400, 'Refresh token không hợp lệ.');
 			}
 			const { userId } = decoded.payload;
 			// Check refreshToken with redis
@@ -348,17 +329,19 @@ class AuthoController {
 			// Check refreshToken with database
 			const user = await User.findById(mongoose.Types.ObjectId(userId));
 			if (!user) {
-				return res.status(400).send('Không tìm thấy người dùng.');
+				return responseError(res, 400, 'Không tìm thấy người dùng.');
 			}
 
 			if (user.lockTime - Date.now() > 0) {
-				return res
-					.status(401)
-					.json(`Tài khoản đã bị khóa. Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()}`);
+				return responseError(
+					res,
+					401,
+					`Tài khoản đã bị khóa.Vui lòng thử lại sau ${moment(user.lockTime).locale('vi').fromNow()} `
+				);
 			}
 
 			if (user.refreshToken !== refreshTokenFromBody) {
-				return res.status(401).send('Refresh token không hợp lệ hoặc đã hết hạn.');
+				return responseError(res, 401, 'Refresh token không hợp lệ hoặc đã hết hạn');
 			}
 
 			// Generate new access token
@@ -368,7 +351,7 @@ class AuthoController {
 			};
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 			if (!accessToken) {
-				return res.status(400).send('Tạo access token không thành công, vui lòng thử lại.');
+				return responseError(res, 400, 'Tạo access token không thành công, vui lòng thử lại.');
 			}
 
 			return res.json({
@@ -378,11 +361,11 @@ class AuthoController {
 			console.log(err.message);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
 				)
 			);
 		}
@@ -393,12 +376,16 @@ class AuthoController {
 		try {
 			const schema = Joi.object({
 				email: Joi.string().email().required(),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await User.findOne({ email: req.body.email });
-			if (!user) return res.status(400).send('Email không tồn tại!!!');
+			if (!user) {
+				return responseError(res, 400, 'Email không tồn tại!!!');
+			}
 
 			let token = await Token.findOne({ userId: user._id });
 			if (!token) {
@@ -408,33 +395,41 @@ class AuthoController {
 				}).save();
 			}
 
-			const link = `${process.env.BASE_URL}/${user._id}/${token.token}`;
+			const link = `${process.env.BASE_URL} /${user._id}/${token.token} `;
 			const status = await sendEmail(user.email, 'Password reset', link, user);
 			// check status
-			if (!status) return res.status(400).send('Gửi email không thành công!!!');
+			if (!status) {
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
 			res.send('Link reset mật khẩu đã được gửi qua email của bạn');
 		} catch (error) {
 			console.log(error);
 			return next(
-				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl}`)
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
 			);
 		}
 	}
 
 	async resetPassword(req, res, next) {
 		try {
-			const schema = Joi.object({ password: Joi.string().required() });
+			const schema = Joi.object({ password: Joi.string().required() }).unknown();
 			const { error } = schema.validate(req.body);
-			if (error) return res.status(400).send(error.details[0].message);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
 
 			const user = await User.findById(req.params.userId);
-			if (!user) return res.status(400).send('Không tìm thấy người dùng!!!');
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
 
 			const token = await Token.findOne({
 				userId: user._id,
 				token: req.params.token,
 			});
-			if (!token) return res.status(400).send('Link không đúng hoặc đã hết hạn');
+			if (!token) {
+				return responseError(res, 400, 'Link không đúng hoặc đã hết hạn');
+			}
 
 			// hash password
 			const salt = await bcrypt.genSalt(10);
@@ -447,11 +442,197 @@ class AuthoController {
 			console.log(err);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
+				)
+			);
+		}
+	}
+
+	// change password
+	async changePassword(req, res, next) {
+		try {
+			const schema = Joi.object({
+				oldPassword: Joi.string().required(),
+				newPassword: Joi.string().required(),
+				confirmPassword: Joi.string().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			const user = await User.findById(req.user._id);
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
+
+			const isPasswordValid = bcrypt.compareSync(req.body.oldPassword, user.password);
+			if (!isPasswordValid) {
+				return responseError(res, 400, 'Mật khẩu cũ không đúng');
+			}
+
+			// check newPassword and confirmPassword
+			if (req.body.newPassword !== req.body.confirmPassword) {
+				return responseError(res, 400, 'Mật khẩu mới và xác nhận mật khẩu không khớp');
+			}
+
+			// generate new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
+			user.password = hashedPassword;
+			await user.save();
+			return res.status(200).json('Thay đổi mật khẩu thành công!!');
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)} `
+				)
+			);
+		}
+	}
+
+	// send OPT comfirm
+	async sendOTP(req, res, next) {
+		try {
+			// Tạo một bí mật ngẫu nhiên
+			const secret = speakeasy.generateSecret({ length: 20 });
+
+			// Tạo mã OTP
+			const otp = speakeasy.totp({
+				secret: secret.base32,
+				encoding: 'base32',
+			});
+
+			// save otp to redis set time expire 5m
+			await redisClient.set(`comfirm:${req.user._id}`, otp, 'EX', 60 * 5);
+
+			// Gửi mã OTP đến email
+			const status = await sendMailOTP(req.user.email, 'OTP Comfirm Set Password', otp, req.user.fullname);
+			// check status
+			if (!status) {
+				// delete in redis
+				await redisClient.del(`comfirm:${req.user._id}`);
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
+
+			res.json('Mã OTP đã được gửi qua email của bạn');
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
+			);
+		}
+	}
+
+	// send OTP verify
+	async sendOTPverify(req, res, next) {
+		try {
+			const schema = Joi.object({
+				email: Joi.string().email().required(),
+				fullname: Joi.string().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			// check email exsit
+			const user = await User.findOne({ email: req.body.email });
+			if (user) return responseError(res, 400, 'Email đã tồn tại');
+
+			// Tạo một bí mật ngẫu nhiên
+			const secret = speakeasy.generateSecret({ length: 20 });
+
+			// Tạo mã OTP
+			const otp = speakeasy.totp({
+				secret: secret.base32,
+				encoding: 'base32',
+			});
+
+			// save otp to redis set time expire 5m
+			await redisClient.set(`verify:${req.body.email}`, otp, 'EX', 60 * 5);
+
+			// Gửi mã OTP đến email
+			const status = await sendMailOTP(req.body.email, 'OTP Verify Account', otp, req.body.fullname);
+			// check status
+			if (!status) {
+				// delete in redis
+				await redisClient.del(`verify:${req.body.email}`);
+				return responseError(res, 400, 'Gửi email thất bại!!!');
+			}
+
+			res.json('Mã OTP đã được gửi qua email của bạn');
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(`${error.message} in method: ${req.method} of ${req.originalUrl} `)
+			);
+		}
+	}
+
+	// set password
+	async setPassword(req, res, next) {
+		try {
+			const schema = Joi.object({
+				newPassword: Joi.string().required(),
+				confirmPassword: Joi.string().required(),
+				otp: Joi.number().required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return responseError(res, 400, error.details[0].message);
+			}
+
+			const user = await User.findById(req.user._id);
+			if (!user) {
+				return responseError(res, 400, 'Không tìm thấy người dùng');
+			}
+
+			// check newPassword and confirmPassword
+			if (req.body.newPassword !== req.body.confirmPassword) {
+				return responseError(res, 400, 'Mật khẩu mới và xác nhận mật khẩu không khớp');
+			}
+
+			// generate new password
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
+
+			// get opt from redis
+			const otp = await redisClient.get(`comfirm:${req.user._id}`);
+			if (!otp) {
+				return responseError(res, 400, 'Mã OTP đã hết hạn');
+			}
+
+			// verify opt
+			const isVerify = otp.toString() === req.body.otp.toString();
+			if (!isVerify) {
+				return responseError(res, 400, 'Mã OTP không đúng');
+			}
+
+			// save new password
+			user.password = hashedPassword;
+			await user.save();
+			redisClient.del(`comfirm:${req.user._id}`); // delete otp
+
+			return res.status(200).json('Đặt mật khẩu thành công!!!');
+		} catch (error) {
+			console.log(error.message);
+			return next(
+				createError.InternalServerError(
+					`${error.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)} `
 				)
 			);
 		}
@@ -466,11 +647,11 @@ class AuthoController {
 			console.log(err);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${err.message} \nin method: ${req.method} of ${req.originalUrl} \nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
-					)}`
+					)} `
 				)
 			);
 		}

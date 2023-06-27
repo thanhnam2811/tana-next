@@ -50,6 +50,7 @@ export const fileUtil = {
 		const ext = name?.split('.').pop();
 		return ext && acceptedFileTypes.includes(ext);
 	},
+
 	isValidFileSize: (size: number) => {
 		const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 		return size <= MAX_FILE_SIZE;
@@ -59,15 +60,34 @@ export const fileUtil = {
 		const ext = name?.split('.').pop();
 		return ext && acceptedVideoTypes.includes(ext);
 	},
+
 	isImage: (name: string) => {
 		const ext = name?.split('.').pop();
 		return ext && acceptedImageTypes.includes(ext);
 	},
+
 	getFileIcon: (name: string) => {
 		const ext = name.split('.').pop();
 		if (ext && Object.keys(filesIcon).includes(ext)) {
 			return filesIcon[ext];
 		}
 		return filesIcon.def;
+	},
+
+	formatSize: (size: number) => {
+		if (isNaN(size)) return 'Không xác định';
+
+		const KB = 1024;
+		const MB = 1024 * KB;
+		const GB = 1024 * MB;
+		if (size < KB) {
+			return `${size} B`;
+		} else if (size < MB) {
+			return `${(size / KB).toFixed(2)} KB`;
+		} else if (size < GB) {
+			return `${(size / MB).toFixed(2)} MB`;
+		} else {
+			return `${(size / GB).toFixed(2)} GB`;
+		}
 	},
 };

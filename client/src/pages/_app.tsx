@@ -8,9 +8,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { App, ConfigProvider, theme } from 'antd';
 
 import '@styles/global.scss';
-import 'aos/dist/aos.css';
 import 'draft-js/dist/Draft.css';
-import 'swiper/css';
 
 import viVn from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
@@ -43,15 +41,18 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 		if (authUser) {
 			window.socket.connect();
 			window.socket.on('connect', () => {
-				window.socket.emit('login', authUser?._id); // login to socket
+				const accessToken = localStorage.getItem('accessToken');
+				window.socket.emit('login', accessToken); // login to socket
+
+				console.log('✔ Connected to socket!');
 			});
-			console.log('connected to socket');
 		}
 		return () => {
 			if (authUser) {
 				window.socket.off('connect');
 				window.socket.disconnect(); // disconnect to socket
-				console.log('disconnected to socket');
+
+				console.log('✖ Disconnected to socket!');
 			}
 		};
 	}, [authUser?._id]);

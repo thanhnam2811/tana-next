@@ -3,16 +3,16 @@ import { UserType } from '@modules/user/types';
 import { Button, Card, Form, Input, List, Select, Space } from 'antd';
 import React, { useRef, useState } from 'react';
 import { FriendCard } from '../components';
-import { friendTypeList } from '../data';
-import { FriendType, IFriendFilter } from '../types';
+import { IFriendFilter } from '../types';
 
 interface Props {
-	type: FriendType;
+	api: string;
+	title?: string;
 }
 
-export function ListFriend({ type }: Props) {
+export function ListFriend({ api, title = 'Danh sách bạn bè' }: Props) {
 	const [filter, setFilter] = useState<IFriendFilter>({ sort: 'desc', gender: '' });
-	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/${type}`, params: filter, limit: 12 });
+	const friendFetcher = useFetcher<UserType>({ api, params: filter, limit: 12 });
 
 	const typingRef = useRef<null | ReturnType<typeof setTimeout>>(null);
 	const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,12 +23,9 @@ export function ListFriend({ type }: Props) {
 			setFilter({ ...filter, key: value });
 		}, 300);
 	};
+
 	return (
-		<Card
-			title={friendTypeList.find((item) => item.type === type)?.title}
-			headStyle={{ padding: '0 16px' }}
-			bodyStyle={{ padding: 8 }}
-		>
+		<Card title={title} headStyle={{ padding: '0 16px' }} bodyStyle={{ padding: 8 }}>
 			<Space direction="vertical" style={{ width: '100%' }}>
 				<Input.Search placeholder="Tìm kiếm bạn bè" onChange={handleSearch} />
 
@@ -68,20 +65,27 @@ export function ListFriend({ type }: Props) {
 					itemLayout="horizontal"
 					dataSource={friendFetcher.data}
 					loading={friendFetcher.fetching}
-					loadMore={
-						!friendFetcher.fetching &&
-						friendFetcher.hasMore && (
-							<Button type="primary" onClick={friendFetcher.loadMore}>
-								Xem thêm
-							</Button>
-						)
-					}
 					grid={{ gutter: 16, column: 3 }}
-					renderItem={(item) => (
+					renderItem={(user) => (
 						<List.Item>
-							<FriendCard user={item} reload={friendFetcher.reload} />
+							<FriendCard user={user} />
 						</List.Item>
 					)}
+					loadMore={
+						!friendFetcher.fetching &&
+						friendFetcher.data.length > 0 && (
+							<div style={{ textAlign: 'center', marginTop: 16 }}>
+								<Button
+									size="small"
+									onClick={friendFetcher.loadMore}
+									loading={friendFetcher.loadingMore}
+									disabled={!friendFetcher.hasMore}
+								>
+									{friendFetcher.hasMore ? 'Xem thêm' : 'Hết rồi'}
+								</Button>
+							</div>
+						)
+					}
 				/>
 			</Space>
 		</Card>

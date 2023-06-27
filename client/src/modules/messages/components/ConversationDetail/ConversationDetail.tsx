@@ -36,8 +36,9 @@ import { TiInfoLarge } from 'react-icons/ti';
 import { SelectApi } from 'src/common/components/Input';
 import { ConversationAvatar } from '../ConversationAvatar';
 import styles from './ConversationDetail.module.scss';
-import { InfoMenu, MemberMenu } from './menu';
+import { FileMenu, InfoMenu, MediaMenu, MemberMenu } from './menu';
 import { UserType } from '@modules/user/types';
+import { useReport } from '@modules/report/hooks';
 
 export function ConversationDetail() {
 	const router = useRouter();
@@ -48,6 +49,7 @@ export function ConversationDetail() {
 	const { modal } = App.useApp();
 
 	const friendFetcher = useFetcher({ api: 'users/searchUser/friends' });
+	const { openReport } = useReport({ type: 'conversation', id: conversation._id });
 
 	const [addMemberForm] = Form.useForm<{ members: string[] }>();
 	const handleAddMember = async ({ members }: { members: string[] }) => {
@@ -140,7 +142,7 @@ export function ConversationDetail() {
 					<Typography.Text strong>Hình ảnh & Video</Typography.Text>
 				</Space>
 			),
-			children: <div>Hình ảnh & Video</div>,
+			children: <MediaMenu />,
 		},
 		{
 			key: 'files',
@@ -151,7 +153,7 @@ export function ConversationDetail() {
 					<Typography.Text strong>Tệp</Typography.Text>
 				</Space>
 			),
-			children: <div>Tệp</div>,
+			children: <FileMenu />,
 		}
 	);
 
@@ -223,7 +225,7 @@ export function ConversationDetail() {
 						</Tooltip>
 
 						<Tooltip title="Báo cáo">
-							<Button shape="circle" icon={<HiExclamationTriangle />} />
+							<Button shape="circle" icon={<HiExclamationTriangle />} onClick={openReport} />
 						</Tooltip>
 					</Space>
 				</Space>
@@ -249,7 +251,7 @@ export function ConversationDetail() {
 						{...panel}
 						key={panel.key}
 						className={styles.collapse_panel}
-						style={{ borderColor: token.colorBorder }}
+						style={{ borderColor: token.colorBorder, backgroundColor: token.colorBgContainer }}
 					/>
 				))}
 			</Collapse>

@@ -3,9 +3,13 @@ import { Button, Card, Col, Divider, Form, Input, Row, theme, Typography } from 
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
-import Lottie from 'react-lottie-player';
 import { useState } from 'react';
 import { forgotPasswordApi } from '../api';
+import SEO from '@common/components/SEO';
+import dynamic from 'next/dynamic';
+import { forgotPwdJson } from '@assets/data/json';
+
+const Lottie = dynamic(() => import('lottie-react'));
 
 const ForgotPasswordPage = () => {
 	const router = useRouter();
@@ -30,61 +34,62 @@ const ForgotPasswordPage = () => {
 		setLoading(false);
 	};
 	return (
-		<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
-			<Col span={12} style={{ height: 'fit-content' }}>
-				<Lottie
-					path="https://assets3.lottiefiles.com/private_files/lf30_GjhcdO.json"
-					speed={1}
-					loop
-					play
-					style={{ width: '100%', height: '100%' }}
-				/>
-			</Col>
+		<>
+			<SEO title="Quên mật khẩu" robot />
 
-			<Card
-				title={
-					<Typography.Title level={2} style={{ color: token.colorPrimary, margin: 0, textAlign: 'center' }}>
-						Quên mật khẩu
-					</Typography.Title>
-				}
-				style={{ width: 480, margin: 'auto' }}
-			>
-				<Form layout="vertical" form={form} onFinish={onFinish}>
-					<Form.Item
-						label="Email"
-						name="email"
-						rules={[
-							{
-								required: true,
-								message: 'Vui lòng nhập email!',
-							},
-							{
-								type: 'email',
-								message: 'Email không hợp lệ!',
-							},
-						]}
-					>
-						<Input />
-					</Form.Item>
+			<Row style={{ maxWidth: 1200, margin: 'auto', flex: 1, height: '100%' }} align="middle" justify="center">
+				<Col span={12} style={{ height: 'fit-content' }}>
+					<Lottie animationData={forgotPwdJson} loop autoplay style={{ width: '100%', height: '100%' }} />
+				</Col>
 
-					<Form.Item>
-						<Button type="primary" block loading={loading}>
-							Đặt lại mật khẩu
-						</Button>
-					</Form.Item>
+				<Card
+					title={
+						<Typography.Title
+							level={2}
+							style={{ color: token.colorPrimary, margin: 0, textAlign: 'center' }}
+						>
+							Quên mật khẩu
+						</Typography.Title>
+					}
+					style={{ width: 480, margin: 'auto' }}
+				>
+					<Form layout="vertical" form={form} onFinish={onFinish}>
+						<Form.Item
+							label="Email"
+							name="email"
+							rules={[
+								{
+									required: true,
+									message: 'Vui lòng nhập email!',
+								},
+								{
+									type: 'email',
+									message: 'Email không hợp lệ!',
+								},
+							]}
+						>
+							<Input />
+						</Form.Item>
 
-					<Divider>Hoặc</Divider>
+						<Form.Item>
+							<Button type="primary" block loading={loading}>
+								Đặt lại mật khẩu
+							</Button>
+						</Form.Item>
 
-					<Link href={`/auth/login`} style={{ float: 'right' }}>
-						<Button type="primary">Đăng nhập</Button>
-					</Link>
+						<Divider>Hoặc</Divider>
 
-					<Link href={`/auth/register`} style={{ float: 'left' }}>
-						<Button>Đăng ký</Button>
-					</Link>
-				</Form>
-			</Card>
-		</Row>
+						<Link href={`/auth/login`} style={{ float: 'right' }}>
+							<Button type="primary">Đăng nhập</Button>
+						</Link>
+
+						<Link href={`/auth/register`} style={{ float: 'left' }}>
+							<Button>Đăng ký</Button>
+						</Link>
+					</Form>
+				</Card>
+			</Row>
+		</>
 	);
 };
 

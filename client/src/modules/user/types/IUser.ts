@@ -53,12 +53,14 @@ interface IUser extends IData {
 
 	isOnline: boolean;
 	lastAccess?: string;
+	shouldSetPassword?: boolean; // For login with 3rd party
 
 	relationship?: RelationshipType;
 
 	contact: IContact[];
 	work: IWork[];
 	education: IEducation[];
+	hobbies?: string[];
 }
 
 // For use

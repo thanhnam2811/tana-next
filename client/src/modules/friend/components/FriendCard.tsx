@@ -1,6 +1,6 @@
 import { UserAvatar } from '@modules/user/components';
 import { UserType } from '@modules/user/types';
-import { App, Button, Card, Dropdown, MenuProps, theme, Tooltip, Typography } from 'antd';
+import { Button, Card, Dropdown, MenuProps, Popconfirm, theme, Tooltip, Typography } from 'antd';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { HiDotsHorizontal } from 'react-icons/hi';
@@ -15,144 +15,102 @@ import {
 } from 'react-icons/hi2';
 import { friendRelationshipMap, relationshipColor, relationshipLabel } from '../data';
 import { FriendType } from '../types';
-import { acceptFriendApi, rejectFriendApi, requestFriendApi, unFriendApi } from '../api';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
+import { useAuth } from '@modules/auth/hooks';
+import { useReport } from '@modules/report/hooks';
+import { useUserAction } from '@modules/user/hooks';
 
 interface Props {
 	user: UserType;
-	reload?: () => void;
 }
 
-export function FriendCard({ user, reload }: Props) {
+export function FriendCard({ user }: Props) {
 	const { token } = theme.useToken();
-	const { modal } = App.useApp();
+
+	const { authUser } = useAuth();
+	const isAuthUser = authUser?._id === user._id;
 
 	const router = useRouter();
 	const type = (router.query.type as FriendType) || 'friends';
-	const relationship = friendRelationshipMap[type] || user.relationship || 'none';
+	const _relationship = user.relationship || friendRelationshipMap[type] || 'none';
+	const {
+		relationship,
+		loading,
+		handleRequestFriend,
+		handleCancelRequestFriend,
+		handleAcceptFriend,
+		handleUnfriend,
+		handleChat,
+		handleRejectFriend,
+	} = useUserAction({ ...user, relationship: _relationship });
 
+	const { openReport } = useReport({ type: 'user', id: user._id });
 	const dropdownItems: MenuProps['items'] = [
 		{
 			key: 'report',
 			icon: <HiExclamationTriangle />,
 			label: 'Báo cáo',
+			onClick: openReport,
 		},
 	];
-
-	const handleUnfriend = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Hủy kết bạn với <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Sau khi hủy kết bạn, nếu muốn kết bạn lại, bạn cần phải chờ <strong>{user.fullname}</strong> chấp
-					nhận lời mời kết bạn của bạn.
-				</span>
-			),
-			okText: 'Hủy kết bạn',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await unFriendApi(user._id);
-				toast.success('Hủy kết bạn thành công');
-				reload?.();
-			},
-		});
-
-	const handleCancelRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Hủy lời mời kết bạn với <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Sau khi hủy lời mời kết bạn, bạn có thể gửi lại lời mời kết bạn cho <strong>{user.fullname}</strong>
-					.
-				</span>
-			),
-			okText: 'Hủy lời mời',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await requestFriendApi(user._id);
-				toast.success('Hủy lời mời kết bạn thành công');
-				reload?.();
-			},
-		});
-
-	const handleAcceptRequest = async () => {
-		await acceptFriendApi(user._id);
-		toast.success('Chấp nhận lời mời kết bạn thành công');
-		reload?.();
-	};
-
-	const handleRejectRequest = () =>
-		modal.confirm({
-			title: (
-				<span>
-					Từ chối lời mời kết bạn từ <strong>{user.fullname}</strong>?
-				</span>
-			),
-			content: (
-				<span>
-					Nếu muốn kết bạn với <strong>{user.fullname}</strong> sau này, bạn cần gửi lại lời mời kết bạn.
-				</span>
-			),
-			okText: 'Từ chối',
-			okType: 'danger',
-			cancelText: 'Thoát',
-			onOk: async () => {
-				await rejectFriendApi(user._id);
-				toast.success('Từ chối lời mời kết bạn thành công');
-				reload?.();
-			},
-		});
-
-	const handleSendRequest = async () => {
-		await requestFriendApi(user._id);
-		toast.success('Gửi lời mời kết bạn thành công');
-		reload?.();
-	};
 
 	switch (relationship) {
 		case 'friend':
 			dropdownItems.unshift({
 				key: 'unfriend',
 				icon: <HiUserMinus />,
-				label: 'Hủy kết bạn',
 				danger: true,
-				onClick: handleUnfriend,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn hủy kết bạn?"
+						okText="Hủy kết bạn"
+						cancelText="Thoát"
+						onConfirm={handleUnfriend}
+					>
+						Hủy kết bạn
+					</Popconfirm>
+				),
 			});
 			break;
 		case 'sent':
 			dropdownItems.unshift({
 				key: 'cancel',
 				icon: <HiXMark />,
-				label: 'Hủy lời mời',
 				danger: true,
-				onClick: handleCancelRequest,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn hủy lời mời kết bạn?"
+						okText="Hủy lời mời"
+						cancelText="Thoát"
+						onConfirm={handleCancelRequestFriend}
+					>
+						Hủy lời mời
+					</Popconfirm>
+				),
 			});
 			break;
 		case 'received':
 			dropdownItems.unshift({
 				key: 'decline',
 				icon: <HiXMark />,
-				label: 'Từ chối lời mời',
 				danger: true,
-				onClick: handleRejectRequest,
+				label: (
+					<Popconfirm
+						title="Bạn có chắc muốn từ chối lời mời kết bạn?"
+						okText="Từ chối"
+						cancelText="Thoát"
+						onConfirm={handleRejectFriend}
+					>
+						Từ chối
+					</Popconfirm>
+				),
 			});
 
 			dropdownItems.unshift({
 				key: 'accept',
 				icon: <HiArrowDownOnSquareStack />,
 				label: 'Chấp nhận lời mời',
-				onClick: handleAcceptRequest,
+				onClick: handleAcceptFriend,
 			});
 			break;
 		case 'none':
@@ -160,7 +118,7 @@ export function FriendCard({ user, reload }: Props) {
 				key: 'add',
 				icon: <HiUserPlus />,
 				label: 'Kết bạn',
-				onClick: handleSendRequest,
+				onClick: handleRequestFriend,
 			});
 			break;
 	}
@@ -184,10 +142,19 @@ export function FriendCard({ user, reload }: Props) {
 					</Link>
 				</Tooltip>,
 				<Tooltip key="message" title="Nhắn tin">
-					<Button icon={<HiChatBubbleOvalLeft />} />
+					<Button
+						icon={<HiChatBubbleOvalLeft />}
+						onClick={handleChat}
+						disabled={isAuthUser}
+						loading={loading.chat}
+					/>
 				</Tooltip>,
-				<Dropdown key="more" menu={{ items: dropdownItems }} arrow>
-					<Button icon={<HiDotsHorizontal />} />
+				<Dropdown key="more" menu={{ items: dropdownItems }} arrow disabled={isAuthUser} trigger={['click']}>
+					<Button
+						icon={<HiDotsHorizontal />}
+						disabled={isAuthUser}
+						loading={Object.keys(loading).some((item) => item !== 'chat' && loading[item])} // loading doesn't include chat
+					/>
 				</Dropdown>,
 			]}
 			bodyStyle={{ padding: 12 }}
@@ -196,9 +163,13 @@ export function FriendCard({ user, reload }: Props) {
 				avatar={<UserAvatar user={user} />}
 				title={user.fullname}
 				description={
-					<Typography.Text strong type={relationshipColor[relationship]}>
-						{relationshipLabel[relationship]}
-					</Typography.Text>
+					isAuthUser ? (
+						'Bạn'
+					) : (
+						<Typography.Text strong type={relationshipColor[relationship]}>
+							{relationshipLabel[relationship]}
+						</Typography.Text>
+					)
 				}
 			/>
 		</Card>

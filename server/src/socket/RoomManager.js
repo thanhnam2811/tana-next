@@ -6,33 +6,8 @@ const { populateUser } = require('../utils/Populate/User');
 const Conversation = require('../app/models/Conversation');
 const SocketManager = require('./SocketManager');
 const { eventName } = require('./constant');
+
 function RoomMagager(socket, io) {
-	// socket.on('joinRoom', (conversationId) => {
-	// 	console.log('joinRoom', conversationId);
-	// 	socket.join(conversationId);
-	// });
-
-	// Listen for chatMessage
-	socket.on(eventName.SEND_MESSAGE, async (msg) => {
-		try {
-			console.log('sendMessage', msg.conversation);
-			const conversation = await Conversation.findById(msg.conversation);
-			if (!conversation) return;
-			const userIds = conversation.members
-				.filter((member) => member.user.toString() !== msg.sender._id.toString())
-				.map((menber) => menber.user.toString());
-
-			SocketManager.sendToList(userIds, eventName.RECEIVE_MESSAGE, msg);
-		} catch (error) {
-			console.log(error);
-		}
-	});
-
-	// socket.on('leaveRoom', (conversationId) => {
-	// 	console.log('leaveRoom', conversationId);
-	// 	socket.leave(conversationId);
-	// });
-
 	// Video call TODO: API => send event
 	socket.on(eventName.CREATE_VIDEO_CALL, async (data) => {
 		// data = {
@@ -69,16 +44,23 @@ function RoomMagager(socket, io) {
 		});
 	});
 
+	socket.on('joinRoom', (conversationId) => {
+		console.log('joinRoom', conversationId);
+		socket.join(conversationId);
+	});
+
+	socket.on('leaveRoom', (conversationId) => {
+		console.log('leaveRoom', conversationId);
+		socket.leave(conversationId);
+	});
+
 	// typing message
 	socket.on(eventName.TYPING_MESSAGE, async (data) => {
 		console.log('typingMessage-----------', data);
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
-		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== data.senderId.toString())
-			.map((menber) => menber.user.toString());
-		SocketManager.sendToList(userIds, eventName.TYPING_MESSAGE, data);
+		io.to(data.conversation).emit(eventName.TYPING_MESSAGE, data);
 	});
 
 	socket.on(eventName.STOP_TYPING_MESSAGE, async (data) => {
@@ -86,11 +68,7 @@ function RoomMagager(socket, io) {
 		const conversation = await Conversation.findById(data.conversation);
 		if (!conversation) return;
 
-		const userIds = conversation.members
-			.filter((member) => member.user.toString() !== data.senderId.toString())
-			.map((menber) => menber.user.toString());
-
-		SocketManager.sendToList(userIds, eventName.STOP_TYPING_MESSAGE, data);
+		io.to(data.conversation).emit(eventName.STOP_TYPING_MESSAGE, data);
 	});
 }
 

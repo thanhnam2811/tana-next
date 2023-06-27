@@ -28,6 +28,8 @@ class AccessController {
 
 	async dailyAccessSevenDaysAgo(startDay, endDay) {
 		try {
+			// increase endDay 1
+			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalAccessByDay = await Access.aggregate([
 				{
 					$match: {
@@ -54,7 +56,7 @@ class AccessController {
 			// Initialize the map with 0 for each day in the range
 			let currentDate = new Date(startDay);
 			const endDate = new Date(endDay);
-			while (currentDate <= endDate) {
+			while (currentDate <= endDate - 1) {
 				const dateString = currentDate.toISOString().split('T')[0];
 				totalAccessMap[dateString] = 0;
 

@@ -1,2 +1,4 @@
-export * from './api.type';
-export * from './user.type';
+export * from './common';
+export * from './IFile';
+export * from './IPrivacy';
+export * from './ISetting';

@@ -1,3 +1,5 @@
+/* eslint-disable no-lonely-if */
+/* eslint-disable import/order */
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
 const createError = require('http-errors');
@@ -8,6 +10,9 @@ const { getUserWithPrivacy } = require('../../utils/Privacy/inforUser');
 const { getListUser, getListData, getListPost } = require('../../utils/Response/listData');
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
+const moment = require('moment');
+const suggestFriend = require('../../utils/Suggest/friend');
+const { responseError } = require('../../utils/Response/error');
 
 function querySearchAllUsers(req) {
 	try {
@@ -51,8 +56,9 @@ async function querySearchSuggestFriends(req, next) {
 				)
 		);
 
-		const cityUser = req.user.city ? req.user.city : '';
-		const fromUser = req.user.from ? req.user.from : '';
+		const cityUser = req.user.city ? req.user.city.province : '';
+		const fromUser = req.user.from ? req.user.from.province : '';
+
 		// TODO: education and work is array
 		const schoolUser = req.user.education.school ? req.user.education.school : '';
 		const companyUser = req.user.work.company ? req.user.work.company : '';
@@ -66,10 +72,10 @@ async function querySearchSuggestFriends(req, next) {
 							$and: [
 								{
 									$or: [
-										{ city: { $regex: cityUser, $options: 'i' } },
-										{ from: { $regex: fromUser, $options: 'i' } },
-										{ 'education.school': { $regex: schoolUser, $options: 'i' } },
-										{ 'work.company': { $regex: companyUser, $options: 'i' } },
+										{ 'city.province': { $regex: cityUser, $options: 'i' } },
+										{ 'from.province': { $regex: fromUser, $options: 'i' } },
+										// 		{ 'education.school': { $regex: schoolUser, $options: 'i' } },
+										// 		{ 'work.company': { $regex: companyUser, $options: 'i' } },
 									],
 								},
 								{ _id: { $nin: friendsOfFriendsFilter } },
@@ -133,6 +139,25 @@ class UserController {
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [GET]
+	async suggestFriends(req, res, next) {
+		try {
+			const users = await suggestFriend(req.user._id);
+			res.status(200).json(users);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -213,7 +238,7 @@ class UserController {
 
 	// delete user
 	async delete(req, res, next) {
-		if (req.user._id === req.params.id || req.user.isAdmin) {
+		if (req.user._id === req.params.id || req.user.role.name === 'ADMIN') {
 			try {
 				const user = await User.findByIdAndDelete(req.params.id);
 				res.status(200).send({
@@ -267,7 +292,7 @@ class UserController {
 			if (user) {
 				res.status(200).json(user);
 			} else {
-				res.status(404).json('Không tìm thấy người dùng!!!');
+				return responseError(res, 404, 'Không tìm thấy người dùng!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -365,10 +390,10 @@ class UserController {
 
 					res.status(200).json('Kết bạn thành công!!!');
 				} else {
-					res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
+					return responseError(res, 403, 'Bạn không thể chấp nhận yêu cầu kết bạn này!!!');
 				}
 			} else {
-				return res.status(403).json('Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
+				return responseError(res, 403, 'Bạn không thể chấp nhận yêu cầu kết bạn của chính mình!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -400,10 +425,10 @@ class UserController {
 					await currentUser.updateOne({ $pull: { friendRequests: { user: user._id } } });
 					res.status(200).json('Từ chối yêu cầu kết bạn thành công!!!');
 				} else {
-					res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn này!!!');
+					return responseError(res, 403, 'Bạn không thể từ chối yêu cầu kết bạn này!!!');
 				}
 			} else {
-				return res.status(403).json('Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
+				return responseError(res, 403, 'Bạn không thể từ chối yêu cầu kết bạn của chính mình!!!');
 			}
 		} catch (err) {
 			console.log(err);
@@ -720,6 +745,32 @@ class UserController {
 		}
 	}
 
+	// add hobbies for user
+	async addHobbies(req, res, next) {
+		try {
+			const { hobbies } = req.body;
+			const user = await User.findByIdAndUpdate(
+				req.user._id,
+				{
+					$set: { hobbies },
+				},
+				{ new: true }
+			);
+			return res.status(200).json(user);
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
 	// search new friends by keyword
 	async searchNewFriends(req, res, next) {
 		try {
@@ -852,8 +903,6 @@ class UserController {
 						$or: [
 							{ fullname: { $regex: req.query.key, $options: 'i' } },
 							{ email: { $regex: req.query.key, $options: 'i' } },
-							{ city: { $regex: req.query.key, $options: 'i' } },
-							{ from: { $regex: req.query.key, $options: 'i' } },
 						],
 					},
 				});
@@ -1076,7 +1125,7 @@ class UserController {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -1099,6 +1148,9 @@ class UserController {
 				{
 					offset,
 					limit,
+					sort: {
+						createdAt: -1,
+					},
 					populate: [
 						{ path: 'profilePicture', select: '_id link' },
 						{ path: 'coverPicture', select: '_id link' },
@@ -1143,7 +1195,7 @@ class UserController {
 		}
 	}
 
-	async searchAdmin(req, res) {
+	async searchAdmin(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
@@ -1216,11 +1268,66 @@ class UserController {
 	// get information of user: education, work, contact,... with privacy setting of user
 	async getUserInfo(req, res, next) {
 		try {
-			const user = await getUserWithPrivacy(req);
+			const user = await getUserWithPrivacy(req, res);
 			if (!user) {
 				return next(createError.NotFound('User not found'));
 			}
-			res.status(200).json(user);
+			const userObj = user.toObject();
+			if (!req.user) {
+				userObj.relationship = 'none';
+			} else {
+				if (
+					req.user.friends.some((friend) => friend.user && friend.user._id.toString() === user._id.toString())
+				) {
+					userObj.relationship = 'friend';
+				} else if (
+					req.user.sentRequests.some(
+						(sentRequest) => sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
+					)
+				) {
+					userObj.relationship = 'sent';
+				} else if (
+					req.user.friendRequests.some(
+						(friendRequest) =>
+							friendRequest.user && friendRequest.user._id.toString() === user._id.toString()
+					)
+				) {
+					userObj.relationship = 'received';
+				} else if (req.user._id.toString() === user._id.toString()) {
+					userObj.relationship = 'self';
+				} else {
+					userObj.relationship = 'none';
+				}
+			}
+
+			return res.status(200).json(userObj);
+		} catch (err) {
+			console.log(err);
+			return next(
+				createError.InternalServerError(
+					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	async lock(req, res, next) {
+		try {
+			const user = await populateUser(req.params.id);
+			if (!user) {
+				return next(createError.NotFound('Tài khoản không toàn tại'));
+			}
+			if (user.lockTime > Date.now()) {
+				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
+			}
+			// lock account 100 years
+			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+			await user.save();
+			return user;
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -1238,16 +1345,11 @@ class UserController {
 	// lock account
 	async lockAccount(req, res, next) {
 		try {
-			const user = await populateUser(req.params.id);
+			const user = await this.lock(req, res, next);
 			if (!user) {
-				return next(createError.NotFound('Tài khoản không toàn tại'));
+				return next(createError.NotFound('User not found'));
 			}
-			if (user.lockTime > Date.now()) {
-				return next(createError.BadRequest(`Tài khoản đã bị khóa cho đến ${user.lockTime}`));
-			}
-			// lock account 100 years
-			user.lockTime = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
-			await user.save();
+
 			return res.status(200).json(user);
 		} catch (err) {
 			console.log(err);
@@ -1508,6 +1610,8 @@ class UserController {
 
 	async getNumUserCreatedDaily(startDay, endDay) {
 		try {
+			// increase endDay 1
+			endDay = moment(endDay).add(1, 'days').format('YYYY-MM-DD');
 			const totalUserCreationsByDay = await User.aggregate([
 				{
 					$match: {
@@ -1532,7 +1636,7 @@ class UserController {
 			// Initialize the map with 0 for each day in the range
 			let currentDate = new Date(startDay);
 			const endDate = new Date(endDay);
-			while (currentDate <= endDate) {
+			while (currentDate <= endDate - 1) {
 				const dateString = currentDate.toISOString().split('T')[0];
 				totalUserCreationsMap[dateString] = 0;
 
@@ -1554,6 +1658,59 @@ class UserController {
 			return totalUserCreationsByDayArray;
 		} catch (err) {
 			console.log(err);
+		}
+	}
+
+	async getAllUserOnline(req, res, next) {
+		try {
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			User.paginate(
+				{
+					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
+					isOnline: true,
+				},
+				{
+					offset,
+					limit,
+					populate: [
+						{ path: 'profilePicture', select: '_id link' },
+						{ path: 'coverPicture', select: '_id link' },
+						{
+							path: 'friends.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'friendRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{
+							path: 'sentRequests.user',
+							select: '_id fullname profilePicture isOnline',
+							populate: { path: 'profilePicture', select: '_id link' },
+						},
+						{ path: 'role', select: '_id name' },
+					],
+				}
+			)
+				.then((data) => {
+					getListData(res, data);
+				})
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
 		}
 	}
 }

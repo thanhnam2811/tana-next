@@ -97,6 +97,29 @@ const contact = mongoose.Schema(
 	{ _id: false }
 );
 
+const address = mongoose.Schema(
+	{
+		country: {
+			type: String,
+			required: true,
+		},
+		province: {
+			type: String,
+			required: true,
+		},
+		district: {
+			type: String,
+		},
+		ward: {
+			type: String,
+		},
+		address: {
+			type: String,
+		},
+	},
+	{ _id: false }
+);
+
 const labelOfGender = {
 	male: 'nam',
 	female: 'nữ',
@@ -195,12 +218,10 @@ const UserSchema = new mongoose.Schema(
 		followers: [friend],
 		followings: [friend],
 		city: {
-			type: String,
-			max: 50,
+			type: address,
 		},
 		from: {
-			type: String,
-			max: 50,
+			type: address,
 		},
 		gender: {
 			type: gender,
@@ -216,6 +237,9 @@ const UserSchema = new mongoose.Schema(
 		},
 		birthdate: {
 			type: Date,
+		},
+		hobbies: {
+			type: [String],
 		},
 		role: {
 			type: mongoose.SchemaTypes.ObjectId,
@@ -241,8 +265,20 @@ const validate = (user) => {
 		fullname: Joi.string().min(1).max(50),
 		profilePicture: Joi.string(),
 		coverPicture: Joi.string(),
-		city: Joi.string().min(1).max(50),
-		from: Joi.string().min(1).max(50),
+		city: Joi.object({
+			country: Joi.string().min(1).max(200).required(),
+			province: Joi.string().min(1).max(200).required(),
+			district: Joi.string().min(1).max(200),
+			ward: Joi.string().min(1).max(200),
+			address: Joi.string().min(1).max(200),
+		}),
+		from: Joi.object({
+			country: Joi.string().min(1).max(200).required(),
+			province: Joi.string().min(1).max(200).required(),
+			district: Joi.string().min(1).max(200),
+			ward: Joi.string().min(1).max(200),
+			address: Joi.string().min(1).max(200),
+		}),
 		education: Joi.array().items(
 			Joi.object({
 				school: Joi.string().min(1).max(200).required(),
@@ -290,6 +326,7 @@ const validate = (user) => {
 			privacy: validatePrivacy(),
 		}),
 		birthdate: Joi.date(),
+		hobbies: Joi.array().items(Joi.string().min(1).max(50)),
 	});
 
 	return schema.validate(user);

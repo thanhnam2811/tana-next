@@ -11,8 +11,13 @@ const Comment = require('./comments');
 const Report = require('./reports');
 const Admin = require('./admin');
 const Notification = require('./notification');
+const Hobby = require('./hobby');
+const Search = require('./search');
+
 const logEvents = require('../Helpers/logEvents');
 const bot = require('../utils/SlackLogger/bot');
+const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
+const SearchController = require('../app/controllers/SearchController');
 
 function route(app) {
 	// cors handle
@@ -41,6 +46,7 @@ function route(app) {
 	// limit access to 20 requests per 1 minutes
 	// app.use(limiter);
 	// route
+	app.use('/search', Search);
 	app.use('/admin', Admin);
 	app.use('/files', File);
 	app.use('/conversations/:conversationId/messages', Message);
@@ -52,6 +58,7 @@ function route(app) {
 	app.use('/auth', Auth);
 	app.use('/notifications', Notification);
 	app.use('/reports', Report);
+	app.use('/hobbies', Hobby);
 	// get error 404
 	app.use((req, res, next) => {
 		next(createError(404, `Method: ${req.method} of ${req.originalUrl}  not found`));
@@ -60,7 +67,7 @@ function route(app) {
 	// eslint-disable-next-line no-unused-vars
 	app.use((error, req, res, next) => {
 		logEvents(`idError: ${uuidv4()} - ${error.message}`);
-		bot.sendNotificationToBotty(error.message);
+		bot.sendNotificationToBotty(`Method: ${req.method} of ${req.originalUrl}  not found\n${error.message}`);
 		res.status(error.status || 500);
 		res.json({
 			error: {

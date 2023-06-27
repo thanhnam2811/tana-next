@@ -3,6 +3,7 @@ const { User } = require('../models/User');
 const Activity = require('../models/Activity');
 const { getPagination } = require('../../utils/Pagination');
 const { getListData } = require('../../utils/Response/listData');
+const { responseError } = require('../../utils/Response/error');
 
 class ActivityController {
 	async getAllActivityOfUser(req, res, next) {
@@ -54,11 +55,9 @@ class ActivityController {
 				.then((data) => {
 					getListData(res, data);
 				})
-				.catch((err) => {
-					res.status(500).json({
-						message: err.message || 'Some error occurred while retrieving tutorials.',
-					});
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -127,9 +126,7 @@ class ActivityController {
 					getListData(res, data);
 				})
 				.catch((err) => {
-					res.status(500).json({
-						message: err.message || 'Some error occurred while retrieving tutorials.',
-					});
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.');
 				});
 		} catch (err) {
 			console.log(err);
@@ -164,9 +161,7 @@ class ActivityController {
 		try {
 			const activity = await Activity.findById(req.params.id);
 			if (!activity) {
-				res.status(404).json({
-					message: `Activity không tìm thấy với id ${req.params.id}`,
-				});
+				responseError(res, 404, `Activity không tìm thấy với id ${req.params.id}`);
 			} else if (activity.user.toString() === req.user._id.toString()) {
 				const result = await Activity.findByIdAndDelete(req.params.id);
 				res.status(200).json({
@@ -176,6 +171,7 @@ class ActivityController {
 				res.status(403).json({
 					message: "You don't have permission to delete this activity!",
 				});
+				responseError(res, 403, 'Bạn không có quyền thực hiện hành động này!!');
 			}
 		} catch (err) {
 			console.log(err);

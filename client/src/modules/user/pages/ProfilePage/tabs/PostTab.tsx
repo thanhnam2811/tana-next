@@ -1,15 +1,17 @@
 import { useFetcher } from '@common/hooks';
-import { PostType } from '@common/types';
 import { CreatePost, ListPost } from '@modules/post/components';
-import { useUserContext } from '@modules/user/hooks';
+import { useUserAction, useUserContext } from '@modules/user/hooks';
 import styles from './PostTab.module.scss';
-import { Button, Image, Tooltip, Typography, theme } from 'antd';
-import { HiCamera, HiUserPlus } from 'react-icons/hi2';
+import { Button, Dropdown, Image, Popconfirm, theme, Tooltip, Typography } from 'antd';
+import { HiCamera, HiExclamationTriangle, HiUserPlus } from 'react-icons/hi2';
 import { UploadImage } from '@common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
 import { toast } from 'react-hot-toast';
 import { uploadFileApi } from '@common/api';
 import { ReactNode } from 'react';
+import { HiDotsHorizontal } from 'react-icons/hi';
+import { useReport } from '@modules/report/hooks';
+import { PostType } from '@modules/post/types';
 
 export function PostTab() {
 	const { token } = theme.useToken();
@@ -49,40 +51,101 @@ export function PostTab() {
 		}
 	};
 
+	const {
+		relationship,
+		loading,
+		handleRequestFriend,
+		handleCancelRequestFriend,
+		handleAcceptFriend,
+		handleUnfriend,
+		handleChat,
+		handleRejectFriend,
+	} = useUserAction(user);
+
 	const actions: ReactNode[] = [];
 
 	if (!isCurrentUser) {
-		switch (user.relationship) {
+		switch (relationship) {
 			case 'none':
 				actions.push(
-					<Button key="add-friend" type="primary" icon={<HiUserPlus />} onClick={console.log}>
+					<Button
+						key="add-friend"
+						type="primary"
+						icon={<HiUserPlus />}
+						onClick={handleRequestFriend}
+						loading={loading.request}
+					>
 						Kết bạn
 					</Button>
 				);
 				break;
 			case 'friend':
 				actions.push(
-					<Button key="unfriend" type="primary" onClick={console.log}>
-						Bạn bè
-					</Button>,
-					<Button key="chat" onClick={console.log}>
+					<Dropdown
+						key="friend"
+						arrow
+						trigger={['click']}
+						menu={{
+							items: [
+								{
+									key: 'unfriend',
+									label: (
+										<Popconfirm
+											title="Bạn có chắc muốn hủy kết bạn?"
+											okText="Đồng ý"
+											cancelText="Hủy"
+											onConfirm={handleUnfriend}
+										>
+											Hủy kết bạn
+										</Popconfirm>
+									),
+									danger: true,
+								},
+							],
+						}}
+					>
+						<Button type="primary">Bạn bè</Button>
+					</Dropdown>,
+					<Button key="chat" onClick={handleChat} loading={loading.chat}>
 						Nhắn tin
 					</Button>
 				);
 				break;
 			case 'sent':
 				actions.push(
-					<Button key="cancel-request" onClick={console.log}>
-						Đã gửi lời mời
-					</Button>
+					<Dropdown
+						key="sent"
+						arrow
+						trigger={['click']}
+						menu={{
+							items: [
+								{
+									key: 'cancel',
+									label: (
+										<Popconfirm
+											title="Bạn có chắc muốn hủy lời mời kết bạn?"
+											okText="Đồng ý"
+											cancelText="Hủy"
+											onConfirm={handleCancelRequestFriend}
+										>
+											Hủy lời mời
+										</Popconfirm>
+									),
+									danger: true,
+								},
+							],
+						}}
+					>
+						<Button type="primary">Đã gửi lời mời</Button>
+					</Dropdown>
 				);
 				break;
 			case 'received':
 				actions.push(
-					<Button key="accept-request" type="primary" onClick={console.log}>
+					<Button key="accept" type="primary" onClick={handleAcceptFriend} loading={loading.accept}>
 						Chấp nhận
 					</Button>,
-					<Button key="decline-request" onClick={console.log} danger>
+					<Button key="reject" danger onClick={handleRejectFriend} loading={loading.reject}>
 						Từ chối
 					</Button>
 				);
@@ -92,7 +155,28 @@ export function PostTab() {
 		}
 	}
 
-	console.log({ user, actions });
+	const { openReport } = useReport({ type: 'user', id: user._id });
+	if (!isCurrentUser)
+		actions.push(
+			<Dropdown
+				key="more"
+				arrow
+				trigger={['click']}
+				menu={{
+					items: [
+						{
+							key: 'report',
+							label: 'Báo cáo',
+							danger: true,
+							onClick: openReport,
+							icon: <HiExclamationTriangle />,
+						},
+					],
+				}}
+			>
+				<Button icon={<HiDotsHorizontal />} />
+			</Dropdown>
+		);
 
 	return (
 		<>

@@ -5,7 +5,7 @@ import { ConversationFormType, ConversationType } from '@modules/messages/types'
 import { getConversationInfo } from '@modules/messages/utils';
 import { Button, Card, Space, Spin, Tooltip, Typography } from 'antd';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { HiPhone, HiVideoCamera } from 'react-icons/hi2';
 import { TiInfoLarge } from 'react-icons/ti';
 import useSWR from 'swr';
@@ -15,7 +15,7 @@ import { ConversationMessage } from './ConversationMessage';
 import { toast } from 'react-hot-toast';
 import { updateConversationApi } from '@modules/messages/api';
 import { ConversationProvider } from '@modules/messages/hooks';
-import Head from 'next/head';
+import SEO from '@common/components/SEO';
 
 interface Props {
 	onUpdate?: (id: string, data: ConversationType) => void;
@@ -78,9 +78,7 @@ export function ConversationContent({ onUpdate }: Props) {
 				updateConversationForm,
 			}}
 		>
-			<Head>
-				<title>{name} - Tin nhắn</title>
-			</Head>
+			<SEO title={`Tin nhắn - ${name}`} />
 
 			<Layout.Content style={{ maxWidth: '100%' }} fixed>
 				<Card

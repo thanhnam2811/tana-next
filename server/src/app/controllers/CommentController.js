@@ -17,6 +17,7 @@ const {
 	createActivityWithReactComment,
 } = require('../../utils/Activity/comment');
 const { getListPost } = require('../../utils/Response/listData');
+const { responseError } = require('../../utils/Response/error');
 
 class CommentController {
 	// [POST] create a comment
@@ -27,7 +28,7 @@ class CommentController {
 				content: Joi.string().required(),
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError(400, error.details[0].message));
@@ -70,10 +71,9 @@ class CommentController {
 						path: 'media',
 						select: '_id link',
 					});
-				res.status(200).json(comment);
-			} else {
-				res.status(404).send('Bài viết không tồn tại');
+				return res.status(200).json(comment);
 			}
+			return responseError(res, 404, 'Bài viết không tồn tại');
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -95,7 +95,7 @@ class CommentController {
 			const schema = Joi.object({
 				content: Joi.string().required(),
 				media: Joi.array().items(Joi.string()),
-			});
+			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {
 				return next(createError(400, error.details[0].message));
@@ -117,10 +117,9 @@ class CommentController {
 						select: '_id link',
 					});
 
-				res.status(200).json(commentUpdated);
-			} else {
-				res.status(401).json('Bạn không có quyền cập nhật bình luận này');
+				return res.status(200).json(commentUpdated);
 			}
+			return responseError(res, 401, 'Bạn không có quyền cập nhật bình luận này');
 		} catch (error) {
 			console.log(error);
 			return next(
@@ -209,10 +208,10 @@ class CommentController {
 
 					const commentWithReactUser = commentUpdated.toObject();
 					commentWithReactUser.reactOfUser = req.body.type;
-					res.status(200).json(commentWithReactUser);
+					return res.status(200).json(commentWithReactUser);
 				}
 			} else {
-				res.status(404).json('Bình luận không tồn tại');
+				return responseError(res, 404, 'Bình luận không tồn tại');
 			}
 		} catch (err) {
 			console.log(err);
@@ -228,8 +227,7 @@ class CommentController {
 		}
 	}
 
-	// [Delete] delete a comment
-	async delete(req, res) {
+	async deleteComment(req, res, next) {
 		try {
 			const comment = await Comment.findById(req.params.id).populate(
 				'author',
@@ -239,7 +237,8 @@ class CommentController {
 			if (comment) {
 				if (
 					comment.author._id.toString() === req.user._id.toString() ||
-					post.author.toString() === req.user._id.toString()
+					post.author.toString() === req.user._id.toString() ||
+					req.user.role.name === 'ADMIN'
 				) {
 					await comment.delete();
 					// check comment is included in lastestFiveComments of post
@@ -259,18 +258,37 @@ class CommentController {
 					});
 					// save and return post populated with comments
 					await post.save();
-					res.status(200).json(comment);
-				} else {
-					res.status(401).json('Bạn không có quyền xóa bình luận này');
+					return comment;
 				}
-			} else {
-				res.status(404).json('Bình luận không tồn tại');
+				return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
 			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	// [Delete] delete a comment
+	async delete(req, res, next) {
+		try {
+			const comment = await this.deleteComment(req, res, next);
+			if (!comment) return responseError(res, 500, 'Không xóa được bình luận!!!');
+
+			return res.status(200).json(comment);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -289,7 +307,7 @@ class CommentController {
 				const schema = Joi.object({
 					content: Joi.string().required(),
 					media: Joi.array().items(Joi.string()),
-				});
+				}).unknown();
 				const { error } = schema.validate(req.body);
 				if (error) {
 					return next(createError(400, error.details[0].message));
@@ -327,15 +345,14 @@ class CommentController {
 						path: 'media',
 						select: '_id link',
 					});
-				res.status(200).json(commentPopulated);
-			} else {
-				res.status(404).send('Bình luận không tồn tại');
+				return res.status(200).json(commentPopulated);
 			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
 				createError.InternalServerError(
-					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
@@ -390,11 +407,9 @@ class CommentController {
 						getListPost(res, data, listComments);
 					});
 				})
-				.catch((e) => {
-					res.status(500).send({
-						message: e.message || 'Some error occurred while retrieving comments.',
-					});
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(
@@ -454,11 +469,9 @@ class CommentController {
 						getListPost(res, data, listComments);
 					});
 				})
-				.catch((e) => {
-					res.status(500).send({
-						message: e.message || 'Some error occurred while retrieving comments.',
-					});
-				});
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (err) {
 			console.log(err);
 			return next(

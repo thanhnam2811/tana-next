@@ -1,15 +1,17 @@
 import { PrivacyDropdown } from 'src/common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
-import { Button, DatePicker, Form, Input, List, Modal, Select, Space } from 'antd';
+import { Button, DatePicker, Form, Input, List, Modal, Select } from 'antd';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiPencil, HiPlus, HiTrash } from 'react-icons/hi2';
 import { DATE_FORMAT, dateUtil } from '@common/utils';
-import { IEducation } from '@modules/user/types';
+import { IEducation, UserType } from '@modules/user/types';
 import { IPrivacy } from '@common/types';
 import { useUserContext } from '@modules/user/hooks';
 import { privacyOptions } from '@assets/data';
 import dayjs from 'dayjs';
+import { SelectApi } from '@common/components/Input';
+import { useFetcher } from '@common/hooks';
 
 interface EducationModalData {
 	data: IEducation;
@@ -184,19 +186,17 @@ function EducationModal({ open, onClose, data, onSubmit }: ModalProps) {
 		}
 	}, [open, data]);
 
+	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/friends` });
+	const privacyValue = Form.useWatch(['privacy', 'value'], form);
+
 	return (
 		<Modal
 			open={open}
 			onCancel={onClose}
 			title={data ? 'Chỉnh sửa thông tin học vấn' : 'Thêm thông tin học vấn'}
-			footer={
-				<Space>
-					<Button onClick={onClose}>Hủy</Button>
-					<Button type="primary" onClick={() => form.submit()}>
-						{data ? 'Lưu' : 'Thêm'}
-					</Button>
-				</Space>
-			}
+			okText={data ? 'Lưu' : 'Thêm'}
+			onOk={form.submit}
+			cancelText="Hủy"
 		>
 			<Form form={form} onFinish={onSubmit} layout="vertical">
 				<Form.Item
@@ -269,6 +269,52 @@ function EducationModal({ open, onClose, data, onSubmit }: ModalProps) {
 				>
 					<Select options={privacyOptions} />
 				</Form.Item>
+
+				{privacyValue === 'includes' && (
+					<Form.Item
+						name={['privacy', 'includes']}
+						label="Bao gồm"
+						rules={[
+							({ getFieldValue }) => ({
+								validator(_, value) {
+									if (getFieldValue('value') === 'includes' && value?.length === 0) {
+										return Promise.reject(new Error('Vui lòng chọn người dùng'));
+									}
+									return Promise.resolve();
+								},
+							}),
+						]}
+					>
+						<SelectApi
+							mode="multiple"
+							fetcher={friendFetcher}
+							toOption={(u) => ({ label: u.fullname, value: u._id })}
+						/>
+					</Form.Item>
+				)}
+
+				{privacyValue === 'excludes' && (
+					<Form.Item
+						name={['privacy', 'excludes']}
+						label="Trừ ra"
+						rules={[
+							({ getFieldValue }) => ({
+								validator(_, value) {
+									if (getFieldValue('value') === 'excludes' && value?.length === 0) {
+										return Promise.reject(new Error('Vui lòng chọn người dùng'));
+									}
+									return Promise.resolve();
+								},
+							}),
+						]}
+					>
+						<SelectApi
+							mode="multiple"
+							fetcher={friendFetcher}
+							toOption={(u) => ({ label: u.fullname, value: u._id })}
+						/>
+					</Form.Item>
+				)}
 			</Form>
 		</Modal>
 	);
