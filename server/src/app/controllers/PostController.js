@@ -81,7 +81,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 					],
 				}
@@ -351,7 +351,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 
 				return res.status(200).send(postUpdated);
@@ -499,7 +499,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 					],
 				}
@@ -604,7 +604,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
@@ -669,7 +669,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = 'none';
@@ -723,7 +723,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 
 				const postReturn = postUpdated.toObject();
@@ -793,7 +793,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = newReact.type;
@@ -949,7 +949,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 
 			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
@@ -999,7 +999,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 			}
 
@@ -1085,7 +1085,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 						{
 							path: 'privacy.includes',
@@ -1201,7 +1201,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 
 			// :TODO: if listPost is empty, get random posts
@@ -1317,7 +1317,7 @@ class PostController {
 					},
 					{
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					},
 					{
 						path: 'privacy.includes',
