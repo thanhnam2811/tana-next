@@ -1358,8 +1358,7 @@ class UserController {
 			user.reasonLock = req.body.reasonLock;
 			await user.save();
 
-			// send email
-			return res.status(200).json('Đã khóa tài khoản thành công!!');
+			return res.status(200).json(user);
 		} catch (err) {
 			console.log(err);
 			return next(
