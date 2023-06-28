@@ -17,15 +17,22 @@ export class ApiError {
 			const code = response.status;
 			let message = 'Lỗi kết nối đến máy chủ!';
 
-			if (response?.data?.error?.message) message = response.data.error.message;
-			else if (response?.data?.message) message = response.data.message;
-			else if (response?.data) message = response.data;
-			else if (response?.statusText) message = response.statusText;
+			const { data, statusText } = response;
+
+			if (data) {
+				const { error, message: dataMsg } = data;
+
+				if (error) {
+					const { message: errorMsg } = error;
+
+					message = errorMsg || error;
+				} else message = dataMsg || data;
+			} else if (statusText) message = statusText;
 
 			return new ApiError(code, message);
 		}
 
-		return new ApiError(500);
+		return new ApiError(500, error.message);
 	}
 
 	static fromError(error: Error) {

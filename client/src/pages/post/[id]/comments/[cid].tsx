@@ -1,7 +1,7 @@
 import { getPostApi } from '@modules/post/api';
 import PostPage, { PostSEO } from '@modules/post/pages/PostPage';
 import { GetServerSideProps } from 'next';
-import { ApiError, handleError, isApiError } from '@common/api';
+import { ApiError, handleError } from '@common/api';
 import { PostType } from '@modules/post/types';
 
 interface Props {
@@ -16,7 +16,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 	try {
 		props.post = await getPostApi(id, true);
 	} catch (e: any) {
-		if (isApiError(e)) props.error = e;
+		if (ApiError.isApiError(e)) props.error = e;
 		else handleError(e).catch((e) => (props.error = e));
 	}
 
