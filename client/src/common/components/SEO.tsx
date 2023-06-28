@@ -35,7 +35,6 @@ export default function SEO({ title, description, images, url, children, robot }
 			{/* Favicon */}
 			<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" key="apple-touch-icon" />
 			<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" key="favicon-32x32" />
-			<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" key="favicon-16x16" />
 			<link rel="manifest" href="/site.webmanifest" key="site.webmanifest" />
 			<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" key="safari-pinned-tab" />
 			<meta name="apple-mobile-web-app-title" content="TaNa" key="apple-mobile-web-app-title" />
@@ -106,7 +105,7 @@ export default function SEO({ title, description, images, url, children, robot }
 				</>
 			))}
 
-			{children}
+			<Head>{children}</Head>
 		</Head>
 	);
 }
