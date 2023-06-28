@@ -292,10 +292,40 @@ class CommentController {
 	// [Delete] delete a comment
 	async delete(req, res, next) {
 		try {
-			const comment = await this.deleteComment(req, res, next);
-			if (!comment) return responseError(res, 500, 'Không xóa được bình luận!!!');
-
-			return res.status(200).json(comment);
+			const comment = await Comment.findById(req.params.id).populate(
+				'author',
+				'_id fullname profilePicture isOnline'
+			);
+			const post = await Post.findById(req.params.postId);
+			if (comment) {
+				if (
+					comment.author._id.toString() === req.user._id.toString() ||
+					post.author.toString() === req.user._id.toString() ||
+					req.user.role.name === 'ADMIN'
+				) {
+					await comment.delete();
+					// check comment is included in lastestFiveComments of post
+					const index = post.lastestFiveComments.indexOf(req.params.id);
+					if (index > -1) {
+						// update lastestFiveComments of post = top 5 comments lastest and not replyTo
+						post.lastestFiveComments = await Comment.find({ post: req.params.postId, replyTo: null })
+							.sort({ createdAt: -1 })
+							.limit(5)
+							.select('_id');
+					}
+					// delete all replies of comment and return number of replies deleted
+					const numberReplyDeleted = await Comment.deleteMany({ replyTo: req.params.id });
+					// decrease number of comments of post
+					await Post.findByIdAndUpdate(req.params.postId, {
+						$inc: { numberComment: -1 - numberReplyDeleted.deletedCount },
+					});
+					// save and return post populated with comments
+					await post.save();
+					return res.status(200).json(comment);
+				}
+				return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
+			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
