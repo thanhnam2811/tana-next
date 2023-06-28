@@ -168,7 +168,7 @@ class PostController {
 					Joi.object({
 						_id: Joi.string().required(),
 						description: Joi.string(),
-					})
+					}).unknown()
 				),
 				privacy: validatePrivacy,
 			}).unknown();
@@ -200,7 +200,7 @@ class PostController {
 				await Promise.all(
 					req.body.media.map(async (file) => {
 						const fileUpdated = await File.findByIdAndUpdate(
-							file.file,
+							file._id,
 							{
 								description: file.description,
 								post: savedPost._id,
@@ -271,7 +271,7 @@ class PostController {
 					Joi.object({
 						_id: Joi.string().required(),
 						description: Joi.string(),
-					})
+					}).unknown()
 				),
 				privacy: Joi.object({
 					value: Joi.string().valid('public', 'private', 'friends', 'includes', 'excludes').required(),
@@ -298,7 +298,7 @@ class PostController {
 				await Promise.all(
 					req.body.media.map(async (file) => {
 						const fileUpdated = await File.findByIdAndUpdate(
-							file.file,
+							file._id,
 							{
 								description: file.description,
 								post: post._id,
@@ -737,12 +737,17 @@ class PostController {
 					type: req.body.type,
 				});
 				await newReact.save();
+
 				// update the number of reactions of the post
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
 				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
+
+					// const user = await User.findById(req.user._id);
+					// // update interactionScore friend of user
+					// user.friends
 				}
 
 				// save activity for user
@@ -1154,6 +1159,7 @@ class PostController {
 		try {
 			const listFriendId = req.user.friends.map((friend) => friend.user._id);
 			listFriendId.push(req.user._id);
+
 			const listPost = await Post.find({ author: { $in: listFriendId } })
 				.sort({ updatedAt: -1 })
 				.populate({
@@ -1219,11 +1225,28 @@ class PostController {
 					listPosts.push(postObject);
 				})
 			).then(async () => {
-				// getListPost(res, data, listPosts);
+				const friendScores = {};
+				req.user.friends.forEach((friend) => {
+					friendScores[friend.user._id.toString()] = friend.interactionScore;
+				});
+
+				const sortedPosts = listPost.sort((a, b) => {
+					const interactionScoreA = friendScores[a.author._id.toString()];
+					const interactionScoreB = friendScores[b.author._id.toString()];
+
+					if (interactionScoreA === interactionScoreB) {
+						// Sắp xếp theo updatedAt nếu interactionScore bằng nhau
+						return b.updatedAt - a.updatedAt;
+					}
+
+					// Sắp xếp giảm dần theo interactionScore
+					return friendScores[b.author] - friendScores[a.author];
+				});
+
 				// sort post by date desc
-				listPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-				// getListPost(res, data, listPosts);
-				const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
+				// listPosts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+				const listPostsFilter = await getAllPostWithPrivacy(sortedPosts, req);
 				// pagination for listPosts
 				const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 				return res.status(200).send({
