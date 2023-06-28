@@ -166,7 +166,7 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(
 					Joi.object({
-						file: Joi.string().required(),
+						_id: Joi.string().required(),
 						description: Joi.string(),
 					})
 				),
@@ -187,7 +187,7 @@ class PostController {
 				);
 			}
 
-			const files = req.body.media?.map((file) => file.file);
+			const files = req.body.media?.map((file) => file._id);
 			const newPost = new Post({
 				...req.body,
 				media: files,
@@ -269,7 +269,7 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(
 					Joi.object({
-						file: Joi.string().required(),
+						_id: Joi.string().required(),
 						description: Joi.string(),
 					})
 				),
@@ -309,7 +309,7 @@ class PostController {
 					})
 				);
 
-				const files = req.body.media.map((file) => file.file);
+				const files = req.body.media.map((file) => file._id);
 				const postUpdated = await Post.findByIdAndUpdate(
 					req.params.id,
 					{
