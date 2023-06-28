@@ -200,7 +200,7 @@ class PostController {
 				await Promise.all(
 					req.body.media.map(async (file) => {
 						const fileUpdated = await File.findByIdAndUpdate(
-							file.file,
+							file._id,
 							{
 								description: file.description,
 								post: savedPost._id,
@@ -298,7 +298,7 @@ class PostController {
 				await Promise.all(
 					req.body.media.map(async (file) => {
 						const fileUpdated = await File.findByIdAndUpdate(
-							file.file,
+							file._id,
 							{
 								description: file.description,
 								post: post._id,
@@ -737,12 +737,17 @@ class PostController {
 					type: req.body.type,
 				});
 				await newReact.save();
+
 				// update the number of reactions of the post
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
 				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
+
+					// const user = await User.findById(req.user._id);
+					// // update interactionScore friend of user
+					// user.friends
 				}
 
 				// save activity for user
@@ -1222,12 +1227,12 @@ class PostController {
 			).then(async () => {
 				const friendScores = {};
 				req.user.friends.forEach((friend) => {
-					friendScores[friend.user] = friend.interactionScore;
+					friendScores[friend.user._id.toString()] = friend.interactionScore;
 				});
 
 				const sortedPosts = listPost.sort((a, b) => {
-					const interactionScoreA = friendScores[a.author];
-					const interactionScoreB = friendScores[b.author];
+					const interactionScoreA = friendScores[a.author._id.toString()];
+					const interactionScoreB = friendScores[b.author._id.toString()];
 
 					if (interactionScoreA === interactionScoreB) {
 						// Sắp xếp theo updatedAt nếu interactionScore bằng nhau
