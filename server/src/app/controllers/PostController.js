@@ -745,9 +745,13 @@ class PostController {
 				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
 
-					// const user = await User.findById(req.user._id);
-					// // update interactionScore friend of user
-					// user.friends
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === post.author._id.toString()) {
+							arr[index].interactionScore += 1;
+						}
+					});
+					user.save();
 				}
 
 				// save activity for user

@@ -3,6 +3,7 @@ const Joi = require('joi');
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 const React = require('../models/React');
+const { User } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
 const {
 	notificationCreateComment,
@@ -65,6 +66,16 @@ class CommentController {
 				// create notification for author of post
 				await notificationCreateComment(post, savedComment, req.user);
 				await notificationTagComment(savedComment, req.user);
+
+				if (savedComment.author.toString() !== req.user._id.toString()) {
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === savedComment.author.toString()) {
+							arr[index].interactionScore += 2;
+						}
+					});
+					user.save();
+				}
 
 				// save activity for user
 				await createActivityWithComment(savedComment, req.user);
@@ -203,6 +214,15 @@ class CommentController {
 
 					// save activity for user
 					await createActivityWithReactComment(comment, req.user);
+					if (comment.author.toString() !== req.user._id.toString()) {
+						const user = await User.findById(req.user._id);
+						user.friends.forEach((friend, index, arr) => {
+							if (friend.user._id.toString() === comment.author.toString()) {
+								arr[index].interactionScore += 2;
+							}
+						});
+						user.save();
+					}
 
 					const commentUpdated = await Comment.findById(req.params.id)
 						.populate({
@@ -366,6 +386,15 @@ class CommentController {
 
 				// save activity for user
 				await createActivityWithReplyComment(savedComment, req.user);
+				if (savedComment.author.toString() !== req.user._id.toString()) {
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === savedComment.author.toString()) {
+							arr[index].interactionScore += 2;
+						}
+					});
+					user.save();
+				}
 
 				// increase number comment of post
 				await Post.findByIdAndUpdate(req.params.postId, { $inc: { numberComment: 1 } });
