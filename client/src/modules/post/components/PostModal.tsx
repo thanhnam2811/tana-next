@@ -46,8 +46,10 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		mediaInputRef.current!.value = ''; // reset input
 	};
 
-	const handleDeleteMedia = (id: string) => {
-		setListMedia((prev) => prev.filter((item) => item._id !== id));
+	const handleDeleteMedia = (id: string) => setListMedia((prev) => prev.filter((item) => item._id !== id));
+	const handleEditMedia = (id: string, media: IMedia) => {
+		const newMedia = listMedia.map((item) => (item._id === id ? { ...item, ...media } : item));
+		setListMedia(newMedia);
 	};
 
 	const [form] = Form.useForm<PostFormType>();
@@ -59,11 +61,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		} else {
 			setListMedia(data.media || []);
 
-			form.setFieldsValue({
-				...data,
-				// Gán lại media thành mảng id để submit
-				media: data.media?.map((item) => item._id) || [],
-			});
+			form.setFieldsValue(data);
 		}
 	}, [data]);
 
@@ -84,7 +82,7 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 		});
 
 		// Gán lại media
-		data.media = oldMedia.map(({ _id }) => _id);
+		data.media = oldMedia;
 
 		// Nếu có file mới thì upload
 		if (newFiles.length) {
@@ -92,7 +90,13 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 			try {
 				const { files } = await uploadFileApi(newFiles);
 
-				data.media = [...data.media, ...files.map(({ _id }) => _id)];
+				data.media = [
+					...data.media,
+					...files.map((item) => ({
+						_id: item._id,
+						description: listMedia.find((i) => i.file?.name === item.originalname)?.description,
+					})),
+				];
 				toast.success('Tải lên ảnh, video thành công', { id: toastId });
 			} catch (error: any) {
 				toast.error(error.message || error.toString(), { id: toastId });
@@ -185,7 +189,13 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 				}
 			>
 				<Collapse in={!!listMedia.length}>
-					<PostMedia media={listMedia} onDelete={handleDeleteMedia} showAll />
+					<PostMedia
+						media={listMedia}
+						onDelete={handleDeleteMedia}
+						onEdit={handleEditMedia}
+						showAll
+						style={{ padding: 16 }}
+					/>
 				</Collapse>
 			</Card>
 		</Modal>

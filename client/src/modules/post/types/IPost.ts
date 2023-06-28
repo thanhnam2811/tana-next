@@ -6,7 +6,7 @@ interface IPost extends IData {
 	privacy: IPrivacy;
 
 	content: string;
-	media: IMedia[] | string[]; // string[] for create, update post
+	media: IMedia[] | Omit<IMedia, 'link'>[];
 	tags: any[];
 
 	numberReact: number;
@@ -21,4 +21,4 @@ interface IPost extends IData {
 export type PostType = IPost & { media: IMedia[] };
 
 // For form
-export type PostFormType = Partial<IPost & { media: string[] }>;
+export type PostFormType = Partial<IPost & { media: Omit<IMedia, 'link'>[] }>;

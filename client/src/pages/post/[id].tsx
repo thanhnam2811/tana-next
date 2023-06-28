@@ -1,13 +1,13 @@
 import { getPostApi } from '@modules/post/api';
 import PostPage, { PostSEO } from '@modules/post/pages/PostPage';
 import { GetServerSideProps } from 'next';
-import { ApiError, handleError } from '@common/api';
+import { ApiError } from '@common/api';
 import { PostType } from '@modules/post/types';
 
 interface Props {
 	post?: PostType;
 	id?: string;
-	error?: ApiError;
+	error?: object;
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
@@ -16,8 +16,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 	try {
 		props.post = await getPostApi(id, true);
 	} catch (e: any) {
-		if (ApiError.isApiError(e)) props.error = e;
-		else handleError(e).catch((e) => (props.error = e));
+		if (ApiError.isApiError(e)) props.error = e.toObject();
+		else props.error = ApiError.fromError(e).toObject();
 	}
 
 	return { props };
@@ -26,7 +26,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 export default function Post({ post, id, error }: Props) {
 	return (
 		<>
-			<PostSEO id={id} post={post} error={error} />
+			<PostSEO id={id} post={post} error={error && ApiError.fromObject(error)} />
 
 			<PostPage post={post} />
 		</>

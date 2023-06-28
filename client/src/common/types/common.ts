@@ -1,6 +1,7 @@
 export interface IMedia {
 	_id: string;
 	link: string;
+	description?: string;
 }
 
 export type ReactionTypeValue = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
