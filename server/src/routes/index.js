@@ -14,11 +14,10 @@ const Notification = require('./notification');
 const Hobby = require('./hobby');
 const Search = require('./search');
 const Album = require('./album');
+const BadWord = require('./badword');
 
 const logEvents = require('../Helpers/logEvents');
 const bot = require('../utils/SlackLogger/bot');
-const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
-const SearchController = require('../app/controllers/SearchController');
 
 function route(app) {
 	// cors handle
@@ -48,6 +47,7 @@ function route(app) {
 	// app.use(limiter);
 	// route
 	app.use('/search', Search);
+	app.use('/badwords', BadWord);
 	app.use('/albums', Album);
 	app.use('/admin', Admin);
 	app.use('/files', File);

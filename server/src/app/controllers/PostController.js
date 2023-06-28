@@ -24,6 +24,7 @@ const {
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
 const { responseError } = require('../../utils/Response/error');
+const { checkBadWord } = require('../../utils/CheckContent/filter');
 
 class PostController {
 	// search post by content
@@ -176,7 +177,17 @@ class PostController {
 				return next(createError.BadRequest(error.details[0].message));
 			}
 
-			const files = req.body.media.map((file) => file.file);
+			// check content has bad-words
+			const check = await checkBadWord(req.body.content);
+			if (check) {
+				return next(
+					createError.BadRequest(
+						'Vuii lòng kiểm tra nội dung bài viết, do có chưa ngôn từ vi phạm tiêu chuẩn cộng đồng'
+					)
+				);
+			}
+
+			const files = req.body.media?.map((file) => file.file);
 			const newPost = new Post({
 				...req.body,
 				media: files,
@@ -185,19 +196,21 @@ class PostController {
 			const savedPost = await newPost.save();
 
 			// update description of file
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-							post: savedPost._id,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
+			if (req.body.media) {
+				await Promise.all(
+					req.body.media.map(async (file) => {
+						const fileUpdated = await File.findByIdAndUpdate(
+							file.file,
+							{
+								description: file.description,
+								post: savedPost._id,
+							},
+							{ new: true }
+						);
+						return fileUpdated;
+					})
+				);
+			}
 			const post = await Post.findById(savedPost._id)
 				.populate({
 					path: 'author',
@@ -1142,7 +1155,7 @@ class PostController {
 			const listFriendId = req.user.friends.map((friend) => friend.user._id);
 			listFriendId.push(req.user._id);
 			const listPost = await Post.find({ author: { $in: listFriendId } })
-				.sort({ createdAt: -1 })
+				.sort({ updatedAt: -1 })
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
