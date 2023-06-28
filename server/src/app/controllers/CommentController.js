@@ -489,7 +489,7 @@ class CommentController {
 	// [GET] get a comment
 	async get(req, res, next) {
 		try {
-			const comment = await Comment.findById(req.params.id).populate({
+			let comment = await Comment.findOneWithDeleted({ _id: req.params.id }).populate({
 				path: 'author',
 				select: '_id fullname profilePicture isOnline',
 				populate: {
@@ -497,7 +497,33 @@ class CommentController {
 					select: '_id link',
 				},
 			});
-			res.status(200).send(comment);
+
+			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== comment.author._id.toString()) {
+				comment = await Comment.findById(req.params.id).populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				});
+			}
+
+			if (!comment) {
+				return responseError(res, 404, 'Comment not found');
+			}
+
+			let reactOfUser = 'none';
+			if (req.user) {
+				const react = await React.findOne({ comment: req.params.id, user: req.user._id });
+				if (react) {
+					reactOfUser = react.type;
+				}
+			}
+
+			const commentObject = comment.toObject();
+			commentObject.reactOfUser = reactOfUser;
+			res.status(200).json(commentObject);
 		} catch (err) {
 			return next(
 				createError.InternalServerError(

@@ -888,7 +888,9 @@ class PostController {
 	// [Get] get a post by id
 	async get(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id)
+			let post = await Post.findOneWithDeleted({
+				_id: req.params.id,
+			})
 				.populate({
 					path: 'lastestFiveComments',
 					populate: {
@@ -936,6 +938,57 @@ class PostController {
 					path: 'media',
 					select: '_id link',
 				});
+
+			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
+				post = await Post.findById(req.params.id)
+					.populate({
+						path: 'lastestFiveComments',
+						populate: {
+							path: 'author',
+							select: '_id fullname profilePicture isOnline friends',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+					})
+					.populate({
+						path: 'author',
+						select: '_id fullname profilePicture isOnline friends',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'tags',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'media',
+						select: '_id link',
+					});
+			}
 
 			if (!post) return next(createError.NotFound('Post not found'));
 
