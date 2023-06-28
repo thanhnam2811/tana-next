@@ -161,6 +161,10 @@ const friend = mongoose.Schema(
 			type: Date,
 			default: Date.now,
 		},
+		interactionScore: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{ _id: false }
 );
