@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 
 export class ApiError {
 	code: number;
@@ -36,6 +36,8 @@ export class ApiError {
 	}
 
 	static fromError(error: Error) {
+		if (axios.isAxiosError(error)) return ApiError.fromAxiosError(error);
+
 		return new ApiError(500, error.message);
 	}
 
@@ -45,5 +47,23 @@ export class ApiError {
 
 	toString() {
 		return `[${this.code}]: ${this.message}`;
+	}
+
+	toObject() {
+		return { code: this.code, message: this.message };
+	}
+
+	static fromObject(obj: object) {
+		if (!ApiError.isApiError(obj)) throw new Error('Invalid ApiError object!');
+
+		return new ApiError(obj.code, obj.message);
+	}
+
+	toJSON() {
+		return JSON.stringify(this.toObject());
+	}
+
+	static fromJSON(json: string) {
+		this.fromObject(JSON.parse(json));
 	}
 }

@@ -7,13 +7,7 @@ const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.respon
 
 // Handle error
 export const handleError = (error: any) => {
-	// Remove access token, refresh token from local storage
-	localStorage.removeItem('accessToken');
-	localStorage.removeItem('refreshToken');
-
 	if (ApiError.isApiError(error)) return Promise.reject(error);
-
-	if (axios.isAxiosError(error)) return Promise.reject(ApiError.fromAxiosError(error));
 
 	return Promise.reject(ApiError.fromError(error));
 };
@@ -31,7 +25,13 @@ const retryRequest = async (error: AxiosError) => {
 	// Check if retry count is greater than max retry
 	const retryCount = Number(retryConfig.headers['Retry-Count']);
 	const maxRetry = Number(retryConfig.headers['Max-Retry']);
-	if (retryCount >= maxRetry) return handleError(error);
+	if (retryCount >= maxRetry) {
+		// Remove access token, refresh token from local storage
+		localStorage.removeItem('accessToken');
+		localStorage.removeItem('refreshToken');
+
+		return handleError(error);
+	}
 
 	// Increase retry count
 	retryConfig.headers['Retry-Count'] = retryCount + 1;
