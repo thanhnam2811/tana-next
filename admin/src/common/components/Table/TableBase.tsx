@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import styles from './Table.module.scss';
 import { IPaginationResponse } from '@common/types';
 import { stringUtil } from '@common/utils';
+import Icon from '@ant-design/icons';
 
 export interface TableBaseProps<T extends object> extends TableProps<T> {
 	endpoint: string;
@@ -51,7 +52,7 @@ export function TableBase<T extends object>({
 					shape="circle"
 					onClick={() => mutate()}
 					loading={isValidating}
-					icon={<IoRefresh />}
+					icon={<Icon component={IoRefresh} />}
 					className={styles.refresh}
 				/>
 			</Tooltip>

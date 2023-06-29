@@ -1,5 +1,12 @@
 import Icon from '@ant-design/icons';
-import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
+import {
+	IoHeartOutline,
+	IoLanguageOutline,
+	IoListOutline,
+	IoPeopleOutline,
+	IoPersonOutline,
+	IoShieldOutline,
+} from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { BsExclamationTriangle } from 'react-icons/bs';
 
@@ -46,5 +53,22 @@ export const layoutData: ILayoutData[] = [
 		title: 'Báo cáo',
 		icon: <Icon component={BsExclamationTriangle} />,
 		element: <ReportPage />,
+	},
+	{
+		path: 'list',
+		title: 'Danh sách',
+		icon: <Icon component={IoListOutline} />,
+		children: [
+			{
+				path: 'hobby',
+				title: 'Sở thích',
+				icon: <Icon component={IoHeartOutline} />,
+			},
+			{
+				path: 'bad-word',
+				title: 'Từ phản cảm',
+				icon: <Icon component={IoLanguageOutline} />,
+			},
+		],
 	},
 ];
