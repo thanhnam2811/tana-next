@@ -15,6 +15,7 @@ const Hobby = require('./hobby');
 const Search = require('./search');
 const Album = require('./album');
 const BadWord = require('./badword');
+const List = require('./list');
 
 const logEvents = require('../Helpers/logEvents');
 const bot = require('../utils/SlackLogger/bot');
@@ -61,6 +62,7 @@ function route(app) {
 	app.use('/notifications', Notification);
 	app.use('/reports', Report);
 	app.use('/hobbies', Hobby);
+	app.use('/list', List);
 	// get error 404
 	app.use((req, res, next) => {
 		next(createError(404, `Method: ${req.method} of ${req.originalUrl}  not found`));
