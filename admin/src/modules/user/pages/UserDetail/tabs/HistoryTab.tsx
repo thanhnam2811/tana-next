@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { IPaginationResponse } from '@common/types';
 import { Link, useSearchParams } from 'react-router-dom';
 import { HiEye } from 'react-icons/hi2';
-import { timeUtil } from '@common/utils';
+import { stringUtil, timeUtil } from '@common/utils';
 
 interface Props {
 	user: UserType;
@@ -31,10 +31,8 @@ function HistoryTab({ user }: Props) {
 			return p;
 		});
 
-	const { data: res, isLoading } = useSWR<IPaginationResponse<IActivity>>(
-		`admin/activityUser/${user._id}?page=${page}&size=${size}`,
-		swrFetcher
-	);
+	const swrKey = stringUtil.generateUrl(`admin/activityUser/${user._id}`, { page: page - 1, size });
+	const { data: res, isLoading } = useSWR<IPaginationResponse<IActivity>>(swrKey, swrFetcher);
 
 	const [totalItems, setTotalItems] = useState(0);
 	useEffect(() => {
@@ -59,7 +57,7 @@ function HistoryTab({ user }: Props) {
 				</List.Item>
 			)}
 			pagination={{
-				current: page + 1,
+				current: page,
 				onChange: (page) => changePage(page),
 				onShowSizeChange: (_, size) => changeSize(size),
 				position: 'top',
