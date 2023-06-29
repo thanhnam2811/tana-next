@@ -961,7 +961,7 @@ class PostController {
 					select: '_id link description',
 				});
 
-			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
+			if (req.user && req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
 				post = await Post.findById(req.params.id)
 					.populate({
 						path: 'lastestFiveComments',
