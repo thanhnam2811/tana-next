@@ -8,7 +8,7 @@ async function checkBadWord(content) {
 	const lowerCaseContent = content.toLowerCase();
 
 	for (const word of bannedWords) {
-		if (lowerCaseContent.includes(word)) {
+		if (lowerCaseContent.includes(word.toLowerCase())) {
 			return true;
 		}
 	}
