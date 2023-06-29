@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { useTheme } from 'src/layout/hooks';
 import { SERVER_URL } from '@common/config';
+import SEO from '@common/components/SEO';
 
 dayjs.locale('vi');
 
@@ -73,6 +74,8 @@ export default function NextApp({ Component, pageProps }: AppProps) {
 			input={{ autoComplete: 'off' }}
 			select={{ showSearch: true }}
 		>
+			<SEO />
+
 			<Toaster position="bottom-right" />
 
 			<NextProgress color={token.colorPrimary} delay={300} height={2} />
