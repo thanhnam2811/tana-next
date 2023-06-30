@@ -152,24 +152,14 @@ class AlbumController {
 		}
 	}
 
-	// react album
-	async reactAlbum(req, res, next) {
+	// get album
+	async getAlbumById(req, res, next) {
 		try {
 			const { id } = req.params;
-			const { type } = req.body;
-
 			const album = await Album.findById(id)
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
-					populate: {
-						path: 'profilePicture',
-						select: '_id link',
-					},
-				})
-				.populate({
-					path: 'privacy.excludes',
-					select: '_id fullname profilePicture isOnline',
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
@@ -184,35 +174,21 @@ class AlbumController {
 					},
 				})
 				.populate({
-					path: 'media',
-					select: '_id link description',
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
 				});
 			if (!album) {
 				return next(createError(404, 'Album not found'));
 			}
-
-			const checkPrivacy = await getPostWithPrivacy(album, req);
-			if (!checkPrivacy) {
-				return next(createError.Forbidden('Bạn không có quyền xem bài viết này'));
+			const albumPrivacy = await getPostWithPrivacy(album, req);
+			if (!albumPrivacy) {
+				return res.status(403).json('Bạn không có quyền xem bài viết này');
 			}
-
-			// check if the user has reacted this post before
-			const listReactOfAlbum = await React.find({ album: req.params.id });
-			const userReacted = listReactOfAlbum.find((react) => react.user.toString() === req.user._id.toString());
-		} catch (error) {
-			next(error);
-		}
-	}
-
-	// get album
-	async getAlbumById(req, res, next) {
-		try {
-			const { id } = req.params;
-			const album = await Album.findById(id);
-			if (!album) {
-				return next(createError(404, 'Album not found'));
-			}
-			return res.status(200).json(album);
+			return res.status(200).json(albumPrivacy);
 		} catch (error) {
 			next(error);
 		}
