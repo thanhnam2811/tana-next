@@ -6,6 +6,7 @@ const File = require('../models/File');
 const { responseError } = require('../../utils/Response/error');
 const { getPagination } = require('../../utils/Pagination');
 const { getListData } = require('../../utils/Response/listData');
+const { getPostWithPrivacy } = require('../../utils/Privacy/Post');
 
 class FileController {
 	async uploadFiles(req, res, next) {
@@ -142,16 +143,55 @@ class FileController {
 						},
 						{
 							path: 'album',
-							select: '_id name',
-						},
-						{
-							path: 'post',
-							select: '_id content author',
+							select: '_id name author privacy',
 							populate: [
 								{
 									path: 'author',
-									select: '_id fullname profilePicture isOnline',
+									select: '_id fullname profilePicture isOnline friends',
 									populate: { path: 'profilePicture', select: '_id link' },
+								},
+								{
+									path: 'privacy.includes',
+									select: '_id fullname profilePicture isOnline',
+									populate: {
+										path: 'profilePicture',
+										select: '_id link',
+									},
+								},
+								{
+									path: 'privacy.excludes',
+									select: '_id fullname profilePicture isOnline',
+									populate: {
+										path: 'profilePicture',
+										select: '_id link',
+									},
+								},
+							],
+						},
+						{
+							path: 'post',
+							select: '_id content author privacy',
+							populate: [
+								{
+									path: 'author',
+									select: '_id fullname profilePicture isOnline friends',
+									populate: { path: 'profilePicture', select: '_id link' },
+								},
+								{
+									path: 'privacy.includes',
+									select: '_id fullname profilePicture isOnline',
+									populate: {
+										path: 'profilePicture',
+										select: '_id link',
+									},
+								},
+								{
+									path: 'privacy.excludes',
+									select: '_id fullname profilePicture isOnline',
+									populate: {
+										path: 'profilePicture',
+										select: '_id link',
+									},
 								},
 							],
 						},
@@ -159,7 +199,37 @@ class FileController {
 				}
 			)
 				.then((data) => {
-					getListData(res, data);
+					// check privacy
+					// eslint-disable-next-line array-callback-return
+					data.docs = data.docs.filter((file) => {
+						if (!req.user) {
+							console.log(
+								file.album && file.album.privacy.value === 'private',
+								file.post && file.post.privacy.value === 'private'
+							);
+							if (file.album || (file.album && file.album.privacy.value === 'private')) {
+								return null;
+							}
+							if (!file.post || (file.post && file.post.privacy.value === 'private')) {
+								return null;
+							}
+							return file;
+						}
+						if (file.album) {
+							return getPostWithPrivacy(file.album, req);
+						}
+						if (file.post) {
+							return getPostWithPrivacy(file.post, req);
+						}
+					});
+
+					return res.status(200).json({
+						totalItems: data.docs.length,
+						items: data.docs,
+						totalPages: Math.ceil(data.docs.length / limit),
+						currentPage: Math.floor(offset / limit),
+						offset,
+					});
 				})
 				.catch((err) =>
 					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
