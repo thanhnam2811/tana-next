@@ -1,12 +1,5 @@
 import Icon from '@ant-design/icons';
-import {
-	IoHeartOutline,
-	IoLanguageOutline,
-	IoListOutline,
-	IoPeopleOutline,
-	IoPersonOutline,
-	IoShieldOutline,
-} from 'react-icons/io5';
+import { IoListOutline, IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { BsExclamationTriangle } from 'react-icons/bs';
 
@@ -14,7 +7,8 @@ import { ILayoutData } from '@layout/types';
 import UserPage from '@modules/user/pages/UserPage';
 import AdminPage from '@modules/admin/pages/AdminPage';
 import DashboardPage from '@modules/dashboard/pages/Dashboard';
-import ReportPage from '@modules/report/pages/ReportPage.tsx';
+import ReportPage from '@modules/report/pages/ReportPage';
+import ListPage from '@modules/list/pages/ListPage.tsx';
 
 export const layoutData: ILayoutData[] = [
 	{
@@ -58,17 +52,6 @@ export const layoutData: ILayoutData[] = [
 		path: 'list',
 		title: 'Danh sách',
 		icon: <Icon component={IoListOutline} />,
-		children: [
-			{
-				path: 'hobby',
-				title: 'Sở thích',
-				icon: <Icon component={IoHeartOutline} />,
-			},
-			{
-				path: 'bad-word',
-				title: 'Từ phản cảm',
-				icon: <Icon component={IoLanguageOutline} />,
-			},
-		],
+		element: <ListPage />,
 	},
 ];
