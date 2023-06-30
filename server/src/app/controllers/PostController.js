@@ -24,6 +24,7 @@ const {
 } = require('../../utils/Activity/post');
 const { validatePrivacy } = require('../models/Privacy');
 const { responseError } = require('../../utils/Response/error');
+const { checkBadWord } = require('../../utils/CheckContent/filter');
 
 class PostController {
 	// search post by content
@@ -80,7 +81,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 					],
 				}
@@ -165,9 +166,9 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(
 					Joi.object({
-						file: Joi.string().required(),
+						_id: Joi.string().required(),
 						description: Joi.string(),
-					})
+					}).unknown()
 				),
 				privacy: validatePrivacy,
 			}).unknown();
@@ -176,7 +177,17 @@ class PostController {
 				return next(createError.BadRequest(error.details[0].message));
 			}
 
-			const files = req.body.media.map((file) => file.file);
+			// check content has bad-words
+			const check = await checkBadWord(req.body.content);
+			if (check) {
+				return next(
+					createError.BadRequest(
+						'Vuii lòng kiểm tra nội dung bài viết, do có chưa ngôn từ vi phạm tiêu chuẩn cộng đồng'
+					)
+				);
+			}
+
+			const files = req.body.media?.map((file) => file._id);
 			const newPost = new Post({
 				...req.body,
 				media: files,
@@ -185,19 +196,21 @@ class PostController {
 			const savedPost = await newPost.save();
 
 			// update description of file
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-							post: savedPost._id,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
+			if (req.body.media) {
+				await Promise.all(
+					req.body.media.map(async (file) => {
+						const fileUpdated = await File.findByIdAndUpdate(
+							file._id,
+							{
+								description: file.description,
+								post: savedPost._id,
+							},
+							{ new: true }
+						);
+						return fileUpdated;
+					})
+				);
+			}
 			const post = await Post.findById(savedPost._id)
 				.populate({
 					path: 'author',
@@ -256,9 +269,9 @@ class PostController {
 				tags: Joi.array().items(Joi.string()),
 				media: Joi.array().items(
 					Joi.object({
-						file: Joi.string().required(),
+						_id: Joi.string().required(),
 						description: Joi.string(),
-					})
+					}).unknown()
 				),
 				privacy: Joi.object({
 					value: Joi.string().valid('public', 'private', 'friends', 'includes', 'excludes').required(),
@@ -285,7 +298,7 @@ class PostController {
 				await Promise.all(
 					req.body.media.map(async (file) => {
 						const fileUpdated = await File.findByIdAndUpdate(
-							file.file,
+							file._id,
 							{
 								description: file.description,
 								post: post._id,
@@ -296,7 +309,7 @@ class PostController {
 					})
 				);
 
-				const files = req.body.media.map((file) => file.file);
+				const files = req.body.media.map((file) => file._id);
 				const postUpdated = await Post.findByIdAndUpdate(
 					req.params.id,
 					{
@@ -338,7 +351,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 
 				return res.status(200).send(postUpdated);
@@ -486,7 +499,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 					],
 				}
@@ -591,7 +604,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 			if (!post) {
 				return next(createError.NotFound('Không tìm thấy bài viết'));
@@ -656,7 +669,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = 'none';
@@ -710,7 +723,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 
 				const postReturn = postUpdated.toObject();
@@ -724,12 +737,21 @@ class PostController {
 					type: req.body.type,
 				});
 				await newReact.save();
+
 				// update the number of reactions of the post
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
 				if (post.author._id.toString() !== req.user._id.toString()) {
 					await notificationForReactPost(post, req.user);
+
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === post.author._id.toString()) {
+							arr[index].interactionScore += 1;
+						}
+					});
+					user.save();
 				}
 
 				// save activity for user
@@ -780,7 +802,7 @@ class PostController {
 					})
 					.populate({
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					});
 				const postReturn = postUpdated.toObject();
 				postReturn.reactOfUser = newReact.type;
@@ -888,7 +910,9 @@ class PostController {
 	// [Get] get a post by id
 	async get(req, res, next) {
 		try {
-			const post = await Post.findById(req.params.id)
+			let post = await Post.findOneWithDeleted({
+				_id: req.params.id,
+			})
 				.populate({
 					path: 'lastestFiveComments',
 					populate: {
@@ -934,8 +958,59 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
+
+			if (req.user && req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
+				post = await Post.findById(req.params.id)
+					.populate({
+						path: 'lastestFiveComments',
+						populate: {
+							path: 'author',
+							select: '_id fullname profilePicture isOnline friends',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+					})
+					.populate({
+						path: 'author',
+						select: '_id fullname profilePicture isOnline friends',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'tags',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'privacy.includes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'privacy.excludes',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					})
+					.populate({
+						path: 'media',
+						select: '_id link description',
+					});
+			}
 
 			if (!post) return next(createError.NotFound('Post not found'));
 
@@ -1019,7 +1094,7 @@ class PostController {
 						},
 						{
 							path: 'media',
-							select: '_id link',
+							select: '_id link description',
 						},
 						{
 							path: 'privacy.includes',
@@ -1088,8 +1163,9 @@ class PostController {
 		try {
 			const listFriendId = req.user.friends.map((friend) => friend.user._id);
 			listFriendId.push(req.user._id);
+
 			const listPost = await Post.find({ author: { $in: listFriendId } })
-				.sort({ createdAt: -1 })
+				.sort({ updatedAt: -1 })
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
@@ -1135,7 +1211,7 @@ class PostController {
 				})
 				.populate({
 					path: 'media',
-					select: '_id link',
+					select: '_id link description',
 				});
 
 			// :TODO: if listPost is empty, get random posts
@@ -1153,11 +1229,28 @@ class PostController {
 					listPosts.push(postObject);
 				})
 			).then(async () => {
-				// getListPost(res, data, listPosts);
+				const friendScores = {};
+				req.user.friends.forEach((friend) => {
+					friendScores[friend.user._id.toString()] = friend.interactionScore;
+				});
+
+				const sortedPosts = listPost.sort((a, b) => {
+					const interactionScoreA = friendScores[a.author._id.toString()];
+					const interactionScoreB = friendScores[b.author._id.toString()];
+
+					if (interactionScoreA === interactionScoreB) {
+						// Sắp xếp theo updatedAt nếu interactionScore bằng nhau
+						return b.updatedAt - a.updatedAt;
+					}
+
+					// Sắp xếp giảm dần theo interactionScore
+					return friendScores[b.author] - friendScores[a.author];
+				});
+
 				// sort post by date desc
-				listPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-				// getListPost(res, data, listPosts);
-				const listPostsFilter = await getAllPostWithPrivacy(listPosts, req);
+				// listPosts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+				const listPostsFilter = await getAllPostWithPrivacy(sortedPosts, req);
 				// pagination for listPosts
 				const listPostsPaginate = listPostsFilter.slice(offset, offset + limit);
 				return res.status(200).send({
@@ -1251,7 +1344,7 @@ class PostController {
 					},
 					{
 						path: 'media',
-						select: '_id link',
+						select: '_id link description',
 					},
 					{
 						path: 'privacy.includes',

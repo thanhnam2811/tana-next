@@ -4,8 +4,8 @@ const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 
 const { isAuth } = AuthoMiddleware;
 
+router.get('/:id/medias', isAuth, AlbumController.getMediaOfAlbum);
 router.get('/:id', isAuth, AlbumController.getAlbumById);
-router.get('/', isAuth, AlbumController.getListAlbum);
 
 router.post('/', isAuth, AlbumController.createAlbum);
 

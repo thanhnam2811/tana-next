@@ -9,7 +9,7 @@ async function notificationForFriends(post, user) {
 	const notification = await new Notification({
 		type: 'post',
 		content: `${user.fullname} đã đăng một bài viết mới`,
-		link: `/posts/${post._id}`,
+		link: `/post/${post._id}`,
 		sender: user._id,
 		receiver: friendsOfAuthor,
 	}).save();
@@ -31,7 +31,7 @@ async function notificationForTags(post, user) {
 	const notification = await new Notification({
 		type: 'post',
 		content: `${user.fullname} đã gắn thẻ bạn trong một bài viết`,
-		link: `/posts/${post._id}`,
+		link: `/post/${post._id}`,
 		sender: user._id,
 		receiver: tags,
 	}).save();
@@ -55,7 +55,7 @@ async function notificationForSharedPost(post, user) {
 	const notification = await new Notification({
 		type: 'post',
 		content: `${user.fullname} đã chia sẻ một bài viết của bạn`,
-		link: `/posts/${post._id}`,
+		link: `/post/${post._id}`,
 		sender: user._id,
 		receiver,
 	}).save();
@@ -75,7 +75,7 @@ async function notificationForReactPost(post, user) {
 	const notification = await new Notification({
 		type: 'post',
 		content: `${user.fullname} đã bày tỏ cảm xúc về một bài viết của bạn`,
-		link: `/posts/${post._id}`,
+		link: `/post/${post._id}`,
 		sender: user._id,
 		receiver,
 	}).save();
