@@ -22,12 +22,19 @@ function socket(io) {
 				await AccessController.updateAccessInDay();
 
 				// Update user isOnline
-				await User.findByIdAndUpdate(userID, {
-					isOnline: true,
-				});
+				const user = await User.findByIdAndUpdate(
+					userID,
+					{
+						isOnline: true,
+					},
+					{ new: true }
+				);
 
 				// Add user to socket manager
 				SocketManager.addUser(userID, sk);
+
+				// Send user online
+				SocketManager.sendAll(`online:${userID} `, user);
 			} catch (err) {
 				console.log(err);
 			}
@@ -40,13 +47,18 @@ function socket(io) {
 			// console.log('Client disconnected', userID);
 			try {
 				// Update user isOnline
-				await User.findByIdAndUpdate(userID, {
-					isOnline: false,
-					lastAccess: Date.now(),
-				});
+				const user = await User.findByIdAndUpdate(
+					userID,
+					{
+						isOnline: false,
+						lastAccess: Date.now(),
+					},
+					{ new: true }
+				);
 
 				// Remove user from socket manager
 				SocketManager.removeUser(userID);
+				SocketManager.sendAll(`online:${userID} `, user);
 			} catch (err) {
 				console.log(err);
 			}
