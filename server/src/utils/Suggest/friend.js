@@ -2,8 +2,10 @@
 /* eslint-disable import/order */
 const { User } = require('../../app/models/User');
 const { getPagination } = require('../Pagination');
+const createError = require('http-errors');
 
 const calculateCosineSimilarity = (interests1, interests2) => {
+	console.log(interests1, interests2);
 	const set1 = new Set(interests1);
 	const set2 = new Set(interests2);
 	const combinedSet = new Set([...set1, ...set2]);
@@ -55,27 +57,29 @@ const suggestFriend = async (req, res, next) => {
 						createError.InternalServerError(`${err.message} in method: ${req.method} of ${req.originalUrl}`)
 					);
 				}
-				console.log(data);
-				// const userHobbies = user.hobbies;
-				// const usersHobbies = users.map((user) => user.hobbies);
+				const userHobbies = user.hobbies ?? [];
+				const usersHobbies = data.map((user) => user.hobbies ?? []);
 
-				// // Đảm bảo số lượng phần tử của hai mảng giống nhau
-				// const maxLength = Math.max(userHobbies.length, ...usersHobbies.map((hobbies) => hobbies.length));
-				// const paddedUserHobbies = userHobbies.concat(Array(maxLength - userHobbies.length).fill(''));
-				// const paddedOrtherUsersHobbies = usersHobbies.map((hobbies) =>
-				// 	hobbies.concat(Array(maxLength - hobbies.length).fill(''))
-				// );
+				// Đảm bảo số lượng phần tử của hai mảng giống nhau
+				const maxLength = Math.max(userHobbies.length, ...usersHobbies.map((hobbies) => hobbies.length));
+				const paddedUserHobbies = userHobbies.concat(Array(maxLength - userHobbies.length).fill(''));
+				const paddedOrtherUsersHobbies = usersHobbies.map((hobbies) =>
+					hobbies.concat(Array(maxLength - hobbies.length).fill(''))
+				);
 
-				// const similarityHobbies = paddedOrtherUsersHobbies.map((hobbies) =>
-				// 	calculateCosineSimilarity(hobbies, paddedUserHobbies)
-				// );
-				// const suggestUsers = users.map((user, index) => ({ ...user.toObject(), similarity: similarityHobbies[index] }));
-				// suggestUsers.sort((a, b) => b.similarity - a.similarity);
-				// return suggestUsers.slice.slice(offset, offset + limit);
+				const similarityHobbies = paddedOrtherUsersHobbies.map((hobbies) =>
+					calculateCosineSimilarity(hobbies, paddedUserHobbies)
+				);
+				const suggestUsers = data.map((user, index) => ({ ...user, similarity: similarityHobbies[index] }));
+				suggestUsers.sort((a, b) => b.similarity - a.similarity);
+				return suggestUsers.slice(offset, offset + limit);
 			});
 	} catch (error) {
 		throw error;
 	}
 };
 
-module.exports = suggestFriend;
+module.exports = {
+	suggestFriend,
+	calculateCosineSimilarity,
+};

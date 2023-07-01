@@ -11,7 +11,7 @@ const { getListUser, getListData, getListPost } = require('../../utils/Response/
 const { notificationRequestFriend, notificationAcceptFriend } = require('../../utils/Notification/Friend');
 const { createActivityWithFriendRequest, createActivityWithFriendAccept } = require('../../utils/Activity/friend');
 const moment = require('moment');
-const suggestFriend = require('../../utils/Suggest/friend');
+const { calculateCosineSimilarity } = require('../../utils/Suggest/friend');
 const { responseError } = require('../../utils/Response/error');
 
 function querySearchAllUsers(req) {
@@ -151,8 +151,61 @@ class UserController {
 	// [GET]
 	async suggestFriends(req, res, next) {
 		try {
-			const users = await suggestFriend(req, res, next);
-			res.status(200).json(users);
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+
+			const userId = req.user._id;
+			const user = await User.findById(userId);
+			const listFriendsOfUser = user.friends.map((friend) => friend.user);
+			listFriendsOfUser.push(userId);
+
+			const query = [{ $match: { _id: { $nin: listFriendsOfUser } } }];
+			if (req.query.key) {
+				query.push({
+					$match: {
+						$or: [
+							{ fullname: { $regex: req.query.key, $options: 'i' } },
+							{ email: { $regex: req.query.key, $options: 'i' } },
+							{ city: { $regex: req.query.key, $options: 'i' } },
+							{ from: { $regex: req.query.key, $options: 'i' } },
+						],
+					},
+				});
+			}
+			User.aggregate(query)
+				.skip(offset)
+				.limit(limit)
+				.exec((err, data) => {
+					if (err) {
+						console.log(err);
+						return next(
+							createError.InternalServerError(
+								`${err.message} in method: ${req.method} of ${req.originalUrl}`
+							)
+						);
+					}
+					const userHobbies = user.hobbies ?? [];
+					const usersHobbies = data.map((user) => user.hobbies ?? []);
+
+					// Đảm bảo số lượng phần tử của hai mảng giống nhau
+					const maxLength = Math.max(userHobbies.length, ...usersHobbies.map((hobbies) => hobbies.length));
+					const paddedUserHobbies = userHobbies.concat(Array(maxLength - userHobbies.length).fill(''));
+					const paddedOrtherUsersHobbies = usersHobbies.map((hobbies) =>
+						hobbies.concat(Array(maxLength - hobbies.length).fill(''))
+					);
+
+					const similarityHobbies = paddedOrtherUsersHobbies.map((hobbies) =>
+						calculateCosineSimilarity(hobbies, paddedUserHobbies)
+					);
+					const suggestUsers = data.map((user, index) => ({ ...user, similarity: similarityHobbies[index] }));
+					suggestUsers.sort((a, b) => b.similarity - a.similarity);
+					return res.status(200).send({
+						totalItems: suggestUsers.length,
+						items: suggestUsers.slice(offset, offset + limit),
+						totalPages: Math.ceil(suggestUsers.length / limit),
+						currentPage: Math.floor(offset / limit),
+						offset,
+					});
+				});
 		} catch (error) {
 			console.log(error);
 			return next(
@@ -653,7 +706,7 @@ class UserController {
 						$count: 'totalCount',
 					});
 
-					User.aggregate(query).exec((err, result) => {
+					User.aggregate(query).exec(async (err, result) => {
 						if (err) {
 							console.log(err);
 							return next(
@@ -663,15 +716,78 @@ class UserController {
 							);
 						}
 
-						const { totalCount } = result[0] ? result[0] : { totalCount: 0 };
+						let { totalCount } = result[0] ? result[0] : { totalCount: 0 };
+						let listUsers = data;
+
+						if (type === 'suggests' && totalCount == 0) {
+							const userId = req.user._id;
+							const user = await User.findById(userId);
+							const listFriendsOfUser = user.friends.map((friend) => friend.user);
+							const listFriendRequests = user.friendRequests.map((friend) => friend.user);
+							const listSentRequests = user.sentRequests.map((friend) => friend.user);
+							listFriendsOfUser.push(userId);
+
+							const listHiddenUser = listFriendsOfUser.concat(
+								listFriendRequests.concat(listSentRequests)
+							);
+
+							const query = [{ $match: { _id: { $nin: listHiddenUser } } }];
+							if (req.query.key) {
+								query.push({
+									$match: {
+										$or: [
+											{ fullname: { $regex: req.query.key, $options: 'i' } },
+											{ email: { $regex: req.query.key, $options: 'i' } },
+											{ city: { $regex: req.query.key, $options: 'i' } },
+											{ from: { $regex: req.query.key, $options: 'i' } },
+										],
+									},
+								});
+							}
+							listUsers = await new Promise((resolve, reject) => {
+								User.aggregate(query).exec((err, data) => {
+									if (err) {
+										console.log(err);
+										return reject(
+											createError.InternalServerError(
+												`${err.message} in method: ${req.method} of ${req.originalUrl}`
+											)
+										);
+									}
+									const userHobbies = user.hobbies ?? [];
+									const usersHobbies = data.map((user) => user.hobbies ?? []);
+
+									const similarityHobbies = usersHobbies.map((hobbies) => {
+										const maxLength = Math.max(hobbies.length ?? 0, userHobbies.length ?? 0);
+										if (maxLength == 0) return 0;
+										const paddedUserHobbies = userHobbies.concat(
+											Array(maxLength - userHobbies.length).fill('')
+										);
+										const paddedOrtherUsersHobbies = hobbies.concat(
+											Array(maxLength - hobbies.length).fill('')
+										);
+
+										return calculateCosineSimilarity(paddedOrtherUsersHobbies, paddedUserHobbies);
+									});
+									const suggestUsers = data.map((user, index) => ({
+										...user,
+										similarity: similarityHobbies[index],
+									}));
+									suggestUsers.sort((a, b) => b.similarity - a.similarity);
+									totalCount = data.length;
+									data = suggestUsers.slice(offset, offset + limit);
+									resolve(data);
+								});
+							});
+						}
 
 						User.populate(
-							data,
+							listUsers,
 							[
 								{ path: 'profilePicture', select: '_id link' },
 								{ path: 'coverPicture', select: '_id link' },
 							],
-							(err, data) => {
+							(err, result) => {
 								if (err) {
 									console.log(err);
 									return next(
@@ -680,7 +796,7 @@ class UserController {
 										)
 									);
 								}
-								let users = data;
+								let users = result;
 								const usersList = [];
 								if (type === 'all') {
 									users.forEach((user) => {
@@ -724,7 +840,7 @@ class UserController {
 									totalCount,
 									users,
 									Math.ceil(totalCount / limit),
-									Math.ceil(offset / limit),
+									Math.floor(offset / limit),
 									offset * 1
 								);
 							}
