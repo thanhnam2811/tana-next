@@ -16,14 +16,12 @@ class AlbumController {
 		try {
 			const schema = Joi.object({
 				name: Joi.string().required(),
-				media: Joi.array()
-					.items(
-						Joi.object({
-							_id: Joi.string().required(),
-							description: Joi.string(),
-						})
-					)
-					.required(),
+				media: Joi.array().items(
+					Joi.object({
+						_id: Joi.string().required(),
+						description: Joi.string(),
+					})
+				),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
@@ -93,10 +91,6 @@ class AlbumController {
 								path: 'profilePicture',
 								select: '_id link',
 							},
-						},
-						{
-							path: 'cover',
-							select: '_id link description',
 						},
 					],
 				}
@@ -292,14 +286,12 @@ class AlbumController {
 		try {
 			const schema = Joi.object({
 				name: Joi.string().required(),
-				media: Joi.array()
-					.items(
-						Joi.object({
-							_id: Joi.string().required(),
-							description: Joi.string(),
-						})
-					)
-					.required(),
+				media: Joi.array().items(
+					Joi.object({
+						_id: Joi.string().required(),
+						description: Joi.string(),
+					})
+				),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
