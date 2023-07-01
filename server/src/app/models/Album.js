@@ -16,7 +16,7 @@ const AlbumSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
-		user: {
+		author: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'User',
 			required: true,

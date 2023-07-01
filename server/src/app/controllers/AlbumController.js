@@ -5,7 +5,10 @@ const { getListPost, getListData } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
 const Album = require('../models/Album');
 const File = require('../models/File');
+const { User } = require('../models/User');
+const React = require('../models/React');
 const { validatePrivacy } = require('../models/Privacy');
+const { getAllPostWithPrivacy, getPostWithPrivacy } = require('../../utils/Privacy/Post');
 
 class AlbumController {
 	// create album
@@ -33,7 +36,7 @@ class AlbumController {
 			const album = await Album.create({
 				name,
 				media: files,
-				user: req.user._id,
+				author: req.user._id,
 				privacy,
 			});
 
@@ -64,23 +67,82 @@ class AlbumController {
 	}
 
 	// get list album of user
-	async getListAlbum(req, res, next) {
+	async getListAlbumByUserId(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			const user = await User.findById(req.params.id);
+			if (!user) {
+				return next(createError.NotFound('Không tìm thấy người dùng'));
+			}
 			Album.paginate(
-				{ user: req.user._id },
+				{ author: req.params.id },
 				{
 					offset,
 					limit,
 					sort: { createdAt: -1 },
-					populate: {
-						path: 'media',
-						select: '_id link description',
-					},
+					populate: [
+						{
+							path: 'media',
+							select: '_id link description',
+						},
+						{
+							path: 'author',
+							select: '_id fullname profilePicture isOnline friends',
+							populate: {
+								path: 'profilePicture',
+								select: '_id link',
+							},
+						},
+					],
 				}
 			)
-				.then((data) => {
-					getListData(res, data);
+				.then(async (data) => {
+					const albums = data.docs;
+					const listalbums = [];
+					if (!req.user) {
+						albums.forEach((album) => {
+							const albumObject = album.toObject();
+							albumObject.reactOfUser = 'none';
+							listalbums.push(albumObject);
+						});
+						// getListalbum(res, data, listalbums);
+						const listalbumsFilter = await getAllPostWithPrivacy(listalbums, req);
+						// pagination for listalbums
+						const listalbumsPaginate = listalbumsFilter.slice(offset, offset + limit);
+						res.status(200).send({
+							totalItems: listalbumsFilter.length,
+							items: listalbumsPaginate,
+							totalPages: Math.ceil(listalbums.length / limit),
+							currentPage: Math.floor(offset / limit),
+							offset,
+						});
+					} else {
+						Promise.all(
+							albums.map(async (album) => {
+								const albumObject = album.toObject();
+								albumObject.reactOfUser = 'none';
+								const react = await React.findOne({ album: album._id, user: req.user._id });
+								if (react) {
+									albumObject.reactOfUser = react.type;
+								}
+								listalbums.push(albumObject);
+							})
+						).then(async () => {
+							// sort album by date desc
+							listalbums.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+							// getListalbum(res, data, listalbums);
+							const listalbumsFilter = await getAllPostWithPrivacy(listalbums, req);
+							// pagination for listalbums
+							const listalbumsPaginate = listalbumsFilter.slice(offset, offset + limit);
+							res.status(200).send({
+								totalItems: listalbumsFilter.length,
+								items: listalbumsPaginate,
+								totalPages: Math.ceil(listalbums.length / limit),
+								currentPage: Math.floor(offset / limit),
+								offset,
+							});
+						});
+					}
 				})
 				.catch((err) =>
 					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
@@ -94,14 +156,103 @@ class AlbumController {
 	async getAlbumById(req, res, next) {
 		try {
 			const { id } = req.params;
-			const album = await Album.findById(id).populate({
-				path: 'media',
-				select: '_id link description',
-			});
+			const album = await Album.findById(id)
+				.populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline friends',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				});
 			if (!album) {
 				return next(createError(404, 'Album not found'));
 			}
-			return res.status(200).json(album);
+			const albumPrivacy = await getPostWithPrivacy(album, req);
+			if (!albumPrivacy) {
+				return res.status(403).json('Bạn không có quyền xem bài viết này');
+			}
+			return res.status(200).json(albumPrivacy);
+		} catch (error) {
+			next(error);
+		}
+	}
+
+	// get media of album
+	async getMediaOfAlbum(req, res, next) {
+		try {
+			const { id } = req.params;
+			const album = await Album.findById(id)
+				.populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline friends',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.includes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				})
+				.populate({
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				});
+			if (!album) {
+				return next(createError(404, 'Album not found'));
+			}
+			const albumPrivacy = await getPostWithPrivacy(album, req);
+			if (!albumPrivacy) {
+				return res.status(403).json('Bạn không có quyền xem bài viết này');
+			}
+			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
+			File.paginate(
+				{ album: id },
+				{
+					offset,
+					limit,
+					sort: { createdAt: -1 },
+					populate: {
+						path: 'creator',
+						select: '_id fullname profilePicture isOnline',
+						populate: {
+							path: 'profilePicture',
+							select: '_id link',
+						},
+					},
+				}
+			)
+				.then((result) => {
+					getListData(res, result);
+				})
+				.catch((err) =>
+					responseError(res, 500, err.message ?? 'Some error occurred while retrieving tutorials.')
+				);
 		} catch (error) {
 			next(error);
 		}
@@ -116,7 +267,7 @@ class AlbumController {
 				return next(createError(404, 'Album not found'));
 			}
 
-			if (album.user.toString() !== req.user._id.toString())
+			if (album.author.toString() !== req.user._id.toString())
 				return next(createError(403, 'Bạn không có quyền xóa album nàyy'));
 
 			await album.delete();
@@ -149,6 +300,13 @@ class AlbumController {
 
 			const { id } = req.params;
 			const { name, media, privacy } = req.body;
+			const album = await Album.findById(id);
+			if (!album) {
+				return next(createError(404, 'Album not found'));
+			}
+
+			if (album.author.toString() !== req.user._id.toString())
+				return next(createError(403, 'Bạn không có quyền chỉnh sửa album này'));
 
 			const files = media.map((file) => file.file);
 			const albumUpdated = await Album.findByIdAndUpdate(

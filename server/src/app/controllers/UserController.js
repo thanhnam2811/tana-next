@@ -151,7 +151,7 @@ class UserController {
 	// [GET]
 	async suggestFriends(req, res, next) {
 		try {
-			const users = await suggestFriend(req.user._id);
+			const users = await suggestFriend(req, res, next);
 			res.status(200).json(users);
 		} catch (error) {
 			console.log(error);

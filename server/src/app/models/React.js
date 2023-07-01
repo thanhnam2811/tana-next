@@ -22,6 +22,10 @@ const ReactSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Post',
 		},
+		album: {
+			type: mongoose.SchemaTypes.ObjectId,
+			ref: 'Album',
+		},
 		// commentid
 		comment: {
 			type: mongoose.SchemaTypes.ObjectId,
