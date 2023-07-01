@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
-const { getListPost, getListData } = require('../../utils/Response/listData');
+const { getListData } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
 const Album = require('../models/Album');
 const File = require('../models/File');
@@ -19,7 +19,7 @@ class AlbumController {
 				media: Joi.array()
 					.items(
 						Joi.object({
-							file: Joi.string().required(),
+							_id: Joi.string().required(),
 							description: Joi.string(),
 						})
 					)
@@ -32,11 +32,12 @@ class AlbumController {
 			}
 
 			const { name, media, privacy } = req.body;
-			const files = media.map((file) => file.file);
+			const files = media.map((file) => file._id);
 			const album = await Album.create({
 				name,
 				media: files,
 				author: req.user._id,
+				cover: files[files.length - 1],
 				privacy,
 			});
 
@@ -44,7 +45,7 @@ class AlbumController {
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
+						file._id,
 						{
 							description: file.description,
 							album: album._id,
@@ -57,7 +58,7 @@ class AlbumController {
 
 			// populate album
 			const albumPopulated = await album.populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
 			return res.status(200).json(albumPopulated);
@@ -82,7 +83,7 @@ class AlbumController {
 					sort: { createdAt: -1 },
 					populate: [
 						{
-							path: 'media',
+							path: 'cover',
 							select: '_id link description',
 						},
 						{
@@ -92,6 +93,10 @@ class AlbumController {
 								path: 'profilePicture',
 								select: '_id link',
 							},
+						},
+						{
+							path: 'cover',
+							select: '_id link description',
 						},
 					],
 				}
@@ -157,6 +162,10 @@ class AlbumController {
 		try {
 			const { id } = req.params;
 			const album = await Album.findById(id)
+				.populate({
+					path: 'cover',
+					select: '_id link description',
+				})
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
@@ -286,7 +295,7 @@ class AlbumController {
 				media: Joi.array()
 					.items(
 						Joi.object({
-							file: Joi.string().required(),
+							_id: Joi.string().required(),
 							description: Joi.string(),
 						})
 					)
@@ -308,24 +317,25 @@ class AlbumController {
 			if (album.author.toString() !== req.user._id.toString())
 				return next(createError(403, 'Bạn không có quyền chỉnh sửa album này'));
 
-			const files = media.map((file) => file.file);
+			const files = media.map((file) => file._id);
 			const albumUpdated = await Album.findByIdAndUpdate(
 				id,
 				{
 					name,
 					media: files,
+					cover: files[files.length - 1],
 					privacy,
 				},
 				{ new: true }
 			).populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
 
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
+						file._id,
 						{
 							description: file.description,
 							album: albumUpdated._id,
