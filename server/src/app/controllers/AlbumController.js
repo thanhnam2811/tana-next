@@ -19,7 +19,7 @@ class AlbumController {
 				media: Joi.array()
 					.items(
 						Joi.object({
-							file: Joi.string().required(),
+							_id: Joi.string().required(),
 							description: Joi.string(),
 						})
 					)
@@ -32,7 +32,7 @@ class AlbumController {
 			}
 
 			const { name, media, privacy } = req.body;
-			const files = media.map((file) => file.file);
+			const files = media.map((file) => file._id);
 			const album = await Album.create({
 				name,
 				media: files,
@@ -44,7 +44,7 @@ class AlbumController {
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
+						file._id,
 						{
 							description: file.description,
 							album: album._id,
@@ -286,7 +286,7 @@ class AlbumController {
 				media: Joi.array()
 					.items(
 						Joi.object({
-							file: Joi.string().required(),
+							_id: Joi.string().required(),
 							description: Joi.string(),
 						})
 					)
@@ -308,7 +308,7 @@ class AlbumController {
 			if (album.author.toString() !== req.user._id.toString())
 				return next(createError(403, 'Bạn không có quyền chỉnh sửa album này'));
 
-			const files = media.map((file) => file.file);
+			const files = media.map((file) => file._id);
 			const albumUpdated = await Album.findByIdAndUpdate(
 				id,
 				{
@@ -325,7 +325,7 @@ class AlbumController {
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
+						file._id,
 						{
 							description: file.description,
 							album: albumUpdated._id,
