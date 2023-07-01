@@ -1,4 +1,4 @@
-import { Form, Input, Modal, Switch } from 'antd';
+import { Form, Input, Modal, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { ListFormType } from '@modules/list/types';
 
@@ -13,8 +13,10 @@ function ListFormModal({ open, onClose, list, onSubmit }: Props) {
 	const [form] = Form.useForm<ListFormType>();
 
 	useEffect(() => {
-		if (list) form.setFieldsValue(list);
-		else form.resetFields();
+		if (open) {
+			if (list) form.setFieldsValue(list);
+			else form.resetFields();
+		}
 	}, [open]);
 
 	const [submitting, setSubmitting] = useState(false);
@@ -22,7 +24,6 @@ function ListFormModal({ open, onClose, list, onSubmit }: Props) {
 		setSubmitting(true);
 		await onSubmit(values);
 		setSubmitting(false);
-		onClose();
 	};
 
 	return (
@@ -42,8 +43,14 @@ function ListFormModal({ open, onClose, list, onSubmit }: Props) {
 					<Input placeholder="Nhập giá trị" />
 				</Form.Item>
 
-				<Form.Item name="isPrivate" label="Bảo mật">
-					<Switch checkedChildren="Riêng tư" unCheckedChildren="Công khai" />
+				<Form.Item name="isPrivate" label="Bảo mật" initialValue={false}>
+					<Select
+						options={[
+							{ label: 'Công khai', value: false },
+							{ label: 'Riêng tư', value: true },
+						]}
+						showSearch={false}
+					/>
 				</Form.Item>
 			</Form>
 		</Modal>

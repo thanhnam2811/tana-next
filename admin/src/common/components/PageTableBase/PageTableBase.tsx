@@ -1,15 +1,17 @@
 import { Button, Card, Input, Space } from 'antd';
-import { TableBase, TableBaseProps } from '../Table';
+import { TableBase, TableBaseProps, useTableBase } from '../Table';
 import { HiOutlineFilter } from 'react-icons/hi';
 import React, { useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { IData } from '@common/types';
 
-interface Props<T extends object> extends TableBaseProps<T> {
+interface Props<T extends IData> extends TableBaseProps<T> {
 	header: React.ReactNode;
 	endpoint: string;
+	actions?: React.ReactNode[];
 }
 
-export function PageTableBase<T extends object>({ header, endpoint, ...props }: Props<T>) {
+export const usePageTableBase = <T extends IData>({ endpoint }: TableBaseProps<T>) => {
 	const [params, setParams] = useSearchParams();
 
 	const search = params.get('search') ?? '';
@@ -43,6 +45,16 @@ export function PageTableBase<T extends object>({ header, endpoint, ...props }: 
 			return params;
 		});
 
+	const tableBase = useTableBase({ endpoint, params: { page, size, search, filter } });
+
+	return { search, page, size, filter, handleSearch, handleChange, handlePagination, tableBase };
+};
+
+export function PageTableBase<T extends IData>({ header, endpoint, actions, ...props }: Props<T>) {
+	const { search, page, size, filter, handleSearch, handleChange, handlePagination } = usePageTableBase<T>({
+		endpoint,
+	});
+
 	return (
 		<Card
 			title={header}
@@ -51,13 +63,15 @@ export function PageTableBase<T extends object>({ header, endpoint, ...props }: 
 					<Input.Search placeholder="Tìm kiếm" onSearch={handleSearch} onChange={handleChange} />
 
 					<Button icon={<HiOutlineFilter />}>Lọc</Button>
+
+					{actions}
 				</Space>
 			}
 			bodyStyle={{ padding: 12 }}
 		>
 			<TableBase<T>
 				endpoint={endpoint}
-				params={{ page, size, search, filter }}
+				params={{ page: page, size, search, filter }}
 				onPaginationChange={handlePagination}
 				{...props}
 			/>

@@ -3,11 +3,11 @@ import { Button, Table, TableProps, Tooltip } from 'antd';
 import { IoRefresh } from 'react-icons/io5';
 import useSWR from 'swr';
 import styles from './Table.module.scss';
-import { IPaginationResponse } from '@common/types';
+import { IData, IPaginationResponse } from '@common/types';
 import { stringUtil } from '@common/utils';
 import Icon from '@ant-design/icons';
 
-export interface TableBaseProps<T extends object> extends TableProps<T> {
+export interface TableBaseProps<T extends IData> extends TableProps<T> {
 	endpoint: string;
 	params?: {
 		page?: number;
@@ -18,14 +18,25 @@ export interface TableBaseProps<T extends object> extends TableProps<T> {
 	onPaginationChange?: (nextPage: number, pageSize?: number) => void;
 }
 
-export function TableBase<T extends object>({
+export const useTableBase = <T extends IData>({ endpoint, params }: TableBaseProps<T>) => {
+	if (params && params.page) {
+		params.page = params.page - 1;
+	}
+
+	const swrKey = stringUtil.generateUrl(endpoint, params);
+	return useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
+};
+
+export function TableBase<T extends IData>({
 	endpoint,
 	params: { page = 1, size = 5, search = '', filter = {} } = {},
 	onPaginationChange,
 	...props
 }: TableBaseProps<T>) {
-	const swrKey = stringUtil.generateUrl(endpoint, { page: page - 1, size, key: search, filter });
-	const { data, isLoading, mutate, isValidating } = useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
+	const { data, isLoading, mutate, isValidating } = useTableBase<T>({
+		endpoint,
+		params: { page, size, search, filter },
+	});
 
 	return (
 		<div className={styles.container}>

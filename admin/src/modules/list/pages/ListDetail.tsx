@@ -59,6 +59,7 @@ const ListDetail = () => {
 			await mutate(added, false);
 
 			message.success({ content: `Thêm ${items.length} giá trị thành công!`, key: 'add' });
+			closeModal();
 		} catch (error) {
 			message.error({ content: `Thêm ${items.length} giá trị thất bại! ${error}`, key: 'add' });
 		}
