@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
-const { getListPost, getListData } = require('../../utils/Response/listData');
+const { getListData } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
 const Album = require('../models/Album');
 const File = require('../models/File');
@@ -37,6 +37,7 @@ class AlbumController {
 				name,
 				media: files,
 				author: req.user._id,
+				cover: files[files.length - 1],
 				privacy,
 			});
 
@@ -57,7 +58,7 @@ class AlbumController {
 
 			// populate album
 			const albumPopulated = await album.populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
 			return res.status(200).json(albumPopulated);
@@ -82,7 +83,7 @@ class AlbumController {
 					sort: { createdAt: -1 },
 					populate: [
 						{
-							path: 'media',
+							path: 'cover',
 							select: '_id link description',
 						},
 						{
@@ -92,6 +93,10 @@ class AlbumController {
 								path: 'profilePicture',
 								select: '_id link',
 							},
+						},
+						{
+							path: 'cover',
+							select: '_id link description',
 						},
 					],
 				}
@@ -157,6 +162,10 @@ class AlbumController {
 		try {
 			const { id } = req.params;
 			const album = await Album.findById(id)
+				.populate({
+					path: 'cover',
+					select: '_id link description',
+				})
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
@@ -314,11 +323,12 @@ class AlbumController {
 				{
 					name,
 					media: files,
+					cover: files[files.length - 1],
 					privacy,
 				},
 				{ new: true }
 			).populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
 
