@@ -220,19 +220,25 @@ export function ConversationMessage() {
 
 	useEffect(() => {
 		if (id) {
+			window.socket.emit('joinRoom', id);
+
 			window.socket.on('typingMessage', ({ senderId }: { senderId: string }) => {
-				const typer = conversation.members.find(({ user }: IMember) => user._id === senderId);
+				const typer = conversation.members.find(
+					({ user }: IMember) => user._id === senderId && user._id !== authUser?._id
+				);
 				if (typer) setTypingList((prev) => [...prev, typer]);
 			});
 
 			window.socket.on('stopTypingMessage', ({ senderId }: any) => {
-				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
+				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId && user._id !== authUser?._id));
 			});
 
 			window.socket.on('sendMessage', handleReceiveMessage);
 		}
 
 		return () => {
+			window.socket.emit('leaveRoom', id);
+
 			window.socket.off('typingMessage');
 			window.socket.off('stopTypingMessage');
 			window.socket.off('sendMessage');
