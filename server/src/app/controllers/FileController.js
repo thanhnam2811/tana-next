@@ -85,7 +85,11 @@ class FileController {
 			fs.unlinkSync(path);
 
 			// increse size of album 1
-			if (req.body.album) await Album.findByIdAndUpdate(req.body.album, { $inc: { size: 1 } });
+			if (req.body.album)
+				await Album.findByIdAndUpdate(req.body.album, {
+					cover: newFile._id,
+					$inc: { size: 1 },
+				});
 			return res.status(200).json(newFile);
 		} catch (error) {
 			console.log(error);
@@ -117,7 +121,22 @@ class FileController {
 		try {
 			const file = await File.findById(req.params.id);
 			if (file.creator.toString() === req.user._id.toString()) {
-				console.log(file.public_id);
+				// decrese size of album 1
+				if (file.album) {
+					const album = await Album.findById(file.album);
+					if (album.cover.toString() === file._id.toString()) {
+						// sort createdAt -1
+						const files = await File.find({ album: file.album }, { createdAt: -1 });
+
+						if (files.length > 0) {
+							album.cover = files[0].public_id;
+						}
+
+						album.size -= 1;
+						await album.save();
+					}
+				}
+
 				if (file.public_id) {
 					cloudinaryV2.uploader.destroy(file.public_id, async (err, result) => {
 						if (err) {
@@ -131,8 +150,6 @@ class FileController {
 							File: file,
 						});
 					});
-					// decrese size of album 1
-					if (file.album) await Album.findByIdAndUpdate(file.album, { $inc: { size: -1 } });
 				} else {
 					await file.delete();
 					res.status(200).send({
