@@ -3,6 +3,7 @@ const fs = require('fs');
 const cloudinaryV2 = require('cloudinary').v2;
 const cloudinary = require('../../configs/cloudinary');
 const File = require('../models/File');
+const Album = require('../models/Album');
 const { responseError } = require('../../utils/Response/error');
 const { getPagination } = require('../../utils/Pagination');
 const { getListData } = require('../../utils/Response/listData');
@@ -11,11 +12,12 @@ const { getPostWithPrivacy } = require('../../utils/Privacy/Post');
 class FileController {
 	async uploadFiles(req, res, next) {
 		try {
-			const uploader = (path) => cloudinary.uploads(path, 'Files');
+			console.log(req.files);
 			if (req.files.length <= 0) {
 				return responseError(res, 400, 'Bạn nên chọn ít nhất là 1 file để upload.');
 			}
 
+			const uploader = (path) => cloudinary.uploads(path, 'Files');
 			const files = [];
 			await Promise.all(
 				req.files.map(async (file) => {
@@ -60,6 +62,36 @@ class FileController {
 		}
 	}
 
+	async uploadFile(req, res, next) {
+		try {
+			console.log(req.file);
+			if (!req.file) return responseError(res, 400, 'Vui lòng chọn file cần upload');
+
+			const uploader = (path) => cloudinary.uploads(path, 'Files');
+			const { path } = req.file;
+			const newPath = await uploader(path);
+			const newFile = new File({
+				name: req.file.filename,
+				originalname: req.file.originalname,
+				type: req.file.mimetype,
+				link: newPath.url,
+				size: req.file.size, // bytes
+				public_id: newPath.id,
+				creator: req.user._id,
+				...req.body,
+			});
+			await newFile.save();
+			fs.unlinkSync(path);
+
+			// increse size of album 1
+			if (req.body.album) await Album.findByIdAndUpdate(req.body.album, { $inc: { size: 1 } });
+			return res.status(200).json(newFile);
+		} catch (error) {
+			console.log(error);
+			return responseError(res, 500, error.message ?? 'Some error occurred while retrieving tutorials.');
+		}
+	}
+
 	async getFile(req, res) {
 		try {
 			const file = await File.findById(req.params.id);
@@ -98,6 +130,8 @@ class FileController {
 							File: file,
 						});
 					});
+					// decrese size of album 1
+					if (file.album) await Album.findByIdAndUpdate(file.album, { $inc: { size: -1 } });
 				} else {
 					await file.delete();
 					res.status(200).send({

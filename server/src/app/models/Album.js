@@ -9,13 +9,10 @@ const AlbumSchema = new mongoose.Schema(
 			type: String,
 			require: true,
 		},
-		media: [
-			{
-				type: mongoose.SchemaTypes.ObjectId,
-				ref: 'File',
-				default: [],
-			},
-		],
+		size: {
+			type: Number,
+			default: 0,
+		},
 		cover: {
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'File',
