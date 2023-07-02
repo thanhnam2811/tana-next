@@ -30,6 +30,8 @@ router.post('/upload', AuthoMiddleware.isAuth, (req, res, next) => {
 
 router.post('/', AuthoMiddleware.isAuth, uploadFile, FileController.uploadFile);
 
+router.put('/:id', AuthoMiddleware.isAuth, FileController.updateFile);
+
 router.get('/:id', FileController.getFile);
 
 router.delete('/:id', AuthoMiddleware.isAuth, FileController.delete);
