@@ -17,6 +17,7 @@ function socket(io) {
 				return;
 			}
 			userID = verified.payload.userId;
+			console.log(userID);
 			try {
 				// data is userID
 				await AccessController.updateAccessInDay();
@@ -34,7 +35,7 @@ function socket(io) {
 				SocketManager.addUser(userID, sk);
 
 				// Send user online
-				SocketManager.sendAll(`online:${userID} `, user);
+				SocketManager.sendAll(`online:${userID}`, user);
 			} catch (err) {
 				console.log(err);
 			}
@@ -58,7 +59,7 @@ function socket(io) {
 
 				// Remove user from socket manager
 				SocketManager.removeUser(userID);
-				SocketManager.sendAll(`online:${userID} `, user);
+				SocketManager.sendAll(`online:${userID}`, user);
 			} catch (err) {
 				console.log(err);
 			}
