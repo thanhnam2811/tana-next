@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const fs = require('fs');
 const cloudinaryV2 = require('cloudinary').v2;
+const Joi = require('joi');
 const cloudinary = require('../../configs/cloudinary');
 const File = require('../models/File');
 const Album = require('../models/Album');
@@ -84,7 +85,11 @@ class FileController {
 			fs.unlinkSync(path);
 
 			// increse size of album 1
-			if (req.body.album) await Album.findByIdAndUpdate(req.body.album, { $inc: { size: 1 } });
+			if (req.body.album)
+				await Album.findByIdAndUpdate(req.body.album, {
+					cover: newFile._id,
+					$inc: { size: 1 },
+				});
 			return res.status(200).json(newFile);
 		} catch (error) {
 			console.log(error);
@@ -116,7 +121,22 @@ class FileController {
 		try {
 			const file = await File.findById(req.params.id);
 			if (file.creator.toString() === req.user._id.toString()) {
-				console.log(file.public_id);
+				// decrese size of album 1
+				if (file.album) {
+					const album = await Album.findById(file.album);
+					if (album.cover.toString() === file._id.toString()) {
+						// sort createdAt -1
+						const files = await File.find({ album: file.album }, { createdAt: -1 });
+
+						if (files.length > 0) {
+							album.cover = files[0].public_id;
+						}
+
+						album.size -= 1;
+						await album.save();
+					}
+				}
+
 				if (file.public_id) {
 					cloudinaryV2.uploader.destroy(file.public_id, async (err, result) => {
 						if (err) {
@@ -130,8 +150,6 @@ class FileController {
 							File: file,
 						});
 					});
-					// decrese size of album 1
-					if (file.album) await Album.findByIdAndUpdate(file.album, { $inc: { size: -1 } });
 				} else {
 					await file.delete();
 					res.status(200).send({
@@ -147,6 +165,43 @@ class FileController {
 			return next(
 				createError.InternalServerError(
 					`${err.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
+						req.body,
+						null,
+						2
+					)}`
+				)
+			);
+		}
+	}
+
+	async updateFile(req, res, next) {
+		try {
+			const file = await File.findById(req.params.id);
+			if (file.creator.toString() !== req.user._id.toString())
+				return responseError(res, 403, 'Bạn không có quyền chỉnh sửa file này');
+
+			// validate request body
+			const schema = Joi.object({
+				description: Joi.string(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return next(createError(400, error.details[0].message));
+			}
+			const { description } = req.body;
+			const fileUpdated = await File.findByIdAndUpdate(
+				req.params.id,
+				{
+					description,
+				},
+				{ new: true }
+			);
+			return res.status(200).json(fileUpdated);
+		} catch (error) {
+			console.log(error);
+			return next(
+				createError.InternalServerError(
+					`${error.message}\nin method: ${req.method} of ${req.originalUrl}\nwith body: ${JSON.stringify(
 						req.body,
 						null,
 						2
