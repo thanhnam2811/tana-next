@@ -119,16 +119,20 @@ class FileController {
 	async delete(req, res, next) {
 		try {
 			const file = await File.findById(req.params.id);
+			if (!file) {
+				return responseError(res, 404, 'Không tìm thấy file');
+			}
+
 			if (file.creator.toString() === req.user._id.toString()) {
 				// decrese size of album 1
 				if (file.album) {
 					const album = await Album.findById(file.album);
 					if (album.cover.toString() === file._id.toString()) {
 						// sort createdAt -1
-						const files = await File.find({ album: file.album }, { createdAt: -1 });
+						const files = await File.find({ album: file.album }).sort({ createdAt: -1 });
 
 						if (files.length > 0) {
-							album.cover = files[0]._id;
+							album.cover = files[1]._id;
 						}
 
 						album.size -= 1;
