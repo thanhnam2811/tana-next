@@ -65,7 +65,6 @@ class FileController {
 
 	async uploadFile(req, res, next) {
 		try {
-			console.log(req.file);
 			if (!req.file) return responseError(res, 400, 'Vui lòng chọn file cần upload');
 
 			const uploader = (path) => cloudinary.uploads(path, 'Files');
@@ -129,7 +128,7 @@ class FileController {
 						const files = await File.find({ album: file.album }, { createdAt: -1 });
 
 						if (files.length > 0) {
-							album.cover = files[0].public_id;
+							album.cover = files[0]._id;
 						}
 
 						album.size -= 1;
