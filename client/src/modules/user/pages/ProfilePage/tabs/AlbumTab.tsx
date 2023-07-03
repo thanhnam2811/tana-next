@@ -126,10 +126,11 @@ export function AlbumTab() {
 		});
 	};
 
-	const goBack = () =>
-		router.push({ pathname: router.pathname, query: { ...router.query, aid: undefined } }, undefined, {
+	const goBack = async () => {
+		await router.push({ pathname: router.pathname, query: { ...router.query, aid: undefined } }, undefined, {
 			shallow: true, // prevent re-render
 		});
+	};
 
 	if (aid)
 		return (
