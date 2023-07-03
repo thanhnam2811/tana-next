@@ -1,4 +1,4 @@
-import { uploadFileApi } from '@common/api';
+import { uploadMultiFileApi } from '@common/api';
 import { useFetcher } from '@common/hooks';
 import { IFile } from '@common/types';
 import { randomUtil, stringUtil } from '@common/utils';
@@ -87,7 +87,7 @@ export function ConversationMessage() {
 		try {
 			// Upload file
 			if (data.files?.length) {
-				const uploaded = await uploadFileApi(data.files, { conversation: id });
+				const uploaded = await uploadMultiFileApi(data.files, { conversation: id });
 				data.media = uploaded.files.map(({ _id }) => _id);
 			}
 			delete data.files;

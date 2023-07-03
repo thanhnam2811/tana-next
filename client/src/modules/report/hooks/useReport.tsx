@@ -1,7 +1,7 @@
 import { App, Form, Input, Upload } from 'antd';
 import { ReportFormType, ReportTypeValue } from '../types';
 import { toast } from 'react-hot-toast';
-import { uploadFileApi } from '@common/api';
+import { uploadMultiFileApi } from '@common/api';
 import { reportApi } from '@modules/report/api';
 
 const labelReport: Record<ReportTypeValue, string> = {
@@ -29,7 +29,7 @@ export function useReport({ type, id }: Props) {
 			const fileList = values.files?.fileList;
 			if (fileList?.length) {
 				const uploadFiles = fileList.map((file) => file.originFileObj);
-				const { files } = await uploadFileApi(uploadFiles);
+				const { files } = await uploadMultiFileApi(uploadFiles);
 				values.images = files.map((file) => file._id);
 			}
 			delete values.files;

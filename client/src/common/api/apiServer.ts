@@ -7,7 +7,7 @@ export const apiServer = axios.create({
 	headers: {
 		'Content-Type': 'application/json',
 	},
-	timeout: 10000,
+	timeout: 5000,
 	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ!',
 });
 

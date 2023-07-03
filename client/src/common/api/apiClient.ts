@@ -61,7 +61,7 @@ const apiClient = axios.create({
 		'Max-Retry': MAX_RETRY,
 		'Retry-Count': 0,
 	},
-	timeout: 10000,
+	timeout: 20000,
 	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ!',
 });
 

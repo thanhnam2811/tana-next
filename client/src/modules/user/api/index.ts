@@ -1,1 +1,1 @@
-export * from './delete-activity.api';
+export * from './deleteActivity.api';

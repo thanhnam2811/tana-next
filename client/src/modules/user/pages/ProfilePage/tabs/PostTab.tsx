@@ -7,7 +7,7 @@ import { HiCamera, HiExclamationTriangle, HiUserPlus } from 'react-icons/hi2';
 import { UploadImage } from '@common/components/Button';
 import { useAuth } from '@modules/auth/hooks';
 import { toast } from 'react-hot-toast';
-import { uploadFileApi } from '@common/api';
+import { uploadMultiFileApi } from '@common/api';
 import { ReactNode } from 'react';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { useReport } from '@modules/report/hooks';
@@ -25,7 +25,7 @@ export function PostTab() {
 		const toastId = toast.loading('Đang tải ảnh lên...');
 
 		try {
-			const uploaded = await uploadFileApi([file]);
+			const uploaded = await uploadMultiFileApi([file]);
 			const coverPicture = uploaded.files[0];
 			toast.success('Tải ảnh lên thành công!', { id: toastId });
 
@@ -40,7 +40,7 @@ export function PostTab() {
 		const toastId = toast.loading('Đang tải ảnh lên...');
 
 		try {
-			const uploaded = await uploadFileApi([file]);
+			const uploaded = await uploadMultiFileApi([file]);
 			const profilePicture = uploaded.files[0];
 			toast.success('Tải ảnh lên thành công!', { id: toastId });
 

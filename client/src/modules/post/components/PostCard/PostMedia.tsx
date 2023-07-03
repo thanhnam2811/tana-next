@@ -1,4 +1,4 @@
-import { IMedia } from '@common/types/common';
+import { MediaType } from '@common/types/common';
 import { Button, Card, Col, Image, Input, Row, RowProps, Typography } from 'antd';
 import { HiX } from 'react-icons/hi';
 import styles from './PostCard.module.scss';
@@ -12,10 +12,10 @@ const getColumnSize = (index: number, size: number) => {
 };
 
 interface Props extends RowProps {
-	media: IMedia[];
+	media: MediaType[];
 	showAll?: boolean;
 	onDelete?: (id: string) => void;
-	onEdit?: (id: string, media: IMedia) => void;
+	onEdit?: (id: string, media: MediaType) => void;
 }
 
 export function PostMedia({ media, showAll = false, onDelete, onEdit, ...props }: Props) {

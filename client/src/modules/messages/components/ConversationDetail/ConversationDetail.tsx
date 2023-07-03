@@ -1,4 +1,4 @@
-import { uploadFileApi } from '@common/api';
+import { uploadMultiFileApi } from '@common/api';
 import { UploadImage } from '@common/components/Button';
 import { useFetcher } from '@common/hooks';
 import { addMemberApi, leaveConversationApi } from '@modules/messages/api';
@@ -160,7 +160,7 @@ export function ConversationDetail() {
 	const handleChangeAvatar = async (file: File) => {
 		const toastId = toast.loading('Đang tải ảnh lên...');
 		try {
-			const { files } = await uploadFileApi([file]);
+			const { files } = await uploadMultiFileApi([file]);
 			toast.success('Tải ảnh lên thành công!', { id: toastId });
 
 			await updateConversationForm({ avatar: files[0]._id });

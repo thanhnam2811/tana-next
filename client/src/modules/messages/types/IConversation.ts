@@ -1,4 +1,4 @@
-import { IData, IMedia } from '@common/types';
+import { IData, MediaType } from '@common/types';
 import { MessageType } from '@modules/messages/types';
 import { UserType } from '@modules/user/types';
 
@@ -15,11 +15,11 @@ interface IConversation extends IData {
 	name: string;
 	history: History[];
 	lastest_message: MessageType;
-	avatar: IMedia | string;
+	avatar: MediaType | string;
 }
 
 // For use
-export type ConversationType = IConversation & { members: IMember[]; avatar: IMedia };
+export type ConversationType = IConversation & { members: IMember[]; avatar: MediaType };
 
 // For form
 export type ConversationFormType = Partial<IConversation & { members: string[]; avatar: string }>;

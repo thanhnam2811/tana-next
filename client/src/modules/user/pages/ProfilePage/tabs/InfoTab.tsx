@@ -25,8 +25,8 @@ export const InfoTab = () => {
 	const updateGender = (data: Partial<IGender>) => handleChangeField('gender')({ ...user.gender, ...data });
 
 	return (
-		<Card>
-			<List header={<Typography.Title level={3}>Thông tin cá nhân</Typography.Title>}>
+		<Card title="Thông tin cá nhân">
+			<List>
 				<List.Item>
 					<List.Item.Meta
 						title="Họ và tên"
