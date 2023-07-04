@@ -131,8 +131,10 @@ class FileController {
 						// sort createdAt -1
 						const files = await File.find({ album: file.album }).sort({ createdAt: -1 });
 
-						if (files.length > 0) {
+						if (files.length > 1) {
 							album.cover = files[1]._id;
+						} else if (files.length == 1) {
+							album.cover = null;
 						}
 
 						album.size -= 1;
