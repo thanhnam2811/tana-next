@@ -1,7 +1,6 @@
 import { withLayout } from '@layout/components';
 import { Button, Card, Col, Divider, Form, Input, Row, theme, Typography } from 'antd';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import { forgotPasswordApi } from '../api';
@@ -12,7 +11,6 @@ import { forgotPwdJson } from '@assets/data/json';
 const Lottie = dynamic(() => import('lottie-react'));
 
 const ForgotPasswordPage = () => {
-	const router = useRouter();
 	const { token } = theme.useToken();
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
@@ -25,8 +23,6 @@ const ForgotPasswordPage = () => {
 			await forgotPasswordApi(values.email);
 
 			toast.success('Gửi yêu thành công! Vui lòng kiểm tra email của bạn.', { id: toastId });
-
-			await router.push('/auth/reset-password');
 		} catch (error) {
 			toast.error(`Gửi yêu thất bại! Lỗi: ${error}`, { id: toastId });
 		}
@@ -72,8 +68,8 @@ const ForgotPasswordPage = () => {
 						</Form.Item>
 
 						<Form.Item>
-							<Button type="primary" block loading={loading}>
-								Đặt lại mật khẩu
+							<Button type="primary" block loading={loading} htmlType="submit">
+								Gửi yêu cầu
 							</Button>
 						</Form.Item>
 
