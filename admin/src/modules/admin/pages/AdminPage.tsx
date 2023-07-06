@@ -28,5 +28,5 @@ const columns: ColumnType<UserType>[] = [
 ];
 
 export default function AdminPage() {
-	return <PageTableBase<UserType> header="Người dùng" endpoint="/admin/searchAdmin" columns={columns} />;
+	return <PageTableBase<UserType> header="Quản trị viên" endpoint="/admin/searchAdmin" columns={columns} />;
 }
