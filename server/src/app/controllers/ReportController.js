@@ -149,8 +149,6 @@ class ReportController {
 					path: 'images',
 				});
 
-			console.log(report);
-
 			if (!report) {
 				return next(createError.NotFound('Báo cáo không tồn tại'));
 			}
