@@ -178,7 +178,7 @@ class ReportController {
 					await notificationToUser(report.user, req.user);
 				} else if (report.type === 'bug') {
 					await notificationToUserWithMessage(
-						report.user,
+						report.reporter,
 						req.user,
 						'báo cáo của bạn đã được ghi nhận và sẽ khắc phục trong thời gian sớm nhất'
 					);

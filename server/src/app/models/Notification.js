@@ -29,7 +29,6 @@ const NotificationSchema = new mongoose.Schema(
 		// link to object create notification
 		link: {
 			type: String,
-			required: true,
 		},
 		sender: {
 			type: mongoose.Schema.Types.ObjectId,
