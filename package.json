@@ -8,7 +8,7 @@
 		"client:build": "cd client && yarn build",
 		"client:start": "cd client && yarn start",
 		"client:dev": "cd client && yarn dev",
-		"server:start": "cd  server && npm start",
+		"server:start": "cd server && npm start",
 		"prepare": "husky install"
 	},
 	"dependencies": {},

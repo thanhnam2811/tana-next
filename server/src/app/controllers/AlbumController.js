@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const Joi = require('joi');
 const { getPagination } = require('../../utils/Pagination');
-const { getListPost, getListData } = require('../../utils/Response/listData');
+const { getListData } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
 const Album = require('../models/Album');
 const File = require('../models/File');
@@ -16,14 +16,6 @@ class AlbumController {
 		try {
 			const schema = Joi.object({
 				name: Joi.string().required(),
-				media: Joi.array()
-					.items(
-						Joi.object({
-							file: Joi.string().required(),
-							description: Joi.string(),
-						})
-					)
-					.required(),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
@@ -31,20 +23,51 @@ class AlbumController {
 				return next(createError(400, error.details[0].message));
 			}
 
-			const { name, media, privacy } = req.body;
-			const files = media.map((file) => file.file);
+			const { name, privacy } = req.body;
 			const album = await Album.create({
 				name,
-				media: files,
 				author: req.user._id,
 				privacy,
 			});
+
+			return res.status(200).json(album);
+		} catch (error) {
+			console.log(error);
+			next(error);
+		}
+	}
+
+	// add media to album
+	async addMediaToAlbum(req, res, next) {
+		try {
+			const schema = Joi.object({
+				media: Joi.array()
+					.items(
+						Joi.object({
+							_id: Joi.string().required(),
+							description: Joi.string(),
+						})
+					)
+					.required(),
+			}).unknown();
+			const { error } = schema.validate(req.body);
+			if (error) {
+				return next(createError(400, error.details[0].message));
+			}
+			const { media } = req.body;
+			const album = await Album.findById(req.params.id);
+			if (!album) {
+				return next(createError.NotFound('Không tìm thấy album'));
+			}
+			if (album.author.toString() !== req.user._id.toString()) {
+				return next(createError.Forbidden('Bạn không có quyền thêm media vào album này'));
+			}
 
 			// update description of file
 			await Promise.all(
 				req.body.media.map(async (file) => {
 					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
+						file._id,
 						{
 							description: file.description,
 							album: album._id,
@@ -55,9 +78,96 @@ class AlbumController {
 				})
 			);
 
+			const files = media.map((file) => file._id);
+			const albumUpdated = await Album.findByIdAndUpdate(
+				req.params.id,
+				{
+					media: files,
+					cover: files[files.length - 1],
+				},
+				{ new: true }
+			).populate({
+				path: 'cover',
+				select: '_id link description',
+			});
+
+			return res.status(200).json(albumUpdated);
+		} catch (error) {
+			next(error);
+		}
+	}
+
+	// delete item media of album
+	async deleteItemMediaOfAlbum(req, res, next) {
+		try {
+			const { id, mid } = req.params;
+			const album = await Album.findById(id);
+			if (!album) {
+				return next(createError.NotFound('Không tìm thấy album'));
+			}
+
+			if (album.author.toString() !== req.user._id.toString()) {
+				return next(createError.Forbidden('Bạn không có quyền xóa media của album này'));
+			}
+
+			// find index of item in media
+			const index = album.media.findIndex((item) => item.toString() === mid.toString());
+			if (index === -1) {
+				return next(createError.NotFound('Media không tồn tại trong album'));
+			}
+
+			if (index == album.media.length - 1) album.cover = album.media[index - 1];
+
+			// delete item in media
+			album.media.splice(index, 1);
+			await album.save();
+
+			// populate album
+			const albumUpdated = await album.populate({
+				path: 'cover',
+				select: '_id link description',
+			});
+
+			// delete album in media
+			await File.deleteOne({ _id: mid });
+
+			return res.status(200).json(albumUpdated);
+		} catch (error) {
+			next(error);
+		}
+	}
+
+	// update item media of album
+	async updateItemMediaOfAlbum(req, res, next) {
+		try {
+			const { id, mid } = req.params;
+			const album = await Album.findById(id);
+			if (!album) {
+				return next(createError.NotFound('Không tìm thấy album'));
+			}
+
+			if (album.author.toString() !== req.user._id.toString()) {
+				return next(createError.Forbidden('Bạn không có quyền sửa media của album này'));
+			}
+
+			// find index of item in media
+			const index = album.media.findIndex((item) => item.toString() === mid.toString());
+			if (index === -1) {
+				return next(createError.NotFound('Media không tồn tại trong album'));
+			}
+
+			await File.findByIdAndUpdate(
+				mid,
+				{
+					description: req.body.description,
+					album: album._id,
+				},
+				{ new: true }
+			);
+
 			// populate album
 			const albumPopulated = await album.populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
 			return res.status(200).json(albumPopulated);
@@ -82,7 +192,7 @@ class AlbumController {
 					sort: { createdAt: -1 },
 					populate: [
 						{
-							path: 'media',
+							path: 'cover',
 							select: '_id link description',
 						},
 						{
@@ -152,24 +262,18 @@ class AlbumController {
 		}
 	}
 
-	// react album
-	async reactAlbum(req, res, next) {
+	// get album
+	async getAlbumById(req, res, next) {
 		try {
 			const { id } = req.params;
-			const { type } = req.body;
-
 			const album = await Album.findById(id)
+				.populate({
+					path: 'cover',
+					select: '_id link description',
+				})
 				.populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline friends',
-					populate: {
-						path: 'profilePicture',
-						select: '_id link',
-					},
-				})
-				.populate({
-					path: 'privacy.excludes',
-					select: '_id fullname profilePicture isOnline',
 					populate: {
 						path: 'profilePicture',
 						select: '_id link',
@@ -184,35 +288,21 @@ class AlbumController {
 					},
 				})
 				.populate({
-					path: 'media',
-					select: '_id link description',
+					path: 'privacy.excludes',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
 				});
 			if (!album) {
 				return next(createError(404, 'Album not found'));
 			}
-
-			const checkPrivacy = await getPostWithPrivacy(album, req);
-			if (!checkPrivacy) {
-				return next(createError.Forbidden('Bạn không có quyền xem bài viết này'));
+			const albumPrivacy = await getPostWithPrivacy(album, req);
+			if (!albumPrivacy) {
+				return res.status(403).json('Bạn không có quyền xem bài viết này');
 			}
-
-			// check if the user has reacted this post before
-			const listReactOfAlbum = await React.find({ album: req.params.id });
-			const userReacted = listReactOfAlbum.find((react) => react.user.toString() === req.user._id.toString());
-		} catch (error) {
-			next(error);
-		}
-	}
-
-	// get album
-	async getAlbumById(req, res, next) {
-		try {
-			const { id } = req.params;
-			const album = await Album.findById(id);
-			if (!album) {
-				return next(createError(404, 'Album not found'));
-			}
-			return res.status(200).json(album);
+			return res.status(200).json(albumPrivacy);
 		} catch (error) {
 			next(error);
 		}
@@ -306,15 +396,7 @@ class AlbumController {
 	async updateAlbum(req, res, next) {
 		try {
 			const schema = Joi.object({
-				name: Joi.string().required(),
-				media: Joi.array()
-					.items(
-						Joi.object({
-							file: Joi.string().required(),
-							description: Joi.string(),
-						})
-					)
-					.required(),
+				name: Joi.string(),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
@@ -323,7 +405,7 @@ class AlbumController {
 			}
 
 			const { id } = req.params;
-			const { name, media, privacy } = req.body;
+			const { name, privacy } = req.body;
 			const album = await Album.findById(id);
 			if (!album) {
 				return next(createError(404, 'Album not found'));
@@ -332,33 +414,17 @@ class AlbumController {
 			if (album.author.toString() !== req.user._id.toString())
 				return next(createError(403, 'Bạn không có quyền chỉnh sửa album này'));
 
-			const files = media.map((file) => file.file);
 			const albumUpdated = await Album.findByIdAndUpdate(
 				id,
 				{
 					name,
-					media: files,
 					privacy,
 				},
 				{ new: true }
 			).populate({
-				path: 'media',
+				path: 'cover',
 				select: '_id link description',
 			});
-
-			await Promise.all(
-				req.body.media.map(async (file) => {
-					const fileUpdated = await File.findByIdAndUpdate(
-						file.file,
-						{
-							description: file.description,
-							album: albumUpdated._id,
-						},
-						{ new: true }
-					);
-					return fileUpdated;
-				})
-			);
 
 			if (!albumUpdated) {
 				return next(createError(404, 'Album not found'));

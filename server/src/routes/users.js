@@ -29,7 +29,7 @@ router.get('/search', UserController.search);
 router.get('/all', isAuth, RoleMiddleware.IsAdmin, UserController.getAllUsers);
 router.get('/:id/friends', getUserFromToken, UserController.getFriendsListById);
 router.get('/:id/posts', getUserFromToken, PostController.getAll);
-router.get('/:id/medias', isAuth, FileController.getAllMedia);
+router.get('/:id/medias', getUserFromToken, FileController.getAllMedia);
 router.get('/:id/albums', getUserFromToken, AlbumController.getListAlbumByUserId);
 
 router.get('/:id', getUserFromToken, UserController.getUserInfo);

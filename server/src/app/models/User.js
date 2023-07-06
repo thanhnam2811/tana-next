@@ -214,7 +214,7 @@ const UserSchema = new mongoose.Schema(
 		profilePicture: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'File',
-			default: '635e2e1b9ab8c87106013373',
+			default: '649fdbbf25bcc0c94aeb8d04',
 		},
 		coverPicture: {
 			type: mongoose.Schema.Types.ObjectId,

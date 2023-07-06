@@ -1,10 +1,11 @@
-const BadWord = require('../../app/models/BadWord');
+const List = require('../../app/models/List');
 
 // Define the checkBadWord function
 async function checkBadWord(content) {
-	const badwords = await BadWord.find();
-	const bannedWords = badwords.reduce((result, item) => result.concat(item.words), []);
-
+	const listBadWords = await List.findOne({
+		key: 'bad-word',
+	});
+	const bannedWords = listBadWords.items ?? [];
 	const lowerCaseContent = content.toLowerCase();
 
 	for (const word of bannedWords) {

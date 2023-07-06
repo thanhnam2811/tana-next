@@ -34,6 +34,13 @@ class SocketManager {
 			this.send(userId, event, data);
 		});
 	}
+
+	// send all
+	sendAll(event, data) {
+		this._store.forEach((socket) => {
+			socket.emit(event, data);
+		});
+	}
 }
 
 module.exports = new SocketManager();
