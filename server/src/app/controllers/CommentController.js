@@ -3,6 +3,7 @@ const Joi = require('joi');
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
 const React = require('../models/React');
+const { User } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
 const {
 	notificationCreateComment,
@@ -18,6 +19,7 @@ const {
 } = require('../../utils/Activity/comment');
 const { getListPost } = require('../../utils/Response/listData');
 const { responseError } = require('../../utils/Response/error');
+const { checkBadWord } = require('../../utils/CheckContent/filter');
 
 class CommentController {
 	// [POST] create a comment
@@ -33,6 +35,17 @@ class CommentController {
 			if (error) {
 				return next(createError(400, error.details[0].message));
 			}
+
+			// check content has bad word
+			const check = await checkBadWord(req.body.content);
+			if (check) {
+				return next(
+					createError.BadRequest(
+						'Vuii lòng kiểm tra nội dung bình luận, do có chưa ngôn từ vi phạm tiêu chuẩn cộng đồng'
+					)
+				);
+			}
+
 			const newComment = new Comment(req.body);
 			newComment.author = req.user._id;
 			newComment.post = req.params.postId;
@@ -53,6 +66,16 @@ class CommentController {
 				// create notification for author of post
 				await notificationCreateComment(post, savedComment, req.user);
 				await notificationTagComment(savedComment, req.user);
+
+				if (savedComment.author.toString() !== req.user._id.toString()) {
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === savedComment.author.toString()) {
+							arr[index].interactionScore += 2;
+						}
+					});
+					user.save();
+				}
 
 				// save activity for user
 				await createActivityWithComment(savedComment, req.user);
@@ -191,6 +214,15 @@ class CommentController {
 
 					// save activity for user
 					await createActivityWithReactComment(comment, req.user);
+					if (comment.author.toString() !== req.user._id.toString()) {
+						const user = await User.findById(req.user._id);
+						user.friends.forEach((friend, index, arr) => {
+							if (friend.user._id.toString() === comment.author.toString()) {
+								arr[index].interactionScore += 2;
+							}
+						});
+						user.save();
+					}
 
 					const commentUpdated = await Comment.findById(req.params.id)
 						.populate({
@@ -280,10 +312,40 @@ class CommentController {
 	// [Delete] delete a comment
 	async delete(req, res, next) {
 		try {
-			const comment = await this.deleteComment(req, res, next);
-			if (!comment) return responseError(res, 500, 'Không xóa được bình luận!!!');
-
-			return res.status(200).json(comment);
+			const comment = await Comment.findById(req.params.id).populate(
+				'author',
+				'_id fullname profilePicture isOnline'
+			);
+			const post = await Post.findById(req.params.postId);
+			if (comment) {
+				if (
+					comment.author._id.toString() === req.user._id.toString() ||
+					post.author.toString() === req.user._id.toString() ||
+					req.user.role.name === 'ADMIN'
+				) {
+					await comment.delete();
+					// check comment is included in lastestFiveComments of post
+					const index = post.lastestFiveComments.indexOf(req.params.id);
+					if (index > -1) {
+						// update lastestFiveComments of post = top 5 comments lastest and not replyTo
+						post.lastestFiveComments = await Comment.find({ post: req.params.postId, replyTo: null })
+							.sort({ createdAt: -1 })
+							.limit(5)
+							.select('_id');
+					}
+					// delete all replies of comment and return number of replies deleted
+					const numberReplyDeleted = await Comment.deleteMany({ replyTo: req.params.id });
+					// decrease number of comments of post
+					await Post.findByIdAndUpdate(req.params.postId, {
+						$inc: { numberComment: -1 - numberReplyDeleted.deletedCount },
+					});
+					// save and return post populated with comments
+					await post.save();
+					return res.status(200).json(comment);
+				}
+				return responseError(res, 401, 'Bạn không có quyền xóa bình luận này');
+			}
+			return responseError(res, 404, 'Bình luận không tồn tại');
 		} catch (error) {
 			console.log(error);
 			return next(
@@ -324,6 +386,15 @@ class CommentController {
 
 				// save activity for user
 				await createActivityWithReplyComment(savedComment, req.user);
+				if (savedComment.author.toString() !== req.user._id.toString()) {
+					const user = await User.findById(req.user._id);
+					user.friends.forEach((friend, index, arr) => {
+						if (friend.user._id.toString() === savedComment.author.toString()) {
+							arr[index].interactionScore += 2;
+						}
+					});
+					user.save();
+				}
 
 				// increase number comment of post
 				await Post.findByIdAndUpdate(req.params.postId, { $inc: { numberComment: 1 } });
@@ -489,7 +560,7 @@ class CommentController {
 	// [GET] get a comment
 	async get(req, res, next) {
 		try {
-			const comment = await Comment.findById(req.params.id).populate({
+			let comment = await Comment.findOneWithDeleted({ _id: req.params.id }).populate({
 				path: 'author',
 				select: '_id fullname profilePicture isOnline',
 				populate: {
@@ -497,7 +568,33 @@ class CommentController {
 					select: '_id link',
 				},
 			});
-			res.status(200).send(comment);
+
+			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== comment.author._id.toString()) {
+				comment = await Comment.findById(req.params.id).populate({
+					path: 'author',
+					select: '_id fullname profilePicture isOnline',
+					populate: {
+						path: 'profilePicture',
+						select: '_id link',
+					},
+				});
+			}
+
+			if (!comment) {
+				return responseError(res, 404, 'Comment not found');
+			}
+
+			let reactOfUser = 'none';
+			if (req.user) {
+				const react = await React.findOne({ comment: req.params.id, user: req.user._id });
+				if (react) {
+					reactOfUser = react.type;
+				}
+			}
+
+			const commentObject = comment.toObject();
+			commentObject.reactOfUser = reactOfUser;
+			res.status(200).json(commentObject);
 		} catch (err) {
 			return next(
 				createError.InternalServerError(

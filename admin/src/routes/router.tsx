@@ -3,8 +3,9 @@ import { layoutData, layoutRoutes } from '@layout/data';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import LoginPage from '@modules/auth/pages/LoginPage';
-import UserDetail from '@modules/user/pages/UserDetail.tsx';
-import ReportDetail from '@modules/report/pages/ReportDetail.tsx';
+import UserDetail from '@modules/user/pages/UserDetail';
+import ReportDetail from '@modules/report/pages/ReportDetail';
+import ListDetail from '@modules/list/pages/ListDetail';
 
 export const router = createBrowserRouter([
 	{
@@ -36,6 +37,15 @@ export const router = createBrowserRouter([
 					{
 						path: ':id',
 						element: <ReportDetail />,
+					},
+				],
+			},
+			{
+				path: 'list',
+				children: [
+					{
+						path: ':id',
+						element: <ListDetail />,
 					},
 				],
 			},

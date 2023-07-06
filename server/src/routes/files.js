@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const FileController = require('../app/controllers/FileController');
 const uploadFiles = require('../app/middlewares/UploadFilesMiddleware');
+const uploadFile = require('../app/middlewares/UploadFileMiddleware');
 const AuthoMiddleware = require('../app/middlewares/AuthMiddleware');
 
 router.post('/upload', AuthoMiddleware.isAuth, (req, res, next) => {
@@ -26,6 +27,10 @@ router.post('/upload', AuthoMiddleware.isAuth, (req, res, next) => {
 		FileController.uploadFiles(req, res, next);
 	});
 });
+
+router.post('/', AuthoMiddleware.isAuth, uploadFile, FileController.uploadFile);
+
+router.put('/:id', AuthoMiddleware.isAuth, FileController.updateFile);
 
 router.get('/:id', FileController.getFile);
 

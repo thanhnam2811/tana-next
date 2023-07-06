@@ -81,7 +81,6 @@ exports.populateUser = async (userID) => {
 		.populate({ path: 'friendRequests.user', select: '_id fullname profilePicture isOnline' })
 		.populate({ path: 'sentRequests.user', select: '_id fullname profilePicture isOnline' })
 		.populate({ path: 'role', select: '_id name' });
-
 	return user;
 };
 
@@ -154,7 +153,7 @@ exports.populateUserForOther = async (userId) => {
 				select: '_id link',
 			},
 		})
-		.select('-password -lockTime -loginAttempts -sentRequests -friendRequests -role -refreshToken');
+		.select('-password -loginAttempts -sentRequests -friendRequests -role -refreshToken');
 
 	return user;
 };

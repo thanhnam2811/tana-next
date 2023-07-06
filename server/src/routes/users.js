@@ -5,6 +5,8 @@ const PostController = require('../app/controllers/PostController');
 const NotificationController = require('../app/controllers/NotificationController');
 const RoleMiddleware = require('../app/middlewares/RoleMiddleware');
 const ActivityController = require('../app/controllers/ActivityController');
+const FileController = require('../app/controllers/FileController');
+const AlbumController = require('../app/controllers/AlbumController');
 
 const { isAuth } = AuthoMiddleware;
 const { getUserFromToken } = AuthoMiddleware;
@@ -27,6 +29,9 @@ router.get('/search', UserController.search);
 router.get('/all', isAuth, RoleMiddleware.IsAdmin, UserController.getAllUsers);
 router.get('/:id/friends', getUserFromToken, UserController.getFriendsListById);
 router.get('/:id/posts', getUserFromToken, PostController.getAll);
+router.get('/:id/medias', getUserFromToken, FileController.getAllMedia);
+router.get('/:id/albums', getUserFromToken, AlbumController.getListAlbumByUserId);
+
 router.get('/:id', getUserFromToken, UserController.getUserInfo);
 // router.get("/:id/info", getUserFromToken, UserController.getUserInfo);
 router.get('/', UserController.getUser);

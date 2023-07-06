@@ -60,6 +60,11 @@ interface IUser extends IData {
 	contact: IContact[];
 	work: IWork[];
 	education: IEducation[];
+
+	// Lock
+	isPermanentlyLocked?: boolean;
+	lockTime?: string;
+	reasonLock?: string;
 }
 
 // For use

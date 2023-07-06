@@ -118,7 +118,8 @@ class AuthoController {
 			// await redisClient.set(user._id, refreshToken);
 			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
 			const userSave = await User.findById(user._id);
-			if (user.lockTime - Date.now() > 0) {
+			if (user.lockTime - Date.now() > 0 || user.isPermanentlyLocked === true) {
+				if (user.isPermanentlyLocked) return responseError(res, 401, 'Tài khoản của bạn đã bị khóa vĩnh viễn');
 				return responseError(
 					res,
 					401,
@@ -215,7 +216,8 @@ class AuthoController {
 			}
 
 			// check account is being blocked (LockTime - current time > 0)
-			if (user.lockTime - Date.now() > 0) {
+			if (user.lockTime - Date.now() > 0 || user.isPermanentlyLocked === true) {
+				if (user.isPermanentlyLocked) return responseError(res, 401, 'Tài khoản của bạn đã bị khóa vĩnh viễn');
 				return responseError(
 					res,
 					401,
@@ -395,7 +397,7 @@ class AuthoController {
 				}).save();
 			}
 
-			const link = `${process.env.BASE_URL} /${user._id}/${token.token} `;
+			const link = `${process.env.BASE_URL}?id=${user._id}&token=${token.token}`;
 			const status = await sendEmail(user.email, 'Password reset', link, user);
 			// check status
 			if (!status) {

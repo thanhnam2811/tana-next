@@ -4,6 +4,7 @@ import { ColumnType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { IMedia } from '@common/types';
 import { UserType } from '@modules/user/types';
+import UserStatusTag from '@modules/user/components/UserStatusTag.tsx';
 
 const columns: ColumnType<UserType>[] = [
 	{
@@ -15,6 +16,12 @@ const columns: ColumnType<UserType>[] = [
 				{user.fullname}
 			</Avatar>
 		),
+	},
+	{
+		key: 'status',
+		title: 'Trạng thái',
+		dataIndex: 'status',
+		render: (_, user) => <UserStatusTag user={user} />,
 	},
 	{
 		key: 'fullname',

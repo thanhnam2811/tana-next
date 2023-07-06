@@ -1,5 +1,5 @@
 import Icon from '@ant-design/icons';
-import { IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
+import { IoListOutline, IoPeopleOutline, IoPersonOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { BsExclamationTriangle } from 'react-icons/bs';
 
@@ -7,7 +7,8 @@ import { ILayoutData } from '@layout/types';
 import UserPage from '@modules/user/pages/UserPage';
 import AdminPage from '@modules/admin/pages/AdminPage';
 import DashboardPage from '@modules/dashboard/pages/Dashboard';
-import ReportPage from '@modules/report/pages/ReportPage.tsx';
+import ReportPage from '@modules/report/pages/ReportPage';
+import ListPage from '@modules/list/pages/ListPage.tsx';
 
 export const layoutData: ILayoutData[] = [
 	{
@@ -33,12 +34,12 @@ export const layoutData: ILayoutData[] = [
 				icon: <Icon component={RiShieldUserLine} />,
 				element: <AdminPage />,
 			},
-			{
-				path: 'role',
-				title: 'Quyền',
-				icon: <Icon component={IoShieldOutline} />,
-				element: <div>Role</div>,
-			},
+			// {
+			// 	path: 'role',
+			// 	title: 'Quyền',
+			// 	icon: <Icon component={IoShieldOutline} />,
+			// 	element: <div>Role</div>,
+			// },
 		],
 	},
 	{
@@ -46,5 +47,11 @@ export const layoutData: ILayoutData[] = [
 		title: 'Báo cáo',
 		icon: <Icon component={BsExclamationTriangle} />,
 		element: <ReportPage />,
+	},
+	{
+		path: 'list',
+		title: 'Danh sách',
+		icon: <Icon component={IoListOutline} />,
+		element: <ListPage />,
 	},
 ];

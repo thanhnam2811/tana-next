@@ -161,7 +161,7 @@ class ReportController {
 					await notificationToAuthorOfPost(report.post, req.user);
 				} else if (report.type === 'comment') {
 					req.params.id = report.comment._id;
-					req.params.postId = req.comment.post._id;
+					req.params.postId = report.comment.post._id;
 					// delete comment and notification to author
 					await CommentController.deleteComment(req, res, next);
 					await notificationToAuthorOfComment(report.comment.post, report.comment, req.user);
@@ -342,7 +342,7 @@ class ReportController {
 	async getAllReports(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-			const { type } = req.query;
+			const { type, key } = req.query;
 			let query = {};
 
 			if (req.query.reporterId) {
@@ -363,6 +363,17 @@ class ReportController {
 						query = { ...query, conversation: req.query.id };
 					}
 				}
+			}
+
+			if (key) {
+				// search by title or description
+				query = {
+					...query,
+					$or: [
+						{ title: { $regex: new RegExp(key), $options: 'i' } },
+						{ description: { $regex: new RegExp(key), $options: 'i' } },
+					],
+				};
 			}
 
 			Report.paginate(query, {

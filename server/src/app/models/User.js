@@ -161,6 +161,10 @@ const friend = mongoose.Schema(
 			type: Date,
 			default: Date.now,
 		},
+		interactionScore: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{ _id: false }
 );
@@ -185,6 +189,13 @@ const UserSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		isPermanentlyLocked: {
+			type: Boolean,
+			default: false,
+		},
+		reasonLock: {
+			type: String,
+		},
 		lockTime: {
 			type: Date,
 		},
@@ -203,7 +214,7 @@ const UserSchema = new mongoose.Schema(
 		profilePicture: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'File',
-			default: '635e2e1b9ab8c87106013373',
+			default: '649fdbbf25bcc0c94aeb8d04',
 		},
 		coverPicture: {
 			type: mongoose.Schema.Types.ObjectId,

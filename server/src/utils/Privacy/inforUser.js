@@ -4,11 +4,10 @@ async function getUserWithPrivacy(req, res) {
 	try {
 		let user;
 		if (req.user && req.user._id.toString() === req.params.id.toString()) {
-			user = await populateUser(req.user._id);
+			user = await populateUser(req.params.id);
 		} else {
 			user = await populateUserForOther(req.params.id);
 		}
-
 		if (!user) return null;
 
 		// check fields have privacy or not
