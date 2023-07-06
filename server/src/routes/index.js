@@ -16,6 +16,7 @@ const Search = require('./search');
 const Album = require('./album');
 const BadWord = require('./badword');
 const List = require('./list');
+const limiter = require('../app/middlewares/Limiter');
 
 const logEvents = require('../Helpers/logEvents');
 const bot = require('../utils/SlackLogger/bot');
@@ -44,8 +45,8 @@ function route(app) {
 		next();
 	});
 
-	// limit access to 20 requests per 1 minutes
-	// app.use(limiter);
+	// limit access to 30 requests per 1 minutes
+	app.use(limiter);
 	// route
 	app.use('/search', Search);
 	app.use('/badwords', BadWord);
