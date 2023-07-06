@@ -24,7 +24,9 @@ export const useTableBase = <T extends IData>({ endpoint, params }: TableBasePro
 	}
 
 	const swrKey = stringUtil.generateUrl(endpoint, params);
-	return useSWR<IPaginationResponse<T>>(swrKey, swrFetcher);
+	return useSWR<IPaginationResponse<T>>(swrKey, swrFetcher, {
+		keepPreviousData: true,
+	});
 };
 
 export function TableBase<T extends IData>({

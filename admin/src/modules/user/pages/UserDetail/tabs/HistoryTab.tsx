@@ -4,9 +4,10 @@ import useSWR from 'swr';
 import { swrFetcher } from '@common/api';
 import { useEffect, useState } from 'react';
 import { IPaginationResponse } from '@common/types';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { HiEye } from 'react-icons/hi2';
 import { stringUtil, timeUtil } from '@common/utils';
+import Icon from '@ant-design/icons';
 
 interface Props {
 	user: UserType;
@@ -32,7 +33,9 @@ function HistoryTab({ user }: Props) {
 		});
 
 	const swrKey = stringUtil.generateUrl(`admin/activityUser/${user._id}`, { page: page - 1, size });
-	const { data: res, isLoading } = useSWR<IPaginationResponse<IActivity>>(swrKey, swrFetcher);
+	const { data: res, isLoading } = useSWR<IPaginationResponse<IActivity>>(swrKey, swrFetcher, {
+		keepPreviousData: true,
+	});
 
 	const [totalItems, setTotalItems] = useState(0);
 	useEffect(() => {
@@ -47,9 +50,7 @@ function HistoryTab({ user }: Props) {
 				<List.Item
 					extra={
 						<Tooltip key="link" title="Xem chi tiết">
-							<Link to={item.link} style={{ display: 'block' }}>
-								<Button type="text" icon={<HiEye />} />
-							</Link>
+							<Button type="text" icon={<Icon component={HiEye} />} disabled href={item.link} />
 						</Tooltip>
 					}
 				>

@@ -1,5 +1,5 @@
 import Icon from '@ant-design/icons';
-import { IoListOutline, IoPeopleOutline, IoPersonOutline, IoShieldOutline } from 'react-icons/io5';
+import { IoListOutline, IoPeopleOutline, IoPersonOutline } from 'react-icons/io5';
 import { RiHome4Line, RiShieldUserLine } from 'react-icons/ri';
 import { BsExclamationTriangle } from 'react-icons/bs';
 
@@ -34,12 +34,12 @@ export const layoutData: ILayoutData[] = [
 				icon: <Icon component={RiShieldUserLine} />,
 				element: <AdminPage />,
 			},
-			{
-				path: 'role',
-				title: 'Quyền',
-				icon: <Icon component={IoShieldOutline} />,
-				element: <div>Role</div>,
-			},
+			// {
+			// 	path: 'role',
+			// 	title: 'Quyền',
+			// 	icon: <Icon component={IoShieldOutline} />,
+			// 	element: <div>Role</div>,
+			// },
 		],
 	},
 	{
