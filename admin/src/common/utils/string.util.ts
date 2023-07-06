@@ -23,6 +23,7 @@ export const stringUtil = {
 
 		Object.entries(params).forEach(([key, value]) => append(key, value));
 
-		return `${url}?${urlParams.toString()}`;
+		const queryString = urlParams.toString();
+		return [url, queryString].join('?');
 	},
 };

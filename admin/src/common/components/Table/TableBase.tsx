@@ -12,14 +12,14 @@ export interface TableBaseProps<T extends IData> extends TableProps<T> {
 	params?: {
 		page?: number;
 		size?: number;
-		search?: string;
+		key?: string;
 		filter?: object;
 	};
 	onPaginationChange?: (nextPage: number, pageSize?: number) => void;
 }
 
 export const useTableBase = <T extends IData>({ endpoint, params }: TableBaseProps<T>) => {
-	if (params && params.page) {
+	if (params?.page) {
 		params.page = params.page - 1;
 	}
 
@@ -31,13 +31,13 @@ export const useTableBase = <T extends IData>({ endpoint, params }: TableBasePro
 
 export function TableBase<T extends IData>({
 	endpoint,
-	params: { page = 1, size = 5, search = '', filter = {} } = {},
+	params: { page = 1, size = 5, key = '', filter = {} } = {},
 	onPaginationChange,
 	...props
 }: TableBaseProps<T>) {
 	const { data, isLoading, mutate, isValidating } = useTableBase<T>({
 		endpoint,
-		params: { page, size, search, filter },
+		params: { page, size, key, filter },
 	});
 
 	return (

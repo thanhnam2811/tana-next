@@ -14,14 +14,14 @@ interface Props<T extends IData> extends TableBaseProps<T> {
 export const usePageTableBase = <T extends IData>({ endpoint }: TableBaseProps<T>) => {
 	const [params, setParams] = useSearchParams();
 
-	const search = params.get('search') ?? '';
+	const key = params.get('key') ?? '';
 	const page = Number(params.get('page') ?? 1);
 	const size = Number(params.get('size') ?? 5);
 	const filter = params.get('filter') ?? {};
 
 	const handleSearch = (value: string) =>
 		setParams((params) => {
-			params.set('search', value);
+			params.set('key', value);
 			params.set('page', '1');
 			return params;
 		});
@@ -45,13 +45,13 @@ export const usePageTableBase = <T extends IData>({ endpoint }: TableBaseProps<T
 			return params;
 		});
 
-	const tableBase = useTableBase({ endpoint, params: { page, size, search, filter } });
+	const tableBase = useTableBase({ endpoint, params: { page, size, key, filter } });
 
-	return { search, page, size, filter, handleSearch, handleChange, handlePagination, tableBase };
+	return { key, page, size, filter, handleSearch, handleChange, handlePagination, tableBase };
 };
 
 export function PageTableBase<T extends IData>({ header, endpoint, actions, ...props }: Props<T>) {
-	const { search, page, size, filter, handleSearch, handleChange, handlePagination } = usePageTableBase<T>({
+	const { key, page, size, filter, handleSearch, handleChange, handlePagination } = usePageTableBase<T>({
 		endpoint,
 	});
 
@@ -71,7 +71,7 @@ export function PageTableBase<T extends IData>({ header, endpoint, actions, ...p
 		>
 			<TableBase<T>
 				endpoint={endpoint}
-				params={{ page: page, size, search, filter }}
+				params={{ page, size, key, filter }}
 				onPaginationChange={handlePagination}
 				{...props}
 			/>
