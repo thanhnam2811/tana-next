@@ -63,6 +63,26 @@ async function notificationToUser(user, admin) {
 	});
 }
 
+async function notificationToUserWithMessage(user, admin, message) {
+	const receiver = [user._id];
+	const notification = await new Notification({
+		type: 'user',
+		content: message,
+		link: ``,
+		sender: admin._id,
+		receiver,
+	}).save();
+
+	// populate notification
+	const popNotification = await populateNotification(notification);
+
+	// send socket
+	SocketManager.send(receiver, eventName.NOTIFICATION, {
+		type: notificationType.HANDLE_BUG,
+		data: popNotification,
+	});
+}
+
 async function notificationToMembersOfConv(conversation, admin) {
 	const receiver = conversation.members;
 	const notification = await new Notification({
@@ -88,4 +108,5 @@ module.exports = {
 	notificationToAuthorOfComment,
 	notificationToUser,
 	notificationToMembersOfConv,
+	notificationToUserWithMessage,
 };

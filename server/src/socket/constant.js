@@ -23,6 +23,7 @@ const notificationType = {
 	DELETE_POST: 'deletePost',
 	DELETE_COMMENT: 'deleteComment',
 	LOCK_ACCOUNT: 'lockAccount',
+	HANDLE_BUG: 'handleBug',
 	DELETE_CONVERSATION: 'deleteConversation',
 };
 

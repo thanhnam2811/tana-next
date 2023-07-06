@@ -1258,8 +1258,15 @@ class UserController {
 			const roleUserID = mongoose.Types.ObjectId('6389667eb7991bdd04987103');
 			User.paginate(
 				{
-					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-					role: roleUserID,
+					$and: [
+						{
+							$or: [
+								{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
+								{ email: { $regex: new RegExp(req.query.key), $options: 'i' } },
+							],
+						},
+						{ role: roleUserID },
+					],
 				},
 				{
 					offset,
@@ -1314,11 +1321,18 @@ class UserController {
 	async searchAdmin(req, res, next) {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-			const roleUserID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
+			const roleAdminID = mongoose.Types.ObjectId('64586af0a2167d1f245fbeea');
 			User.paginate(
 				{
-					fullname: { $regex: new RegExp(req.query.key), $options: 'i' },
-					role: roleUserID,
+					$and: [
+						{
+							$or: [
+								{ fullname: { $regex: new RegExp(req.query.key), $options: 'i' } },
+								{ email: { $regex: new RegExp(req.query.key), $options: 'i' } },
+							],
+						},
+						{ role: roleAdminID },
+					],
 				},
 				{
 					offset,

@@ -17,6 +17,7 @@ const {
 	notificationToAuthorOfPost,
 	notificationToUser,
 	notificationToMembersOfConv,
+	notificationToUserWithMessage,
 } = require('../../utils/Notification/Admin');
 
 class ReportController {
@@ -175,8 +176,12 @@ class ReportController {
 					req.params.id = report.user._id;
 					await UserController.lock(req, res, next);
 					await notificationToUser(report.user, req.user);
-				} else {
-					throw new Error('Report type not found');
+				} else if (report.type === 'bug') {
+					await notificationToUserWithMessage(
+						report.user,
+						req.user,
+						'báo cáo của bạn đã được ghi nhận và sẽ khắc phục trong thời gian sớm nhất'
+					);
 				}
 			}
 
