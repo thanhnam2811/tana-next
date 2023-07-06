@@ -3,6 +3,7 @@ import { HiUser } from 'react-icons/hi2';
 import styles from './UserAvatar.module.scss';
 import { UserType } from '@modules/user/types';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface Props {
 	user?: UserType;
@@ -11,13 +12,34 @@ interface Props {
 	avtSize?: number; // Size of avatar
 }
 
-export function UserAvatar({ user, nickname, badgeProps, avtSize = 40, ...avatarProps }: Props & AvatarProps) {
+export function UserAvatar({
+	user: initUser,
+	nickname,
+	badgeProps,
+	avtSize = 40,
+	...avatarProps
+}: Props & AvatarProps) {
 	const { token } = theme.useToken();
-
 	const badgeSize = avtSize / 4;
 
+	const [user, setUser] = useState<UserType | undefined>(initUser);
 	const profilePic = user?.profilePicture;
-	// const { data: profilePic } = useSWR<IFile>(`/files/${pId}?width=${avtSize}&height=${avtSize}`, swrFetcher);
+
+	useEffect(() => {
+		setUser(initUser);
+	}, [initUser]);
+
+	useEffect(() => {
+		if (user)
+			window.socket?.on(`online:${user?._id}`, (user: UserType) => {
+				console.log('online', user);
+				setUser(user);
+			});
+
+		return () => {
+			window.socket?.off(`online:${user?._id}`);
+		};
+	}, [user]);
 
 	if (!user) return <Skeleton.Avatar size={avtSize} shape="circle" active />;
 

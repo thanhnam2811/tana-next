@@ -1,10 +1,10 @@
-import { IData, IMedia, ReactionTypeValue } from '@common/types';
+import { IData, MediaType, ReactionTypeValue } from '@common/types';
 import { UserType } from '@modules/user/types';
 
 interface IComment extends IData {
 	_id: string;
 	content: string;
-	media: IMedia[];
+	media: MediaType[];
 	numberReact: number;
 	numberReply: number;
 	reactOfUser?: ReactionTypeValue;

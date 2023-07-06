@@ -4,7 +4,7 @@ import { ReactPopover, SharePopover } from 'src/common/components/Popover';
 import { IPrivacy } from '@common/types';
 import { ReactionTypeValue } from '@common/types/common';
 import { useAuth } from '@modules/auth/hooks';
-import { Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space, Typography } from 'antd';
+import { App, Avatar, Button, Card, Dropdown, MenuProps, Skeleton, Space, Typography } from 'antd';
 import Link from 'next/link';
 import { HiArchive, HiBell, HiDotsHorizontal, HiEyeOff, HiLink } from 'react-icons/hi';
 import {
@@ -37,6 +37,8 @@ interface Props {
 }
 
 export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, openNewTab }: Props) {
+	const { modal } = App.useApp();
+
 	const [post, setPost] = useState<PostType | undefined>(initPost);
 	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
 
@@ -143,13 +145,18 @@ export function PostCard({ post: initPost, onUpdate, onDelete, onCommentClick, o
 				key: 'edit',
 				icon: <HiPencil />,
 				label: 'Chỉnh sửa bài viết',
-				onClick: () => console.log('Chỉnh sửa bài viết'),
+				disabled: true,
 			},
 			{
 				key: 'delete',
 				icon: <HiTrash />,
 				label: 'Xóa bài viết',
-				onClick: handleDelete,
+				onClick: () =>
+					modal.confirm({
+						title: 'Xóa bài viết',
+						content: 'Bạn có chắc muốn xóa bài viết này?',
+						onOk: handleDelete,
+					}),
 			}
 		);
 

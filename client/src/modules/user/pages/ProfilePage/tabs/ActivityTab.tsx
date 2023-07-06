@@ -1,14 +1,14 @@
 import React from 'react';
 import { useFetcher } from '@common/hooks';
 import { IActivity } from '@modules/user/types';
-import { Button, Card, List, Popconfirm, Tooltip, Typography } from 'antd';
+import { Button, Card, List, Popconfirm, Tooltip } from 'antd';
 import { dateUtil } from '@common/utils';
 import { HiEye, HiTrash } from 'react-icons/hi2';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { deleteActivityApi } from '@modules/user/api';
 
-function ActivityTab() {
+export function ActivityTab() {
 	const activityFetcher = useFetcher<IActivity>({ api: '/users/activities' });
 
 	const handleDelete = async (id: string) => {
@@ -25,9 +25,8 @@ function ActivityTab() {
 	};
 
 	return (
-		<Card>
+		<Card title="Hoạt động">
 			<List
-				header={<Typography.Title level={3}>Hoạt động</Typography.Title>}
 				loading={activityFetcher.fetching}
 				dataSource={activityFetcher.data}
 				renderItem={(item) => (
@@ -69,5 +68,3 @@ function ActivityTab() {
 		</Card>
 	);
 }
-
-export default ActivityTab;

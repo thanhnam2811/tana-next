@@ -45,8 +45,8 @@ const ProviderAuthPage = ({ provider }: ProviderAuthPageProps) => {
 		};
 
 		// Login if access token and refresh token are available
-		loginWithProvider();
-	}, []);
+		if (router.isReady) loginWithProvider().then();
+	}, [router.isReady]);
 
 	return (
 		<Layout.Container>

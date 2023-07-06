@@ -12,6 +12,7 @@ export interface IFile extends IData {
 	link: string;
 	type: string;
 	size: number;
+	description?: string;
 
 	public_id?: string;
 	is_System?: boolean;

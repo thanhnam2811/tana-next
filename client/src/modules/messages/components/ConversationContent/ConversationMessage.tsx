@@ -1,4 +1,4 @@
-import { uploadFileApi } from '@common/api';
+import { uploadMultiFileApi } from '@common/api';
 import { useFetcher } from '@common/hooks';
 import { IFile } from '@common/types';
 import { randomUtil, stringUtil } from '@common/utils';
@@ -87,7 +87,7 @@ export function ConversationMessage() {
 		try {
 			// Upload file
 			if (data.files?.length) {
-				const uploaded = await uploadFileApi(data.files, { conversation: id });
+				const uploaded = await uploadMultiFileApi(data.files, { conversation: id });
 				data.media = uploaded.files.map(({ _id }) => _id);
 			}
 			delete data.files;
@@ -220,19 +220,25 @@ export function ConversationMessage() {
 
 	useEffect(() => {
 		if (id) {
+			window.socket.emit('joinRoom', id);
+
 			window.socket.on('typingMessage', ({ senderId }: { senderId: string }) => {
-				const typer = conversation.members.find(({ user }: IMember) => user._id === senderId);
+				const typer = conversation.members.find(
+					({ user }: IMember) => user._id === senderId && user._id !== authUser?._id
+				);
 				if (typer) setTypingList((prev) => [...prev, typer]);
 			});
 
 			window.socket.on('stopTypingMessage', ({ senderId }: any) => {
-				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId));
+				setTypingList((prev) => prev.filter(({ user }) => user._id !== senderId && user._id !== authUser?._id));
 			});
 
 			window.socket.on('sendMessage', handleReceiveMessage);
 		}
 
 		return () => {
+			window.socket.emit('leaveRoom', id);
+
 			window.socket.off('typingMessage');
 			window.socket.off('stopTypingMessage');
 			window.socket.off('sendMessage');

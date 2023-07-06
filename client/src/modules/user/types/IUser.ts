@@ -1,4 +1,4 @@
-import { IData, IMedia, IPrivacy } from '@common/types';
+import { IData, IPrivacy, MediaType } from '@common/types';
 import { IGender } from './IGender';
 
 export type ContactType =
@@ -48,8 +48,8 @@ interface IUser extends IData {
 	email: string;
 	gender?: IGender;
 
-	profilePicture: IMedia | string;
-	coverPicture: IMedia | string;
+	profilePicture: MediaType | string;
+	coverPicture: MediaType | string;
 
 	isOnline: boolean;
 	lastAccess?: string;
@@ -65,8 +65,8 @@ interface IUser extends IData {
 
 // For use
 export type UserType = IUser & {
-	profilePicture: IMedia;
-	coverPicture: IMedia;
+	profilePicture: MediaType;
+	coverPicture: MediaType;
 };
 
 // For form

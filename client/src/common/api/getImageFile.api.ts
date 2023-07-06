@@ -6,9 +6,9 @@ interface ImageOptions {
 	height?: number;
 }
 
-export const getImageFileApi = (fileId: string, options: ImageOptions = {}) =>
+export const getImageFileApi = (id: string, options: ImageOptions = {}) =>
 	apiClient
-		.get<IFile>(`files/${fileId}`, {
+		.get<IFile>(`files/${id}`, {
 			params: options,
 		})
 		.then((res) => res.data);

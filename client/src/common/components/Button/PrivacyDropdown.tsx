@@ -49,96 +49,94 @@ export function PrivacyDropdown({
 	const friendFetcher = useFetcher<UserType>({ api: `/users/searchUser/friends` });
 
 	return (
-		<>
-			<Form form={form} onFinish={onSubmit}>
-				<Modal
-					title={
-						form.getFieldValue('value') === 'includes'
-							? 'Những ai có thể xem?'
-							: form.getFieldValue('value') === 'excludes'
-							? 'Những ai không thể xem?'
-							: ''
-					}
-					open={openModal}
-					onCancel={hideModal}
-					onOk={form.submit}
-					closable={!form.getFieldsError().length}
+		<Form form={form} onFinish={onSubmit} onClick={(e) => e.stopPropagation()}>
+			<Modal
+				title={
+					form.getFieldValue('value') === 'includes'
+						? 'Những ai có thể xem?'
+						: form.getFieldValue('value') === 'excludes'
+						? 'Những ai không thể xem?'
+						: ''
+				}
+				open={openModal}
+				onCancel={hideModal}
+				onOk={form.submit}
+				closable={!form.getFieldsError().length}
+			>
+				<Form.Item
+					name="includes"
+					label="Bao gồm"
+					hidden={form.getFieldValue('value') !== 'includes'}
+					rules={[
+						({ getFieldValue }) => ({
+							validator(_, value) {
+								if (getFieldValue('value') === 'includes' && value?.length === 0) {
+									return Promise.reject(new Error('Vui lòng chọn người dùng'));
+								}
+								return Promise.resolve();
+							},
+						}),
+					]}
 				>
+					<SelectApi
+						mode="multiple"
+						fetcher={friendFetcher}
+						toOption={(u) => ({ label: u.fullname, value: u._id })}
+					/>
+				</Form.Item>
+
+				<Form.Item
+					name="excludes"
+					label="Trừ ra"
+					hidden={form.getFieldValue('value') !== 'excludes'}
+					rules={[
+						({ getFieldValue }) => ({
+							validator(_, value) {
+								if (getFieldValue('value') === 'excludes' && value?.length === 0) {
+									return Promise.reject(new Error('Vui lòng chọn người dùng'));
+								}
+								return Promise.resolve();
+							},
+						}),
+					]}
+				>
+					<SelectApi
+						mode="multiple"
+						fetcher={friendFetcher}
+						toOption={(u) => ({ label: u.fullname, value: u._id })}
+					/>
+				</Form.Item>
+			</Modal>
+
+			<Dropdown
+				menu={{
+					onClick: ({ key }) => handleChange(key as PrivacyValueType),
+					items: privacyOptions.map(({ value, label, RIcon }) => ({
+						key: value,
+						label: label,
+						icon: <RIcon />,
+					})),
+				}}
+				arrow
+				trigger={['click']}
+				{...props}
+			>
+				<Tooltip title={privacyOption.label}>
 					<Form.Item
-						name="includes"
-						label="Bao gồm"
-						hidden={form.getFieldValue('value') !== 'includes'}
+						name="value"
+						hidden
 						rules={[
-							({ getFieldValue }) => ({
-								validator(_, value) {
-									if (getFieldValue('value') === 'includes' && value?.length === 0) {
-										return Promise.reject(new Error('Vui lòng chọn người dùng'));
-									}
-									return Promise.resolve();
-								},
-							}),
+							{
+								required: true,
+								message: 'Vui lòng chọn quyền riêng tư',
+							},
 						]}
 					>
-						<SelectApi
-							mode="multiple"
-							fetcher={friendFetcher}
-							toOption={(u) => ({ label: u.fullname, value: u._id })}
-						/>
+						<Input />
 					</Form.Item>
-
-					<Form.Item
-						name="excludes"
-						label="Trừ ra"
-						hidden={form.getFieldValue('value') !== 'excludes'}
-						rules={[
-							({ getFieldValue }) => ({
-								validator(_, value) {
-									if (getFieldValue('value') === 'excludes' && value?.length === 0) {
-										return Promise.reject(new Error('Vui lòng chọn người dùng'));
-									}
-									return Promise.resolve();
-								},
-							}),
-						]}
-					>
-						<SelectApi
-							mode="multiple"
-							fetcher={friendFetcher}
-							toOption={(u) => ({ label: u.fullname, value: u._id })}
-						/>
-					</Form.Item>
-				</Modal>
-
-				<Dropdown
-					menu={{
-						onClick: ({ key }) => handleChange(key as PrivacyValueType),
-						items: privacyOptions.map(({ value, label, RIcon }) => ({
-							key: value,
-							label: label,
-							icon: <RIcon />,
-						})),
-					}}
-					arrow
-					trigger={['click']}
-					{...props}
-				>
-					<Tooltip title={privacyOption.label}>
-						<Form.Item
-							name="value"
-							hidden
-							rules={[
-								{
-									required: true,
-									message: 'Vui lòng chọn quyền riêng tư',
-								},
-							]}
-						>
-							<Input />
-						</Form.Item>
-						{render?.(privacyOption) || <Button type="text" icon={<privacyOption.RIcon />} />}
-					</Tooltip>
-				</Dropdown>
-			</Form>
-		</>
+					{render?.(privacyOption) || <Button type="text" icon={<privacyOption.RIcon />} />}
+				</Tooltip>
+			</Dropdown>
+		</Form>
 	);
 }

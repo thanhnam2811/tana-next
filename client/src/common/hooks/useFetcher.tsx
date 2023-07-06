@@ -3,7 +3,7 @@ import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
 import { useCallback, useEffect, useState } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { urlUtil } from '@common/utils';
-import { KeyedMutator } from 'swr';
+import useSWR, { KeyedMutator, useSWRConfig } from 'swr';
 
 // T: Data type,
 export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
@@ -91,6 +91,108 @@ export const useFetcher = <T extends IData = any, U extends IPaginationResponse<
 		fetching,
 		loadingMore,
 		validating,
+		hasMore,
+		loadMore,
+		addData,
+		updateData,
+		removeData,
+		api,
+		mutate,
+	};
+};
+
+export type SWRFetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
+	data: T[];
+	res?: U;
+	updateData: (id: string, newData: T) => Promise<void>;
+	addData: (newData: T, validate?: boolean) => Promise<void>;
+	removeData: (id: string) => Promise<void>;
+	fetching: boolean;
+	loadingMore: boolean;
+	validating: boolean;
+	hasMore: boolean;
+	params: IPaginationParams;
+	loadMore: () => void;
+	api: string;
+	mutate: KeyedMutator<U>;
+};
+
+export const useSWRFetcher = <T extends IData = any, U extends IPaginationResponse<T> = IPaginationResponse<T>>({
+	api,
+	limit = 20,
+	params: initParams = {},
+}: FetcherProps): SWRFetcherType<T, U> => {
+	const [data, setData] = useState<T[]>([]);
+	const [hasMore, setHasMore] = useState(true);
+	const [params, setParams] = useState<IPaginationParams>(initParams);
+	const { page = 0, size = limit, offset = page * size } = params;
+
+	const { mutate: globalMutate } = useSWRConfig();
+	const swrKey = urlUtil.generateUrl(api, { ...params, offset, size });
+	const { data: res, isValidating, isLoading, mutate } = useSWR<U>(swrKey, swrFetcher);
+	useEffect(() => {
+		if (res) {
+			const { items, totalItems, offset } = res;
+			setData((prevData) => {
+				const newData = [...prevData];
+				newData.splice(offset, items.length, ...items);
+				return [...newData];
+			});
+			setHasMore(offset + items.length < totalItems);
+		}
+	}, [res]);
+
+	const addData = async (newData: T) => {
+		setData((prevData) => {
+			const newDataList = [newData, ...prevData];
+			newDataList.pop(); // Remove last item
+			return newDataList;
+		});
+
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: 0, size: limit });
+		await globalMutate(swrKey);
+	};
+
+	const updateData = async (id: string, newData: T) => {
+		const index = data.findIndex((item) => item._id === id);
+		if (index === -1) return;
+
+		const newDataList = [...data];
+		newDataList[index] = newData;
+		setData(newDataList);
+
+		const page = Math.floor(index / limit);
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: page, size: limit });
+		await globalMutate(swrKey);
+	};
+
+	const removeData = async (id: string) => {
+		const index = data.findIndex((item) => item._id === id);
+		if (index === -1) return;
+
+		const newDataList = [...data];
+		newDataList.splice(index, 1);
+		setData(newDataList);
+
+		const page = Math.floor(index / limit);
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: page, size: limit });
+		await globalMutate(swrKey);
+	};
+
+	const loadMore = () => {
+		if (isLoading || !hasMore) return;
+
+		const newParams = { ...params, page: page + 1 };
+		setParams(newParams);
+	};
+
+	return {
+		data,
+		res,
+		params,
+		fetching: isLoading && data.length === 0,
+		loadingMore: isLoading,
+		validating: isValidating,
 		hasMore,
 		loadMore,
 		addData,
