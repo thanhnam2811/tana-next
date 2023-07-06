@@ -397,7 +397,7 @@ class AuthoController {
 				}).save();
 			}
 
-			const link = `${process.env.BASE_URL} /${user._id}/${token.token} `;
+			const link = `${process.env.BASE_URL}?id=${user._id}&token=${token.token}`;
 			const status = await sendEmail(user.email, 'Password reset', link, user);
 			// check status
 			if (!status) {

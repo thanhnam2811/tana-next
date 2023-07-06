@@ -30,7 +30,7 @@ class PostController {
 	// search post by content
 	async search(req, res, next) {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
-		const { q } = req.query;
+		const q = req.query.key;
 		try {
 			Post.paginate(
 				{ $text: { $search: q } },

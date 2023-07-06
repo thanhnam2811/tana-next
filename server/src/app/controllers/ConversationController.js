@@ -331,7 +331,11 @@ class ConversationController {
 						return member;
 					})
 				);
-				req.body.name = req.body.members.map((x) => x.nickname).join(', ');
+
+				if (!req.body.name) {
+					req.body.name = req.body.members.map((x) => x.nickname).join(', ');
+				}
+
 				req.body.type = 'group';
 
 				const newConversation = new Conversation(req.body);
