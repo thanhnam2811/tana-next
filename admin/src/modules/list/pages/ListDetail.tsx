@@ -73,6 +73,7 @@ const ListDetail = () => {
 			await mutate(updated, false);
 
 			message.success({ content: `Cập nhật danh sách thành công!`, key: 'edit' });
+			closeModal();
 		} catch (error) {
 			message.error({ content: `Cập nhật danh sách thất bại! ${error}`, key: 'edit' });
 		}
