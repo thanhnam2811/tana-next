@@ -2,16 +2,20 @@ import { useConversationContext } from '@modules/messages/hooks';
 import { App, Button, Input, InputRef, Space } from 'antd';
 import { useRef } from 'react';
 import { HiMagnifyingGlass, HiPencil } from 'react-icons/hi2';
+import { getConversationInfo } from '@modules/messages/utils';
+import { useAuth } from '@modules/auth/hooks';
 
 export function InfoMenu() {
+	const { authUser } = useAuth();
 	const { conversation, updateConversationForm } = useConversationContext();
 	const { modal } = App.useApp();
 
+	const { name } = getConversationInfo(conversation, authUser!);
 	const inputNameRef = useRef<InputRef>(null);
 	const handleChangeName = async () =>
 		modal.info({
 			title: 'Đổi tên cuộc trò chuyện',
-			content: <Input placeholder="Tên cuộc trò chuyện" defaultValue={conversation.name} ref={inputNameRef} />,
+			content: <Input placeholder="Tên cuộc trò chuyện" defaultValue={name} ref={inputNameRef} />,
 			okText: 'Lưu',
 			cancelText: 'Hủy',
 			onOk: () => updateConversationForm({ name: inputNameRef.current!.input?.value }),
