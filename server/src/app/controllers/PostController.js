@@ -167,7 +167,7 @@ class PostController {
 				media: Joi.array().items(
 					Joi.object({
 						_id: Joi.string().required(),
-						description: Joi.string(),
+						description: Joi.string().allow(''),
 					}).unknown()
 				),
 				privacy: validatePrivacy,
