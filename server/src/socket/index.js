@@ -1,6 +1,7 @@
 /* eslint-disable import/newline-after-import */
 const AccessController = require('../app/controllers/AccessController');
 const { User } = require('../app/models/User');
+const { populateUserForOther } = require('../utils/Populate/User');
 const SocketManager = require('./SocketManager');
 const RoomMagager = require('./RoomManager');
 const authMethod = require('../auth/auth.method');
@@ -23,19 +24,18 @@ function socket(io) {
 				await AccessController.updateAccessInDay();
 
 				// Update user isOnline
-				const user = await User.findByIdAndUpdate(
-					userID,
-					{
-						isOnline: true,
-					},
-					{ new: true }
-				);
+				await User.findByIdAndUpdate(userID, {
+					isOnline: true,
+				});
+
+				// Populate user
+				const userPopulated = await populateUserForOther(userID);
 
 				// Add user to socket manager
 				SocketManager.addUser(userID, sk);
 
 				// Send user online
-				SocketManager.sendAll(`online:${userID}`, user);
+				SocketManager.sendAll(`online:${userID}`, userPopulated);
 			} catch (err) {
 				console.log(err);
 			}
@@ -48,18 +48,17 @@ function socket(io) {
 			// console.log('Client disconnected', userID);
 			try {
 				// Update user isOnline
-				const user = await User.findByIdAndUpdate(
-					userID,
-					{
-						isOnline: false,
-						lastAccess: Date.now(),
-					},
-					{ new: true }
-				);
+				await User.findByIdAndUpdate(userID, {
+					isOnline: false,
+					lastAccess: Date.now(),
+				});
+
+				// Populate user
+				const userPopulated = await populateUserForOther(userID);
 
 				// Remove user from socket manager
 				SocketManager.removeUser(userID);
-				SocketManager.sendAll(`online:${userID}`, user);
+				SocketManager.sendAll(`online:${userID}`, userPopulated);
 			} catch (err) {
 				console.log(err);
 			}
