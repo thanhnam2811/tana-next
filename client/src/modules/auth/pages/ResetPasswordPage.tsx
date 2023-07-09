@@ -96,7 +96,7 @@ const ResetPasswordPage = () => {
 						</Form.Item>
 
 						<Form.Item>
-							<Button type="primary" block loading={loading}>
+							<Button type="primary" block loading={loading} htmlType="submit">
 								Đặt lại mật khẩu
 							</Button>
 						</Form.Item>
