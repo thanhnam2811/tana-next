@@ -2,7 +2,6 @@ import { Avatar, AvatarProps, Badge, BadgeProps, Skeleton, theme, Tooltip } from
 import { HiUser } from 'react-icons/hi2';
 import styles from './UserAvatar.module.scss';
 import { UserType } from '@modules/user/types';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
