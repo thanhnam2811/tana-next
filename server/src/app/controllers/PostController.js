@@ -1236,7 +1236,7 @@ class PostController {
 					friendScores[friend.user._id.toString()] = friend.interactionScore;
 				});
 
-				const sortedPosts = listPost.sort((a, b) => {
+				const sortedPosts = listPosts.sort((a, b) => {
 					const interactionScoreA = friendScores[a.author._id.toString()];
 					const interactionScoreB = friendScores[b.author._id.toString()];
 
