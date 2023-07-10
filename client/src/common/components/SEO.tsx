@@ -95,18 +95,18 @@ function renderOpenGraphTags(title: string, description: string, images: SEOImag
 		<>
 			<meta property="og:title" content={title} key="og-title" />
 			<meta property="og:description" content={description} key="og-description" />
-			{images.map(({ url, alt, width, height }, index) => (
-				<>
-					<meta property="og:image" content={url} key={`og-image-${index}`} />
-					{alt && <meta property="og:image:alt" content={alt} key={`og-image-alt-${index}`} />}
-					{width && (
-						<meta property="og:image:width" content={width.toString()} key={`og-image-width-${index}`} />
-					)}
-					{height && (
-						<meta property="og:image:height" content={height.toString()} key={`og-image-height-${index}`} />
-					)}
-				</>
-			))}
+			{/*{images.map(({ url, alt, width, height }, index) => (*/}
+			{/*	<>*/}
+			{/*		<meta property="og:image" content={url} key={`og-image-${index}`} />*/}
+			{/*		{alt && <meta property="og:image:alt" content={alt} key={`og-image-alt-${index}`} />}*/}
+			{/*		{width && (*/}
+			{/*			<meta property="og:image:width" content={width.toString()} key={`og-image-width-${index}`} />*/}
+			{/*		)}*/}
+			{/*		{height && (*/}
+			{/*			<meta property="og:image:height" content={height.toString()} key={`og-image-height-${index}`} />*/}
+			{/*		)}*/}
+			{/*	</>*/}
+			{/*))}*/}
 
 			<meta property="og:url" content={url} key="og-url" />
 			<meta property="og:site_name" content="TaNa - Kết nối và sáng tạo" key="og-site_name" />
@@ -123,22 +123,22 @@ function renderTwitterTags(title: string, description: string, images: SEOImage[
 			<meta name="twitter:creator" content="@tana" key="twitter-creator" />
 			<meta name="twitter:title" content={title} key="twitter-title" />
 			<meta name="twitter:description" content={description} key="twitter-description" />
-			{images.map(({ url, alt, width, height }, index) => (
-				<>
-					<meta name="twitter:image" content={url} key={`tw-image-${index}`} />
-					{alt && <meta name="twitter:image:alt" content={alt} key={`tw-image-alt-${index}`} />}
-					{width && (
-						<meta name="twitter:image:width" content={width.toString()} key={`tw-image-width-${index}`} />
-					)}
-					{height && (
-						<meta
-							name="twitter:image:height"
-							content={height.toString()}
-							key={`tw-image-height-${index}`}
-						/>
-					)}
-				</>
-			))}
+			{/*{images.map(({ url, alt, width, height }, index) => (*/}
+			{/*	<>*/}
+			{/*		<meta name="twitter:image" content={url} key={`tw-image-${index}`} />*/}
+			{/*		{alt && <meta name="twitter:image:alt" content={alt} key={`tw-image-alt-${index}`} />}*/}
+			{/*		{width && (*/}
+			{/*			<meta name="twitter:image:width" content={width.toString()} key={`tw-image-width-${index}`} />*/}
+			{/*		)}*/}
+			{/*		{height && (*/}
+			{/*			<meta*/}
+			{/*				name="twitter:image:height"*/}
+			{/*				content={height.toString()}*/}
+			{/*				key={`tw-image-height-${index}`}*/}
+			{/*			/>*/}
+			{/*		)}*/}
+			{/*	</>*/}
+			{/*))}*/}
 		</>
 	);
 }

@@ -4,6 +4,7 @@ import styles from './UserAvatar.module.scss';
 import { UserType } from '@modules/user/types';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 
 interface Props {
 	user?: UserType;
@@ -19,8 +20,9 @@ export function UserAvatar({
 	avtSize = 40,
 	...avatarProps
 }: Props & AvatarProps) {
+	const router = useRouter();
+
 	const { token } = theme.useToken();
-	const badgeSize = avtSize / 4;
 
 	const [user, setUser] = useState<UserType | undefined>(initUser);
 	const profilePic = user?.profilePicture;
@@ -43,6 +45,9 @@ export function UserAvatar({
 
 	if (!user) return <Skeleton.Avatar size={avtSize} shape="circle" active />;
 
+	const goToProfile = () => router.push(`/profile?id=${user?._id}`);
+
+	const badgeSize = avtSize / 4;
 	return (
 		<Tooltip title={nickname || user?.fullname} placement="top">
 			<Badge
@@ -63,16 +68,21 @@ export function UserAvatar({
 				offset={[0 - badgeSize / 2, avtSize - badgeSize / 2]}
 				{...badgeProps}
 			>
-				<Link href={`/profile?id=${user?._id}`} passHref draggable onClick={(e) => e.stopPropagation()}>
-					<Avatar
-						shape="circle"
-						src={profilePic?.link}
-						alt={user?.fullname}
-						icon={<HiUser size={avtSize} />}
-						{...avatarProps}
-						style={{ width: avtSize, height: avtSize, border: 'none', ...avatarProps?.style }}
-					/>
-				</Link>
+				<Avatar
+					shape="circle"
+					src={profilePic?.link}
+					alt={user?.fullname}
+					icon={<HiUser size={avtSize} />}
+					{...avatarProps}
+					style={{
+						width: avtSize,
+						height: avtSize,
+						border: 'none',
+						cursor: 'pointer',
+						...avatarProps?.style,
+					}}
+					onClick={goToProfile}
+				/>
 			</Badge>
 		</Tooltip>
 	);
