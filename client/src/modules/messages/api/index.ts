@@ -6,3 +6,4 @@ export * from './leaveConversation.api';
 export * from './removeMember.api';
 export * from './sendMessage.api';
 export * from './updateConversation.api';
+export * from './deleteConversation.api';

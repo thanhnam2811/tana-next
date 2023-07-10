@@ -16,6 +16,7 @@ interface IConversation extends IData {
 	history: History[];
 	lastest_message: MessageType;
 	avatar: MediaType | string;
+	type: 'direct' | 'group';
 }
 
 // For use

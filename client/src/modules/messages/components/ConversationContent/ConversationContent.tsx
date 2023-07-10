@@ -13,15 +13,16 @@ import { ConversationAvatar } from '../ConversationAvatar';
 import { ConversationDetail } from '../ConversationDetail';
 import { ConversationMessage } from './ConversationMessage';
 import { toast } from 'react-hot-toast';
-import { updateConversationApi } from '@modules/messages/api';
+import { deleteConversationApi, updateConversationApi } from '@modules/messages/api';
 import { ConversationProvider } from '@modules/messages/hooks';
 import SEO from '@common/components/SEO';
 
 interface Props {
 	onUpdate?: (id: string, data: ConversationType) => void;
+	onDelete?: (id: string) => void;
 }
 
-export function ConversationContent({ onUpdate }: Props) {
+export function ConversationContent({ onUpdate, onDelete }: Props) {
 	const { authUser } = useAuth();
 	const router = useRouter();
 
@@ -70,12 +71,26 @@ export function ConversationContent({ onUpdate }: Props) {
 		}
 	};
 
+	const deleteConversation = async () => {
+		const toastId = toast.loading('Đang xóa cuộc trò chuyện...');
+
+		try {
+			await deleteConversationApi(id);
+			onDelete?.(id);
+			toast.success('Xóa cuộc trò chuyện thành công!', { id: toastId });
+			await router.push('/messages');
+		} catch (error: any) {
+			toast.error(error.message || error.toString(), { id: toastId });
+		}
+	};
+
 	return (
 		<ConversationProvider
 			value={{
 				conversation,
 				updateConversation,
 				updateConversationForm,
+				deleteConversation,
 			}}
 		>
 			<SEO title={`Tin nhắn - ${name}`} />

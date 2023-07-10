@@ -28,7 +28,7 @@ import {
 	HiDocument,
 	HiExclamationTriangle,
 	HiPhoto,
-	HiUser,
+	HiTrash,
 	HiUserPlus,
 	HiUsers,
 } from 'react-icons/hi2';
@@ -42,8 +42,9 @@ import { useReport } from '@modules/report/hooks';
 
 export function ConversationDetail() {
 	const router = useRouter();
-	const { conversation, updateConversationForm, updateConversation, info } = useConversationContext();
-	const { isDirect, name, description, receiver } = info;
+	const { conversation, updateConversationForm, updateConversation, info, deleteConversation } =
+		useConversationContext();
+	const { isDirect, name, description } = info;
 
 	const { token } = theme.useToken();
 	const { modal } = App.useApp();
@@ -203,23 +204,6 @@ export function ConversationDetail() {
 					<Typography.Text type="secondary">{description}</Typography.Text>
 
 					<Space size={8} split>
-						{isDirect ? (
-							<Tooltip title="Trang cá nhân">
-								<Link href={`/profile?id=${receiver?.user._id}`} passHref>
-									<Button shape="circle" icon={<HiUser />} />
-								</Link>
-							</Tooltip>
-						) : (
-							<Popconfirm
-								title="Bạn có chắc chắn muốn rời khỏi nhóm này không?"
-								onConfirm={handleLeaveConversation}
-							>
-								<Tooltip title="Rời nhóm">
-									<Button shape="circle" icon={<HiLogout />} />
-								</Tooltip>
-							</Popconfirm>
-						)}
-
 						<Tooltip title="Tắt thông báo">
 							<Button shape="circle" icon={<HiBellSnooze />} />
 						</Tooltip>
@@ -227,6 +211,26 @@ export function ConversationDetail() {
 						<Tooltip title="Báo cáo">
 							<Button shape="circle" icon={<HiExclamationTriangle />} onClick={openReport} />
 						</Tooltip>
+
+						{isDirect ? (
+							<Popconfirm
+								title="Bạn có chắc chắn muốn xóa cuộc trò chuyện này không?"
+								onConfirm={deleteConversation}
+							>
+								<Tooltip title="Xóa cuộc trò chuyện">
+									<Button shape="circle" icon={<HiTrash />} danger />
+								</Tooltip>
+							</Popconfirm>
+						) : (
+							<Popconfirm
+								title="Bạn có chắc chắn muốn rời khỏi nhóm này không?"
+								onConfirm={handleLeaveConversation}
+							>
+								<Tooltip title="Rời nhóm">
+									<Button shape="circle" icon={<HiLogout />} danger />
+								</Tooltip>
+							</Popconfirm>
+						)}
 					</Space>
 				</Space>
 			}
