@@ -9,7 +9,7 @@ async function notificationCreateComment(post, comment, user) {
 	const notification = await new Notification({
 		type: 'comment',
 		content: `${user.fullname} đã bình luận một bài viết của bạn`,
-		link: `/post/${post._id}?cid=:${comment._id}`,
+		link: `/post/${post._id}?cid=${comment._id}`,
 		sender: user._id,
 		receiver,
 	}).save();
@@ -50,7 +50,7 @@ async function notificationReactComment(comment, user) {
 	const notification = await new Notification({
 		type: 'comment',
 		content: `${user.fullname} đã bày tỏ cảm xúc về một bình luận của bạn`,
-		link: `/post/${comment.post}?cid=:${comment._id}`,
+		link: `/post/${comment.post}?cid=${comment._id}`,
 		sender: user._id,
 		receiver,
 	}).save();
@@ -70,7 +70,7 @@ async function notificationTagComment(comment, user) {
 	const notification = await new Notification({
 		type: 'comment',
 		content: `${user.fullname} đã gắn thẻ bạn trong một bình luận`,
-		link: `/post/${comment.post}?cid=:${comment._id}`,
+		link: `/post/${comment.post}?cid=${comment._id}`,
 		sender: user._id,
 		receiver: tagsInComment,
 	}).save();
