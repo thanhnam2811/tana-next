@@ -295,21 +295,23 @@ class PostController {
 			const post = await Post.findById(req.params.id);
 			if (post.author.toString() === req.user._id.toString()) {
 				// update description of file
-				await Promise.all(
-					req.body.media.map(async (file) => {
-						const fileUpdated = await File.findByIdAndUpdate(
-							file._id,
-							{
-								description: file.description,
-								post: post._id,
-							},
-							{ new: true }
-						);
-						return fileUpdated;
-					})
-				);
+				if (req.body.media) {
+					await Promise.all(
+						req.body.media?.map(async (file) => {
+							const fileUpdated = await File.findByIdAndUpdate(
+								file._id,
+								{
+									description: file.description,
+									post: post._id,
+								},
+								{ new: true }
+							);
+							return fileUpdated;
+						})
+					);
+				}
 
-				const files = req.body.media.map((file) => file._id);
+				const files = req.body.media?.map((file) => file._id);
 				const postUpdated = await Post.findByIdAndUpdate(
 					req.params.id,
 					{
