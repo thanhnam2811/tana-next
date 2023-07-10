@@ -3,7 +3,7 @@ import { ConversationType } from '../types';
 import { dateUtil } from '@common/utils';
 
 export const getConversationInfo = (conversation: ConversationType, authUser: UserType) => {
-	const isDirect = conversation.members.length === 2;
+	const isDirect = conversation.type === 'direct';
 	const receiver = isDirect ? conversation.members.find((member) => member.user._id !== authUser._id) : null;
 
 	const name = isDirect ? receiver?.nickname || receiver?.user.fullname : conversation.name;
