@@ -136,7 +136,7 @@ class ConversationController {
 				return responseError(res, 404, 'Không tìm thấy cuộc trò chuyện');
 			}
 
-			if (conversation.members.length === 2) {
+			if (conversation.members.length === 2 || conversation.type === 'direct') {
 				return responseError(res, 400, 'Không thể rời khỏi cuộc trò chuyện 2 người');
 			}
 
