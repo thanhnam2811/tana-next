@@ -71,7 +71,7 @@ async function notificationForSharedPost(post, user) {
 }
 
 async function notificationForReactPost(post, user) {
-	const receiver = [post.author];
+	const receiver = [post.author._id];
 	const notification = await new Notification({
 		type: 'post',
 		content: `${user.fullname} đã bày tỏ cảm xúc về một bài viết của bạn`,
@@ -79,8 +79,6 @@ async function notificationForReactPost(post, user) {
 		sender: user._id,
 		receiver,
 	}).save();
-
-	console.log(notification);
 
 	// populate notification
 	const popNotification = await populateNotification(notification);
