@@ -12,7 +12,7 @@ const limiter = async (req, res, next) => {
 		} else {
 			timeLeft = await getTime(ipUser);
 		}
-		if (numRequest > 30) {
+		if (numRequest > 60) {
 			return res
 				.status(429)
 				.send(`Bạn đã vượt quá số lần truy cập cho phép trong 1 phút. Vui lòng thử lại sau ${timeLeft} giây!`);

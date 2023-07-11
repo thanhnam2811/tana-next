@@ -314,6 +314,8 @@ class ConversationController {
 
 					newConversation.lastest_message = messageSystem;
 
+					console.log(newConversation);
+
 					return res.status(200).json(await populateConversation(savedConversation._id));
 				} else {
 					const conversation = await populateConversation(conv[0]._id);
@@ -354,14 +356,15 @@ class ConversationController {
 				const savedConversation = await newConversation.save();
 
 				// create message system
-				const messageSystem = new Message({
+				const messageSystem = await new Message({
 					conversation: savedConversation._id,
 					text: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 					isSystem: true,
-				});
-				await messageSystem.save();
+				}).save();
 
-				newConversation.lastest_message = messageSystem;
+				newConversation.lastest_message = messageSystem._id;
+
+				await savedConversation.save();
 
 				return res.status(200).json(await populateConversation(savedConversation._id));
 			}

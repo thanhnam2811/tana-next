@@ -339,6 +339,13 @@ class CommentController {
 					await Post.findByIdAndUpdate(req.params.postId, {
 						$inc: { numberComment: -1 - numberReplyDeleted.deletedCount },
 					});
+
+					// :TODO decrease number reply comment of comemnt
+					if (comment.replyTo) {
+						await Comment.findByIdAndUpdate(comment.replyTo, {
+							$inc: { numberReply: -1 },
+						});
+					}
 					// save and return post populated with comments
 					await post.save();
 					return res.status(200).json(comment);
