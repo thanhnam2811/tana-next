@@ -67,7 +67,7 @@ export function ListFriend({ api, title = 'Danh sách bạn bè' }: Props) {
 					loading={friendFetcher.fetching}
 					grid={{ gutter: 16, column: 3 }}
 					renderItem={(user) => (
-						<List.Item>
+						<List.Item key={user._id}>
 							<FriendCard user={user} />
 						</List.Item>
 					)}
