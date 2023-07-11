@@ -64,7 +64,7 @@ async function notificationForSharedPost(post, user) {
 	const popNotification = await populateNotification(notification);
 
 	// send socket
-	SocketManager.send(receiver, eventName.NOTIFICATION, {
+	SocketManager.sendToList(receiver, eventName.NOTIFICATION, {
 		type: notificationType.SHARE_POST,
 		data: popNotification,
 	});
@@ -80,11 +80,13 @@ async function notificationForReactPost(post, user) {
 		receiver,
 	}).save();
 
+	console.log(notification);
+
 	// populate notification
 	const popNotification = await populateNotification(notification);
 
 	// send socket
-	SocketManager.send(receiver, eventName.NOTIFICATION, {
+	SocketManager.sendToList(receiver, eventName.NOTIFICATION, {
 		type: notificationType.REACT_POST,
 		data: popNotification,
 	});
