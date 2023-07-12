@@ -16,8 +16,6 @@ import { MediaModal } from '@modules/user/components/MediaModal';
 import { deleteAlbumApi } from '@modules/user/api/deleteAlbum.api';
 import { MediaCard } from '@modules/user/components/MediaCard';
 
-O;
-
 enum ModalType {
 	ALBUM,
 	MEDIA,
