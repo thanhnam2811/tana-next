@@ -1,7 +1,7 @@
 import { AlbumFormType, AlbumType } from '@modules/user/types';
 import useSWR from 'swr';
-import { deleteFileApi, swrFetcher, uploadFileApi } from '@common/api';
-import { Button, Card, Image, List, Popconfirm, Space, Spin, Tooltip, Typography } from 'antd';
+import { deleteFileApi, swrFetcher, updateFileApi, uploadFileApi } from '@common/api';
+import { Button, Card, Image, List, Popconfirm, Space, Spin, Tooltip } from 'antd';
 import { useSWRFetcher } from '@common/hooks';
 import { IFile, IPrivacy, MediaType } from '@common/types';
 import { useAuth } from '@modules/auth/hooks';
@@ -12,9 +12,11 @@ import { AlbumModal } from '@modules/user/components/AlbumModal';
 import { toast } from 'react-hot-toast';
 import { updateAlbumApi } from '@modules/user/api/updateAlbum.api';
 import { PrivacyDropdown } from '@common/components/Button';
-import { dateUtil } from '@common/utils';
 import { MediaModal } from '@modules/user/components/MediaModal';
 import { deleteAlbumApi } from '@modules/user/api/deleteAlbum.api';
+import { MediaCard } from '@modules/user/components/MediaCard';
+
+O;
 
 enum ModalType {
 	ALBUM,
@@ -199,59 +201,56 @@ const ListMedia = ({ id, isOwner, modal }: ListMediaProps) => {
 		}
 	};
 
-	const MediaCard = ({ media }: { media: IFile }) => {
-		const handleDeleteMedia = async () => {
-			const toastId = toast.loading('Đang xóa ảnh khỏi album...');
+	const handleDeleteMedia = async (id: string) => {
+		const toastId = toast.loading('Đang xóa ảnh khỏi album...');
 
-			try {
-				await deleteFileApi(media._id);
-				mediaFetcher.removeData(media._id);
+		try {
+			await deleteFileApi(id);
+			await mediaFetcher.removeData(id);
 
-				toast.success('Xóa ảnh khỏi album thành công', { id: toastId });
-			} catch (error) {
-				toast.error(`Xóa ảnh khỏi album thất bại! ${error}`, { id: toastId });
-			}
-		};
-
-		return (
-			<Card
-				cover={
-					<Image src={media.link} alt={media.originalname} style={{ aspectRatio: '1', objectFit: 'cover' }} />
-				}
-				bodyStyle={{ padding: 8 }}
-				actions={
-					isOwner
-						? [
-								<Button key="edit" icon={<HiPencil />} />,
-								<Popconfirm
-									key="delete"
-									title="Bạn có chắc muốn xóa ảnh này?"
-									onConfirm={handleDeleteMedia}
-								>
-									<Button icon={<HiTrash />} danger />
-								</Popconfirm>,
-						  ]
-						: undefined
-				}
-			>
-				<Card.Meta
-					title={media.description || <Typography.Text type="secondary">(Không có mô tả)</Typography.Text>}
-					description={dateUtil.getTimeAgo(media.createdAt)}
-				/>
-			</Card>
-		);
+			toast.success('Xóa ảnh khỏi album thành công', { id: toastId });
+		} catch (error) {
+			toast.error(`Xóa ảnh khỏi album thất bại! ${error}`, { id: toastId });
+		}
 	};
 
+	const handleEditMedia = async (id: string, media: MediaType) => {
+		const toastId = toast.loading('Đang cập nhật ảnh...');
+
+		try {
+			const updated = await updateFileApi(id, {
+				description: media.description,
+			});
+			await mediaFetcher.updateData(id, updated);
+			closeCardModal();
+
+			toast.success('Cập nhật ảnh thành công', { id: toastId });
+		} catch (error) {
+			toast.error(`Cập nhật ảnh thất bại! ${error}`, { id: toastId });
+		}
+	};
+
+	const [cardModal, setCardModal] = useState<{ open: boolean; media?: IFile }>({ open: false });
+	const openCardModal = (media: IFile) => setCardModal({ open: true, media });
+	const closeCardModal = () => setCardModal({ open: false });
+
 	return (
-		<>
+		<Image.PreviewGroup>
 			<MediaModal open={modal.open} onClose={modal.onClose} onSubmit={handleSubmitMedia} />
+			<MediaCard.EditModal
+				open={cardModal.open}
+				onClose={closeCardModal}
+				media={cardModal.media!}
+				onSubmit={handleEditMedia}
+			/>
+
 			<List
 				grid={{ gutter: 16, column: 3 }}
 				dataSource={mediaFetcher.data}
 				loading={mediaFetcher.fetching}
 				renderItem={(item) => (
 					<List.Item>
-						<MediaCard media={item} />
+						<MediaCard media={item} isOwner={isOwner} onDelete={handleDeleteMedia} onEdit={openCardModal} />
 					</List.Item>
 				)}
 				loadMore={
@@ -269,6 +268,6 @@ const ListMedia = ({ id, isOwner, modal }: ListMediaProps) => {
 					)
 				}
 			/>
-		</>
+		</Image.PreviewGroup>
 	);
 };
