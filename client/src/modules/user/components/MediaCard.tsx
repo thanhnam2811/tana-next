@@ -1,7 +1,7 @@
 import { IFile, MediaType } from '@common/types';
 import { Button, Card, Form, Image, Input, Modal, Popconfirm, Typography } from 'antd';
 import { HiPencil, HiTrash } from 'react-icons/hi2';
-import { dateUtil } from '@common/utils';
+import { dateUtil, fileUtil } from '@common/utils';
 import React, { useEffect } from 'react';
 
 interface Props {
@@ -15,9 +15,18 @@ export const MediaCard = ({ media, onDelete, onEdit, isOwner }: Props) => {
 	const handleDelete = () => onDelete?.(media._id);
 	const handleEdit = () => onEdit?.(media);
 
+	const fileName = media.name || media.link.split('/').pop();
+	const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+
 	return (
 		<Card
-			cover={<Image src={media.link} alt={media.originalname} style={{ aspectRatio: '1', objectFit: 'cover' }} />}
+			cover={
+				isVideo ? (
+					<video src={media.link} controls style={{ aspectRatio: '1', objectFit: 'contain' }} />
+				) : (
+					<Image src={media.link} alt={media.originalname} style={{ aspectRatio: '1', objectFit: 'cover' }} />
+				)
+			}
 			bodyStyle={{ padding: 8 }}
 			actions={
 				isOwner

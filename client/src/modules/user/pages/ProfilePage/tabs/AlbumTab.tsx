@@ -8,7 +8,7 @@ import { AlbumModal } from '@modules/user/components';
 import { toast } from 'react-hot-toast';
 import { updateAlbumApi } from '@modules/user/api/updateAlbum.api';
 import { createAlbumApi } from '@modules/user/api/createAlbum.api';
-import { dateUtil, urlUtil } from '@common/utils';
+import { dateUtil, fileUtil, urlUtil } from '@common/utils';
 import { PrivacyDropdown } from '@common/components/Button';
 import { IFile, IPrivacy, MediaType } from '@common/types';
 import { AlbumDetail } from '@modules/user/components/AlbumDetail';
@@ -154,6 +154,10 @@ export function AlbumTab() {
 			}
 		};
 
+		const cover = album.cover;
+		const fileName = cover.file?.name || cover.link.split('/').pop();
+		const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+
 		return (
 			<Card
 				cover={
@@ -167,19 +171,27 @@ export function AlbumTab() {
 							/>
 						}
 					>
-						<Image
-							src={
-								album.cover?.link ||
-								urlUtil.getPlaceholderImage({
-									text: album.name,
-									width: 300,
-									height: 300,
-								})
-							}
-							alt={album.cover?.description || album.name}
-							style={{ aspectRatio: '1', objectFit: 'cover' }}
-							onClick={(e) => e.stopPropagation()}
-						/>
+						{isVideo ? (
+							<video
+								src={cover.link}
+								style={{ width: '100%', aspectRatio: '1', objectFit: 'contain' }}
+								controls
+							/>
+						) : (
+							<Image
+								src={
+									album.cover?.link ||
+									urlUtil.getPlaceholderImage({
+										text: album.name,
+										width: 300,
+										height: 300,
+									})
+								}
+								alt={album.cover?.description || album.name}
+								style={{ aspectRatio: '1', objectFit: 'cover' }}
+								onClick={(e) => e.stopPropagation()}
+							/>
+						)}
 					</Badge>
 				}
 				hoverable

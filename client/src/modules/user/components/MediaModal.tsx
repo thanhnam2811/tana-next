@@ -1,6 +1,6 @@
 import { Badge, Button, Card, Form, Image, Input, List, Modal, Space } from 'antd';
 import { useRef, useState } from 'react';
-import { randomUtil } from '@common/utils';
+import { fileUtil, randomUtil } from '@common/utils';
 import { MediaType } from '@common/types';
 import { HiPlus, HiTrash } from 'react-icons/hi2';
 
@@ -89,46 +89,66 @@ const ListMedia = ({ value = [], onChange }: ListMediaProps) => {
 				}
 				dataSource={value}
 				grid={{ gutter: 16, column: 3 }}
-				renderItem={(item, index) => (
-					<List.Item>
-						<Card
-							cover={
-								<Badge
-									count={
-										<Button
-											size="small"
-											shape="circle"
-											danger
-											icon={<HiTrash />}
-											onClick={() => handleDeleteMedia(item._id)}
-										/>
-									}
-									offset={[0, 0]}
-								>
-									<Image
-										src={item.link}
-										alt={item.description}
-										style={{ aspectRatio: '1', objectFit: 'cover' }}
-									/>
-								</Badge>
-							}
-							bodyStyle={{ padding: 0 }}
-						>
-							<Input.TextArea
-								placeholder="Nhập mô tả"
-								autoSize={{ minRows: 2, maxRows: 4 }}
-								value={item.description}
-								onChange={(e) => {
-									const { value: desc } = e.target;
-									const newList = [...value];
-									newList[index].description = desc;
-									onChange?.(newList);
-								}}
-								bordered={false}
-							/>
-						</Card>
-					</List.Item>
-				)}
+				renderItem={(item, index) => {
+					const fileName = item.file?.name || item.link.split('/').pop();
+					const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+
+					return (
+						<List.Item>
+							<Card
+								cover={
+									<Badge
+										count={
+											<Button
+												size="small"
+												shape="circle"
+												danger
+												icon={<HiTrash />}
+												onClick={() => handleDeleteMedia(item._id)}
+											/>
+										}
+										offset={[0, 0]}
+									>
+										{isVideo ? (
+											<video
+												src={item.link}
+												style={{
+													width: '100%',
+													aspectRatio: '1',
+													objectFit: 'contain',
+												}}
+												controls
+											/>
+										) : (
+											<Image
+												src={item.link}
+												alt={item.description}
+												style={{
+													aspectRatio: '1',
+													objectFit: 'cover',
+												}}
+											/>
+										)}
+									</Badge>
+								}
+								bodyStyle={{ padding: 0 }}
+							>
+								<Input.TextArea
+									placeholder="Nhập mô tả"
+									autoSize={{ minRows: 2, maxRows: 4 }}
+									value={item.description}
+									onChange={(e) => {
+										const { value: desc } = e.target;
+										const newList = [...value];
+										newList[index].description = desc;
+										onChange?.(newList);
+									}}
+									bordered={false}
+								/>
+							</Card>
+						</List.Item>
+					);
+				}}
 			/>
 		</Image.PreviewGroup>
 	);
