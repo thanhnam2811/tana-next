@@ -155,7 +155,7 @@ class ConversationController {
 					});
 				}
 				// create message system
-				const messageSystem = new Message({
+				const messageSystem = await new Message({
 					conversation: conversation._id,
 					text: `<b>${req.user.fullname}</b> đã rời khỏi cuộc hội thoại này`,
 					isSystem: true,
