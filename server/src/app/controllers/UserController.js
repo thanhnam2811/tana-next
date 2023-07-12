@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt');
 const { default: mongoose } = require('mongoose');
 const createError = require('http-errors');
-const { User, validate } = require('../models/User');
+const { User, validate, labelOfGender } = require('../models/User');
 const { getPagination } = require('../../utils/Pagination');
 const { populateUser } = require('../../utils/Populate/User');
 const { getUserWithPrivacy } = require('../../utils/Privacy/inforUser');
@@ -126,7 +126,13 @@ class UserController {
 			const user = await User.findByIdAndUpdate(
 				req.user._id,
 				{
-					$set: req.body,
+					$set: {
+						...req.body,
+						gender: {
+							value: req.body.gender.value,
+							label: labelOfGender[req.body.gender.value],
+						},
+					},
 				},
 				{ new: true }
 			)
