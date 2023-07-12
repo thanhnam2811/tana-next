@@ -869,12 +869,12 @@ class ConversationController {
 					);
 					const { nickname } = conversation.members[index];
 					const user = await User.findById(req.body.userID).select('fullname');
-					if (!nickname) {
+					if (nickname && req.body.nickname == '') {
 						// get fullname of user will be removed
 						conversation.members[index].nickname = req.body.nickname;
 						conversation.members[index].changedNicknameBy = req.user._id;
 						contentMessage = `đã gỡ biệt danh của <b>${user.fullname}</b>`;
-					} else {
+					} else if (req.body.nickname != nickname) {
 						contentMessage = `đã thay đổi biệt danh của <b>${user.fullname}</b> thành <b>${req.body.nickname}</b>`;
 						conversation.members[index].nickname = req.body.nickname;
 						conversation.members[index].changedNicknameBy = req.user._id;
