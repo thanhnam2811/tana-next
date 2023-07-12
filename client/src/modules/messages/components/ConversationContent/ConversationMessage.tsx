@@ -1,7 +1,7 @@
 import { uploadMultiFileApi } from '@common/api';
 import { useFetcher } from '@common/hooks';
 import { IFile } from '@common/types';
-import { randomUtil, stringUtil } from '@common/utils';
+import { fileUtil, randomUtil, stringUtil } from '@common/utils';
 import { useAuth } from '@modules/auth/hooks';
 import { sendMessageApi } from '@modules/messages/api';
 import { ConversationAvatar, MessageItem } from '@modules/messages/components';
@@ -342,7 +342,14 @@ export function ConversationMessage() {
 					}}
 				>
 					<Form.Item name="files" hidden />
-					<input {...getInputProps()} ref={inputFilesRef} />
+					<input
+						{...getInputProps()}
+						ref={inputFilesRef}
+						accept={[
+							...fileUtil.acceptedImageTypes.map((ext) => `.${ext}`),
+							...fileUtil.acceptedVideoTypes.map((ext) => `.${ext}`),
+						].join(',')}
+					/>
 					<div className={styles.dropzone_content} style={{ borderColor: token.colorPrimary }}>
 						<Typography.Text strong>Gửi file</Typography.Text>
 

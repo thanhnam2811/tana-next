@@ -53,32 +53,40 @@ export function MessageItem({ message, prevCombine, nextCombine, onRetry }: Prop
 					<List
 						size="small"
 						dataSource={message.media}
-						renderItem={(item) => (
-							<List.Item
-								className={styles.file_item}
-								extra={
-									<Link href={item.link} target="_blank" download>
-										<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
-									</Link>
-								}
-							>
-								<Image
-									className={styles.file_icon}
-									preview={
-										!!fileUtil.isImage(item.name) && {
-											maskClassName: styles.file_icon,
-											mask: <HiEye />,
-										}
+						renderItem={(item) => {
+							const fileName = item.name || item.link.split('/').pop();
+							const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+							return (
+								<List.Item
+									className={styles.file_item}
+									extra={
+										<Link href={item.link} target="_blank" download>
+											<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
+										</Link>
 									}
-									src={fileUtil.getFilePreview(item)}
-									alt={item.originalname}
-								/>
+								>
+									{isVideo ? (
+										<video className={styles.file_icon} src={item.link} controls />
+									) : (
+										<Image
+											className={styles.file_icon}
+											preview={
+												!!fileUtil.isImage(item.name) && {
+													maskClassName: styles.file_icon,
+													mask: <HiEye />,
+												}
+											}
+											src={fileUtil.getFilePreview(item)}
+											alt={item.originalname}
+										/>
+									)}
 
-								<Typography.Text strong className={styles.file_name}>
-									{item.originalname}
-								</Typography.Text>
-							</List.Item>
-						)}
+									<Typography.Text strong className={styles.file_name}>
+										{item.originalname}
+									</Typography.Text>
+								</List.Item>
+							);
+						}}
 					/>
 				)}
 

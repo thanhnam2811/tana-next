@@ -17,32 +17,41 @@ export function MediaMenu() {
 		<Image.PreviewGroup>
 			<List
 				dataSource={mediaFetcher.data}
-				renderItem={(file) => (
-					<List.Item
-						className={styles.file_item}
-						extra={
-							<Link href={file.link} target="_blank" download>
-								<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
-							</Link>
-						}
-					>
-						<List.Item.Meta
-							avatar={
-								<Image
-									src={file.link}
-									alt={file.originalname}
-									className={styles.file_icon}
-									preview={{
-										maskClassName: styles.file_icon,
-										mask: <HiEye />,
-									}}
-								/>
+				renderItem={(file) => {
+					const fileName = file.name || file.link.split('/').pop();
+					const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+
+					return (
+						<List.Item
+							className={styles.file_item}
+							extra={
+								<Link href={file.link} target="_blank" download>
+									<Button shape="circle" key="download" icon={<HiDownload />} size="small" />
+								</Link>
 							}
-							title={file.originalname}
-							description={fileUtil.formatSize(file.size)}
-						/>
-					</List.Item>
-				)}
+						>
+							<List.Item.Meta
+								avatar={
+									isVideo ? (
+										<video src={file.link} className={styles.file_icon} controls />
+									) : (
+										<Image
+											src={file.link}
+											alt={file.originalname}
+											className={styles.file_icon}
+											preview={{
+												maskClassName: styles.file_icon,
+												mask: <HiEye />,
+											}}
+										/>
+									)
+								}
+								title={file.originalname}
+								description={fileUtil.formatSize(file.size)}
+							/>
+						</List.Item>
+					);
+				}}
 				loading={mediaFetcher.fetching}
 				loadMore={
 					!mediaFetcher.fetching &&

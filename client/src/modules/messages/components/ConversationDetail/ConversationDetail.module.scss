@@ -35,6 +35,9 @@
 					object-fit: cover;
 					border-radius: 8px;
 				}
+				video.file_icon {
+					object-fit: contain;
+				}
 			}
 		}
 	}

@@ -32,6 +32,10 @@
 				border-radius: 8px;
 			}
 
+			video.file_icon {
+				object-fit: contain;
+			}
+
 			.file_name {
 				flex: 1;
 				width: 100%;
