@@ -890,12 +890,11 @@ class ConversationController {
 					});
 
 					// create message system
-					const messageSystem = new Message({
+					const messageSystem = await new Message({
 						conversation: req.params.id,
 						text: `<b>${req.user.fullname}</b> ${contentMessage}`,
 						isSystem: true,
-					});
-					await messageSystem.save();
+					}).save();
 					// update last message
 					conversation.lastest_message = messageSystem._id;
 				}
