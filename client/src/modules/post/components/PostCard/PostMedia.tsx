@@ -2,6 +2,7 @@ import { MediaType } from '@common/types/common';
 import { Button, Card, Col, Image, Input, Row, RowProps, Typography } from 'antd';
 import { HiX } from 'react-icons/hi';
 import styles from './PostCard.module.scss';
+import { fileUtil } from '@common/utils';
 
 // Layout for image
 const getColumnSize = (index: number, size: number) => {
@@ -29,6 +30,10 @@ export function PostMedia({ media, showAll = false, onDelete, onEdit, ...props }
 					const { _id, link, description } = item;
 					const hasMore = !showAll && media?.length > 6 && index === 5;
 
+					const fileName = item.file?.name || item.link.split('/').pop();
+
+					const isVideo = !!(fileName && fileUtil.isVideo(fileName));
+
 					return (
 						<Col span={getColumnSize(index, media?.length)} key={_id}>
 							<Card
@@ -36,14 +41,18 @@ export function PostMedia({ media, showAll = false, onDelete, onEdit, ...props }
 								className={styles.post_media_card}
 								cover={
 									<div className={styles.post_media_item}>
-										<Image
-											src={link}
-											alt="media"
-											className={styles.post_media_item_img}
-											preview={{
-												mask: !hasMore ? 'Xem ảnh' : ' ',
-											}}
-										/>
+										{isVideo ? (
+											<video src={link} controls />
+										) : (
+											<Image
+												src={link}
+												alt={description}
+												className={styles.post_media_item_img}
+												preview={{
+													mask: !hasMore ? 'Xem ảnh' : ' ',
+												}}
+											/>
+										)}
 
 										{/* Has more image */}
 										{hasMore && (

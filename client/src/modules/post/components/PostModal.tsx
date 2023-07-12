@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { HiMapPin, HiPhoto, HiPlayCircle } from 'react-icons/hi2';
 import { PostMedia } from './PostCard';
-import { randomUtil } from '@common/utils';
+import { fileUtil, randomUtil } from '@common/utils';
 import { uploadMultiFileApi } from '@common/api';
 import { PostFormType, PostType } from '@modules/post/types';
 
@@ -97,21 +97,15 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 				return;
 			}
 		}
+		try {
+			await (isEdit ? onUpdate?.(data._id!, data) : onCreate?.(data));
 
-		// Nếu là update thì gọi hàm onUpdate
-		if (isEdit) {
-			await onUpdate?.(data._id!, data);
+			// Reset form, đóng modal
+			resetData();
+			onClose(); // Đóng modal
+		} finally {
+			setSubmitting(false); // Tắt loading
 		}
-
-		// Nếu là create thì gọi hàm onCreate
-		else {
-			await onCreate?.(data);
-		}
-
-		// Reset form, đóng modal
-		resetData();
-		onClose();
-		setSubmitting(false); // Tắt loading
 	};
 
 	return (
@@ -149,7 +143,10 @@ export const PostModal = ({ data, open, onClose, onCreate, onUpdate }: Props) =>
 				hidden
 				onChange={(e) => handleAddMedia(e.target.files)}
 				multiple
-				accept="image/*, video/*"
+				accept={[
+					...fileUtil.acceptedImageTypes.map((ext) => `.${ext}`),
+					...fileUtil.acceptedVideoTypes.map((ext) => `.${ext}`),
+				].join(',')}
 			/>
 
 			<Card
