@@ -1,14 +1,14 @@
-import { getPostApi } from '@modules/post/api';
-import PostPage, { PostSEO } from '@modules/post/pages/PostPage';
-import { GetServerSideProps } from 'next';
-import { ApiError } from '@common/api';
-import { PostType } from '@modules/post/types';
+// import { getPostApi } from '@modules/post/api';
+// import { GetServerSideProps } from 'next';
+// import { ApiError } from '@common/api';
+// import { PostType } from '@modules/post/types';
+import PostPage from '@modules/post/pages/PostPage';
 
-interface Props {
-	post?: PostType;
-	id?: string;
-	error?: object;
-}
+// interface Props {
+// 	post?: PostType;
+// 	id?: string;
+// 	error?: object;
+// }
 
 // export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
 // 	const id = params?.id as string;
