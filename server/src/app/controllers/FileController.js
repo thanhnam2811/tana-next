@@ -187,7 +187,7 @@ class FileController {
 
 			// validate request body
 			const schema = Joi.object({
-				description: Joi.string(),
+				description: Joi.string().allow(''),
 			}).unknown();
 			const { error } = schema.validate(req.body);
 			if (error) {

@@ -868,14 +868,14 @@ class ConversationController {
 						(member) => member.user.toString() === req.body.userID.toString()
 					);
 					const { nickname } = conversation.members[index];
+					const user = await User.findById(req.body.userID).select('fullname');
 					if (!nickname) {
 						// get fullname of user will be removed
-						const user = await User.findById(req.body.userID).select('fullname');
 						conversation.members[index].nickname = req.body.nickname;
 						conversation.members[index].changedNicknameBy = req.user._id;
-						contentMessage = `đã đổi tên hiển thị của <b>${user.fullname}</b> thành <b>${req.body.nickname}</b>`;
+						contentMessage = `đã gỡ biệt danh của <b>${user.fullname}</b>`;
 					} else {
-						contentMessage = `đã thay đổi biệt danh của <b>${nickname}</b> thành <b>${req.body.nickname}</b>`;
+						contentMessage = `đã thay đổi biệt danh của <b>${user.fullname}</b> thành <b>${req.body.nickname}</b>`;
 						conversation.members[index].nickname = req.body.nickname;
 						conversation.members[index].changedNicknameBy = req.user._id;
 					}

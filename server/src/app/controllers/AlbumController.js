@@ -45,7 +45,7 @@ class AlbumController {
 					.items(
 						Joi.object({
 							_id: Joi.string().required(),
-							description: Joi.string(),
+							description: Joi.string().allow(''),
 						})
 					)
 					.required(),
@@ -396,7 +396,7 @@ class AlbumController {
 	async updateAlbum(req, res, next) {
 		try {
 			const schema = Joi.object({
-				name: Joi.string(),
+				name: Joi.string().required(),
 				privacy: validatePrivacy,
 			}).unknown();
 			const { error } = schema.validate(req.body);
