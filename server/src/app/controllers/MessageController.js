@@ -68,7 +68,7 @@ class MessageController {
 					});
 				conversation.lastest_message = savedMessage._id;
 				// remove userId in hidden
-				conversation.hidden = conversation.hidden.filter((id) => id.toString() !== req.user._id.toString());
+				conversation.hidden = [];
 				await conversation.save();
 				message.text = req.body.text;
 
