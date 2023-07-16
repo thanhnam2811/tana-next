@@ -89,6 +89,13 @@ const ConversationSchema = new mongoose.Schema(
 			type: mongoose.SchemaTypes.ObjectId,
 			ref: 'Message',
 		},
+		hidden: [
+			{
+				type: mongoose.SchemaTypes.ObjectId,
+				ref: 'User',
+				default: [],
+			},
+		],
 		deleted: {
 			type: Boolean,
 			default: false,

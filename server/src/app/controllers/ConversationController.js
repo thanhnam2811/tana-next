@@ -196,6 +196,9 @@ class ConversationController {
 				} else {
 					conversation.user_deleted.push({ userId: req.user._id });
 				}
+				if (!conversation.hidden.includes(req.user._id)) {
+					conversation.hidden.push(req.user._id);
+				}
 				await conversation.save();
 				return res.status(200).send('Đã xóa cuộc hội thoại cho User');
 			} else {
@@ -394,6 +397,9 @@ class ConversationController {
 						$elemMatch: {
 							user: req.user._id,
 						},
+					},
+					hidden: {
+						$nin: [req.user._id],
 					},
 					$or: [
 						{
