@@ -1233,7 +1233,7 @@ class PostController {
 			).then(async () => {
 				const friendScores = {};
 				req.user.friends.forEach((friend) => {
-					friendScores[friend.user._id.toString()] = friend.interactionScore;
+					friendScores[friend.user?._id.toString()] = friend.interactionScore;
 				});
 
 				const sortedPosts = listPosts.sort((a, b) => {

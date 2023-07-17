@@ -1080,19 +1080,20 @@ class UserController {
 										userObj.relationship = 'none';
 									} else if (
 										req.user.friends.some(
-											(friend) => friend.user._id.toString() === user._id.toString()
+											(friend) => friend.user?._id.toString() === user._id.toString()
 										)
 									) {
 										userObj.relationship = 'friend';
 									} else if (
 										req.user.sentRequests.some(
-											(sentRequest) => sentRequest.user._id.toString() === user._id.toString()
+											(sentRequest) => sentRequest.user?._id.toString() === user._id.toString()
 										)
 									) {
 										userObj.relationship = 'sent';
 									} else if (
 										req.user.friendRequests.some(
-											(friendRequest) => friendRequest.user._id.toString() === user._id.toString()
+											(friendRequest) =>
+												friendRequest.user?._id.toString() === user._id.toString()
 										)
 									) {
 										userObj.relationship = 'received';
