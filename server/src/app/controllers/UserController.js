@@ -37,14 +37,14 @@ async function querySearchSuggestFriends(req, next) {
 	try {
 		const listFriendsOfUser = req.user.friends.map((friend) => friend.user?._id);
 		const friendsOfUser = await User.find({ _id: { $in: listFriendsOfUser } });
-		const friendsOfFriends = friendsOfUser.flatMap((friend) => friend.friends.map((f) => f.user._id));
+		const friendsOfFriends = friendsOfUser.flatMap((friend) => friend.friends.map((f) => f.user?._id));
 		const uniqueFriendsOfFriends = [...new Set(friendsOfFriends)];
 
 		// remove user current, user's friends, user's friendsRequest, user's sentRequests
-		const listRequestsOfUser = req.user.friendRequests.map((f) => f.user._id);
+		const listRequestsOfUser = req.user.friendRequests.map((f) => f.user?._id);
 
 		// const listSentRequestsOfUser = req.user.sentRequests.map(friend => friend.user._id);
-		const listSentRequestsOfUser = req.user.sentRequests.map((f) => f.user._id);
+		const listSentRequestsOfUser = req.user.sentRequests.map((f) => f.user?._id);
 
 		const friendsOfFriendsFilter = uniqueFriendsOfFriends.filter(
 			(friendId) =>
@@ -554,7 +554,7 @@ class UserController {
 			if (req.query.sort) {
 				sort = req.query.sort;
 			}
-			const listIDFirends = req.user.friends.map((friend) => friend.user);
+			const listIDFirends = req.user.friends.map((friend) => friend.user?._id);
 			const query = [{ _id: { $in: listIDFirends }, $sort: { 'friends.date': sort } }];
 			if (req.query.gender) {
 				query.push({ 'gender.value': { $eq: req.query.gender } });
