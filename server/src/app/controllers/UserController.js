@@ -131,6 +131,7 @@ class UserController {
 						gender: {
 							value: req.body.gender?.value,
 							label: labelOfGender[req.body.gender?.value],
+							privacy: req.body.gender?.privacy,
 						},
 					},
 				},
