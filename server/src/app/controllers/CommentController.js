@@ -47,7 +47,7 @@ class CommentController {
 			}
 
 			const newComment = new Comment(req.body);
-			newComment.author = req.user._id;
+			newComment.author = req.user?._id;
 			newComment.post = req.params.postId;
 			const post = await Post.findById(req.params.postId);
 			if (post) {
@@ -67,10 +67,10 @@ class CommentController {
 				await notificationCreateComment(post, savedComment, req.user);
 				await notificationTagComment(savedComment, req.user);
 
-				if (savedComment.author.toString() !== req.user._id.toString()) {
-					const user = await User.findById(req.user._id);
+				if (savedComment.author.toString() !== req.user?._id.toString()) {
+					const user = await User.findById(req.user?._id);
 					user.friends.forEach((friend, index, arr) => {
-						if (friend.user._id.toString() === savedComment.author.toString()) {
+						if (friend.user?._id.toString() === savedComment.author.toString()) {
 							arr[index].interactionScore += 2;
 						}
 					});
@@ -125,7 +125,7 @@ class CommentController {
 			}
 			const comment = await Comment.findById(req.params.id);
 			if (!comment) return next(createError(404, 'Bình luận không tồn tại'));
-			if (comment.author.toString() === req.user._id.toString()) {
+			if (comment.author.toString() === req.user?._id.toString()) {
 				const commentUpdated = await Comment.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
 					.populate({
 						path: 'author',
@@ -156,7 +156,7 @@ class CommentController {
 		try {
 			const comment = await Comment.findById(req.params.id);
 			if (comment) {
-				const reactOfUser = await React.findOne({ user: req.user._id, comment: req.params.id });
+				const reactOfUser = await React.findOne({ user: req.user?._id, comment: req.params.id });
 				// check if user has reacted to comment before
 				if (reactOfUser && reactOfUser.type.toString() === req.body.type.toString()) {
 					// delete react of user
@@ -204,7 +204,7 @@ class CommentController {
 					res.status(200).json(commentWithReactUser);
 				} else {
 					// create new react of user
-					const newReact = new React({ user: req.user._id, comment: req.params.id, type: req.body.type });
+					const newReact = new React({ user: req.user?._id, comment: req.params.id, type: req.body.type });
 					await newReact.save();
 					// increase number of reacts of comment
 					await Comment.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
@@ -214,10 +214,10 @@ class CommentController {
 
 					// save activity for user
 					await createActivityWithReactComment(comment, req.user);
-					if (comment.author.toString() !== req.user._id.toString()) {
-						const user = await User.findById(req.user._id);
+					if (comment.author.toString() !== req.user?._id.toString()) {
+						const user = await User.findById(req.user?._id);
 						user.friends.forEach((friend, index, arr) => {
-							if (friend.user._id.toString() === comment.author.toString()) {
+							if (friend.user?._id.toString() === comment.author.toString()) {
 								arr[index].interactionScore += 2;
 							}
 						});
@@ -268,8 +268,8 @@ class CommentController {
 			const post = await Post.findById(req.params.postId);
 			if (comment) {
 				if (
-					comment.author._id.toString() === req.user._id.toString() ||
-					post.author.toString() === req.user._id.toString() ||
+					comment.author._id.toString() === req.user?._id.toString() ||
+					post.author.toString() === req.user?._id.toString() ||
 					req.user.role.name === 'ADMIN'
 				) {
 					await comment.delete();
@@ -319,8 +319,8 @@ class CommentController {
 			const post = await Post.findById(req.params.postId);
 			if (comment) {
 				if (
-					comment.author._id.toString() === req.user._id.toString() ||
-					post.author.toString() === req.user._id.toString() ||
+					comment.author._id.toString() === req.user?._id.toString() ||
+					post.author.toString() === req.user?._id.toString() ||
 					req.user.role.name === 'ADMIN'
 				) {
 					await comment.delete();
@@ -382,7 +382,7 @@ class CommentController {
 					return next(createError(400, error.details[0].message));
 				}
 				const newComment = new Comment(req.body);
-				newComment.author = req.user._id;
+				newComment.author = req.user?._id;
 				newComment.post = req.params.postId;
 				newComment.replyTo = req.params.id;
 				const savedComment = await newComment.save();
@@ -393,10 +393,10 @@ class CommentController {
 
 				// save activity for user
 				await createActivityWithReplyComment(savedComment, req.user);
-				if (savedComment.author.toString() !== req.user._id.toString()) {
-					const user = await User.findById(req.user._id);
+				if (savedComment.author.toString() !== req.user?._id.toString()) {
+					const user = await User.findById(req.user?._id);
 					user.friends.forEach((friend, index, arr) => {
-						if (friend.user._id.toString() === savedComment.author.toString()) {
+						if (friend.user?._id.toString() === savedComment.author.toString()) {
 							arr[index].interactionScore += 2;
 						}
 					});
@@ -472,7 +472,7 @@ class CommentController {
 							const commentObject = comment.toObject();
 							commentObject.reactOfUser = 'none';
 							if (req.user) {
-								const react = await React.findOne({ comment: comment._id, user: req.user._id });
+								const react = await React.findOne({ comment: comment._id, user: req.user?._id });
 								if (react) {
 									commentObject.reactOfUser = react.type;
 								}
@@ -534,7 +534,7 @@ class CommentController {
 							const commentObject = comment.toObject();
 							commentObject.reactOfUser = 'none';
 							if (req.user) {
-								const react = await React.findOne({ comment: comment._id, user: req.user._id });
+								const react = await React.findOne({ comment: comment._id, user: req.user?._id });
 								if (react) {
 									commentObject.reactOfUser = react.type;
 								}
@@ -576,7 +576,7 @@ class CommentController {
 				},
 			});
 
-			if (req.user.role.name !== 'ADMIN' && req.user._id.toString() !== comment.author._id.toString()) {
+			if (req.user.role.name !== 'ADMIN' && req.user?._id.toString() !== comment.author._id.toString()) {
 				comment = await Comment.findById(req.params.id).populate({
 					path: 'author',
 					select: '_id fullname profilePicture isOnline',
@@ -593,7 +593,7 @@ class CommentController {
 
 			let reactOfUser = 'none';
 			if (req.user) {
-				const react = await React.findOne({ comment: req.params.id, user: req.user._id });
+				const react = await React.findOne({ comment: req.params.id, user: req.user?._id });
 				if (react) {
 					reactOfUser = react.type;
 				}

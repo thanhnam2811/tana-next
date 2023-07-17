@@ -80,7 +80,7 @@ class AdminController {
 			await user.save();
 
 			const dataToken = {
-				userId: user._id,
+				userId: user?._id,
 				role: user.role.name,
 			};
 
@@ -91,8 +91,8 @@ class AdminController {
 			}
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 			// save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
+			// await redisClient.set(user?._id, refreshToken);
+			// await redisClient.expire(user?._id, 7 * 24 * 60 * 60);
 
 			user.refreshToken = refreshToken;
 			await user.save();

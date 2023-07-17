@@ -3,7 +3,7 @@ const { populateUser, populateUserForOther } = require('../Populate/User');
 async function getUserWithPrivacy(req, res) {
 	try {
 		let user;
-		if (req.user && req.user._id.toString() === req.params.id.toString()) {
+		if (req.user && req.user?._id.toString() === req.params.id.toString()) {
 			user = await populateUser(req.params.id);
 		} else {
 			user = await populateUserForOther(req.params.id);
@@ -46,12 +46,12 @@ async function getUserWithPrivacy(req, res) {
 			});
 			return user;
 		}
-		if (req.user._id.toString() === req.params.id.toString()) {
+		if (req.user?._id.toString() === req.params.id.toString()) {
 			// user is owner
 			return user;
 		}
 		// get relationship between user and current user have to be friends
-		const isFriend = user.friends.some((friend) => friend.user._id.toString() == req.user._id.toString());
+		const isFriend = user.friends.some((friend) => friend.user?._id.toString() == req.user?._id.toString());
 		// console.log(privacyFields);
 		// check privacy of fields
 		privacyFields.forEach((field) => {
@@ -64,13 +64,13 @@ async function getUserWithPrivacy(req, res) {
 					if (item.privacy.value == 'friends' && isFriend) return true;
 					if (
 						item.privacy.value == 'includes' &&
-						item.privacy.includes.some((id) => id.toString() == req.user._id.toString()) &&
+						item.privacy.includes.some((id) => id.toString() == req.user?._id.toString()) &&
 						isFriend
 					)
 						return true;
 					if (
 						item.privacy.value == 'excludes' &&
-						!item.privacy.excludes.some((id) => id.toString() == req.user._id.toString()) &&
+						!item.privacy.excludes.some((id) => id.toString() == req.user?._id.toString()) &&
 						isFriend
 					)
 						return true;
@@ -80,15 +80,15 @@ async function getUserWithPrivacy(req, res) {
 				// check privacy of field
 				const { privacy } = user[field];
 				if (privacy.value == 'public') {
-					if (privacy.excludes.some((id) => id.toString() == req.user._id.toString())) user[field] = null;
+					if (privacy.excludes.some((id) => id.toString() == req.user?._id.toString())) user[field] = null;
 				} else if (privacy.value == 'private') {
 					user[field] = null;
 				} else if (privacy.value == 'friends') {
 					if (!isFriend) user[field] = null;
 				} else if (privacy.value == 'includes') {
-					if (!privacy.includes.some((u) => u._id.toString() == req.user._id.toString())) user[field] = null;
+					if (!privacy.includes.some((u) => u._id.toString() == req.user?._id.toString())) user[field] = null;
 				} else if (privacy.value == 'excludes') {
-					if (privacy.exclues.some((u) => u._id.toString() == req.user._id.toString()) && !isFriend)
+					if (privacy.exclues.some((u) => u._id.toString() == req.user?._id.toString()) && !isFriend)
 						user[field] = null;
 				}
 			}

@@ -2,7 +2,7 @@ async function getAllPostWithPrivacy(listPosts, req) {
 	try {
 		const posts = [];
 		listPosts.forEach((post) => {
-			if (req.user && req.user._id.toString() === post.author._id.toString()) {
+			if (req.user && req.user?._id.toString() === post.author._id.toString()) {
 				posts.push(post);
 				return;
 			}
@@ -14,15 +14,15 @@ async function getAllPostWithPrivacy(listPosts, req) {
 					post = null;
 				} else if (post.privacy.value === 'friends') {
 					const isFriend = post.author.friends.some(
-						(friend) => friend.user.toString() === req.user._id.toString()
+						(friend) => friend.user.toString() === req.user?._id.toString()
 					);
 					if (isFriend) {
 						posts.push(post);
 					}
 				} else if (post.privacy.value === 'includes') {
 					if (
-						!post.privacy.includes.some((user) => user._id == req.user._id) &&
-						post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+						!post.privacy.includes.some((user) => user?._id == req.user?._id) &&
+						post.author.friends.some((friend) => friend.user.toString() === req.user?._id.toString())
 					) {
 						post = null;
 						return;
@@ -30,8 +30,8 @@ async function getAllPostWithPrivacy(listPosts, req) {
 					posts.push(post);
 				} else if (post.privacy.value === 'excludes') {
 					if (
-						!post.privacy.excludes.some((user) => user._id.toString() == req.user._id.toString()) &&
-						post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+						!post.privacy.excludes.some((user) => user?._id.toString() == req.user?._id.toString()) &&
+						post.author.friends.some((friend) => friend.user.toString() === req.user?._id.toString())
 					) {
 						posts.push(post);
 						return;
@@ -48,7 +48,7 @@ async function getAllPostWithPrivacy(listPosts, req) {
 
 async function getPostWithPrivacy(post, req) {
 	try {
-		if (req.user._id.toString() === post.author._id.toString()) {
+		if (req.user?._id.toString() === post.author._id.toString()) {
 			return post;
 		}
 
@@ -62,7 +62,7 @@ async function getPostWithPrivacy(post, req) {
 			}
 			if (post.privacy.value === 'friends') {
 				const isFriend = post.author.friends.some(
-					(friend) => friend.user.toString() === req.user._id.toString()
+					(friend) => friend.user.toString() === req.user?._id.toString()
 				);
 				if (!isFriend) {
 					post = null;
@@ -70,16 +70,16 @@ async function getPostWithPrivacy(post, req) {
 				}
 			} else if (post.privacy.value === 'includes') {
 				if (
-					!post.privacy.includes.some((user) => user._id.toString() == req.user._id.toString()) &&
-					post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+					!post.privacy.includes.some((user) => user?._id.toString() == req.user?._id.toString()) &&
+					post.author.friends.some((friend) => friend.user.toString() === req.user?._id.toString())
 				) {
 					post = null;
 					return post;
 				}
 			} else if (post.privacy.value === 'excludes') {
 				if (
-					!post.privacy.excludes.some((user) => user._id.toString() == req.user._id.toString()) &&
-					post.author.friends.some((friend) => friend.user.toString() === req.user._id.toString())
+					!post.privacy.excludes.some((user) => user?._id.toString() == req.user?._id.toString()) &&
+					post.author.friends.some((friend) => friend.user.toString() === req.user?._id.toString())
 				) {
 					return post;
 				}

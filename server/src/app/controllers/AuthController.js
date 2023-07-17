@@ -107,7 +107,7 @@ class AuthoController {
 		try {
 			const { user } = req;
 			const dataToken = {
-				userId: user._id,
+				userId: user?._id,
 			};
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
@@ -115,9 +115,9 @@ class AuthoController {
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 
 			// save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
-			const userSave = await User.findById(user._id);
+			// await redisClient.set(user?._id, refreshToken);
+			// await redisClient.expire(user?._id, 7 * 24 * 60 * 60);
+			const userSave = await User.findById(user?._id);
 			if (user.lockTime - Date.now() > 0 || user.isPermanentlyLocked === true) {
 				if (user.isPermanentlyLocked) return responseError(res, 401, 'Tài khoản của bạn đã bị khóa vĩnh viễn');
 				return responseError(
@@ -151,16 +151,16 @@ class AuthoController {
 		try {
 			const { user } = req;
 			const dataToken = {
-				userId: user._id,
+				userId: user?._id,
 			};
 			const accessToken = await authMethod.generateToken(dataToken, accessTokenSecret, accessTokenLife);
 
 			const refreshToken = await authMethod.generateToken(dataToken, refreshTokenSecret, refreshTokenLife);
 
 			// save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
-			const userSave = await User.findById(user._id);
+			// await redisClient.set(user?._id, refreshToken);
+			// await redisClient.expire(user?._id, 7 * 24 * 60 * 60);
+			const userSave = await User.findById(user?._id);
 
 			if (user.lockTime - Date.now() > 0) {
 				return responseError(
@@ -252,7 +252,7 @@ class AuthoController {
 			user.loginAttempts = 0;
 
 			const dataToken = {
-				userId: user._id,
+				userId: user?._id,
 				role: user.role.name,
 			};
 
@@ -266,8 +266,8 @@ class AuthoController {
 			await user.save();
 
 			// save refresh token to redis and set expire time
-			// await redisClient.set(user._id, refreshToken);
-			// await redisClient.expire(user._id, 7 * 24 * 60 * 60);
+			// await redisClient.set(user?._id, refreshToken);
+			// await redisClient.expire(user?._id, 7 * 24 * 60 * 60);
 
 			return res.status(200).json({
 				msg: 'Đăng nhập thành công.',
@@ -389,15 +389,15 @@ class AuthoController {
 				return responseError(res, 400, 'Email không tồn tại!!!');
 			}
 
-			let token = await Token.findOne({ userId: user._id });
+			let token = await Token.findOne({ userId: user?._id });
 			if (!token) {
 				token = await new Token({
-					userId: user._id,
+					userId: user?._id,
 					token: crypto.randomBytes(32).toString('hex'),
 				}).save();
 			}
 
-			const link = `${process.env.BASE_URL}?id=${user._id}&token=${token.token}`;
+			const link = `${process.env.BASE_URL}?id=${user?._id}&token=${token.token}`;
 			const status = await sendEmail(user.email, 'Password reset', link, user);
 			// check status
 			if (!status) {
@@ -426,7 +426,7 @@ class AuthoController {
 			}
 
 			const token = await Token.findOne({
-				userId: user._id,
+				userId: user?._id,
 				token: req.params.token,
 			});
 			if (!token) {
@@ -467,7 +467,7 @@ class AuthoController {
 				return responseError(res, 400, error.details[0].message);
 			}
 
-			const user = await User.findById(req.user._id);
+			const user = await User.findById(req.user?._id);
 			if (!user) {
 				return responseError(res, 400, 'Không tìm thấy người dùng');
 			}
@@ -515,14 +515,14 @@ class AuthoController {
 			});
 
 			// save otp to redis set time expire 5m
-			await redisClient.set(`comfirm:${req.user._id}`, otp, 'EX', 60 * 5);
+			await redisClient.set(`comfirm:${req.user?._id}`, otp, 'EX', 60 * 5);
 
 			// Gửi mã OTP đến email
 			const status = await sendMailOTP(req.user.email, 'OTP Comfirm Set Password', otp, req.user.fullname);
 			// check status
 			if (!status) {
 				// delete in redis
-				await redisClient.del(`comfirm:${req.user._id}`);
+				await redisClient.del(`comfirm:${req.user?._id}`);
 				return responseError(res, 400, 'Gửi email thất bại!!!');
 			}
 
@@ -594,7 +594,7 @@ class AuthoController {
 				return responseError(res, 400, error.details[0].message);
 			}
 
-			const user = await User.findById(req.user._id);
+			const user = await User.findById(req.user?._id);
 			if (!user) {
 				return responseError(res, 400, 'Không tìm thấy người dùng');
 			}
@@ -609,7 +609,7 @@ class AuthoController {
 			const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
 			// get opt from redis
-			const otp = await redisClient.get(`comfirm:${req.user._id}`);
+			const otp = await redisClient.get(`comfirm:${req.user?._id}`);
 			if (!otp) {
 				return responseError(res, 400, 'Mã OTP đã hết hạn');
 			}
@@ -623,7 +623,7 @@ class AuthoController {
 			// save new password
 			user.password = hashedPassword;
 			await user.save();
-			redisClient.del(`comfirm:${req.user._id}`); // delete otp
+			redisClient.del(`comfirm:${req.user?._id}`); // delete otp
 
 			return res.status(200).json('Đặt mật khẩu thành công!!!');
 		} catch (error) {
@@ -642,7 +642,7 @@ class AuthoController {
 
 	async logout(req, res, next) {
 		try {
-			const userId = req.user._id;
+			const userId = req.user?._id;
 			await redisClient.del(userId);
 			res.send('Đăng xuất thành công!!!');
 		} catch (err) {

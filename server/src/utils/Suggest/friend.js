@@ -29,7 +29,7 @@ const suggestFriend = async (req, res, next) => {
 	try {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
-		const userId = req.user._id;
+		const userId = req.user?._id;
 		const user = await User.findById(userId);
 		const listFriendsOfUser = user.friends.map((friend) => friend.user);
 		listFriendsOfUser.push(userId);
