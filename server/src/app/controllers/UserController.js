@@ -129,8 +129,8 @@ class UserController {
 					$set: {
 						...req.body,
 						gender: {
-							value: req.body.gender.value,
-							label: labelOfGender[req.body.gender.value],
+							value: req.body.gender?.value,
+							label: labelOfGender[req.body.gender?.value],
 						},
 					},
 				},
