@@ -1,6 +1,6 @@
 import { GithubIcon, GoogleIcon } from '@assets/icons';
-import { SERVER_URL } from '@utils/common';
-import { Avatar, Button, Card, Divider, Form, Input, Typography, theme } from 'antd';
+import { SERVER_URL } from '@common/config';
+import { Avatar, Button, Card, Divider, Form, Input, theme, Typography } from 'antd';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -23,9 +23,9 @@ export function LoginForm() {
 		try {
 			await login(values);
 
-			toast.success('Đăng nhập thành công!', { id: toastId });
+			await router.replace((query?.redirect as string) || '/home');
 
-			router.replace((query?.redirect as string) || '/home');
+			toast.success('Đăng nhập thành công!', { id: toastId });
 		} catch (error) {
 			toast.error(`Đăng nhập thất bại! Lỗi: ${error}`, { id: toastId });
 		}

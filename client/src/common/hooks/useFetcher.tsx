@@ -1,26 +1,26 @@
 import { swrFetcher } from '@common/api';
 import { IData, IPaginationParams, IPaginationResponse } from '@common/types';
-import { stringUtil } from '@utils/common';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import useSWRInfinite from 'swr/infinite';
+import { urlUtil } from '@common/utils';
+import useSWR, { KeyedMutator, useSWRConfig } from 'swr';
 
 // T: Data type,
-export type FetcherType<T extends IData> = {
+export type FetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
 	data: T[];
-	updateData: (id: string, newData: Partial<T>) => void;
-	addData: (newData: T) => void;
+	listRes?: U[];
+	updateData: (id: string, newData: T) => void;
+	addData: (newData: T, validate?: boolean) => void;
 	removeData: (id: string) => void;
 	fetching: boolean;
+	loadingMore: boolean;
 	validating: boolean;
 	hasMore: boolean;
 	params: IPaginationParams;
-	fetch: (params: any) => void;
 	loadMore: () => void;
-	filter: (filter: any) => void;
-	reload: () => void;
 	api: string;
+	mutate: KeyedMutator<U[]>;
 };
-
-import useSWRInfinite from 'swr/infinite';
 
 export interface FetcherProps {
 	api: string;
@@ -28,17 +28,21 @@ export interface FetcherProps {
 	params?: IPaginationParams;
 }
 
-export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {} }: FetcherProps): FetcherType<T> => {
+export const useFetcher = <T extends IData = any, U extends IPaginationResponse<T> = IPaginationResponse<T>>({
+	api,
+	limit = 20,
+	params = {},
+}: FetcherProps): FetcherType<T, U> => {
 	const getKey = useCallback(
-		(pageIndex: number, prevData: IPaginationResponse<T>) => {
-			if (pageIndex === 0) return stringUtil.generateUrl(api, { ...params, size: limit });
+		(pageIndex: number, prevData: U) => {
+			if (pageIndex === 0) return urlUtil.generateUrl(api, { ...params, size: limit });
 
 			const prevOffset = Number(prevData?.offset) || 0;
 			const prevItems = prevData?.items || [];
 			if (prevOffset + prevItems.length >= prevData.totalItems) return null; // No more data
 
 			const offset = prevOffset + prevItems.length;
-			return stringUtil.generateUrl(api, { ...params, offset, size: limit });
+			return urlUtil.generateUrl(api, { ...params, offset, size: limit });
 		},
 		[limit, api, params]
 	);
@@ -50,112 +54,151 @@ export const useFetcher = <T extends IData = any>({ api, limit = 20, params = {}
 		mutate,
 		size: page,
 		setSize: setPage,
-	} = useSWRInfinite<IPaginationResponse<T>>(getKey, swrFetcher);
+	} = useSWRInfinite<U>(getKey, swrFetcher);
+	const lastRes = listRes?.[listRes.length - 1];
+	const hasMore = !!lastRes && page < lastRes.totalPages;
 
-	const { data, hasMore } = useMemo(() => {
-		const memo = { data: [], hasMore: true };
+	const resData = listRes?.flatMap((res) => res.items) || [];
+	const [data, setData] = useState<T[]>(resData);
+	useEffect(() => {
+		if (!validating) {
+			const isSame =
+				data.length === resData.length &&
+				resData.every((item, index) => JSON.stringify(item) === JSON.stringify(data[index]));
+			if (!isSame) setData(resData);
+		}
+	}, [validating]);
 
-		if (!listRes?.length) return memo;
+	const addData = (newData: T) => setData((prevData) => [newData, ...prevData]);
 
-		const lastPage = listRes[listRes.length - 1];
-		const data = listRes.reduce<T[]>((acc, res) => [...acc, ...res.items], []);
-		const hasMore = lastPage.totalItems > data.length;
+	const updateData = (id: string, newData: T) =>
+		setData((prevData) => prevData.map((item) => (item._id === id ? newData : item)));
 
-		return { data, hasMore };
-	}, [listRes]);
+	const removeData = (id: string) => setData((prevData) => prevData.filter((item) => item._id !== id));
 
-	const addData = (newData: T) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = [newData, ...data];
+	const [loadingMore, setLoadingMore] = useState(false);
+	const loadMore = () => {
+		if (loadingMore || !hasMore) return;
 
-		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems + 1,
-				};
-			});
-			return newPages;
-		});
+		setLoadingMore(true);
+		setPage(page + 1).finally(() => setLoadingMore(false));
 	};
 
-	const updateData = (id: string, newData: Partial<T>) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.map((item) => (item._id === id ? { ...item, ...newData } : item));
+	return {
+		data,
+		listRes,
+		params,
+		fetching,
+		loadingMore,
+		validating,
+		hasMore,
+		loadMore,
+		addData,
+		updateData,
+		removeData,
+		api,
+		mutate,
+	};
+};
 
-		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-				};
+export type SWRFetcherType<T extends IData, U extends IPaginationResponse<T> = IPaginationResponse<T>> = {
+	data: T[];
+	res?: U;
+	updateData: (id: string, newData: T) => Promise<void>;
+	addData: (newData: T, validate?: boolean) => Promise<void>;
+	removeData: (id: string) => Promise<void>;
+	fetching: boolean;
+	loadingMore: boolean;
+	validating: boolean;
+	hasMore: boolean;
+	params: IPaginationParams;
+	loadMore: () => void;
+	api: string;
+	mutate: KeyedMutator<U>;
+};
+
+export const useSWRFetcher = <T extends IData = any, U extends IPaginationResponse<T> = IPaginationResponse<T>>({
+	api,
+	limit = 20,
+	params: initParams = {},
+}: FetcherProps): SWRFetcherType<T, U> => {
+	const [data, setData] = useState<T[]>([]);
+	const [hasMore, setHasMore] = useState(true);
+	const [params, setParams] = useState<IPaginationParams>(initParams);
+	const { page = 0, size = limit, offset = page * size } = params;
+
+	const { mutate: globalMutate } = useSWRConfig();
+	const swrKey = urlUtil.generateUrl(api, { ...params, offset, size });
+	const { data: res, isValidating, isLoading, mutate } = useSWR<U>(swrKey, swrFetcher);
+	useEffect(() => {
+		if (res) {
+			const { items, totalItems, offset } = res;
+			setData((prevData) => {
+				const newData = [...prevData];
+				newData.splice(offset, items.length, ...items);
+				return [...newData];
 			});
-			return newPages;
+			setHasMore(offset + items.length < totalItems);
+		}
+	}, [res]);
+
+	const addData = async (newData: T) => {
+		setData((prevData) => {
+			const newDataList = [newData, ...prevData];
+			newDataList.pop(); // Remove last item
+			return newDataList;
 		});
+
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: 0, size: limit });
+		await globalMutate(swrKey);
 	};
 
-	const removeData = (id: string) => {
-		// Make a shallow copy of the existing data array and add the new data to the beginning
-		const newItems = data.filter((item) => item._id !== id);
+	const updateData = async (id: string, newData: T) => {
+		const index = data.findIndex((item) => item._id === id);
+		if (index === -1) return;
 
-		// Update the cache with the new data
-		mutate((prevData) => {
-			const newPages = prevData?.map((page, index) => {
-				const startIndex = index * limit,
-					endIndex = (index + 1) * limit;
-				return {
-					...page,
-					items: newItems.slice(startIndex, endIndex),
-					totalItems: page.totalItems - 1,
-				};
-			});
-			return newPages;
-		});
+		const newDataList = [...data];
+		newDataList[index] = newData;
+		setData(newDataList);
+
+		const page = Math.floor(index / limit);
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: page, size: limit });
+		await globalMutate(swrKey);
 	};
 
-	const fetch = (params: object) => {
-		console.log({ params });
+	const removeData = async (id: string) => {
+		const index = data.findIndex((item) => item._id === id);
+		if (index === -1) return;
+
+		const newDataList = [...data];
+		newDataList.splice(index, 1);
+		setData(newDataList);
+
+		const page = Math.floor(index / limit);
+		const swrKey = urlUtil.generateUrl(api, { ...params, offset: page, size: limit });
+		await globalMutate(swrKey);
 	};
 
 	const loadMore = () => {
-		console.log('loadMore');
+		if (isLoading || !hasMore) return;
 
-		setPage(page + 1);
+		const newParams = { ...params, page: page + 1 };
+		setParams(newParams);
 	};
 
-	const reload = () => {
-		mutate();
+	return {
+		data,
+		res,
+		params,
+		fetching: isLoading && data.length === 0,
+		loadingMore: isLoading,
+		validating: isValidating,
+		hasMore,
+		loadMore,
+		addData,
+		updateData,
+		removeData,
+		api,
+		mutate,
 	};
-
-	const filter = (filter: object) => {
-		console.log({ filter });
-	};
-
-	const fetcher = useMemo(
-		() => ({
-			data,
-			params,
-			fetching,
-			validating,
-			hasMore,
-			fetch,
-			loadMore,
-			filter,
-			reload,
-			addData,
-			updateData,
-			removeData,
-			api,
-		}),
-		[data, fetching, hasMore, fetch, loadMore, filter, reload, addData, updateData, removeData, api]
-	);
-
-	return fetcher;
 };

@@ -1,51 +1,36 @@
-import { urlUtil } from '@common/utils';
-import { PostType } from '@common/types';
-import { getPostApi } from '@modules/post/api';
+// import { getPostApi } from '@modules/post/api';
+// import { GetServerSideProps } from 'next';
+// import { ApiError } from '@common/api';
+// import { PostType } from '@modules/post/types';
 import PostPage from '@modules/post/pages/PostPage';
-import axios from 'axios';
-import { GetServerSideProps } from 'next';
-import Head from 'next/head';
 
-interface Props {
-	post?: PostType;
-}
+// interface Props {
+// 	post?: PostType;
+// 	id?: string;
+// 	error?: object;
+// }
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
-	try {
-		const id = params?.id as string;
+// export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
+// 	const id = params?.id as string;
+// 	const props: Props = { id };
+// 	try {
+// 		props.post = await getPostApi(id, true);
+// 	} catch (e: any) {
+// 		if (ApiError.isApiError(e)) props.error = e.toObject();
+// 		else props.error = ApiError.fromError(e).toObject();
+// 	}
+//
+// 	return { props };
+// };
 
-		const post = await getPostApi(id, true);
+// export default function Post({ post, id, error }: Props) {
+// 	return (
+// 		<>
+// 			<PostSEO id={id} post={post} error={error && ApiError.fromObject(error)} />
+//
+// 			<PostPage post={post} />
+// 		</>
+// 	);
+// }
 
-		return { props: { post } };
-	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			if (error.response?.status === 404) {
-				return { notFound: true };
-			}
-		}
-
-		return { props: {} };
-	}
-};
-
-export default function Post({ post }: Props) {
-	const link = urlUtil.getFullUrl(`/post/${post?._id}`);
-
-	return (
-		<>
-			<Head>
-				<meta name="description" content={post?.content} />
-				<link rel="canonical" href={`/post/${post?._id}`} />
-
-				{/* Social media meta tags */}
-				<meta property="og:type" content="website" />
-				<meta property="og:title" content="TaNa - Kết nối và sáng tạo" />
-				<meta property="og:description" content={post?.content} />
-				<meta property="og:url" content={link} />
-				<meta property="og:image" content={post?.media[0]?.link} />
-			</Head>
-
-			<PostPage post={post} />
-		</>
-	);
-}
+export default PostPage;

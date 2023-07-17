@@ -2,7 +2,7 @@ import { FetcherType } from '@common/hooks';
 import { ListComment } from '@modules/comment/components';
 import { Collapse } from '@mui/material';
 import { Card, List } from 'antd';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PostType } from '../types';
 import { PostCard } from './PostCard';

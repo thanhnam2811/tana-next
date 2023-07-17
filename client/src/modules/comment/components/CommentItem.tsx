@@ -1,22 +1,28 @@
-import { reactOptions } from '@assets/data';
 import { UserAvatar } from '@modules/user/components';
-import { ReactPopover } from '@components/v2/Popover';
-import { PostType, ReactionType } from '@common/types';
+import { ReactPopover } from 'src/common/components/Popover';
+import { ReactionTypeValue } from '@common/types';
 import { Collapse } from '@mui/material';
 import { useAuth } from '@modules/auth/hooks';
-import { getTimeAgo } from '@utils/common';
 import { Avatar, Button, List } from 'antd';
 import { useState } from 'react';
-import { HiOutlineChatBubbleLeft, HiOutlineHandThumbUp, HiOutlineTrash } from 'react-icons/hi2';
+import {
+	HiOutlineChatBubbleLeft,
+	HiOutlineExclamationTriangle,
+	HiOutlineHandThumbUp,
+	HiOutlineTrash,
+} from 'react-icons/hi2';
 import { CommentType } from '../types';
 import { ListComment } from './ListComment';
+import { dateUtil } from '@common/utils';
+import { useReport } from '@modules/report/hooks';
+import { PostType } from '@modules/post/types';
 
 interface Props {
 	post: PostType;
 	comment: CommentType;
 	onEdit?: (id: string) => void;
 	onDelete?: (id: string) => void;
-	onReact?: (id: string, reaction: ReactionType) => void;
+	onReact?: (id: string, reaction: ReactionTypeValue) => Promise<void> | void;
 	isReply?: boolean;
 }
 
@@ -28,20 +34,24 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 	const [showReply, setShowReply] = useState(false);
 	const toggleReply = () => setShowReply(!showReply);
 
-	const reaction = reactOptions.find((react) => react.value === comment!.reactOfUser);
-	const handleReact = (react: ReactionType) => onReact?.(comment!._id, react);
+	const handleReact = (react: ReactionTypeValue) => onReact?.(comment!._id, react);
 
 	let actions = [
-		<ReactPopover key="reaction" reaction={reaction?.value} onReact={handleReact}>
-			<Button
-				icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
-				size="small"
-				type="text"
-				style={{ color: reaction?.color }}
-			>
-				{comment.numberReact}
-			</Button>
-		</ReactPopover>,
+		<ReactPopover
+			key="reaction"
+			reaction={comment!.reactOfUser}
+			onReact={handleReact}
+			renderChildren={({ reaction, loading }) => (
+				<Button
+					icon={reaction ? <Avatar src={reaction?.img} /> : <HiOutlineHandThumbUp />}
+					size="small"
+					type="text"
+					loading={loading}
+				>
+					{comment.numberReact}
+				</Button>
+			)}
+		/>,
 	];
 
 	if (!isReply) {
@@ -52,6 +62,20 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			</Button>,
 		];
 	}
+
+	const { openReport } = useReport({ type: 'comment', id: comment._id });
+	if (!isAuthor)
+		actions = [
+			...actions,
+			<Button
+				key="report"
+				size="small"
+				type="text"
+				danger
+				icon={<HiOutlineExclamationTriangle />}
+				onClick={openReport}
+			/>,
+		];
 
 	if (isAuthor || isPostAuthor) {
 		actions = [
@@ -72,7 +96,7 @@ export function CommentItem({ post, comment, onDelete, onReact, isReply = false 
 			<List.Item
 				style={{ borderBottom: '1px solid #e8e8e8' }}
 				actions={actions}
-				extra={<span className="time-ago">{getTimeAgo(comment.createdAt)}</span>}
+				extra={<span className="time-ago">{dateUtil.getTimeAgo(comment.createdAt)}</span>}
 			>
 				<List.Item.Meta
 					avatar={<UserAvatar user={comment.author} size={48} />}

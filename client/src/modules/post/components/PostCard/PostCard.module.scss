@@ -31,16 +31,37 @@
 			float: right;
 		}
 	}
+
+	.statistics {
+		padding: 0 16px;
+	}
 }
 
 .post_media {
 	margin-top: 16px;
+
+	.post_media_card {
+		position: relative;
+
+		textarea {
+			width: 100%;
+			margin: 0;
+		}
+
+		.post_media_item_delete {
+			position: absolute;
+			top: 0;
+			right: 0;
+			z-index: 2;
+		}
+	}
 
 	.post_media_item {
 		position: relative;
 		margin: auto;
 
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 
@@ -60,12 +81,11 @@
 				object-fit: cover;
 			}
 		}
-
-		.post_media_item_delete {
-			position: absolute;
-			top: 0;
-			right: 0;
-			z-index: 2;
+		video {
+			width: 100%;
+			height: 100%;
+			aspect-ratio: 1/1;
+			object-fit: contain;
 		}
 
 		.more_overlay {

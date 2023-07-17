@@ -1,15 +1,3 @@
-import { withAuth } from '@modules/auth/components';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import MessagePage from '@modules/messages/pages/MessagePage';
 
-function Messages() {
-	const router = useRouter();
-
-	useEffect(() => {
-		router.push('/messages/all');
-	}, []);
-
-	return null;
-}
-
-export default withAuth(Messages);
+export default MessagePage;

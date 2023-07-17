@@ -1,10 +1,11 @@
-import { userApi } from '@utils/api';
 import { create } from 'zustand';
-import { loginTokenApi, loginApi } from '../api';
+import { loginApi, loginTokenApi, updateProfileApi } from '../api';
 import { IUseAuth } from '../types';
 
 export const useAuth = create<IUseAuth>()((set, get) => ({
 	authUser: null,
+
+	setAuthUser: (user) => set({ authUser: user }),
 
 	login: async (data) => {
 		// Login by token
@@ -41,21 +42,23 @@ export const useAuth = create<IUseAuth>()((set, get) => ({
 
 	updateAuthUser: async (data, optimisticData) => {
 		// Save rollback data
-		const prev = get().authUser!;
+		const prev = get().authUser;
 
-		// Get optimistic data if not provided
-		optimisticData ??= {
-			...data,
-			profilePicture: prev.profilePicture, // Keep old profile picture
-			coverPicture: prev.coverPicture, // Keep old cover picture
-		};
+		if (prev) {
+			// Get optimistic data if not provided
+			optimisticData ??= {
+				...data,
+				profilePicture: prev.profilePicture, // Keep old profile picture
+				coverPicture: prev.coverPicture, // Keep old cover picture
+			};
 
-		// Optimistic update
-		set({ authUser: { ...prev, ...optimisticData } });
+			// Optimistic update
+			set({ authUser: { ...prev, ...optimisticData } });
+		}
 
 		try {
 			// Update to server
-			const { data: user } = await userApi.update(data);
+			const user = await updateProfileApi(data);
 			set({ authUser: user });
 		} catch (error) {
 			// Rollback if error

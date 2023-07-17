@@ -7,7 +7,9 @@ import { IDashboardData } from '../types';
 import { swrFetcher } from '@common/api';
 
 export default function DashboardPage() {
-	const { data, isLoading } = useSWR<IDashboardData>('/admin/dashboard', swrFetcher);
+	const { data, isLoading } = useSWR<IDashboardData>('/admin/dashboard', swrFetcher, {
+		keepPreviousData: true,
+	});
 
 	const dashboardCard: StatisticProps[] = [
 		{

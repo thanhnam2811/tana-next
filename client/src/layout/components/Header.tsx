@@ -1,5 +1,5 @@
 import classnames from 'classnames';
-import { DetailedHTMLProps, HTMLAttributes, forwardRef } from 'react';
+import React, { DetailedHTMLProps, forwardRef, HTMLAttributes } from 'react';
 import styles from '../styles/Layout.module.scss';
 
 import { theme } from 'antd';

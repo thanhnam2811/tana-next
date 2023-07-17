@@ -1,5 +1,5 @@
 import { apiClient } from '@common/api';
-import { UserType } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 export interface ILoginParams {
 	email: string;

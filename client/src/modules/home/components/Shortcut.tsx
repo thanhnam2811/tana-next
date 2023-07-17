@@ -14,6 +14,7 @@ import {
 	FcSportsMode,
 } from 'react-icons/fc';
 import { IconType } from 'react-icons/lib';
+import { useReport } from '@modules/report/hooks';
 
 interface Action {
 	title: string;
@@ -37,6 +38,7 @@ export function ShortCut() {
 		},
 	];
 
+	const { openReport } = useReport({ type: 'bug' });
 	const listShortCutAction: Action[] = [
 		{
 			title: 'Cài đặt',
@@ -49,9 +51,9 @@ export function ShortCut() {
 			href: '/help',
 		},
 		{
-			title: 'Báo cáo sự cố',
+			title: 'Báo lỗi',
 			icon: FcFeedback,
-			href: '/report',
+			onClick: openReport,
 		},
 		{
 			title: 'Giới thiệu',
@@ -112,7 +114,22 @@ export function ShortCut() {
 					dataSource={list.data}
 					renderItem={(item) => (
 						<List.Item style={{ padding: '4px 0' }}>
-							<Link href={item.href ?? '#'} draggable style={{ width: '100%' }}>
+							{item.href ? (
+								<Link href={item.href} draggable style={{ width: '100%' }}>
+									<Button
+										type="text"
+										block
+										style={{ height: 'auto', padding: '8px' }}
+										onClick={item.onClick}
+									>
+										<Space align="center" style={{ width: '100%' }}>
+											<item.icon size={20} />
+
+											<Typography.Text strong>{item.title}</Typography.Text>
+										</Space>
+									</Button>
+								</Link>
+							) : (
 								<Button
 									type="text"
 									block
@@ -125,7 +142,7 @@ export function ShortCut() {
 										<Typography.Text strong>{item.title}</Typography.Text>
 									</Space>
 								</Button>
-							</Link>
+							)}
 						</List.Item>
 					)}
 				/>
