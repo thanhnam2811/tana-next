@@ -1163,7 +1163,7 @@ class PostController {
 		const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 		// get posts of a user by query id and sort by date
 		try {
-			const listFriendId = req.user.friends.map((friend) => friend.user._id);
+			const listFriendId = req.user.friends.map((friend) => friend.user?._id);
 			listFriendId.push(req.user._id);
 
 			const listPost = await Post.find({ author: { $in: listFriendId } })

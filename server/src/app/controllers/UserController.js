@@ -635,7 +635,7 @@ class UserController {
 				} else {
 					listFriendsOfUser = req.user.friends.sort((a, b) => a.date - b.date);
 				}
-				listFriendsOfUser = req.user.friends.map((f) => f.user._id);
+				listFriendsOfUser = req.user.friends.map((f) => f.user?._id);
 				// query = [
 				//     { _id: { $in: listFriendsOfUser }, $sort: { "friends.date": sort } },
 				// ];
