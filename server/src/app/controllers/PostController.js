@@ -1236,11 +1236,14 @@ class PostController {
 					friendScores[friend.user?._id.toString()] = friend.interactionScore;
 				});
 
+				// sort post by date desc
+				listPosts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
 				const sortedPosts = listPosts.sort((a, b) => {
 					const interactionScoreA = friendScores[a.author._id.toString()];
 					const interactionScoreB = friendScores[b.author._id.toString()];
 
-					if (interactionScoreA === interactionScoreB) {
+					if (interactionScoreA == interactionScoreB) {
 						// Sắp xếp theo updatedAt nếu interactionScore bằng nhau
 						return b.updatedAt - a.updatedAt;
 					}
