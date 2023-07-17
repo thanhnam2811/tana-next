@@ -23,9 +23,7 @@
 		"paths": {
 			"@assets/*": ["src/assets/*"],
 			"@common/*": ["src/common/*"],
-			"@components/*": ["src/components/*"],
 			"@modules/*": ["src/modules/*"],
-			"@theme/*": ["src/theme/*"],
 			"@layout/*": ["src/layout/*"]
 		}
 	},

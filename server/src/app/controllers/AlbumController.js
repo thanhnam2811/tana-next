@@ -26,7 +26,7 @@ class AlbumController {
 			const { name, privacy } = req.body;
 			const album = await Album.create({
 				name,
-				author: req.user._id,
+				author: req.user?._id,
 				privacy,
 			});
 
@@ -59,7 +59,7 @@ class AlbumController {
 			if (!album) {
 				return next(createError.NotFound('Không tìm thấy album'));
 			}
-			if (album.author.toString() !== req.user._id.toString()) {
+			if (album.author.toString() !== req.user?._id.toString()) {
 				return next(createError.Forbidden('Bạn không có quyền thêm media vào album này'));
 			}
 
@@ -106,7 +106,7 @@ class AlbumController {
 				return next(createError.NotFound('Không tìm thấy album'));
 			}
 
-			if (album.author.toString() !== req.user._id.toString()) {
+			if (album.author.toString() !== req.user?._id.toString()) {
 				return next(createError.Forbidden('Bạn không có quyền xóa media của album này'));
 			}
 
@@ -146,7 +146,7 @@ class AlbumController {
 				return next(createError.NotFound('Không tìm thấy album'));
 			}
 
-			if (album.author.toString() !== req.user._id.toString()) {
+			if (album.author.toString() !== req.user?._id.toString()) {
 				return next(createError.Forbidden('Bạn không có quyền sửa media của album này'));
 			}
 
@@ -231,7 +231,7 @@ class AlbumController {
 							albums.map(async (album) => {
 								const albumObject = album.toObject();
 								albumObject.reactOfUser = 'none';
-								const react = await React.findOne({ album: album._id, user: req.user._id });
+								const react = await React.findOne({ album: album._id, user: req.user?._id });
 								if (react) {
 									albumObject.reactOfUser = react.type;
 								}
@@ -381,7 +381,7 @@ class AlbumController {
 				return next(createError(404, 'Album not found'));
 			}
 
-			if (album.author.toString() !== req.user._id.toString())
+			if (album.author.toString() !== req.user?._id.toString())
 				return next(createError(403, 'Bạn không có quyền xóa album nàyy'));
 
 			await album.delete();
@@ -411,7 +411,7 @@ class AlbumController {
 				return next(createError(404, 'Album not found'));
 			}
 
-			if (album.author.toString() !== req.user._id.toString())
+			if (album.author.toString() !== req.user?._id.toString())
 				return next(createError(403, 'Bạn không có quyền chỉnh sửa album này'));
 
 			const albumUpdated = await Album.findByIdAndUpdate(

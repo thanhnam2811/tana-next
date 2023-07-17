@@ -111,7 +111,7 @@ class PostController {
 							posts.map(async (post) => {
 								const postObject = post.toObject();
 								postObject.reactOfUser = 'none';
-								const react = await React.findOne({ post: post._id, user: req.user._id });
+								const react = await React.findOne({ post: post._id, user: req.user?._id });
 								if (react) {
 									postObject.reactOfUser = react.type;
 								}
@@ -192,7 +192,7 @@ class PostController {
 				...req.body,
 				media: files,
 			});
-			newPost.author = req.user._id;
+			newPost.author = req.user?._id;
 			const savedPost = await newPost.save();
 
 			// update description of file
@@ -293,7 +293,7 @@ class PostController {
 				return next(createError.BadRequest(error.details[0].message));
 			}
 			const post = await Post.findById(req.params.id);
-			if (post.author.toString() === req.user._id.toString()) {
+			if (post.author.toString() === req.user?._id.toString()) {
 				// update description of file
 				if (req.body.media) {
 					await Promise.all(
@@ -377,7 +377,7 @@ class PostController {
 	async deletePost(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
-			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
+			if (post.author.toString() === req.user?._id.toString() || req.user.role.name === 'ADMIN') {
 				await post.delete();
 				// delete all comments of this post
 				await Comment.deleteMany({ post: req.params.id });
@@ -410,7 +410,7 @@ class PostController {
 	async delete(req, res, next) {
 		try {
 			const post = await Post.findById(req.params.id);
-			if (post.author.toString() === req.user._id.toString() || req.user.role.name === 'ADMIN') {
+			if (post.author.toString() === req.user?._id.toString() || req.user.role.name === 'ADMIN') {
 				await post.delete();
 				// delete all comments of this post
 				await Comment.deleteMany({ post: req.params.id });
@@ -452,7 +452,7 @@ class PostController {
 				return next(createError.NotFound('Không tìm thấy người dùng'));
 			}
 			Post.paginate(
-				{ author: user._id },
+				{ author: user?._id },
 				{
 					sort: { createdAt: -1 },
 					populate: [
@@ -531,7 +531,7 @@ class PostController {
 							posts.map(async (post) => {
 								const postObject = post.toObject();
 								postObject.reactOfUser = 'none';
-								const react = await React.findOne({ post: post._id, user: req.user._id });
+								const react = await React.findOne({ post: post._id, user: req.user?._id });
 								if (react) {
 									postObject.reactOfUser = react.type;
 								}
@@ -619,7 +619,7 @@ class PostController {
 
 			// check if the user has reacted this post before
 			const listReactOfPost = await React.find({ post: req.params.id });
-			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user._id.toString());
+			const userReacted = listReactOfPost.find((react) => react.user.toString() === req.user?._id.toString());
 			if (userReacted && userReacted.type.toString() === req.body.type.toString()) {
 				// if user has reacted, remove the reaction
 				await React.findByIdAndDelete(userReacted._id);
@@ -735,7 +735,7 @@ class PostController {
 				// if user has not reacted, add a new reaction
 				const newReact = new React({
 					post: req.params.id,
-					user: req.user._id,
+					user: req.user?._id,
 					type: req.body.type,
 				});
 				await newReact.save();
@@ -744,12 +744,12 @@ class PostController {
 				await Post.findByIdAndUpdate(req.params.id, { $inc: { numberReact: 1 } });
 
 				// create a notification for the author of the post
-				if (post.author._id.toString() !== req.user._id.toString()) {
+				if (post.author._id.toString() !== req.user?._id.toString()) {
 					await notificationForReactPost(post, req.user);
 
-					const user = await User.findById(req.user._id);
+					const user = await User.findById(req.user?._id);
 					user.friends.forEach((friend, index, arr) => {
-						if (friend.user._id.toString() === post.author._id.toString()) {
+						if (friend.user?._id.toString() === post.author._id.toString()) {
 							arr[index].interactionScore += 1;
 						}
 					});
@@ -840,13 +840,13 @@ class PostController {
 			const newPost = new Post({
 				content: req.body.content,
 				sharedPost: req.params.id,
-				author: req.user._id,
+				author: req.user?._id,
 			});
 			const savedPost = await newPost.save();
 			// update the number of shares of the post
 			await Post.findByIdAndUpdate(req.params.id, { $inc: { numberShare: 1 } });
 			// create a notification for the author of the post
-			if (post.author.toString() !== req.user._id.toString()) {
+			if (post.author.toString() !== req.user?._id.toString()) {
 				await notificationForSharedPost(savedPost, req.user);
 			}
 
@@ -963,7 +963,7 @@ class PostController {
 					select: '_id link description',
 				});
 
-			if (req.user && req.user.role.name !== 'ADMIN' && req.user._id.toString() !== post.author._id.toString()) {
+			if (req.user && req.user.role.name !== 'ADMIN' && req.user?._id.toString() !== post.author._id.toString()) {
 				post = await Post.findById(req.params.id)
 					.populate({
 						path: 'lastestFiveComments',
@@ -1025,7 +1025,7 @@ class PostController {
 				}
 
 				// get type of reaction of the user to the post
-				const react = await React.findOne({ post: req.params.id, user: req.user._id });
+				const react = await React.findOne({ post: req.params.id, user: req.user?._id });
 				if (react) {
 					reactOfUser = react.type;
 				}
@@ -1061,7 +1061,7 @@ class PostController {
 		// get posts of a user by query id and sort by date
 		try {
 			Post.paginate(
-				{ author: req.user._id },
+				{ author: req.user?._id },
 				{
 					offset,
 					limit,
@@ -1125,7 +1125,7 @@ class PostController {
 						posts.map(async (post) => {
 							const postObject = post.toObject();
 							postObject.reactOfUser = 'none';
-							const react = await React.findOne({ post: post._id, user: req.user._id });
+							const react = await React.findOne({ post: post._id, user: req.user?._id });
 							if (react) {
 								postObject.reactOfUser = react.type;
 							}
@@ -1164,7 +1164,7 @@ class PostController {
 		// get posts of a user by query id and sort by date
 		try {
 			const listFriendId = req.user.friends.map((friend) => friend.user?._id);
-			listFriendId.push(req.user._id);
+			listFriendId.push(req.user?._id);
 
 			const listPost = await Post.find({ author: { $in: listFriendId } })
 				.sort({ updatedAt: -1 })
@@ -1224,7 +1224,7 @@ class PostController {
 				listPost.map(async (post) => {
 					const postObject = post.toObject();
 					postObject.reactOfUser = 'none';
-					const react = await React.findOne({ post: post._id, user: req.user._id });
+					const react = await React.findOne({ post: post._id, user: req.user?._id });
 					if (react) {
 						postObject.reactOfUser = react.type;
 					}

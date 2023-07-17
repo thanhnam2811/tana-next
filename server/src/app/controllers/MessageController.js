@@ -35,7 +35,7 @@ class MessageController {
 			}
 
 			const conversation = await Conversation.findById(req.params.conversationId);
-			if (conversation.members.some((mem) => mem.user.toString() === req.user._id.toString())) {
+			if (conversation.members.some((mem) => mem.user.toString() === req.user?._id.toString())) {
 				// random 16 digit initialization vector
 				const iv = crypto.randomBytes(16);
 
@@ -51,7 +51,7 @@ class MessageController {
 				newMessage.iv = base64data;
 				newMessage.text = encryptedData;
 				newMessage.conversation = conversation._id;
-				newMessage.sender = req.user._id;
+				newMessage.sender = req.user?._id;
 				const savedMessage = await newMessage.save();
 				// populate sender
 				const message = await Message.findById(savedMessage._id)
@@ -100,7 +100,7 @@ class MessageController {
 	async update(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
-			if (!message.reader.includes(req.user._id)) message.reader.push(req.user._id);
+			if (!message.reader.includes(req.user?._id)) message.reader.push(req.user?._id);
 			await message.save();
 			res.status(200).json(message);
 		} catch (err) {
@@ -121,7 +121,7 @@ class MessageController {
 	async delete(req, res, next) {
 		try {
 			const message = await Message.findById(req.params.id);
-			if (message.sender.toString() === req.user._id.toString()) {
+			if (message.sender.toString() === req.user?._id.toString()) {
 				// await Message.delete({ _id: req.params.id });
 				await message.delete();
 				res.status(200).json(message);
@@ -163,12 +163,12 @@ class MessageController {
 
 			// check user has existing user deleted conversation
 			let index = -1;
-			index = conversation.user_deleted.findIndex((item) => item.userId.toString() === req.user._id.toString());
+			index = conversation.user_deleted.findIndex((item) => item.userId.toString() === req.user?._id.toString());
 			let deletedDate = new Date(-1); // date BC
 			if (index !== -1) {
 				deletedDate = conversation.user_deleted[index].deletedAt;
 			}
-			if (conversation.members.some((mem) => mem.user.toString() === req.user._id.toString())) {
+			if (conversation.members.some((mem) => mem.user.toString() === req.user?._id.toString())) {
 				Message.paginate(
 					{ conversation: req.params.conversationId, createdAt: { $gte: deletedDate } },
 					{

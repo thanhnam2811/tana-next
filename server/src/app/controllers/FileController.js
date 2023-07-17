@@ -31,7 +31,7 @@ class FileController {
 						link: newPath.url,
 						size: file.size, // bytes
 						public_id: newPath.id,
-						creator: req.user._id,
+						creator: req.user?._id,
 					});
 					if (req.body.conversation) {
 						newFile.conversation = req.body.conversation;
@@ -77,7 +77,7 @@ class FileController {
 				link: newPath.url,
 				size: req.file.size, // bytes
 				public_id: newPath.id,
-				creator: req.user._id,
+				creator: req.user?._id,
 				...req.body,
 			});
 			await newFile.save();
@@ -123,7 +123,7 @@ class FileController {
 				return responseError(res, 404, 'Không tìm thấy file');
 			}
 
-			if (file.creator.toString() === req.user._id.toString()) {
+			if (file.creator.toString() === req.user?._id.toString()) {
 				// decrese size of album 1
 				if (file.album) {
 					const album = await Album.findById(file.album);
@@ -182,7 +182,7 @@ class FileController {
 	async updateFile(req, res, next) {
 		try {
 			const file = await File.findById(req.params.id);
-			if (file.creator.toString() !== req.user._id.toString())
+			if (file.creator.toString() !== req.user?._id.toString())
 				return responseError(res, 403, 'Bạn không có quyền chỉnh sửa file này');
 
 			// validate request body

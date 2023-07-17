@@ -16,7 +16,7 @@ const { responseError } = require('../../utils/Response/error');
 
 function querySearchAllUsers(req) {
 	try {
-		const query = [{ $match: { _id: { $ne: req.user._id } } }];
+		const query = [{ $match: { _id: { $ne: req.user?._id } } }];
 
 		if (req.query.age) {
 			// convert age to date
@@ -35,7 +35,7 @@ function querySearchAllUsers(req) {
 
 async function querySearchSuggestFriends(req, next) {
 	try {
-		const listFriendsOfUser = req.user.friends.map((friend) => friend.user?._id);
+		const listFriendsOfUser = req.user.friends.map((friend) => friend.user?._id).filter(Boolean);
 		const friendsOfUser = await User.find({ _id: { $in: listFriendsOfUser } });
 		const friendsOfFriends = friendsOfUser.flatMap((friend) => friend.friends.map((f) => f.user?._id));
 		const uniqueFriendsOfFriends = [...new Set(friendsOfFriends)];
@@ -43,12 +43,12 @@ async function querySearchSuggestFriends(req, next) {
 		// remove user current, user's friends, user's friendsRequest, user's sentRequests
 		const listRequestsOfUser = req.user.friendRequests.map((f) => f.user?._id);
 
-		// const listSentRequestsOfUser = req.user.sentRequests.map(friend => friend.user._id);
+		// const listSentRequestsOfUser = req.user.sentRequests.map(friend => friend.user?._id);
 		const listSentRequestsOfUser = req.user.sentRequests.map((f) => f.user?._id);
 
 		const friendsOfFriendsFilter = uniqueFriendsOfFriends.filter(
 			(friendId) =>
-				friendId.toString() !== req.user._id.toString() &&
+				friendId.toString() !== req.user?._id.toString() &&
 				!listRequestsOfUser.some((requestID) => requestID && requestID.toString() === friendId.toString()) &&
 				!listFriendsOfUser.some((friendID) => friendID && friendID.toString() === friendId.toString()) &&
 				!listSentRequestsOfUser.some(
@@ -88,7 +88,7 @@ async function querySearchSuggestFriends(req, next) {
 				},
 			},
 			{
-				$match: { _id: { $ne: req.user._id } },
+				$match: { _id: { $ne: req.user?._id } },
 			},
 		];
 
@@ -124,7 +124,7 @@ class UserController {
 			if (error) return res.status(400).send(error.details[0].message);
 
 			const user = await User.findByIdAndUpdate(
-				req.user._id,
+				req.user?._id,
 				{
 					$set: {
 						...req.body,
@@ -159,7 +159,7 @@ class UserController {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 
-			const userId = req.user._id;
+			const userId = req.user?._id;
 			const user = await User.findById(userId);
 			const listFriendsOfUser = user.friends.map((friend) => friend.user);
 			listFriendsOfUser.push(userId);
@@ -229,7 +229,7 @@ class UserController {
 	// [PUT] set password
 	async setPassword(req, res, next) {
 		try {
-			if (req.params.id.toString() === req.user._id.toString()) {
+			if (req.params.id.toString() === req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
 				if (user.password) {
 					return res
@@ -267,7 +267,7 @@ class UserController {
 	// [PUT] update password
 	async updatePassword(req, res, next) {
 		try {
-			if (req.params.id.toString() === req.user._id.toString()) {
+			if (req.params.id.toString() === req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
 				const validPassword = await bcrypt.compare(req.body.oldPassword, user.password);
 				if (!validPassword) {
@@ -297,7 +297,7 @@ class UserController {
 
 	// delete user
 	async delete(req, res, next) {
-		if (req.user._id === req.params.id || req.user.role.name === 'ADMIN') {
+		if (req.user?._id === req.params.id || req.user.role.name === 'ADMIN') {
 			try {
 				const user = await User.findByIdAndDelete(req.params.id);
 				res.status(200).send({
@@ -370,10 +370,10 @@ class UserController {
 	// send friend request
 	async sendFriendRequest(req, res, next) {
 		try {
-			if (req.params.id.toString() !== req.user._id.toString()) {
+			if (req.params.id.toString() !== req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
-				const currentUser = await User.findById(req.user._id);
-				// check arrray object friends of currentUser has user._id or not
+				const currentUser = await User.findById(req.user?._id);
+				// check arrray object friends of currentUser has user?._id or not
 				if (currentUser.friends.some((friend) => friend.user.toString() === req.params.id)) {
 					res.status(403).json('Hai người đã là bạn bè!!!');
 				} else if (
@@ -384,10 +384,10 @@ class UserController {
 					!currentUser.sentRequests.some((sentRequest) => sentRequest.user.toString() === req.params.id)
 				) {
 					await user.updateOne({
-						$push: { friendRequests: { user: currentUser._id }, followers: { user: currentUser._id } },
+						$push: { friendRequests: { user: currentUser?._id }, followers: { user: currentUser?._id } },
 					});
 					await currentUser.updateOne({
-						$push: { sentRequests: { user: user._id }, followings: { user: user._id } },
+						$push: { sentRequests: { user: user?._id }, followings: { user: user?._id } },
 					});
 					// send notification
 					await notificationRequestFriend(currentUser, user);
@@ -399,10 +399,10 @@ class UserController {
 				} else {
 					// cancel friend request
 					await user.updateOne({
-						$pull: { friendRequests: { user: currentUser._id }, followers: { user: currentUser._id } },
+						$pull: { friendRequests: { user: currentUser?._id }, followers: { user: currentUser?._id } },
 					});
 					await currentUser.updateOne({
-						$pull: { sentRequests: { user: user._id }, followings: { user: user._id } },
+						$pull: { sentRequests: { user: user?._id }, followings: { user: user?._id } },
 					});
 					res.status(200).json('Hủy yêu cầu kết bạn thành công!!!');
 				}
@@ -426,20 +426,20 @@ class UserController {
 	// accept friend request
 	async acceptFriendRequest(req, res, next) {
 		try {
-			if (req.params.id.toString() !== req.user._id.toString()) {
+			if (req.params.id.toString() !== req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
-				const currentUser = await User.findById(req.user._id);
+				const currentUser = await User.findById(req.user?._id);
 				if (
 					currentUser.friendRequests.some((friendRequest) => friendRequest.user.toString() === req.params.id)
 				) {
 					// update friend request, send friend request and followers, following
-					await user.updateOne({ $pull: { sentRequests: { user: currentUser._id } } });
+					await user.updateOne({ $pull: { sentRequests: { user: currentUser?._id } } });
 					await user.updateOne({
-						$push: { friends: { user: currentUser._id }, followings: { user: currentUser._id } },
+						$push: { friends: { user: currentUser?._id }, followings: { user: currentUser?._id } },
 					});
-					await currentUser.updateOne({ $pull: { friendRequests: { user: user._id } } });
+					await currentUser.updateOne({ $pull: { friendRequests: { user: user?._id } } });
 					await currentUser.updateOne({
-						$push: { friends: { user: user._id }, followers: { user: user._id } },
+						$push: { friends: { user: user?._id }, followers: { user: user?._id } },
 					});
 					// send notification
 					await notificationAcceptFriend(currentUser, user);
@@ -471,17 +471,17 @@ class UserController {
 	// reject friend request
 	async rejectFriendRequest(req, res, next) {
 		try {
-			if (req.params.id.toString() !== req.user._id.toString()) {
+			if (req.params.id.toString() !== req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
-				const currentUser = await User.findById(req.user._id);
+				const currentUser = await User.findById(req.user?._id);
 				if (
 					currentUser.friendRequests.some((friendRequest) => friendRequest.user.toString() === req.params.id)
 				) {
 					// update friend request, send friend request and followers, following
 					await user.updateOne({
-						$pull: { sentRequests: { user: currentUser._id }, followings: { user: currentUser._id } },
+						$pull: { sentRequests: { user: currentUser?._id }, followings: { user: currentUser?._id } },
 					});
-					await currentUser.updateOne({ $pull: { friendRequests: { user: user._id } } });
+					await currentUser.updateOne({ $pull: { friendRequests: { user: user?._id } } });
 					res.status(200).json('Từ chối yêu cầu kết bạn thành công!!!');
 				} else {
 					return responseError(res, 403, 'Bạn không thể từ chối yêu cầu kết bạn này!!!');
@@ -506,23 +506,23 @@ class UserController {
 	// unfriend
 	async unfriend(req, res, next) {
 		try {
-			if (req.params.id.toString() !== req.user._id.toString()) {
+			if (req.params.id.toString() !== req.user?._id.toString()) {
 				const user = await User.findById(req.params.id);
-				const currentUser = await User.findById(req.user._id);
+				const currentUser = await User.findById(req.user?._id);
 				if (currentUser.friends.some((friend) => friend.user.toString() === req.params.id)) {
 					// update friend request, send friend request and followers, following
 					await user.updateOne({
 						$pull: {
-							friends: { user: currentUser._id },
-							followings: { user: currentUser._id },
-							followers: { user: currentUser._id },
+							friends: { user: currentUser?._id },
+							followings: { user: currentUser?._id },
+							followers: { user: currentUser?._id },
 						},
 					});
 					await currentUser.updateOne({
 						$pull: {
-							friends: { user: user._id },
-							followers: { user: user._id },
-							followings: { user: user._id },
+							friends: { user: user?._id },
+							followers: { user: user?._id },
+							followings: { user: user?._id },
 						},
 					});
 					res.status(200).json('Hủy kết bạn thành công!!!');
@@ -658,7 +658,7 @@ class UserController {
 				} else {
 					req.user.friendRequests.sort((a, b) => a.date - b.date);
 				}
-				listRequestOfUser = req.user.friendRequests.map((r) => r.user._id);
+				listRequestOfUser = req.user.friendRequests.map((r) => r.user?._id);
 
 				query.push(
 					{ $match: { _id: { $in: listRequestOfUser } } },
@@ -726,7 +726,7 @@ class UserController {
 						let listUsers = data;
 
 						if (type === 'suggests' && totalCount == 0) {
-							const userId = req.user._id;
+							const userId = req.user?._id;
 							const user = await User.findById(userId);
 							const listFriendsOfUser = user.friends.map((friend) => friend.user);
 							const listFriendRequests = user.friendRequests.map((friend) => friend.user);
@@ -810,7 +810,7 @@ class UserController {
 										if (
 											req.user.friends.some(
 												(friend) =>
-													friend.user && friend.user._id.toString() === user._id.toString()
+													friend.user && friend.user?._id.toString() === user?._id.toString()
 											)
 										) {
 											userObj.relationship = 'friend';
@@ -818,7 +818,7 @@ class UserController {
 											req.user.sentRequests.some(
 												(sentRequest) =>
 													sentRequest.user &&
-													sentRequest.user._id.toString() === user._id.toString()
+													sentRequest.user?._id.toString() === user?._id.toString()
 											)
 										) {
 											userObj.relationship = 'sent';
@@ -826,7 +826,7 @@ class UserController {
 											req.user.friendRequests.some(
 												(friendRequest) =>
 													friendRequest.user &&
-													friendRequest.user._id.toString() === user._id.toString()
+													friendRequest.user?._id.toString() === user?._id.toString()
 											)
 										) {
 											userObj.relationship = 'received';
@@ -872,7 +872,7 @@ class UserController {
 		try {
 			const { hobbies } = req.body;
 			const user = await User.findByIdAndUpdate(
-				req.user._id,
+				req.user?._id,
 				{
 					$set: { hobbies },
 				},
@@ -900,7 +900,7 @@ class UserController {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			// create query to filter by keyword
 			const query = [
-				{ _id: { $ne: req.user._id } },
+				{ _id: { $ne: req.user?._id } },
 				{
 					$or: [
 						{ fullname: { $regex: req.query.key, $options: 'i' } },
@@ -947,11 +947,11 @@ class UserController {
 					const usersList = [];
 					users.forEach((user) => {
 						const userObj = user.toObject();
-						if (req.user.friends.includes(user._id)) {
+						if (req.user.friends.includes(user?._id)) {
 							userObj.relationship = 'friend';
-						} else if (req.user.sentRequests.includes(user._id)) {
+						} else if (req.user.sentRequests.includes(user?._id)) {
 							userObj.relationship = 'sent';
-						} else if (req.user.friendRequests.includes(user._id)) {
+						} else if (req.user.friendRequests.includes(user?._id)) {
 							userObj.relationship = 'received';
 						} else {
 							userObj.relationship = 'none';
@@ -999,7 +999,7 @@ class UserController {
 				user.friends.sort((a, b) => a.date - b.date);
 			}
 
-			listFriendsOfUser = user.friends.map((friend) => friend.user._id);
+			listFriendsOfUser = user.friends.map((friend) => friend.user?._id);
 
 			const query = [
 				{ $match: { _id: { $in: listFriendsOfUser } } },
@@ -1080,20 +1080,20 @@ class UserController {
 										userObj.relationship = 'none';
 									} else if (
 										req.user.friends.some(
-											(friend) => friend.user?._id.toString() === user._id.toString()
+											(friend) => friend.user?._id.toString() === user?._id.toString()
 										)
 									) {
 										userObj.relationship = 'friend';
 									} else if (
 										req.user.sentRequests.some(
-											(sentRequest) => sentRequest.user?._id.toString() === user._id.toString()
+											(sentRequest) => sentRequest.user?._id.toString() === user?._id.toString()
 										)
 									) {
 										userObj.relationship = 'sent';
 									} else if (
 										req.user.friendRequests.some(
 											(friendRequest) =>
-												friendRequest.user?._id.toString() === user._id.toString()
+												friendRequest.user?._id.toString() === user?._id.toString()
 										)
 									) {
 										userObj.relationship = 'received';
@@ -1147,7 +1147,8 @@ class UserController {
 			const uniqueFriendsOfFriends = [...new Set(friendsOfFriends)];
 			// remove user current and user's friends
 			const friendsOfFriendsFilter = uniqueFriendsOfFriends.filter(
-				(friendId) => friendId.toString() !== req.user._id.toString() && !req.user.followings.includes(friendId)
+				(friendId) =>
+					friendId.toString() !== req.user?._id.toString() && !req.user.followings.includes(friendId)
 			);
 
 			// console.log(friendsOfFriendsFilter);
@@ -1414,23 +1415,25 @@ class UserController {
 				userObj.relationship = 'none';
 			} else {
 				if (
-					req.user.friends.some((friend) => friend.user && friend.user._id.toString() === user._id.toString())
+					req.user.friends.some(
+						(friend) => friend.user && friend.user?._id.toString() === user?._id.toString()
+					)
 				) {
 					userObj.relationship = 'friend';
 				} else if (
 					req.user.sentRequests.some(
-						(sentRequest) => sentRequest.user && sentRequest.user._id.toString() === user._id.toString()
+						(sentRequest) => sentRequest.user && sentRequest.user?._id.toString() === user?._id.toString()
 					)
 				) {
 					userObj.relationship = 'sent';
 				} else if (
 					req.user.friendRequests.some(
 						(friendRequest) =>
-							friendRequest.user && friendRequest.user._id.toString() === user._id.toString()
+							friendRequest.user && friendRequest.user?._id.toString() === user?._id.toString()
 					)
 				) {
 					userObj.relationship = 'received';
-				} else if (req.user._id.toString() === user._id.toString()) {
+				} else if (req.user?._id.toString() === user?._id.toString()) {
 					userObj.relationship = 'self';
 				} else {
 					userObj.relationship = 'none';
@@ -1554,7 +1557,7 @@ class UserController {
 			const hashedPassword = await bcrypt.hash(req.body.password, salt);
 			user.password = hashedPassword;
 			await user.save();
-			const userSaved = await populateUser(user._id);
+			const userSaved = await populateUser(user?._id);
 			return res.status(200).json(userSaved);
 		} catch (err) {
 			console.log(err);

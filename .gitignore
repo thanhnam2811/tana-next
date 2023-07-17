@@ -1,2 +1,10 @@
 # common
-**/node_modules/ 
+**/node_modules/*
+
+# environments
+**/*.env
+
+# bfg
+bfg.jar
+
+**/.idea/*

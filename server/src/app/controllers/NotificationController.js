@@ -9,7 +9,7 @@ class NotificationController {
 		try {
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			Notification.paginate(
-				{ receiver: { $elemMatch: { $eq: req.user._id } } },
+				{ receiver: { $elemMatch: { $eq: req.user?._id } } },
 				{
 					offset,
 					limit,
@@ -38,7 +38,7 @@ class NotificationController {
 					data.docs.forEach((notification) => {
 						const notificationObject = notification.toObject();
 						notificationObject.isRead = notification.readBy.some(
-							(reader) => reader.readerId._id.toString() === req.user._id.toString()
+							(reader) => reader.readerId._id.toString() === req.user?._id.toString()
 						);
 						listNotifications.push(notificationObject);
 					});
@@ -46,13 +46,13 @@ class NotificationController {
 					const numberUnread = await Notification.countDocuments({
 						receiver: {
 							$elemMatch: {
-								$eq: req.user._id,
+								$eq: req.user?._id,
 							},
 						},
 						readBy: {
 							$not: {
 								$elemMatch: {
-									readerId: req.user._id,
+									readerId: req.user?._id,
 								},
 							},
 						},
@@ -97,13 +97,13 @@ class NotificationController {
 			const count = await Notification.countDocuments({
 				receiver: {
 					$elemMatch: {
-						$eq: req.user._id,
+						$eq: req.user?._id,
 					},
 				},
 				readBy: {
 					$not: {
 						$elemMatch: {
-							readerId: req.user._id,
+							readerId: req.user?._id,
 						},
 					},
 				},
@@ -132,21 +132,21 @@ class NotificationController {
 			if (
 				!notification.receiver
 					.map((receiver) => receiver._id.toString())
-					.some((receiverId) => receiverId === req.user._id.toString())
+					.some((receiverId) => receiverId === req.user?._id.toString())
 			) {
 				return responseError(res, 403, 'Bạn không phải là người nhận thông báo này');
 			}
 			if (
 				notification.readBy
 					.map((item) => item.readerId.toString())
-					.some((readerId) => readerId === req.user._id.toString())
+					.some((readerId) => readerId === req.user?._id.toString())
 			) {
 				return responseError(res, 403, 'Bạn đã đọc thông báo này rồi');
 			}
 			await notification.updateOne({
 				$push: {
 					readBy: {
-						readerId: req.user._id,
+						readerId: req.user?._id,
 					},
 				},
 			});
@@ -167,11 +167,11 @@ class NotificationController {
 
 	async markAllAsRead(req, res, next) {
 		try {
-			// get all notification receivers include req.user._id
+			// get all notification receivers include req.user?._id
 			const notifications = await Notification.find({
 				receiver: {
 					$elemMatch: {
-						$eq: req.user._id,
+						$eq: req.user?._id,
 					},
 				},
 			});
@@ -188,7 +188,7 @@ class NotificationController {
 				{
 					$push: {
 						readBy: {
-							readerId: req.user._id,
+							readerId: req.user?._id,
 						},
 					},
 				}
@@ -214,10 +214,10 @@ class NotificationController {
 			if (!notification) {
 				return responseError(res, 404, `Thông báo không được tìm thấy với id:${req.params.notificationId}`);
 			}
-			if (notification.receiver.some((mem) => mem.toString() === req.user._id.toString())) {
+			if (notification.receiver.some((mem) => mem.toString() === req.user?._id.toString())) {
 				const result = await Notification.findByIdAndUpdate(
 					req.params.notificationId,
-					{ $pull: { receiver: req.user._id } },
+					{ $pull: { receiver: req.user?._id } },
 					{ new: true }
 				);
 				return res.status(200).send({

@@ -1,4 +1,3 @@
-import { Logo } from '@assets/logo';
 import { useAuth } from '@modules/auth/hooks';
 import { Avatar, Button, Input } from 'antd';
 import Link from 'next/link';
@@ -11,7 +10,7 @@ export function NavBarLeft() {
 		<HeaderLeft>
 			<Link href="/" style={{ display: 'flex' }}>
 				<Button shape="circle" size="large">
-					<Avatar src={Logo.src} />
+					<Avatar src="/logo.png" />
 				</Button>
 			</Link>
 

@@ -1,18 +1,20 @@
+import { IData } from '@common/types/common';
+
 export interface IFileUploadResponse {
 	message: string;
 	files: IFile[];
 }
 
-export interface IFile {
+export interface IFile extends IData {
 	name: string;
 	originalname: string;
-	type: string;
+
 	link: string;
-	public_id: string;
-	is_System: boolean;
-	creator: string;
-	_id: string;
-	deleted: boolean;
-	createdAt: string;
-	updatedAt: string;
+	type: string;
+	size: number;
+	description?: string;
+
+	public_id?: string;
+	is_System?: boolean;
+	creator?: string;
 }

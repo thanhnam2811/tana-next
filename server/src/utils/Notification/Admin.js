@@ -44,11 +44,11 @@ async function notificationToAuthorOfComment(post, comment, admin) {
 }
 
 async function notificationToUser(user, admin) {
-	const receiver = [user._id];
+	const receiver = [user?._id];
 	const notification = await new Notification({
 		type: 'user',
 		content: `Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng`,
-		link: `/profile/${user._id}`,
+		link: `/profile/${user?._id}`,
 		sender: admin._id,
 		receiver,
 	}).save();
@@ -64,7 +64,7 @@ async function notificationToUser(user, admin) {
 }
 
 async function notificationToUserWithMessage(user, admin, message) {
-	const receiver = [user._id];
+	const receiver = [user?._id];
 	const notification = await new Notification({
 		type: 'user',
 		content: message,

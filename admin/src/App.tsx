@@ -5,14 +5,15 @@ import 'dayjs/locale/vi';
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
-import { useThemeStore } from '@theme/hooks';
-import { useAuthStore } from '@modules/auth/hooks';
+import { useTheme } from '@layout/hooks';
+import { useAuth } from '@modules/auth/hooks';
+
 dayjs.locale('vi');
 
 function App() {
 	const [loading, setLoading] = useState(true);
-	const { logout, getProfile } = useAuthStore();
-	const { mode } = useThemeStore();
+	const { logout, getProfile } = useAuth();
+	const { mode } = useTheme();
 
 	// get current user
 	useEffect(() => {

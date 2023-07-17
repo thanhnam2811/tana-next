@@ -1,9 +1,8 @@
-export interface IMedia {
-	_id: string;
-	link: string;
-}
+import { IFile } from '@common/types/IFile';
 
-export type ReactionType = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
+export type MediaType = Pick<IFile, '_id' | 'link' | 'description'> & { file?: File };
+
+export type ReactionTypeValue = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry';
 
 export interface IPaginationResponse<T> {
 	items: T[];

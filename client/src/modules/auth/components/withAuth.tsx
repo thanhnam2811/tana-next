@@ -12,15 +12,33 @@ export function withAuth(Component: NextComponentType) {
 		// If user is not logged in, redirect to login page
 		useEffect(() => {
 			if (!authUser) {
+				console.log(router.pathname, 'User is not logged in!');
+
 				const accessToken = localStorage.getItem('accessToken');
-				if (!accessToken)
+				if (!accessToken) {
+					console.log('No access token found! Redirecting to login page...');
 					router.replace({ pathname: '/auth/login', query: { redirect: router.pathname } }, '/auth/login');
-				else
-					login().catch(() =>
-						router.replace({ pathname: '/auth/login', query: { redirect: router.pathname } }, '/auth/login')
-					);
+				} else {
+					console.log('Access token found! Logging in...');
+
+					login()
+						.then(() => {
+							console.log('Login successfully!');
+						})
+						.catch((reason) => {
+							console.log('Login failed! Redirecting to login page...', reason);
+
+							return router.replace(
+								{
+									pathname: '/auth/login',
+									query: { redirect: router.pathname },
+								},
+								'/auth/login'
+							);
+						});
+				}
 			}
-		}, [authUser]);
+		}, []);
 
 		if (!authUser) {
 			return (

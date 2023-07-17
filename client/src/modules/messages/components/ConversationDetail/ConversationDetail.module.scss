@@ -1,0 +1,44 @@
+.container {
+	height: 100%;
+	overflow: hidden auto;
+
+	.header {
+		width: 100%;
+
+		.name {
+			margin: 0;
+
+			text-align: center;
+			white-space: pre-wrap;
+		}
+	}
+
+	.collapse_container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		background: none;
+
+		.collapse_panel {
+			border: 1px solid;
+			border-radius: 0.5rem;
+
+			> div:first-child {
+				height: 42px;
+			}
+
+			.file_item {
+				.file_icon {
+					width: 60px;
+					height: 60px;
+					object-fit: cover;
+					border-radius: 8px;
+				}
+				video.file_icon {
+					object-fit: contain;
+				}
+			}
+		}
+	}
+}

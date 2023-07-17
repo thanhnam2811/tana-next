@@ -7,7 +7,7 @@ async function createActivityWithPost(post, user) {
 		content: `Bạn đã đăng một bài viết`,
 		link: `/post/${post._id}`,
 		post: post._id,
-		user: user._id,
+		user: user?._id,
 	});
 	await activity.save();
 }
@@ -18,7 +18,7 @@ async function createActivityWithSharedPost(post, user) {
 		content: `Bạn đã chia sẻ một bài viết`,
 		link: `/post/${post._id}`,
 		post: post._id,
-		user: user._id,
+		user: user?._id,
 	});
 	await activity.save();
 }
@@ -29,7 +29,7 @@ async function createActivityWithReactPost(post, user) {
 		content: `Bạn đã bày tỏ cảm xúc về một bài viết`,
 		link: `/post/${post._id}`,
 		post: post._id,
-		user: user._id,
+		user: user?._id,
 	});
 	await activity.save();
 }
@@ -40,7 +40,7 @@ async function createActivityWithTagPost(post, user) {
 		content: `Bạn đã gắn thẻ bạn bè trong một bài viết`,
 		link: `/post/${post._id}`,
 		post: post._id,
-		user: user._id,
+		user: user?._id,
 	});
 	await activity.save();
 }

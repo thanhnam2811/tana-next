@@ -1,17 +1,12 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import NavBar from './NavBar';
 import Layout from '.';
+import { MainProps } from '@layout/components/Main';
 
-interface Props {
-	children: React.ReactNode;
-}
+export const Container = forwardRef<HTMLElement, MainProps>((props, ref) => (
+	<>
+		<NavBar />
 
-export function Container({ children }: Props) {
-	return (
-		<>
-			<NavBar />
-
-			<Layout.Main>{children}</Layout.Main>
-		</>
-	);
-}
+		<Layout.Main {...props} ref={ref} />
+	</>
+));

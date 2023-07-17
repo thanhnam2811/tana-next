@@ -63,7 +63,7 @@ class ReportController {
 			}
 
 			const newReport = new Report(req.body);
-			newReport.reporter = req.user._id;
+			newReport.reporter = req.user?._id;
 			await newReport.save();
 
 			return res.status(200).json(newReport);
@@ -173,7 +173,7 @@ class ReportController {
 					await notificationToMembersOfConv(report.conversation, req.user);
 				} else if (report.type === 'user') {
 					// delete user and notification to user
-					req.params.id = report.user._id;
+					req.params.id = report.user?._id;
 					await UserController.lock(req, res, next);
 					await notificationToUser(report.user, req.user);
 				} else if (report.type === 'bug') {
@@ -210,13 +210,13 @@ class ReportController {
 			if (!user) {
 				return next(createError.NotFound('User không tồn tại'));
 			}
-			const report = await Report.findOne({ user: req.params.id, reporter: req.user._id });
+			const report = await Report.findOne({ user: req.params.id, reporter: req.user?._id });
 			if (report) {
 				return next(createError.BadRequest('Bạn đã báo cáo người dùng này'));
 			}
 			const newReport = new Report({
 				user: req.params.id,
-				reporter: req.user._id,
+				reporter: req.user?._id,
 				reason: req.body.reason,
 			});
 			await newReport.save();
@@ -242,13 +242,13 @@ class ReportController {
 			if (!comment) {
 				return next(createError.NotFound('Bình luận không tồn tại'));
 			}
-			const report = await Report.findOne({ comment: comment._id, reporter: req.user._id });
+			const report = await Report.findOne({ comment: comment._id, reporter: req.user?._id });
 			if (report) {
 				return next(createError.BadRequest('Bạn đã báo cáo bình luận này rồi'));
 			}
 			const newReport = new Report({
 				comment: comment._id,
-				reporter: req.user._id,
+				reporter: req.user?._id,
 				reason: req.body.reason,
 			});
 			await newReport.save();
@@ -273,13 +273,13 @@ class ReportController {
 			if (!post) {
 				return next(createError.NotFound('Bài viết không tồn tại'));
 			}
-			const report = await Report.findOne({ post: post._id, reporter: req.user._id });
+			const report = await Report.findOne({ post: post._id, reporter: req.user?._id });
 			if (report) {
 				return next(createError.BadRequest('Bạn đã báo cáo bài viết này rồi'));
 			}
 			const newReport = new Report({
 				post: post._id,
-				reporter: req.user._id,
+				reporter: req.user?._id,
 				reason: req.body.reason,
 			});
 			await newReport.save();

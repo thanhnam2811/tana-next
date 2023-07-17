@@ -1,23 +1,24 @@
-import { IData, IMedia, IPrivacy, UserType } from '@common/types';
+import { IData, IPrivacy, MediaType, ReactionTypeValue } from '@common/types';
+import { UserType } from '@modules/user/types';
 
 interface IPost extends IData {
 	author: UserType;
 	privacy: IPrivacy;
 
 	content: string;
-	media: IMedia[] | string[]; // string[] for create, update post
+	media: MediaType[] | Omit<MediaType, 'link'>[];
 	tags: any[];
 
 	numberReact: number;
 	numberShare: number;
 	numberComment: number;
 
-	reactOfUser: string;
+	reactOfUser: ReactionTypeValue;
 	deleted: boolean;
 }
 
 // For use
-export type PostType = IPost & { media: IMedia[] };
+export type PostType = IPost & { media: MediaType[] };
 
 // For form
-export type PostFormType = Partial<IPost & { media: string[] }>;
+export type PostFormType = Partial<IPost & { media: Omit<MediaType, 'link'>[] }>;

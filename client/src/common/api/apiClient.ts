@@ -1,23 +1,15 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { SERVER_URL } from '@common/config';
+import { ApiError } from '@common/api/ApiError';
 
 // Check if error is unauthorized (status code 401)
 const isUnauthorized = (error: any) => axios.isAxiosError(error) && error.response?.status === 401;
 
 // Handle error
-const handleError = (error: any) => {
-	// eslint-disable-next-line no-console
-	console.error('Call API error: ', error);
+export const handleError = (error: any) => {
+	if (ApiError.isApiError(error)) return Promise.reject(error);
 
-	let message = 'Lỗi kết nối đến máy chủ!';
-
-	if (axios.isAxiosError(error)) {
-		const { response } = error;
-		if (response?.data?.message) message = response.data.message;
-		else if (response?.data) message = response.data;
-		else if (response?.statusText) message = response.statusText;
-	} else if (error?.message) message = error.message;
-
-	return Promise.reject(message);
+	return Promise.reject(ApiError.fromError(error));
 };
 
 const MAX_RETRY = 3;
@@ -33,7 +25,13 @@ const retryRequest = async (error: AxiosError) => {
 	// Check if retry count is greater than max retry
 	const retryCount = Number(retryConfig.headers['Retry-Count']);
 	const maxRetry = Number(retryConfig.headers['Max-Retry']);
-	if (retryCount >= maxRetry) return handleError(error);
+	if (retryCount >= maxRetry) {
+		// Remove access token, refresh token from local storage
+		localStorage.removeItem('accessToken');
+		localStorage.removeItem('refreshToken');
+
+		return handleError(error);
+	}
 
 	// Increase retry count
 	retryConfig.headers['Retry-Count'] = retryCount + 1;
@@ -57,34 +55,31 @@ const retryRequest = async (error: AxiosError) => {
 
 // Create an axios instance
 const apiClient = axios.create({
-	baseURL: process.env.SERVER_URL,
+	baseURL: SERVER_URL,
 	headers: {
 		'Content-Type': 'application/json',
 		'Max-Retry': MAX_RETRY,
 		'Retry-Count': 0,
 	},
-	timeout: 10000,
+	timeout: 20000,
 	timeoutErrorMessage: 'Lỗi kết nối đến máy chủ!',
 });
 
 // Interceptors for request
-apiClient.interceptors.request.use(
-	(config) => {
-		try {
-			// Get access token from local storage
-			const accessToken = localStorage.getItem('accessToken');
+apiClient.interceptors.request.use((config) => {
+	try {
+		// Get access token from local storage
+		const accessToken = localStorage.getItem('accessToken');
 
-			// If access token exists, add it to request header
-			if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
-		} catch (error) {
-			// eslint-disable-next-line no-console
-			console.error('Get access token error: ', error);
-		}
+		// If access token exists, add it to request header
+		if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
+	} catch (error) {
+		// eslint-disable-next-line no-console
+		console.error('Get access token error: ', error);
+	}
 
-		return config;
-	},
-	(error) => handleError(error).catch(() => Promise.reject(error))
-);
+	return config;
+}, handleError);
 
 // Interceptors for response
 apiClient.interceptors.response.use(
@@ -98,7 +93,10 @@ apiClient.interceptors.response.use(
 );
 
 export function swrFetcher<T>(url: string) {
-	return apiClient.get<T>(url).then((res) => res.data);
+	return apiClient
+		.get<T>(url)
+		.then((res) => res.data)
+		.catch(handleError);
 }
 
 export { apiClient };

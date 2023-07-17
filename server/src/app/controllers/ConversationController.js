@@ -34,7 +34,7 @@ class ConversationController {
 				{
 					members: {
 						$elemMatch: {
-							user: req.user._id,
+							user: req.user?._id,
 						},
 					},
 					$or: [
@@ -141,13 +141,13 @@ class ConversationController {
 			}
 
 			let index = -1;
-			index = conversation.members.findIndex((item) => item.user.toString() === req.user._id.toString());
+			index = conversation.members.findIndex((item) => item.user.toString() === req.user?._id.toString());
 			if (index !== -1) {
 				const adminOfConversation = conversation.members.filter((member) => member.role === 'admin');
 				conversation.members.splice(index, 1);
 				if (
 					adminOfConversation.length === 1 &&
-					adminOfConversation[0].user.toString() === req.user._id.toString()
+					adminOfConversation[0].user.toString() === req.user?._id.toString()
 				) {
 					// set all members to admin
 					conversation.members.forEach((member) => {
@@ -186,18 +186,18 @@ class ConversationController {
 	async userDeletedAllMessages(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
-			if (conversation.members.some((member) => member.user.toString() === req.user._id.toString())) {
+			if (conversation.members.some((member) => member.user.toString() === req.user?._id.toString())) {
 				let index = -1;
 				index = conversation.user_deleted.findIndex(
-					(item) => item.userId.toString() === req.user._id.toString()
+					(item) => item.userId.toString() === req.user?._id.toString()
 				);
 				if (index !== -1) {
 					conversation.user_deleted[index].deletedAt = Date.now();
 				} else {
-					conversation.user_deleted.push({ userId: req.user._id });
+					conversation.user_deleted.push({ userId: req.user?._id });
 				}
-				if (!conversation.hidden.includes(req.user._id)) {
-					conversation.hidden.push(req.user._id);
+				if (!conversation.hidden.includes(req.user?._id)) {
+					conversation.hidden.push(req.user?._id);
 				}
 				await conversation.save();
 				return res.status(200).send('Đã xóa cuộc hội thoại cho User');
@@ -262,7 +262,7 @@ class ConversationController {
 										$elemMatch: { user: mongoose.Types.ObjectId(req.body.members[0].user) },
 									},
 								},
-								{ members: { $elemMatch: { user: mongoose.Types.ObjectId(req.user._id) } } },
+								{ members: { $elemMatch: { user: mongoose.Types.ObjectId(req.user?._id) } } },
 								{
 									members: {
 										$size: 2,
@@ -285,7 +285,7 @@ class ConversationController {
 								);
 
 							member.nickname = user.fullname;
-							member.addedBy = req.user._id;
+							member.addedBy = req.user?._id;
 							return member;
 						})
 					);
@@ -293,14 +293,14 @@ class ConversationController {
 
 					const newConversation = new Conversation(req.body);
 					newConversation.members.push({
-						user: req.user._id,
+						user: req.user?._id,
 						nickname: req.user.fullname,
 						role: 'member',
-						addedBy: req.user._id,
+						addedBy: req.user?._id,
 					});
-					newConversation.creator = req.user._id;
+					newConversation.creator = req.user?._id;
 					newConversation.history.push({
-						editor: req.user._id,
+						editor: req.user?._id,
 						content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 					});
 
@@ -332,7 +332,7 @@ class ConversationController {
 							return next(createError.NotFound('Không tìm thấy người dùng để thêm vào cuộc hội thoại'));
 
 						member.nickname = user.fullname;
-						member.addedBy = req.user._id;
+						member.addedBy = req.user?._id;
 						return member;
 					})
 				);
@@ -345,14 +345,14 @@ class ConversationController {
 
 				const newConversation = new Conversation(req.body);
 				newConversation.members.push({
-					user: req.user._id,
+					user: req.user?._id,
 					nickname: req.user.fullname,
 					role: 'admin',
-					addedBy: req.user._id,
+					addedBy: req.user?._id,
 				});
 
 				newConversation.history.push({
-					editor: req.user._id,
+					editor: req.user?._id,
 					content: `<b>${req.user.fullname}</b> đã tạo cuộc hội thoại`,
 				});
 
@@ -395,11 +395,11 @@ class ConversationController {
 				{
 					members: {
 						$elemMatch: {
-							user: req.user._id,
+							user: req.user?._id,
 						},
 					},
 					hidden: {
-						$nin: [req.user._id],
+						$nin: [req.user?._id],
 					},
 					$or: [
 						{
@@ -509,7 +509,7 @@ class ConversationController {
 	async getConversationById(req, res) {
 		try {
 			const conversation = await populateConversation(req.params.id);
-			if (conversation.members.some((member) => member.user._id.toString() === req.user._id.toString())) {
+			if (conversation.members.some((member) => member.user?._id.toString() === req.user?._id.toString())) {
 				return res.status(200).json(conversation);
 			} else {
 				return responseError(res, 401, 'Bạn không có trong conversation này');
@@ -531,7 +531,7 @@ class ConversationController {
 			// const query = {
 			// 	members: {
 			// 		$elemMatch: {
-			// 			user: req.user._id,
+			// 			user: req.user?._id,
 			// 		},
 			// 		$elemMatch: {
 			// 			user: req.params.userId,
@@ -542,7 +542,7 @@ class ConversationController {
 			const query = {
 				members: {
 					$size: 2,
-					$all: [{ $elemMatch: { user: req.user._id } }, { $elemMatch: { user: req.params.userId } }],
+					$all: [{ $elemMatch: { user: req.user?._id } }, { $elemMatch: { user: req.params.userId } }],
 				},
 			};
 			const conversation = await Conversation.findOne(query)
@@ -583,26 +583,26 @@ class ConversationController {
 			if (conversation) {
 				res.status(200).json(conversation);
 			} else {
-				// create new conversation with 2 members is req.user._id and req.params.userId
+				// create new conversation with 2 members is req.user?._id and req.params.userId
 				const newConversation = new Conversation({
 					members: [
 						{
-							user: req.user._id,
+							user: req.user?._id,
 							role: 'admin',
-							addedBy: req.user._id,
+							addedBy: req.user?._id,
 							nickname: req.user.fullname,
 						},
 						{
 							user: req.params.userId,
 							role: 'member',
-							addedBy: req.user._id,
+							addedBy: req.user?._id,
 							nickname: user.fullname,
 						},
 					],
-					creator: req.user._id,
+					creator: req.user?._id,
 				});
 				// name of conversation is name of 2 members
-				const user1 = await User.findById(req.user._id);
+				const user1 = await User.findById(req.user?._id);
 				const user2 = await User.findById(req.params.userId);
 				newConversation.name = `${user1.fullname}, ${user2.fullname}`;
 				// save the conversation
@@ -649,7 +649,7 @@ class ConversationController {
 			}
 
 			const conversation = await Conversation.findById(req.params.id);
-			if (conversation.members.some((member) => member.user.toString() === req.user._id.toString())) {
+			if (conversation.members.some((member) => member.user.toString() === req.user?._id.toString())) {
 				let contentMessage = '';
 
 				for (const key of Object.keys(req.body)) {
@@ -662,20 +662,20 @@ class ConversationController {
 					} else if (key === 'name' && conversation.members.length == 2) {
 						// change nickname of orther member
 						const member = conversation.members.find(
-							(member) => member.user.toString() !== req.user._id.toString()
+							(member) => member.user.toString() !== req.user?._id.toString()
 						);
 
 						contentMessage += `đã đổi biệt danh của ${member.nickname} thành ${req.body[key]}`;
 
 						member.nickname = req.body[key];
-						member.changedNicknameBy = req.user._id;
+						member.changedNicknameBy = req.user?._id;
 					}
 				}
 
 				// Check update
 				if (contentMessage) {
 					conversation.history.push({
-						editor: req.user._id,
+						editor: req.user?._id,
 						content: `<b>${req.user.fullname}</b> ${contentMessage}`,
 					});
 
@@ -717,7 +717,7 @@ class ConversationController {
 	async updateMembers(req, res, next) {
 		try {
 			const conversation = await Conversation.findById(req.params.id);
-			if (conversation.members.some((member) => member.user.toString() === req.user._id.toString())) {
+			if (conversation.members.some((member) => member.user.toString() === req.user?._id.toString())) {
 				const adminOfConversation = conversation.members
 					.filter((member) => member.role === 'admin')
 					.map((member) => member.user.toString());
@@ -748,14 +748,14 @@ class ConversationController {
 					}
 					// set addedBy for new members
 					req.body.newMembers.forEach((member) => {
-						member.addedBy = req.user._id;
+						member.addedBy = req.user?._id;
 					});
 					// check members.length =2 => create new conversation
 					if (conversation.members.length == 2 && conversation.type == 'direct') {
 						const newConversation = new Conversation({
 							members: conversation.members.concat(req.body.newMembers),
 							name: req.body.name,
-							creator: req.user._id,
+							creator: req.user?._id,
 							type: 'group',
 						});
 
@@ -795,7 +795,7 @@ class ConversationController {
 						return responseError(res, 400, error.details[0].message);
 					}
 
-					if (adminOfConversation.includes(req.user._id.toString())) {
+					if (adminOfConversation.includes(req.user?._id.toString())) {
 						if (conversation.members.length == 2 && conversation.type == 'direct') {
 							return responseError(
 								res,
@@ -834,7 +834,7 @@ class ConversationController {
 						return responseError(res, 400, 'Không thể thay đổi quyền trong cuộc trò chuyện giữa 2 người');
 					}
 
-					if (adminOfConversation.includes(req.user._id.toString())) {
+					if (adminOfConversation.includes(req.user?._id.toString())) {
 						// get nickname of user will be removed
 						// const member = conversation.members.filter(member => member.user.toString() === req.body.userID.toString());
 						const index = conversation.members.findIndex(
@@ -842,7 +842,7 @@ class ConversationController {
 						);
 
 						// user cannot update role for self
-						if (req.body.userID.toString() === req.user._id.toString()) {
+						if (req.body.userID.toString() === req.user?._id.toString()) {
 							return responseError(res, 403, 'Bạn không thể thay đổi vai trò của chính mình');
 						}
 
@@ -878,12 +878,12 @@ class ConversationController {
 					if (nickname && req.body.nickname == '') {
 						// get fullname of user will be removed
 						conversation.members[index].nickname = req.body.nickname;
-						conversation.members[index].changedNicknameBy = req.user._id;
+						conversation.members[index].changedNicknameBy = req.user?._id;
 						contentMessage = `đã gỡ biệt danh của <b>${user.fullname}</b>`;
 					} else if (req.body.nickname != nickname) {
 						contentMessage = `đã thay đổi biệt danh của <b>${user.fullname}</b> thành <b>${req.body.nickname}</b>`;
 						conversation.members[index].nickname = req.body.nickname;
-						conversation.members[index].changedNicknameBy = req.user._id;
+						conversation.members[index].changedNicknameBy = req.user?._id;
 					}
 				} else {
 					return responseError(res, 404, 'Không tìm thấy phương thức');
@@ -891,7 +891,7 @@ class ConversationController {
 
 				if (contentMessage != '') {
 					conversation.history.push({
-						editor: req.user._id,
+						editor: req.user?._id,
 						content: `<b>${req.user.fullname}</b> ${contentMessage}`,
 					});
 
@@ -935,7 +935,7 @@ class ConversationController {
 			const adminOfConversation = conversation.members
 				.filter((member) => member.role === 'admin')
 				.map((member) => member.user.toString());
-			if (adminOfConversation.includes(req.user._id.toString()) || req.user.role.name === 'ADMIN') {
+			if (adminOfConversation.includes(req.user?._id.toString()) || req.user.role.name === 'ADMIN') {
 				await conversation.delete();
 				// delete all message in conversation
 				await Message.deleteMany({ conversation: req.params.id });
@@ -967,7 +967,7 @@ class ConversationController {
 			const adminOfConversation = conversation.members
 				.filter((member) => member.role === 'admin')
 				.map((member) => member.user.toString());
-			if (adminOfConversation.includes(req.user._id.toString()) || req.user.role.name === 'ADMIN') {
+			if (adminOfConversation.includes(req.user?._id.toString()) || req.user.role.name === 'ADMIN') {
 				await conversation.delete();
 				// delete all message in conversation
 				await Message.deleteMany({ conversation: req.params.id });
@@ -998,7 +998,7 @@ class ConversationController {
 			}
 			const { limit, offset } = getPagination(req.query.page, req.query.size, req.query.offset);
 			const memberOfConversation = conversations.members.filter(
-				(member) => member.user.toString() === req.user._id.toString()
+				(member) => member.user.toString() === req.user?._id.toString()
 			);
 			if (memberOfConversation.length > 0) {
 				const query = [{ conversation: req.params.id }];
@@ -1059,7 +1059,7 @@ class ConversationController {
 		try {
 			// check user online and
 			// const query = [
-			//     { _id: { $ne: req.user._id } },
+			//     { _id: { $ne: req.user?._id } },
 			//     {
 			//         $or: [
 			//         { "city": { $regex: req.query.key, $options: 'i' } },
@@ -1086,13 +1086,13 @@ class ConversationController {
 			//         const newConversation = new Conversation({
 			//             members: [
 			//                 {
-			//                     user: req.user._id,
+			//                     user: req.user?._id,
 			//                     role: "admin",
-			//                     addedBy: req.user._id,
+			//                     addedBy: req.user?._id,
 			//                     nickname: req.user.fullname,
 			//                 },
 			//             ],
-			//             creator: req.user._id,
+			//             creator: req.user?._id,
 			//         });
 			//         //name of conversation is name of 2 members
 			//         const user1 = req.user;
