@@ -381,6 +381,17 @@ class CommentController {
 				if (error) {
 					return next(createError(400, error.details[0].message));
 				}
+
+				// check content has bad word
+				const check = await checkBadWord(req.body.content);
+				if (check) {
+					return next(
+						createError.BadRequest(
+							'Vuii lòng kiểm tra nội dung bình luận, do có chưa ngôn từ vi phạm tiêu chuẩn cộng đồng'
+						)
+					);
+				}
+
 				const newComment = new Comment(req.body);
 				newComment.author = req.user?._id;
 				newComment.post = req.params.postId;
