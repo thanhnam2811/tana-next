@@ -35,7 +35,6 @@ function querySearchAllUsers(req) {
 
 async function querySearchSuggestFriends(req, next) {
 	try {
-		console.log(req.user.friends);
 		const listFriendsOfUser = req.user.friends.map((friend) => friend.user?._id);
 		const friendsOfUser = await User.find({ _id: { $in: listFriendsOfUser } });
 		const friendsOfFriends = friendsOfUser.flatMap((friend) => friend.friends.map((f) => f.user._id));
